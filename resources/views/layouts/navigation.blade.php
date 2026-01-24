@@ -1,5 +1,11 @@
-<nav class="navbar navbar-expand-lg bg-dark border-bottom border-body fixed-top" data-bs-theme="dark">
+@php
+    use App\Models\Question;
 
+    $levels = Question::select('level')->distinct()->orderBy('level')->get();
+    $activeLevel = auth()->user() ? auth()->user()->level + 1 : 1; // აქტიური ლეველი მოთამაშისთვის
+@endphp
+
+<nav class="navbar navbar-expand-lg bg-dark border-bottom border-body fixed-top" data-bs-theme="dark">
   <div class="container-fluid">
     <a class="navbar-brand text-white" href="{{ url('/') }}">GameVeravart</a>
 
@@ -18,6 +24,7 @@
               👤 {{ auth()->user()->name }}
             </span>
           </li>
+
           <!-- Levels Dropdown -->
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown"
@@ -25,22 +32,40 @@
               Levels
             </a>
             <ul class="dropdown-menu dropdown-menu-dark" style="max-height: 300px; overflow-y: auto;">
-              <li><a class="dropdown-item" href="#">Introduction</a></li>
-              @for ($i = 1; $i <= 30; $i++)
-                <li><a class="dropdown-item" href="#level{{ $i }}">Level {{ $i }}</a></li>
-              @endfor
+                <li>
+                    <a class="dropdown-item {{ $activeLevel == 1 ? 'fw-bold text-warning' : '' }}"
+                       href="#introduction">
+                        Introduction
+                        @if($activeLevel == 1) (Current) @endif
+                    </a>
+                </li>
+                @foreach($levels as $level)
+                    @php
+                        $isActive = $level->level == $activeLevel;
+                        $isDisabled = $level->level > $activeLevel;
+                    @endphp
+                    <li>
+                        <a class="dropdown-item {{ $isDisabled ? 'disabled text-muted' : '' }} {{ $isActive ? 'fw-bold text-warning' : '' }}"
+                           href="{{ $isDisabled ? '#' : '#level' . $level->level }}">
+                            Level {{ $level->level }}
+                            @if($isActive) (Current) @endif
+                        </a>
+                    </li>
+                @endforeach
             </ul>
           </li>
+
+          <!-- Logout -->
           <li class="nav-item">
-    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-inline">
-        @csrf
-        <a href="#"
-           class="nav-link text-white"
-           onclick="event.preventDefault(); this.closest('form').submit();">
-            Logout
-        </a>
-    </form>
-</li>
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-inline">
+                @csrf
+                <a href="#"
+                   class="nav-link text-white"
+                   onclick="event.preventDefault(); this.closest('form').submit();">
+                    Logout
+                </a>
+            </form>
+          </li>
 
         @else
           <!-- სტუმარი → Modal -->
