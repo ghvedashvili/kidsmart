@@ -11,7 +11,11 @@
 <body>
 
 @include('layouts.navigation')
-
+<style>
+    body {
+        padding-top: 70px; /* navbar-ის სიმაღლე */
+    }
+</style>
 <main>
     @yield('content')
 </main>

@@ -1,4 +1,5 @@
-<nav class="navbar navbar-expand-lg bg-dark border-bottom border-body" data-bs-theme="dark">
+<nav class="navbar navbar-expand-lg bg-dark border-bottom border-body fixed-top" data-bs-theme="dark">
+
   <div class="container-fluid">
     <a class="navbar-brand text-white" href="{{ url('/') }}">GameVeravart</a>
 
@@ -16,6 +17,19 @@
             <span class="nav-link text-white">
               👤 {{ auth()->user()->name }}
             </span>
+          </li>
+          <!-- Levels Dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown"
+               aria-expanded="false">
+              Levels
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark" style="max-height: 300px; overflow-y: auto;">
+              <li><a class="dropdown-item" href="#">Introduction</a></li>
+              @for ($i = 1; $i <= 30; $i++)
+                <li><a class="dropdown-item" href="#level{{ $i }}">Level {{ $i }}</a></li>
+              @endfor
+            </ul>
           </li>
           <li class="nav-item">
     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-inline">
