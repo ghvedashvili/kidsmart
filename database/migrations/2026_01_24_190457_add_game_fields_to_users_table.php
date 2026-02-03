@@ -15,7 +15,7 @@ class AddGameFieldsToUsersTable extends Migration
 {
     Schema::table('users', function (Blueprint $table) {
         $table->string('nickname')->unique()->after('name');
-        $table->integer('level')->default(1);
+        $table->integer('level')->default(0);
         $table->integer('xp')->default(0);
         $table->integer('hints')->default(3);
     });
