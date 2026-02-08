@@ -1,35 +1,24 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mt-4">
-    <div class="card">
-        <div class="card-body">
 
-            <h4>Level {{ $level }}</h4>
-
-            @if($userLevel == $level)
-             {{-- წესები --}}
-                @if($question->rules)
-                    <p>{{ $question->rules }}</p>
-                @endif
-            @endif
-           
-           
-
-            {{-- უნიკალური კონტენტი ლეველისთვის --}}
-           @if($level == 1)
-                @yield('level-content')
-            @endif
-
-            {{-- დასრულებული ლეველი --}}
-            @if($userLevel > $level)
-                <div class="alert alert-info mt-3">
-                    ✅ Completed
-                </div>
-            @endif
-
-        </div>
+{{-- ✅ წესები: 100% სიგანე, ჰორიზონტალური --}}
+@if($userLevel == $level && $question->rules)
+    <div class="rules-bar w-100 py-3 px-3 mb-4 text-center">
+        {{ $question->rules }}
     </div>
+@endif
+
+{{-- ✅ Level-ის კონტენტი ქვეშ --}}
+<div class="level-content-wrapper d-flex justify-content-center">
+    @yield('level-content')
 </div>
+
+{{-- დასრულებული ლეველი --}}
+@if($userLevel > $level)
+    <div class="alert alert-info mt-3 text-center">
+        ✅ Completed
+    </div>
+@endif
+
 @endsection
-@include('levels.scripts')

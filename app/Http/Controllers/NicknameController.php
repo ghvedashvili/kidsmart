@@ -52,7 +52,7 @@ private function getRules(string $nickname): array
     $primes = ["11","13","17","19","23","29","31","37","41","43","47","53","59","61","67","71","73","79","83","89","97"];
 
     return [
-        ['id'=>1,'text'=>'Nickname უნდა შეიცავდეს მინიმუმ 5 სიმბოლოს','passed'=>strlen($nickname)>=5],
+        ['id'=>1,'text'=>'Nickname უნდა შეიცავდეს მინიმუმ 5 სიმბოლოს','passed'=>mb_strlen($nickname)>=5],
         // ['id'=>2,'text'=>'Nickname უნდა შეიცავდეს ციფრს','passed'=>preg_match('/\d/',$nickname)],
         // ['id'=>3,'text'=>'Nickname უნდა შეიცავდეს დიდ ასოს','passed'=>preg_match('/[A-Z]/',$nickname)],
         // ['id'=>4,'text'=>'Nickname უნდა შეიცავდეს სპეციალურ სიმბოლოს','passed'=>preg_match('/[!@#$%^&*()_\-+=\[\]{};:"\\|,.<>\/?]/',$nickname)],
@@ -62,8 +62,8 @@ private function getRules(string $nickname): array
         // ['id'=>8,'text'=>'Nickname უნდა შეიცავდეს მიმდინარე თვეს','passed'=>collect($currentMonthNames)->contains(fn($m)=>str_contains(strtolower($nickname),strtolower($m)))],
         // ['id'=>9,'text'=>'Nickname უნდა შეიცავდეს ემოჯის','passed'=>preg_match('/[\x{1F300}-\x{1F9FF}]/u',$nickname)],
         // ['id'=>10,'text'=>'Nickname უნდა შეიცავდეს საქართველოს ან მისი მეზობელი ქვეყნის ISO კოდს','passed'=>collect($countryCodes)->contains(fn($c)=>str_contains($nicknameUpper,$c))],
-        ['id'=>11,'text'=>'Nickname უნდა შეიცავდეს რომაულ ციფრს (მინიმუმ 3 სიმბოლო)','passed'=>preg_match('/[IVXLCDM]{3,}/i',$nickname)],
-        // ['id'=>12,'text'=>'Nickname-ის სიგრძე უნდა იყოს მაქსიმუმ 35 სიმბოლო','passed'=>mb_strlen($nickname)<=35],
+        // ['id'=>11,'text'=>'Nickname უნდა შეიცავდეს რომაულ ციფრს (მინიმუმ 3 სიმბოლო)','passed'=>preg_match('/[IVXLCDM]{3,}/i',$nickname)],
+         ['id'=>12,'text'=>'Nickname-ის სიგრძე უნდა იყოს მაქსიმუმ 35 სიმბოლო','passed'=>mb_strlen($nickname)<=35],
         // ['id'=>13,'text'=>'ყოველი მე-4 ასო უნდა იყოს დიდი','passed'=>function() use($nickname){
         //     $letters = preg_replace('/[^a-zA-Z]/','',$nickname);
         //     if(strlen($letters)<4) return false;
@@ -76,8 +76,12 @@ private function getRules(string $nickname): array
         // ['id'=>15,'text'=>'Nickname უნდა შეიცავდეს ათწილადს','passed'=>preg_match('/\d+\.\d+/',$nickname)],
         // ['id'=>16,'text'=>'Nickname არ უნდა შეიცავდეს ქართულ ასოებს','passed'=>!preg_match('/[ა-ჰ]/',$nickname)],
         // ['id'=>17,'text'=>'Nickname არ უნდა შეიცავდეს მიმდევრობით ერთსა და იმავე სიმბოლოს 2-ზე მეტჯერ','passed'=>!preg_match('/(.)\1\1/',$nickname)],
-        // ['id'=>18,'text'=>'Nickname უნდა შეიცავდეს ტემპერატურას (-375°C-დან 10000°C-მდე ან °F)','passed'=>preg_match('/-?\d{1,5}(°|º|o|O)[CF]/',$nickname)],
-        // ['id'=>19,'text'=>'Nickname უნდა შეიცავდეს 💧-ს ან 🧂-ს ქიმიური ნაერთის კოდს','passed'=>collect($compounds)->contains(fn($c)=>str_contains(strtoupper($nickname),strtoupper($c)))],
+        [
+    'id' => 18,
+    'text' => 'Nickname უნდა შეიცავდეს ტემპერატურას (-375°C-დან 10000°C-მდე ან °F)',
+    'passed' => preg_match('/\-?\d{1,5}\s*(?:°|º|o|O|deg)\s*[CF]/iu', $nickname)
+],
+        ['id'=>19,'text'=>'Nickname უნდა შეიცავდეს 💧-ს ან 🧂-ს ქიმიური ნაერთის კოდს','passed'=>collect($compounds)->contains(fn($c)=>str_contains(strtoupper($nickname),strtoupper($c)))],
         // ['id'=>20,'text'=>'Nickname უნდა შეიცავდეს საქართველოს ავტომობილების სტანდარტულ სარეგისტრაციო ნომერს','passed'=>preg_match('/[A-Z]{2}-\d{3}-[A-Z]{2}/',$nicknameUpper)],
         // ['id'=>21,'text'=>'Nickname-ში არ უნდა იყოს "41"','passed'=>!str_contains($nickname,'41')],
         // ['id'=>22,'text'=>'Nickname უნდა შეიცავდეს მარტივ 2 ნიშნა რიცხვს','passed'=>collect($primes)->contains(fn($p)=>str_contains($nickname,$p))],

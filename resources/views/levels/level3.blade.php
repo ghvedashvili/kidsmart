@@ -4,7 +4,7 @@
 @section('content')
 <div class="container text-center mt-5">
 
-    <h2>Level 3</h2>
+    <h2>Level 003</h2>
 
     <p class="mt-3">
         👁️ ყურადღებით დააკვირდი მისამართის ზოლს ზემოთ

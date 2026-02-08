@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
+use App\Providers\RouteServiceProvider;
 
 class GoogleController extends Controller
 {
@@ -31,6 +32,6 @@ class GoogleController extends Controller
 
         Auth::login($user, true); // ავტორიზაცია
 
-        return redirect()->intended('/dashboard'); // Breeze-ის default home
+        return redirect()->intended(RouteServiceProvider::HOME); // Breeze-ის default home
     }
 }

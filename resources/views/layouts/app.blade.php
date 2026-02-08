@@ -5,6 +5,8 @@
     <title>GameVeravart</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="csrf-token" content="{{ csrf_token() }}">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0d6efd">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
@@ -15,7 +17,7 @@
 
 <style>
     body {
-        padding-top: 70px; /* navbar-ის სიმაღლე */
+        padding-top: 58px; /* navbar-ის სიმაღლე */
     }
 
     .app-loader {
@@ -53,12 +55,21 @@
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
+
+.rules-bar {
+    background: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+    font-size: 15px;
+    font-weight: 500;
+}
+
 </style>
 
 
-<main>
+<div class="container-fluid px-0">
     @yield('content')
-</main>
+</div>
 
 <!-- ✅ LOGIN MODAL -->
 <div class="modal fade" id="loginModal" tabindex="-1">
@@ -133,6 +144,8 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+
+
 window.AppLoader = {
     show(text = 'Loading…') {
         const loader = document.getElementById('app-loader');
@@ -163,5 +176,12 @@ document.addEventListener('click', e => {
 });
 </script>
 
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log('Service Worker registered'))
+        .catch(err => console.error('SW registration failed:', err));
+}
+</script>
 </body>
 </html>

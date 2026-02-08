@@ -104,13 +104,13 @@
 
           <!-- Logout -->
           <li class="nav-item">
-            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-inline">
+            <form method="POST" action="{{ route('logout') }}">
     @csrf
-    <a href="#"
-       class="nav-link text-white"
-       onclick="event.preventDefault(); AppLoader.show('Logging out…'); this.closest('form').submit();">
+    <button type="submit"
+            class="nav-link text-white bg-transparent border-0"
+            onclick="AppLoader.show('Logging out…')">
         Logout
-    </a>
+    </button>
 </form>
           </li>
 
@@ -127,7 +127,7 @@
 
  
           <!-- სტუმარი → Modal -->
-          <!-- <li class="nav-item">
+          <li class="nav-item">
             <a class="nav-link text-white"
                href="#"
                data-bs-toggle="modal"
@@ -142,7 +142,7 @@
                data-bs-target="#registerModal">
               Register
             </a>
-          </li> -->
+          </li>
         
 @endauth
 
