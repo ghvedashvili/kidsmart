@@ -64,7 +64,7 @@
     .phase-line { flex-grow: 1; height: 2px; background-color: var(--google-dark-gray); margin: 0 8px; }
     .phase-line.active { background-color: var(--google-blue); }
 
-    .captcha-challenge { display: none; padding: 20px; }
+    .captcha-challenge { display: none; padding:5px 20px; }
     .captcha-challenge.active { display: block; }
 
     .captcha-display-container { margin-bottom: 20px; }
@@ -143,7 +143,7 @@
         <!-- Step 1: Standard CAPTCHA -->
         <div class="captcha-challenge active" id="step1">
             <div class="captcha-display-container">
-                <span class="captcha-label">გთხოვთ, აკოპიროთ ტექსტი ქვემოთ მოცემული სურათიდან:</span>
+                <span class="captcha-label text-center"><i class="bi bi-info-circle text-primary">  გთხოვთ, შეიყვანოთ ქვემოთ მოცემული ქაფთჩა:</i></span>
                 <div class="captcha-display">{{ $standardCaptcha }}</div>
             </div>
             <div class="captcha-input-container">
@@ -157,7 +157,7 @@
         <!-- Step 2: Selection CAPTCHA (moved from step3) -->
         <div class="captcha-challenge" id="step2">
             <div class="captcha-display-container">
-                <span class="captcha-label">დააწკაპუნეთ ტექსტზე რომ გამოავლინოთ, შემდეგ კი დააკოპირეთ:</span>
+                 <span class="captcha-label text-center"><i class="bi bi-info-circle text-primary"> არ არსებობს დაფარული, რომ არ გამოჩნდეს, და არც რამ სადუმლო რომ არ გამჟღავნდეს.</i></span>
                 <div class="captcha-display selectable" id="selectionDisplay">********</div>
             </div>
             <div class="captcha-input-container">
@@ -171,7 +171,7 @@
         <!-- Step 3: Georgian CAPTCHA (moved from step2) -->
         <div class="captcha-challenge" id="step3">
             <div class="captcha-display-container">
-                <span class="captcha-label">გთხოვთ, აკოპიროთ ტექსტი ქართულად:</span>
+                 <span class="captcha-label text-center"><i class="bi bi-info-circle text-primary">  არასოდეს დაივიწყო ის, რაც შენს ეროვნულ იდენტობას ქმნის.</i></span>
                 <div class="captcha-display">{{ $georgianCaptcha }}</div>
             </div>
             <div class="captcha-input-container">
@@ -185,7 +185,7 @@
         <!-- Step 4: Rotating CAPTCHA -->
         <div class="captcha-challenge" id="step4">
             <div class="captcha-display-container">
-                <span class="captcha-label">ჩაწერეთ ტექსტი რომელიც იცვლება თითოეული აკრეფილი სიმბოლოს შემდეგ:</span>
+                 <span class="captcha-label text-center"><i class="bi bi-info-circle text-primary">  ცვლიებები არასდროს არის შემთხვევითობა! ყველაფერს აქვს თავისი კანონზომიერება.</i></span>
                 <div class="captcha-display" id="rotatingDisplay">{{ $rotatingCaptcha }}</div>
             </div>
             <div class="captcha-input-container">
@@ -214,7 +214,7 @@
                 <div class="card-body text-center">
                     <h5 class="card-title">დონე {{ $level }}</h5>
                     @if($userLevel > $level)
-                        <div class="alert alert-success">✅ ამ დონეს უკვე დაუსრულებიათ</div>
+                        <div class="alert alert-success">თქვენ წარმატებით გაიარეთ caphtcha ტესტი</div>
                     @else
                         <div class="alert alert-warning">⚠️ ეს დონე ჯერ არ არის ხელმისაწვდომი</div>
                     @endif

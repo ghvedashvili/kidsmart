@@ -1,3 +1,4 @@
+@section('scripts') 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -19,26 +20,37 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .then(r => r.json())
         .then(data => {
-    if(data.status === 'correct') {
-        Swal.fire({
-            icon: 'success',
-            title: 'Correct! 🎉',
-            text: 'Moving to next level...',
-            timer: 1200,
-            showConfirmButton: false
-        }).then(() => {
-            window.location.href = "/levels/" + data.nextLevel;
+            if(data.status === 'correct') {
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Correct! 🎉',
+                    text: 'What would you like to do?',
+                    showCancelButton: true,
+                    confirmButtonText: 'Next Level 🚀',
+                    cancelButtonText: 'OK',
+                    reverseButtons: true
+                }).then((result) => {
+
+                    // თუ დააჭირა Next Level-ს
+                    if (result.isConfirmed) {
+                        window.location.href = "/levels/" + data.nextLevel;
+                    }
+
+                    // თუ დააჭირა OK-ს → უბრალოდ დარჩება იმავე გვერდზე
+                });
+
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Wrong answer 😕',
+                    text: 'Think again and try once more.',
+                    confirmButtonText: 'Retry'
+                });
+            }
         });
-    } else {
-        Swal.fire({
-            icon: 'error',
-            title: 'Wrong answer 😕',
-            text: 'Think again and try once more.',
-            confirmButtonText: 'Retry'
-        });
-    }
-});
 
     });
 });
 </script>
+@endsection

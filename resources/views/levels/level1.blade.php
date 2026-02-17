@@ -15,8 +15,8 @@
   }
 
   .rules-card {
-    height: calc(100vh - 120px);
-    max-height: calc(100vh - 120px);
+    height: calc(100vh - 150px);
+    max-height: calc(100vh - 150px);
     display: flex;
     flex-direction: column;
   }
@@ -59,8 +59,8 @@
 <div class="container-fluid">
   <div class="row justify-content-center">
     <div class="col-12 col-md-10 col-lg-8 col-xl-6">
-      <div class="card shadow-sm p-3 mb-3 rules-card">
-        <h2 class="h5 mb-3">Level {{ $level }} Challenge</h2>
+      <div class=" p-3 mb-3 rules-card">
+        <h2 class="h5 mb-3 text-center">შეიყვანე შენი nickname</h2>
 
         <textarea id="nicknameInput" class="form-control mt-2" rows="3" placeholder="შეიყვანეთ Nickname"></textarea>
         <div id="charCounter" class="text-muted mt-1" style="display:none;">0/35</div>
@@ -272,10 +272,29 @@ fetchRules().then(()=>{ checkRules(); });
 </script>
 
 @else
-<div class="container mt-5">
+<!-- <div class="container mt-5">
   <div class="alert alert-success text-center">
-    ✅ <b>{{ $nickname }}</b>
+    <b>თქვენ უკვე შექმენით თქვენი ნიკნეიმი</b>
+    <br>
+     <b>{{ $nickname }}</b>
   </div>
+</div> -->
+<div class="container mt-5 pt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">level{{ $level }}</h5>
+                    @if($userLevel > $level)
+                        <div class="alert alert-success">თქვენ წარმატებით შექმენით თქვენი ნიკნეიმი <br> {{ $nickname }}</div>
+                    @else
+                        <div class="alert alert-warning">⚠️ ეს დონე ჯერ არ არის ხელმისაწვდომი</div>
+                    @endif
+                    <a href="{{ route('levels.show', ['level' => $userLevel]) }}" class="btn btn-primary">გადადით მიმდინარე დონეზე</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 @endif
 @endsection

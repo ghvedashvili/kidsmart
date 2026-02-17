@@ -17,7 +17,8 @@
 
 <style>
     body {
-        padding-top: 58px; /* navbar-ის სიმაღლე */
+        padding-top: 56px; /* navbar-ის სიმაღლე */
+    
     }
 
     .app-loader {
@@ -162,10 +163,10 @@ window.AppLoader = {
     }
 };
 
-// ყველა form submit-ზე
-document.addEventListener('submit', () => {
-    AppLoader.show();
-});
+// ყველა form submit-ზე loader
+// document.addEventListener('submit', () => {
+//     AppLoader.show();
+// });
 
 // ყველა link-ზე სადაც data-loader არის
 document.addEventListener('click', e => {
@@ -183,5 +184,6 @@ if ('serviceWorker' in navigator) {
         .catch(err => console.error('SW registration failed:', err));
 }
 </script>
+@yield('scripts')
 </body>
 </html>

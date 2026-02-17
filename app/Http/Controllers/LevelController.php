@@ -26,7 +26,8 @@ class LevelController extends Controller
             'question' => $question,
             'level' => $level,
             'nickname' => $user->nickname,
-            'userLevel' => $user->level
+            'userLevel' => $user->level,
+             'completed' => false,
         ]);
     }
 

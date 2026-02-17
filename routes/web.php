@@ -6,6 +6,8 @@ use App\Http\Controllers\NicknameController;
 use App\Http\Controllers\CaptchaController;
 use App\Http\Controllers\RussiaIsOccupierController;
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\LevelUpController;
+
 
 Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
 Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
@@ -50,6 +52,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/levels/3/{code}', [RussiaIsOccupierController::class, 'index'])
         ->name('level3');
     Route::post('/levels/3/complete', [RussiaIsOccupierController::class, 'complete'])
+    ->middleware('auth');
+
+    Route::get('/levels/4/complete', [LevelUpController::class, 'complete'])
     ->middleware('auth');
     /*
     |--------------------------------------------------
