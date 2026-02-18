@@ -2,14 +2,47 @@
  
 @if($userLevel == $level)
 @section('content')
-<div class="container text-center mt-5">
+<style>
+ body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f2f2f2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden; /* ვაცილებთ scrollbar-ებს */
+  }
 
-    <h2>Level 003</h2>
+  .marquee-container {
+    width: 100%;        /* სრული ეკრანი */
+    overflow: hidden;   /* ტექსტი გადმოსვლას მალავს */
+    white-space: nowrap;
+    box-sizing: border-box;
+    border: 2px solid #ccc; /* სურვილისამებრ ჩარჩო */
+    background-color: #fff;
+    padding: 10px;
+  }
 
-    <p class="mt-3">
-        👁️ ყურადღებით დააკვირდი მისამართის ზოლს ზემოთ
-    </p>
+  .marquee-text {
+    display: inline-block;
+    padding-left: 100%; /* დასაწყისი ეკრანის მიღმა */
+    animation: marquee 15s linear infinite;
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #000;
+  }
 
+  @keyframes marquee {
+    0%   { transform: translateX(0%); }
+    100% { transform: translateX(-100%); }
+  }
+</style>
+
+
+<div class="marquee-container">
+  <div class="marquee-text">
+    რუსეთი ოკუპანტია და საერთოდ არ აქვს მნიშვნელობა სად შეგხვდება საპირისპირო — ეს ყველგან უნდა გასწორდეს. სამწუხაროდ სანამ შეცდომა არ გასწორდება თამაშს ვერ გავაგრძელებთ.
+  </div>
 </div>
 
 

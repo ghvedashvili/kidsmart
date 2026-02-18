@@ -8,6 +8,18 @@ document.addEventListener('DOMContentLoaded', function () {
     form.addEventListener('submit', function(e){
         e.preventDefault();
 
+        /* 🔴 Loader გამოჩნდეს მაშინვე */
+        Swal.fire({
+            // title: 'Checking...',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            background:'transparent',
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         fetch("{{ route('levels.check', $level) }}", {
             method: "POST",
             headers: {
@@ -20,6 +32,9 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .then(r => r.json())
         .then(data => {
+
+            Swal.close(); // ⛔ Loader დავხუროთ
+console.log(data);
             if(data.status === 'correct') {
 
                 Swal.fire({
@@ -32,25 +47,57 @@ document.addEventListener('DOMContentLoaded', function () {
                     reverseButtons: true
                 }).then((result) => {
 
-                    // თუ დააჭირა Next Level-ს
                     if (result.isConfirmed) {
                         window.location.href = "/levels/" + data.nextLevel;
                     }
 
-                    // თუ დააჭირა OK-ს → უბრალოდ დარჩება იმავე გვერდზე
                 });
 
             } else {
+
                 Swal.fire({
                     icon: 'error',
                     title: 'Wrong answer 😕',
                     text: 'Think again and try once more.',
                     confirmButtonText: 'Retry'
                 });
+
             }
+        })
+        .catch(() => {
+
+            Swal.close();
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Server error ⚠️',
+                text: 'Something went wrong.'
+            });
+
         });
 
     });
 });
+
+document.querySelectorAll('.swal-loader').forEach(btn => {
+    btn.addEventListener('click', function(e){
+        e.preventDefault();
+
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            background: 'transparent',
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        setTimeout(() => {
+            window.location.href = this.href;
+        }, 500);
+    });
+});
+
 </script>
 @endsection

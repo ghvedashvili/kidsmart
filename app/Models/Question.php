@@ -15,5 +15,12 @@ class Question extends Model
         'question',
         'rules',
         'answer',
+        'hints', // დაამატე hints აქ
+    ];
+
+    // აქ ვეტყვით Laravel-ს რომ JSON ველები უნდა გადაიყვანოს array–ად
+    protected $casts = [
+        'answer' => 'array',
+        'hints' => 'array',
     ];
 }

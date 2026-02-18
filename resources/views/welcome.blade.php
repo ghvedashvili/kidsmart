@@ -9,10 +9,12 @@
 <div class="container mt-4">
     <h3>Welcome back, {{ auth()->user()->name }} 👋</h3>
 
-    <a href="{{ route('levels.show', auth()->user()->level) }}"
-       class="btn btn-primary mt-3">
-        ▶ Continue Game
-    </a>
+<a href="{{ route('levels.show', auth()->user()->level) }}"
+   class="btn btn-primary mt-3 swal-loader">
+    ▶ Continue Game
+</a>
+
+
 </div>
 @else
 <div class="container text-center mt-5">
@@ -21,4 +23,28 @@
 </div>
 
 @endauth
-@endsection
+
+<script>
+
+    document.querySelectorAll('.swal-loader').forEach(btn => {
+    btn.addEventListener('click', function(e){
+        e.preventDefault();
+
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            background: 'transparent',
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        setTimeout(() => {
+            window.location.href = this.href;
+        }, 500);
+    });
+});
+
+    </script>
+    @endsection

@@ -32,24 +32,43 @@ class LevelController extends Controller
     }
 
     public function check(Request $request, $level)
-    {
-        $user = Auth::user();
-        $question = Question::where('level', $level)->firstOrFail();
+{
+    $user = Auth::user();
+    $question = Question::where('level', $level)->firstOrFail();
 
-        if ($user->level != $level) {
-            return response()->json(['status' => 'locked']);
-        }
-
-        if (strtolower(trim($request->answer)) === strtolower(trim($question->answer))) {
-            $user->increment('level');
-
-            return response()->json([
-                'status' => 'correct',
-                'nextLevel' => $user->level
-            ]);
-        }
-
-        return response()->json(['status' => 'wrong']);
+    // თუ მომხმარებელი არ არის ამ დონეზე
+    if ($user->level != $level) {
+        return response()->json(['status' => 'locked']);
     }
+
+    // normalize ფუნქცია: lowercase + trim + ყველა ზედმეტი space–ის მოხსნა
+    $normalize = function ($text) {
+        $text = strtolower(trim($text));
+        $text = preg_replace('/\s+/', ' ', $text); // ყველა ზედმეტი space–ი single space–ად
+        return $text;
+    };
+
+    $userAnswer = $normalize($request->answer);
+
+    // ყველა სწორი პასუხის normalize
+    $correctAnswers = array_map($normalize, $question->answer);
+
+    if (in_array($userAnswer, $correctAnswers)) {
+        $user->increment('level');
+
+        return response()->json([
+            'status' => 'correct',
+            'nextLevel' => $user->level,
+            // optional: show hints after correct answer
+            'hints' => $question->hints ?? []
+        ]);
+    }
+
+    return response()->json([
+        'status' => 'wrong',
+        'hints' => $question->hints ?? []
+    ]);
+}
+
 }
 
