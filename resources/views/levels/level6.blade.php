@@ -391,57 +391,57 @@
   };
 
   // ——— Answer form submit ———
-  document.getElementById('fo-answerForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
+//   document.getElementById('fo-answerForm').addEventListener('submit', async function(e) {
+//     e.preventDefault();
 
-    const answer    = document.getElementById('fo-answer').value.trim();
-    const btn       = this.querySelector('button[type="submit"]');
-    const resultBox = document.getElementById('fo-result-box');
+//     const answer    = document.getElementById('fo-answer').value.trim();
+//     const btn       = this.querySelector('button[type="submit"]');
+//     const resultBox = document.getElementById('fo-result-box');
 
-    if (!answer) return;
+//     if (!answer) return;
 
-    btn.disabled    = true;
-    btn.textContent = '...';
-    resultBox.textContent = '';
+//     btn.disabled    = true;
+//     btn.textContent = '...';
+//     resultBox.textContent = '';
 
-    try {
-      const res = await fetch('{{ route("levels.check", ["level" => $level]) }}', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': '{{ csrf_token() }}',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify({ answer }),
-      });
+//     try {
+//       const res = await fetch('{{ route("levels.check", ["level" => $level]) }}', {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//           'X-CSRF-TOKEN': '{{ csrf_token() }}',
+//           'Accept': 'application/json',
+//         },
+//         body: JSON.stringify({ answer }),
+//       });
 
-      const data = await res.json();
+//       const data = await res.json();
 
-      if (data.status === 'correct') {
-        resultBox.style.color = 'green';
-        resultBox.textContent = '✅ სწორია! გადადი შემდეგ დონეზე...';
-        setTimeout(() => { window.location.href = '/levels/' + data.nextLevel; }, 1500);
+//       if (data.status === 'correct') {
+//         resultBox.style.color = 'green';
+//         resultBox.textContent = '✅ სწორია! გადადი შემდეგ დონეზე...';
+//         setTimeout(() => { window.location.href = '/levels/' + data.nextLevel; }, 1500);
 
-      } else if (data.status === 'wrong') {
-        resultBox.style.color = 'tomato';
-        resultBox.textContent = '❌ არასწორია, სცადე თავიდან.';
-        btn.disabled    = false;
-        btn.textContent = 'Submit';
+//       } else if (data.status === 'wrong') {
+//         resultBox.style.color = 'tomato';
+//         resultBox.textContent = '❌ არასწორია, სცადე თავიდან.';
+//         btn.disabled    = false;
+//         btn.textContent = 'Submit';
 
-      } else if (data.status === 'locked') {
-        resultBox.style.color = '#b8860b';
-        resultBox.textContent = '⚠️ ეს დონე ჩაკეტილია.';
-        btn.disabled    = false;
-        btn.textContent = 'Submit';
-      }
+//       } else if (data.status === 'locked') {
+//         resultBox.style.color = '#b8860b';
+//         resultBox.textContent = '⚠️ ეს დონე ჩაკეტილია.';
+//         btn.disabled    = false;
+//         btn.textContent = 'Submit';
+//       }
 
-    } catch (err) {
-      resultBox.style.color = 'tomato';
-      resultBox.textContent = '❌ სერვერის შეცდომა.';
-      btn.disabled    = false;
-      btn.textContent = 'Submit';
-    }
-  });
+//     } catch (err) {
+//       resultBox.style.color = 'tomato';
+//       resultBox.textContent = '❌ სერვერის შეცდომა.';
+//       btn.disabled    = false;
+//       btn.textContent = 'Submit';
+//     }
+//   });
 </script>
 
 @else
