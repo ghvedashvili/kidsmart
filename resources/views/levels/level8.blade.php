@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content"> -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;700&display=swap" rel="stylesheet">
 @if($userLevel == $level)
@@ -16,20 +17,18 @@
         min-height: -webkit-fill-available;
     }
     body {
-        background-color: #f2f2f7;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
-        padding-top: 16px;
-        font-family: 'Lato', sans-serif;
-    }
+    background-color: #f2f2f7;
+    display: flex;
+    align-items: center;       /* ვერტიკალური ცენტრი */
+    justify-content: center;   /* ჰორიზონტალური ცენტრი */
+    height: 100vh;
+    font-family: 'Lato', sans-serif;
+}
 
     .phone-wrapper {
-        margin-top: 50px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+       display: flex;
+    flex-direction: column;
+    align-items: center;
     }
 
     .container {

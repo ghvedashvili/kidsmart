@@ -7,7 +7,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     form.addEventListener('submit', function(e){
         e.preventDefault();
-
+ if(!navigator.onLine){
+        // თუ ინტერნეტი არაა, გამოვუცხადოთ მომხმარებელს
+        Swal.fire({
+            icon: "warning",
+            title: "ინტერნეტი არ არის",
+            text: "გთხოვთ ჩართოთ ინტერნეტი რომ გააგრძელოთ",
+            confirmButtonText: "გასაგებია"
+        });
+        return; // form არ გავაგრძელოთ
+    }
         /* 🔴 Loader გამოჩნდეს მაშინვე */
         Swal.fire({
             // title: 'Checking...',
@@ -27,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                answer: document.getElementById('answer').value
+                answer: document.getElementById('answer')?.value ?? ''
             })
         })
         .then(r => r.json())

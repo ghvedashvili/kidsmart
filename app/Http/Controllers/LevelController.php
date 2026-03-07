@@ -38,7 +38,7 @@ class LevelController extends Controller
     ]);
 }
 
-    public function check(Request $request, $level)
+public function check(Request $request, $level)
 {
     $user = Auth::user();
     $question = Question::where('level', $level)->firstOrFail();
@@ -48,10 +48,21 @@ class LevelController extends Controller
         return response()->json(['status' => 'locked']);
     }
 
-    // normalize ფუნქცია: lowercase + trim + ყველა ზედმეტი space–ის მოხსნა
+    // ✅ თუ კითხვა არის ACTION ტიპის
+    if ($question->type === 'action') {
+        $user->increment('level');
+
+        return response()->json([
+            'status' => 'correct',
+            'nextLevel' => $user->level,
+            'hints' => $question->hints ?? []
+        ]);
+    }
+
+    // normalize ფუნქცია
     $normalize = function ($text) {
         $text = strtolower(trim($text));
-        $text = preg_replace('/\s+/', ' ', $text); // ყველა ზედმეტი space–ი single space–ად
+        $text = preg_replace('/\s+/', ' ', $text);
         return $text;
     };
 
@@ -66,7 +77,6 @@ class LevelController extends Controller
         return response()->json([
             'status' => 'correct',
             'nextLevel' => $user->level,
-            // optional: show hints after correct answer
             'hints' => $question->hints ?? []
         ]);
     }

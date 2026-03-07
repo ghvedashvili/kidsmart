@@ -11,9 +11,9 @@ class AppServiceProvider extends ServiceProvider
 
 public function boot()
 {      //დასტარტვა ngrok
-    // if (app()->environment('local')) {
-    //     URL::forceScheme('https');
-    // }
+    if (app()->environment('local')) {
+        URL::forceScheme('https');
+    }
 }
 
     /**
