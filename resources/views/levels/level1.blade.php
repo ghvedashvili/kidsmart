@@ -313,8 +313,11 @@ function stripGeorgian() {
   nicknameInput.addEventListener(evt, stripGeorgian)
 );
 
+const STORAGE_KEY = 'nickname_draft_level{{ $level }}';
+
 nicknameInput.addEventListener('input', async ()=>{
   stripGeorgian();
+  localStorage.setItem(STORAGE_KEY, nicknameInput.value);
   updateHighlight(nicknameInput.value);
   await fetchRules();
   checkRules();
@@ -334,6 +337,11 @@ nicknameInput.addEventListener('input', async ()=>{
   }
 });
 
+const saved = localStorage.getItem(STORAGE_KEY);
+if (saved) {
+  nicknameInput.value = saved;
+  updateHighlight(saved);
+}
 fetchRules().then(()=>{ checkRules(); });
 
 </script>
