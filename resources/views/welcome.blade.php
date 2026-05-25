@@ -321,7 +321,7 @@
         scrambler2.setText('', subSyms);
         scrambler.setText('VERAVART GAME', symSets).then(() => {
             scrambler2.setText('by ghvedashvili', subSyms).then(() => {
-                enterBtn.classList.add('visible');
+                setTimeout(() => enterBtn.classList.add('visible'), 2500);
                 setTimeout(animate, 15000);
             });
         });

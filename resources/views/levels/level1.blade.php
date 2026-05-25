@@ -267,7 +267,21 @@ function renderRules() {
 charCounter.style.display = 'none';
 charCounter.style.opacity = '0';
 
+function stripGeorgian() {
+  const val = nicknameInput.value;
+  const stripped = val.replace(/[Ⴀ-ჿⴀ-⴯]/g, '');
+  if (stripped !== val) {
+    const pos = Math.max(0, nicknameInput.selectionStart - (val.length - stripped.length));
+    nicknameInput.value = stripped;
+    nicknameInput.setSelectionRange(pos, pos);
+  }
+}
+['keyup', 'compositionend', 'compositionupdate'].forEach(evt =>
+  nicknameInput.addEventListener(evt, stripGeorgian)
+);
+
 nicknameInput.addEventListener('input', async ()=>{
+  stripGeorgian();
   await fetchRules();
   checkRules();
   const len = nicknameInput.value.length;
