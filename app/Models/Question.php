@@ -14,8 +14,9 @@ class Question extends Model
         'type',
         'question',
         'rules',
+        'success_message',
         'answer',
-        'hints', // დაამატე hints აქ
+        'hints',
     ];
 
     // აქ ვეტყვით Laravel-ს რომ JSON ველები უნდა გადაიყვანოს array–ად
