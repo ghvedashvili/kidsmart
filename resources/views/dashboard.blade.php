@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('bodyClass', 'dot-light')
+
 @section('content')
 <div class="container mt-4">
     <h3>Welcome back, {{ auth()->user()->name }} 👋</h3>

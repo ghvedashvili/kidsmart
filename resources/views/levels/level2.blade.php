@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('bodyClass', 'dot-light')
+
 @section('content')
 <style>
     :root {
@@ -18,7 +20,6 @@
         justify-content: center;
         align-items: center;
         padding: 20px;
-        background-color: #f8f9fa;
         width: 100%;
     }
 
@@ -122,10 +123,13 @@
 @if($userLevel == $level)
 <div class="captcha-wrapper">
     <div class="captcha-container">
-        <div class="google-logo">
+        <div class="google-logo" style="position:relative;">
             <span class="google-blue">G</span><span class="google-red">o</span><span class="google-yellow">o</span>
             <span class="google-blue">g</span><span class="google-green">l</span><span class="google-red">e</span>
             CAPTCHA
+            <button onclick="showCaptchaInfo()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#5f6368;font-size:1.1rem;padding:4px;" title="რატომ CAPTCHA?">
+                <i class="bi bi-info-circle"></i>
+            </button>
         </div>
         <hr>
         <div class="progress-container">
@@ -310,6 +314,16 @@ function showError(inputElement,message){
 }
 
 function nextLevel(){ window.location.href="/levels/3"; }
+
+function showCaptchaInfo(){
+    Swal.fire({
+        icon: 'info',
+        title: 'რატომ CAPTCHA?',
+        text: 'ეს CAPTCHA ტესტი მხოლოდ იმიტომ გახდა საჭირო, რომ ძალიან უცნაური Nickname გაქვს 😄',
+        confirmButtonText: 'გასაგებია',
+        confirmButtonColor: 'var(--google-blue)',
+    });
+}
 
 document.addEventListener('DOMContentLoaded',function(){
     updateProgress(1);

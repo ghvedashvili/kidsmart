@@ -11,11 +11,44 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 </head>
-<body>
+<body class="@yield('bodyClass')">
 
 @include('layouts.navigation')
 
 <style>
+    /* ── dot-grid სტილები ── */
+    body.dot-light {
+        background: #f5f5f5;
+    }
+    body.dot-light::before {
+        content: '';
+        position: fixed;
+        inset: -100%;
+        background-image: radial-gradient(rgba(0,0,0,0.13) 1px, transparent 1px);
+        background-size: 28px 28px;
+        animation: dotGrid 18s linear infinite;
+        pointer-events: none;
+        z-index: 0;
+    }
+    body.dot-dark {
+        background: #080808;
+    }
+    body.dot-dark::before {
+        content: '';
+        position: fixed;
+        inset: -100%;
+        background-image: radial-gradient(rgba(255,255,255,0.13) 1px, transparent 1px);
+        background-size: 28px 28px;
+        animation: dotGrid 18s linear infinite;
+        pointer-events: none;
+        z-index: 0;
+    }
+    @keyframes dotGrid {
+        0%   { transform: translate(0, 0); }
+        100% { transform: translate(28px, 28px); }
+    }
+    /* ───────────────────── */
+
     body {
         padding-top: 56px; /* navbar-ის სიმაღლე */
     
@@ -68,7 +101,7 @@
 </style>
 
 
-<div class="container-fluid px-0">
+<div class="container-fluid px-0" style="position:relative;z-index:1;">
     @yield('content')
 </div>
 

@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('bodyClass', 'dot-light')
+
 @section('content')
 
 {{-- ✅ წესები: 100% სიგანე, ჰორიზონტალური --}}

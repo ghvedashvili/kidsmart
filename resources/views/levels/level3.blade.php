@@ -1,5 +1,7 @@
 @extends('levels.layout')
- 
+
+@section('bodyClass', 'dot-light')
+
 @if($userLevel == $level)
 @section('content')
 <style>

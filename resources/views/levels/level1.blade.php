@@ -1,28 +1,11 @@
 @extends('layouts.app')
 
+@section('bodyClass', 'dot-light')
+
 @section('content')
 @if($userLevel == $level)
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <style>
-  body {
-    background: #f5f5f5 !important;
-    position: relative;
-  }
-  body::before {
-    content: '';
-    position: fixed;
-    inset: -100%;
-    background-image: radial-gradient(rgba(0,0,0,0.13) 1px, transparent 1px);
-    background-size: 28px 28px;
-    animation: dotGridMove 18s linear infinite;
-    pointer-events: none;
-    z-index: 0;
-  }
-  @keyframes dotGridMove {
-    0%   { transform: translate(0, 0); }
-    100% { transform: translate(28px, 28px); }
-  }
-  .container-fluid { position: relative; z-index: 1; }
   @keyframes shakeX {
     0%   { transform: translateX(0); }
     50%  { transform: translateX(-4px); }
@@ -155,10 +138,14 @@ async function submitNickname() {
     const data = await res.json();
     if (data.status === 'success') {
       Swal.fire({
-        title: '🎉 Nickname accepted!',
-        html: `<b>${data.nickname}</b>`,
-        confirmButtonText: 'NEXT LEVEL',
-        allowOutsideClick: false
+        title: '🎉 გილოცავთ!',
+        html: `გილოცავთ, რომ აირჩიეთ nickname <b>"${data.nickname}"</b>.<br><br>
+               თუმცა გაგვიკვირდა — რატომ აირჩიეთ ასეთი რთული?<br>
+               ამიტომ აუცილებლად უნდა დავადასტუროთ,<br>რომ არ ხართ <b>რობოტი</b>.<br><br>
+               გთხოვთ გაიაროთ <b>CAPTCHA</b> ტესტი.`,
+        confirmButtonText: 'გავიარო CAPTCHA →',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
       }).then(() => {
         window.location.href = `/levels/${data.newLevel}`;
       });
