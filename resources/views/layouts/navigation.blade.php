@@ -102,6 +102,14 @@
 
           </li>
 
+          @if(auth()->user()->isAdmin())
+          <li class="nav-item">
+              <a class="nav-link text-danger fw-bold" href="{{ route('admin.panel') }}">
+                  <i class="bi bi-shield-lock-fill"></i> Admin
+              </a>
+          </li>
+          @endif
+
           <!-- Logout -->
           <li class="nav-item d-flex align-items-center">
     <form method="POST"

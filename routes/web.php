@@ -7,6 +7,7 @@ use App\Http\Controllers\CaptchaController;
 use App\Http\Controllers\RussiaIsOccupierController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\LevelUpController;
+use App\Http\Controllers\AdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,6 +51,11 @@ Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallb
 | Protected Routes (auth required)
 |--------------------------------------------------------------------------
 */
+
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin', [AdminController::class, 'index'])->name('admin.panel');
+    Route::post('/admin/users/{user}/role', [AdminController::class, 'updateRole'])->name('admin.updateRole');
+});
 
 Route::middleware(['auth'])->group(function () {
 

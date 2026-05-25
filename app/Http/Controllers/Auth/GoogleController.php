@@ -28,7 +28,7 @@ class GoogleController extends Controller
             return view('auth.inapp-browser-warning');
         }
 
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')->stateless()->redirect();
     }
 
     public function handleGoogleCallback()
