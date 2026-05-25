@@ -11,8 +11,23 @@ use App\Providers\RouteServiceProvider;
 
 class GoogleController extends Controller
 {
+    private function isInAppBrowser(): bool
+    {
+        $ua = request()->header('User-Agent', '');
+        $patterns = ['FBAN', 'FBAV', 'FB_IAB', 'Instagram', 'MicroMessenger',
+                     'Musical', 'TikTok', 'Snapchat', 'Twitter', 'Line/'];
+        foreach ($patterns as $p) {
+            if (stripos($ua, $p) !== false) return true;
+        }
+        return false;
+    }
+
     public function redirectToGoogle()
     {
+        if ($this->isInAppBrowser()) {
+            return view('auth.inapp-browser-warning');
+        }
+
         return Socialite::driver('google')->redirect();
     }
 
