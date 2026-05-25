@@ -1,8 +1,19 @@
 @php
     use App\Models\Question;
+    use App\Models\User;
 
     $levels = Question::select('level')->distinct()->orderBy('level')->get();
-    $activeLevel = auth()->user() ? auth()->user()->level: 1; // აქტიური ლეველი მოთამაშისთვის
+    $activeLevel = auth()->user() ? auth()->user()->level : 1;
+
+    if (auth()->check()) {
+        $myLevel      = auth()->user()->level;
+        $myId         = auth()->user()->id;
+        $totalPlayers = User::count();
+        $aheadCount   = User::where('level', '>', $myLevel)->count();
+        $sameCount    = User::where('level', $myLevel)->where('id', '!=', $myId)->count();
+        $belowCount   = User::where('level', '<', $myLevel)->count();
+        $myHints      = auth()->user()->hints ?? 0;
+    }
 @endphp
 <style>
 .google-btn {
@@ -39,29 +50,19 @@
       <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
 
         @auth
-          <!-- შესული მომხმარებელი -->
-          <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-        👤 {{ \Illuminate\Support\Str::limit(auth()->user()->nickname, 10, '...') }}
-    </a>
-    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-        <li class="dropdown-item">
-            <i class="bi bi-person-fill"></i> Nickname: {{ auth()->user()->name }}
-        </li>
-        <li class="dropdown-item">
-            <i class="bi bi-calendar-day"></i> Days since registration: {{ now()->diffInDays(auth()->user()->created_at) }}
-        </li>
-        <li class="dropdown-item">
-            <i class="bi bi-flag-fill"></i> Levels passed: {{ auth()->user()->level - 1 }}
-        </li>
-        <li class="dropdown-item">
-            <i class="bi bi-star-fill"></i> XP: {{ auth()->user()->xp }}
-        </li>
-        <li class="dropdown-item">
-            <i class="bi bi-lightbulb-fill"></i> Hints: {{ auth()->user()->hints }}
-        </li>
-    </ul>
-</li>
+          <!-- Hints counter -->
+          <li class="nav-item d-flex align-items-center me-1">
+              <span class="nav-link text-warning pe-none" style="font-size:0.85rem;cursor:default;" title="Hints დარჩენილი">
+                  💡 {{ $myHints }}
+              </span>
+          </li>
+
+          <!-- Username → stats Swal -->
+          <li class="nav-item d-flex align-items-center">
+              <a class="nav-link text-white" href="#" onclick="showPlayerStats(event)">
+                  👤 {{ \Illuminate\Support\Str::limit(auth()->user()->nickname, 10, '...') }}
+              </a>
+          </li>
 
 
           <!-- Levels Dropdown -->
@@ -166,6 +167,29 @@
     </div>
   </div>
 </nav>
+<script>
+function showPlayerStats(e) {
+    e.preventDefault();
+    Swal.fire({
+        title: '📊 შენი სტატისტიკა',
+        html: `
+            <div style="text-align:left;line-height:2.2;font-size:0.92rem;">
+                <div>👥 სულ მოთამაშე: <b>{{ $totalPlayers }}</b></div>
+                <hr style="margin:6px 0;border-color:#eee;">
+                <div>🔼 ჩემზე წინ: <b>{{ $aheadCount }}</b></div>
+                <div>🟡 ჩემს ტურში: <b>{{ $sameCount }}</b></div>
+                <div>🔽 ჩემზე დაბლა: <b>{{ $belowCount }}</b></div>
+                <hr style="margin:6px 0;border-color:#eee;">
+                <div>💡 დარჩენილი hints: <b>{{ $myHints }}</b></div>
+                <div>🏁 გავლილი ლეველი: <b>{{ auth()->user()->level - 1 }}</b></div>
+            </div>
+        `,
+        confirmButtonText: 'დახურვა',
+        confirmButtonColor: '#111',
+        width: 320,
+    });
+}
+</script>
 <script>
     document.addEventListener('submit', e => {
     const form = e.target.closest('form[data-loader]');
