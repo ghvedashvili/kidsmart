@@ -33,8 +33,12 @@ class GoogleController extends Controller
             ]
         );
 
-        Auth::login($user, true); // ავტორიზაცია
+        Auth::login($user, true);
 
-        return redirect()->intended(RouteServiceProvider::HOME); // Breeze-ის default home
+        if ($user->level > 1) {
+            return redirect()->route('levels.show', $user->level);
+        }
+
+        return redirect()->intended(RouteServiceProvider::HOME);
     }
 }
