@@ -13,13 +13,6 @@ private function getRules(string $nickname): array
     $numbers = [];
     preg_match_all('/\d/', $nickname, $numbers);
 
-    // საქართველოს დრო
-    $now = new \DateTime('now', new \DateTimeZone('Asia/Tbilisi'));
-
-    // დღე და თვე
-    $dayKey = ["SUN","MON","TUE","WED","THU","FRI","SAT"][$now->format('w')];
-    $monthIndex = (int)$now->format('n') - 1;
-
     $days = [
         "SUN" => ["SUNDAY", "კვირა", "კვი"],
         "MON" => ["MONDAY", "ორშაბათი", "ორშ"],
@@ -29,8 +22,6 @@ private function getRules(string $nickname): array
         "FRI" => ["FRIDAY", "პარასკევი", "პარ"],
         "SAT" => ["SATURDAY", "შაბათი", "შაბ"]
     ];
-    $todayNames = array_merge([$dayKey], $days[$dayKey]);
-
     $months = [
         ["january","jan","იანვარი","იან"],
         ["february","feb","თებერვალი","თებ"],
@@ -45,28 +36,36 @@ private function getRules(string $nickname): array
         ["november","nov","ნოემბერი","ნოე"],
         ["december","dec","დეკემბერი","დეკ"]
     ];
-    $currentMonthNames = $months[$monthIndex];
-
-    $compounds = ["H2O","NaCl"];
-    $countryCodes = ["AR","AZ","GE","RU"];
+    $nuclearCodes = ["US","RU","GB","FR","CN","IN","PK","KP","IL"];
     $primes = ["11","13","17","19","23","29","31","37","41","43","47","53","59","61","67","71","73","79","83","89","97"];
 
     return [
         
         
          ['id'=>1,'text'=>'Nickname უნდა შეიცავდეს მინიმუმ 5 სიმბოლოს','passed'=>mb_strlen($nickname)>=5],
+          ['id'=>27,'text'=>'ყველა ლათინური სიმბოლო გამოყენებული უნდა იყოს მხოლოდ ერთხელ','passed'=>(function() use($nickname){
+            $letters = strtolower(preg_replace('/[^a-zA-Z]/', '', $nickname));
+            return $letters === '' || strlen($letters) === count(array_unique(str_split($letters)));
+        })()],
         ['id'=>2,'text'=>'Nickname უნდა შეიცავდეს ციფრს','passed'=>preg_match('/\d/',$nickname)],
         ['id'=>3,'text'=>'Nickname უნდა შეიცავდეს დიდ ასოს','passed'=>preg_match('/[A-Z]/',$nickname)],
         ['id'=>4,'text'=>'Nickname უნდა შეიცავდეს სპეციალურ სიმბოლოს','passed'=>preg_match('/[!@#$%^&*()_\-+=\[\]{};:"\\|,.<>\/?]/',$nickname)],
         ['id'=>5,'text'=>'Nickname-ში ციფრების ჯამი უნდა იყოს 15','passed'=>array_sum(array_map('intval',$numbers[0]??[]))===15],
-        ['id'=>6,'text'=>'Nickname უნდა შეიცავდეს მიმდინარე კვირის დღეს','passed'=>collect($todayNames)->contains(fn($day)=>str_contains($nicknameUpper,strtoupper($day)))],
+        ['id'=>6,'text'=>'Nickname უნდა შეიცავდეს კვირის რომელიმე დღეს და რომელიმე თვეს','passed'=>(function() use($nickname,$nicknameUpper,$days,$months){
+            $allDays = array_merge(...array_values($days));
+            $allDays = array_merge(array_keys($days), $allDays);
+            $allMonths = array_merge(...$months);
+            $hasDay   = collect($allDays)->contains(fn($d)=>str_contains($nicknameUpper, strtoupper($d)));
+            $hasMonth = collect($allMonths)->contains(fn($m)=>str_contains(strtolower($nickname), strtolower($m)));
+            return $hasDay && $hasMonth;
+        })()],
         ['id'=>7,'text'=>'Nickname უნდა შეიცავდეს ჭადრაკის ნოტაციას','passed'=>preg_match('/([a-h][1-8]|[nbrqk][a-h][1-8])/i',$nickname)],
        
          ['id'=>9,'text'=>'Nickname უნდა შეიცავდეს ემოჯის','passed'=>preg_match('/[\x{1F300}-\x{1F9FF}]/u',$nickname)],
-        ['id'=>10,'text'=>'Nickname უნდა შეიცავდეს საქართველოს ან მისი მეზობელი ქვეყნის ISO კოდს','passed'=>collect($countryCodes)->contains(fn($c)=>str_contains($nicknameUpper,$c))],
+        ['id'=>10,'text'=>'Nickname უნდა შეიცავდეს რომელიმე ბირთვული სახელმწიფოს ISO კოდს','passed'=>collect($nuclearCodes)->contains(fn($c)=>str_contains($nicknameUpper,$c))],
         ['id'=>11,'text'=>'Nickname უნდა შეიცავდეს რომაულ ციფრს (მინიმუმ 3 სიმბოლო)','passed'=>preg_match('/[IVXLCDM]{3,}/i',$nickname)],
          ['id'=>12,'text'=>'Nickname-ის სიგრძე უნდა იყოს მაქსიმუმ 35 სიმბოლო','passed'=>mb_strlen($nickname)<=35],
-          ['id'=>8,'text'=>'Nickname უნდა შეიცავდეს მიმდინარე თვეს','passed'=>collect($currentMonthNames)->contains(fn($m)=>str_contains(strtolower($nickname),strtolower($m)))],
+       
         ['id'=>13,'text'=>'ყოველი მე-4 ასო უნდა იყოს დიდი','passed'=>function() use($nickname){
             $letters = preg_replace('/[^a-zA-Z]/','',$nickname);
             if(strlen($letters)<4) return false;
@@ -88,12 +87,15 @@ private function getRules(string $nickname): array
             (strtoupper($matches[2]) === 'F')
         )
 ],
-        ['id'=>19,'text'=>'Nickname უნდა შეიცავდეს 💧-ს ან 🧂-ს ქიმიური ნაერთის კოდს','passed'=>collect($compounds)->contains(fn($c)=>str_contains(strtoupper($nickname),strtoupper($c)))],
+        ['id'=>19,'text'=>'Nickname უნდა შეიცავდეს ძვირფასი ლითონის ქიმიურ სიმბოლოს','passed'=>(function() use($nickname){
+            $precious = ['Au','Ag','Pt','Pd','Rh','Ir','Ru','Os','Re'];
+            return collect($precious)->contains(fn($s)=>str_contains($nickname,$s));
+        })()],
         ['id'=>20,'text'=>'Nickname უნდა შეიცავდეს საქართველოს ავტომობილების სტანდარტულ სარეგისტრაციო ნომერს','passed'=>preg_match('/[A-Z]{2}-\d{3}-[A-Z]{2}/',$nicknameUpper)],
         ['id'=>21,'text'=>'Nickname-ში არ უნდა იყოს "41"','passed'=>!str_contains($nickname,'41')],
         ['id'=>22,'text'=>'Nickname უნდა შეიცავდეს მარტივ 2 ნიშნა რიცხვს','passed'=>collect($primes)->contains(fn($p)=>str_contains($nickname,$p))],
         ['id'=>23,'text'=>'Nickname უნდა შეიცავდეს ციფრულ დროს (12:34, 23:59)','passed'=>preg_match('/([01]?[0-9]|2[0-3]):[0-5][0-9]/',$nickname)],
-        ['id'=>24,'text'=>'Nickname-ში აკრძალულია კოდი RU (რუსეთი ოკუპანტია)','passed'=>!str_contains($nicknameUpper,'RU')],
+        ['id'=>24,'text'=>'Nickname-ში აკრძალულია კოდი RU (გასაგები მიზეზების გამო)','passed'=>!str_contains($nicknameUpper,'RU')],
         ['id'=>25,'text'=>'Nickname კენტი და ლუწი ციფრები უნდა იყოს თანაბარი რაოდენობის','passed'=>function() use($nickname){
             $numbers = preg_match_all('/\d/',$nickname,$matches) ? $matches[0] : [];
             $even = count(array_filter($numbers, fn($n)=>intval($n)%2===0));
@@ -106,7 +108,7 @@ private function getRules(string $nickname): array
             $product = array_product(array_map('intval',$numbers));
             return $product > 0;
         }],
-        ['id'=>999,'text'=>'აკრიფე ეს ქაფთჩა: "AIIM1"','passed'=>str_contains($nickname,'AIIM1')]
+        ['id'=>999,'text'=>'ნიკნეიმი უნდა შეიცავდეს ქაფთჩას: "cdm1S"','passed'=>str_contains($nickname,'cdm1S')]
     ];
 }
 

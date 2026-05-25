@@ -43,6 +43,46 @@
     flex-wrap: wrap;
   }
 
+  .nickname-wrap {
+    position: relative;
+    margin-top: 0.5rem;
+    background: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  }
+  .nickname-wrap:focus-within {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25);
+  }
+  .nickname-highlight {
+    position: absolute;
+    inset: 0;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-family: inherit;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow: hidden;
+    pointer-events: none;
+    background: transparent;
+    z-index: 1;
+    box-sizing: border-box;
+  }
+  #nicknameInput {
+    position: relative;
+    z-index: 2;
+    color: transparent !important;
+    caret-color: #212529;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    resize: vertical;
+    width: 100%;
+  }
+
   .captcha-letter {
     font-size: 1.3em;
     font-weight: bold;
@@ -64,7 +104,10 @@
       <div class=" p-3 mb-3 rules-card">
         <h2 class="h5 mb-3 text-center">შეიყვანე შენი nickname</h2>
 
-        <textarea id="nicknameInput" class="form-control mt-2" rows="3" placeholder="შეიყვანეთ Nickname"></textarea>
+        <div class="nickname-wrap mt-2">
+          <div id="nicknameHighlight" class="nickname-highlight" aria-hidden="true"></div>
+          <textarea id="nicknameInput" class="form-control" rows="3" placeholder="შეიყვანეთ Nickname"></textarea>
+        </div>
         <div id="charCounter" class="text-muted mt-1" style="display:none;">0/35</div>
         <div id="rulesContainer" class="rules-scroll"></div>
       </div>
@@ -74,9 +117,34 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-const nicknameInput = document.getElementById('nicknameInput');
-const rulesContainer = document.getElementById('rulesContainer');
-const charCounter = document.getElementById('charCounter');
+const nicknameInput   = document.getElementById('nicknameInput');
+const nicknameHighlight = document.getElementById('nicknameHighlight');
+const rulesContainer  = document.getElementById('rulesContainer');
+const charCounter     = document.getElementById('charCounter');
+
+function updateHighlight(text) {
+    const counts = {};
+    [...text].forEach(c => {
+        if (/[a-zA-Z]/.test(c)) counts[c.toLowerCase()] = (counts[c.toLowerCase()] || 0) + 1;
+    });
+    const dups = new Set(Object.keys(counts).filter(l => counts[l] > 1));
+
+    const html = [...text].map(c => {
+        if (c === '\n') return '\n';
+        const safe = c.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        if (/[a-zA-Z]/.test(c) && dups.has(c.toLowerCase())) {
+            return `<span style="color:#e74c3c;font-weight:700;">${safe}</span>`;
+        }
+        return `<span style="color:#212529;">${safe}</span>`;
+    }).join('');
+
+    nicknameHighlight.innerHTML = html + ' ';
+    nicknameHighlight.scrollTop = nicknameInput.scrollTop;
+}
+
+nicknameInput.addEventListener('scroll', () => {
+    nicknameHighlight.scrollTop = nicknameInput.scrollTop;
+});
 
 let allRules = [];
 let activeRuleIds = [];
@@ -269,6 +337,7 @@ function stripGeorgian() {
 
 nicknameInput.addEventListener('input', async ()=>{
   stripGeorgian();
+  updateHighlight(nicknameInput.value);
   await fetchRules();
   checkRules();
   const len = nicknameInput.value.length;
