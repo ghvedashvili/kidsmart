@@ -1,6 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
+@guest
+<style>
+    nav.fixed-top { display: none !important; }
+    body { padding-top: 0 !important; }
+</style>
+@endguest
 @auth
 
 @if(auth()->user()->level == 1)
