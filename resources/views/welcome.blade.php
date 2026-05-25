@@ -96,10 +96,10 @@
         <p class="onboard-text">
             გვიხარია, რომ შემოგვიერთდი.<br>
             თამაშის დასაწყებად აუცილებელი პირობაა რომ <br>
-            საკუთარი <strong>nickname</strong> შექმნათ.
+            საკუთარი <strong>nickname</strong> შექმნა.
         </p>
         <a href="{{ route('levels.show', 1) }}" class="onboard-btn" data-loader data-loader-text="Loading...">
-            ნიქნეიმის შექმნა →
+            nickname-ის შექმნა →
         </a>
     </div>
 </div>
