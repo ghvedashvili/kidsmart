@@ -431,11 +431,24 @@ function toggleStepper() {
 }
 
 function toggleMobileNav(btn, forceClose = false) {
-    const nav = document.getElementById('mobileNav');
-    const isOpen = nav.classList.contains('open');
-    if (forceClose) { nav.classList.remove('open'); return; }
-    nav.classList.toggle('open', !isOpen);
-    if (btn) btn.textContent = (!isOpen) ? '✕' : '☰';
+    const mobileNav = document.getElementById('mobileNav');
+    const navEl     = document.querySelector('nav');
+    const isOpen    = mobileNav.classList.contains('open');
+
+    if (forceClose) {
+        mobileNav.classList.remove('open');
+        if (btn) btn.textContent = '☰';
+    } else {
+        mobileNav.classList.toggle('open', !isOpen);
+        if (btn) btn.textContent = (!isOpen) ? '✕' : '☰';
+    }
+
+    document.body.style.transition = 'padding-top 0.3s ease';
+    requestAnimationFrame(() => {
+        const h = navEl.offsetHeight + 'px';
+        document.body.style.paddingTop = h;
+        document.documentElement.style.setProperty('--nav-h', h);
+    });
 }
 
 // stepper panel დაიხუროს გარე კლიქზე
