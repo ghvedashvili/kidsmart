@@ -277,7 +277,10 @@
     color: #fff;
   }
 
-  /* Print — მხოლოდ პასუხი */
+  #fo-answer-box {
+    display: none;
+  }
+
   @media print {
     html, body {
       background: #fff !important;
@@ -369,30 +372,11 @@
     if (e.target === foOverlay) foOverlay.classList.remove('active');
   }, { passive: false });
 
-  // ——— Print logic ———
-  function decodePrintAnswer() {
+  // ——— Print logic: decode on load, CSS handles visibility ———
+  (function() {
     const box = document.getElementById('fo-answer-box');
-    if (!box || box.textContent !== '') return;
-    box.textContent = '✅ ' + atob(box.dataset.a);
-  }
-
-  window.onbeforeprint = decodePrintAnswer;
-
-  if (window.matchMedia) {
-    window.matchMedia('print').addListener(function(e) {
-      if (e.matches) {
-        decodePrintAnswer();
-      } else {
-        const box = document.getElementById('fo-answer-box');
-        if (box) box.textContent = '';
-      }
-    });
-  }
-
-  window.onafterprint = function() {
-    const box = document.getElementById('fo-answer-box');
-    if (box) box.textContent = '';
-  };
+    if (box && box.dataset.a) box.textContent = '✅ ' + atob(box.dataset.a);
+  })();
 
   // ——— Answer form submit ———
 //   document.getElementById('fo-answerForm').addEventListener('submit', async function(e) {
