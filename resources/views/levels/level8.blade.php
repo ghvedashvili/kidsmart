@@ -26,9 +26,15 @@
 }
 
     .phone-wrapper {
-       display: flex;
-    flex-direction: column;
-    align-items: center;
+        position: fixed;
+        top: var(--nav-h, 56px);
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
     }
 
     .container {
