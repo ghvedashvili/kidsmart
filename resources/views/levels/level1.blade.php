@@ -63,7 +63,7 @@
     font-family: inherit;
     line-height: 1.5;
     white-space: pre-wrap;
-    word-break: break-word;
+    word-break: break-all;
     overflow: hidden;
     pointer-events: none;
     background: transparent;
@@ -74,13 +74,16 @@
     position: relative;
     z-index: 2;
     color: transparent !important;
-    caret-color: #212529;
+    caret-color: #0d6efd;
+    caret-width: 2px;
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
     outline: none !important;
     resize: vertical;
     width: 100%;
+    word-break: break-all;
+    overflow-wrap: anywhere;
   }
 
   .captcha-letter {
