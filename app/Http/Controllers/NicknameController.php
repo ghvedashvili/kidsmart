@@ -98,13 +98,12 @@ private function getRules(string $nickname): array
             $odd  = count(array_filter($numbers, fn($n)=>intval($n)%2!==0));
             return $even === $odd;
         }],
-        ['id'=>28,'text'=>'Nickname უნდა შეიცავდეს ლათინური სიმბოლობით შემდგარ პოკერის "სტრიტ"-ს კომბინაციას —  (მაგ. abcde ან edcba)','passed'=>(function() use($nickname){
-            $lower = strtolower($nickname);
-            $alpha = 'abcdefghijklmnopqrstuvwxyz';
-            for($i=0;$i<=21;$i++){
-                $fwd = substr($alpha,$i,5);
-                if(str_contains($lower,$fwd)) return true;
-                if(str_contains($lower,strrev($fwd))) return true;
+        ['id'=>28,'text'=>'Nickname უნდა შეიცავდეს პოკერის სტრიტის ნოტაციას','passed'=>(function() use($nickname){
+            $upper = strtoupper($nickname);
+            $straights = ['A2345','23456','34567','45678','56789','6789T','789TJ','89TJQ','9TJQK','TJQKA'];
+            foreach($straights as $s){
+                if(str_contains($upper,$s)) return true;
+                if(str_contains($upper,strrev($s))) return true;
             }
             return false;
         })()],
