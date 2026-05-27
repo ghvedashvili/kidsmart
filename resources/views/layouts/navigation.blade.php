@@ -135,11 +135,11 @@
 
 /* ── dot player count label ── */
 .stepper-count {
-    font-size: 9px;
+    font-size: 15px;
     color: #666;
     white-space: nowrap;
-    pointer-events: none;
     line-height: 1;
+    cursor: default;
 }
 
 .stepper-line {
@@ -321,7 +321,7 @@
                        class="stepper-dot {{ $isCompleted ? 'dot-done' : ($isCurrent ? 'dot-current' : 'dot-locked') }}">
                         @if($currentPageLevel === $lvl->level)<span class="dot-v"></span>@endif
                     </a>
-                    <span class="stepper-count">👥{{ $cnt }}</span>
+                    <span class="stepper-count" data-tip="ამ ლეველზე იმყოფება {{ $cnt }} მოთამაშე">👤{{ $cnt }}</span>
                 </div>
 
                 @if(!$isLast)
@@ -506,6 +506,47 @@ window.addEventListener('resize', () => {
     const panel = document.getElementById('stepperPanel');
     if (panel && panel.classList.contains('open')) { setupStepper(); scrollToCurrentLevel(true); }
 });
+
+// ── stepper count tooltip ──
+(function() {
+    const tip = document.createElement('div');
+    tip.style.cssText = 'position:fixed;background:#1a1a1a;color:#ccc;font-size:11px;padding:4px 10px;border-radius:5px;border:1px solid #333;pointer-events:none;opacity:0;transition:opacity .15s;z-index:99999;white-space:nowrap;';
+    document.body.appendChild(tip);
+
+    let hideTimer = null;
+
+    function show(el) {
+        if (!el.dataset.tip) return;
+        clearTimeout(hideTimer);
+        tip.textContent = el.dataset.tip;
+        const r = el.getBoundingClientRect();
+        tip.style.opacity = '1';
+        tip.style.left = (r.left + r.width / 2) + 'px';
+        tip.style.top  = (r.top - 34) + 'px';
+        tip.style.transform = 'translateX(-50%)';
+    }
+    function hide(delay = 0) {
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => { tip.style.opacity = '0'; }, delay);
+    }
+
+    // desktop hover
+    document.addEventListener('mouseover', e => {
+        const c = e.target.closest('.stepper-count');
+        if (c) show(c);
+    });
+    document.addEventListener('mouseout', e => {
+        if (e.target.closest('.stepper-count')) hide();
+    });
+
+    // mobile tap toggle
+    document.addEventListener('click', e => {
+        const c = e.target.closest('.stepper-count');
+        if (!c) return;
+        if (tip.style.opacity === '1') { hide(); }
+        else { show(c); hide(2400); }
+    });
+})();
 
 function toggleMobileNav(btn, forceClose = false) {
     const mobileNav = document.getElementById('mobileNav');
