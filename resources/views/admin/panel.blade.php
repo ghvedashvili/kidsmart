@@ -20,6 +20,7 @@
     .admin-table { font-size: 0.875rem; }
     .admin-table thead th { font-size: 0.75rem; letter-spacing: .04em; text-transform: uppercase; }
     .admin-table code { font-size: 0.8rem; word-break: break-all; }
+    .q-cell { max-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     /* ── mobile cards ── */
     .user-card {
@@ -89,6 +90,18 @@
         <i class="bi bi-shield-lock-fill text-danger me-2"></i>Admin Panel
         <span class="badge bg-secondary ms-2" style="font-size:0.7rem;">{{ $users->count() }} მოთამაშე</span>
     </h5>
+
+    <ul class="nav nav-tabs mb-3" id="adminTabs">
+        <li class="nav-item">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-users">მოთამაშეები</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-questions">კითხვები</button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+    <div class="tab-pane fade show active" id="tab-users">
 
     {{-- DESKTOP: table (md+) --}}
     <div class="d-none d-md-block admin-table-wrap">
@@ -173,6 +186,82 @@
         @endforeach
     </div>
 
+    </div>{{-- /tab-pane users --}}
+
+    {{-- ── QUESTIONS TAB ── --}}
+    <div class="tab-pane fade" id="tab-questions">
+        <div class="d-none d-md-block admin-table-wrap">
+            <table class="table table-hover align-middle mb-0 admin-table" style="font-size:0.8rem;">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-3" style="width:44px;">Lvl</th>
+                        <th style="width:80px;">Type</th>
+                        <th style="width:18%;">კითხვა</th>
+                        <th style="width:16%;">Rules</th>
+                        <th style="width:15%;">Success Msg</th>
+                        <th style="width:14%;">Answer</th>
+                        <th style="width:14%;">Hints</th>
+                        <th style="width:44px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($questions as $q)
+                    @php
+                        $answerPreview = is_array($q->answer) ? implode(', ', $q->answer) : ($q->answer ?? '—');
+                        $hintsPreview  = is_array($q->hints)  ? implode(', ', $q->hints)  : ($q->hints  ?? '—');
+                    @endphp
+                    <tr>
+                        <td class="ps-3"><span class="badge bg-primary">{{ $q->level }}</span></td>
+                        <td><span class="badge bg-secondary">{{ $q->type }}</span></td>
+                        <td class="q-cell">{{ \Illuminate\Support\Str::limit($q->question ?? '—', 60) }}</td>
+                        <td class="q-cell">{{ \Illuminate\Support\Str::limit($q->rules ?? '—', 50) }}</td>
+                        <td class="q-cell">{{ \Illuminate\Support\Str::limit($q->success_message ?? '—', 50) }}</td>
+                        <td class="q-cell"><code>{{ \Illuminate\Support\Str::limit($answerPreview, 40) }}</code></td>
+                        <td class="q-cell"><code>{{ \Illuminate\Support\Str::limit($hintsPreview, 40) }}</code></td>
+                        <td class="pe-2">
+                            <button class="btn btn-sm btn-outline-primary"
+                                    onclick="editQuestion({{ $q->id }}, {{ $q->level }}, '{{ addslashes($q->type) }}', {{ json_encode($q->question) }}, {{ json_encode($q->rules) }}, {{ json_encode($q->success_message) }}, {{ json_encode($q->answer) }}, {{ json_encode($q->hints) }})">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+        {{-- Mobile cards --}}
+        <div class="d-md-none">
+            @foreach($questions as $q)
+            @php
+                $answerPreview = is_array($q->answer) ? implode(', ', $q->answer) : ($q->answer ?? '—');
+                $hintsPreview  = is_array($q->hints)  ? implode(', ', $q->hints)  : ($q->hints  ?? '—');
+            @endphp
+            <div class="user-card" style="flex-direction:column;align-items:flex-start;gap:6px;">
+                <div style="display:flex;align-items:center;gap:10px;width:100%;">
+                    <div class="user-card-avatar" style="background:#e3f0ff;color:#0d6efd;font-size:0.85rem;font-weight:700;">{{ $q->level }}</div>
+                    <div style="flex:1;min-width:0;">
+                        <div class="user-card-name">Level {{ $q->level }} — <span class="badge bg-secondary" style="font-size:0.65rem;">{{ $q->type }}</span></div>
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary flex-shrink-0"
+                            onclick="editQuestion({{ $q->id }}, {{ $q->level }}, '{{ addslashes($q->type) }}', {{ json_encode($q->question) }}, {{ json_encode($q->rules) }}, {{ json_encode($q->success_message) }}, {{ json_encode($q->answer) }}, {{ json_encode($q->hints) }})">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                </div>
+                <table style="width:100%;font-size:0.72rem;border-collapse:collapse;">
+                    <tr><td style="color:#6c757d;width:90px;padding:1px 0;">კითხვა</td><td>{{ \Illuminate\Support\Str::limit($q->question ?? '—', 70) }}</td></tr>
+                    <tr><td style="color:#6c757d;padding:1px 0;">Rules</td><td>{{ \Illuminate\Support\Str::limit($q->rules ?? '—', 70) }}</td></tr>
+                    <tr><td style="color:#6c757d;padding:1px 0;">Success Msg</td><td>{{ \Illuminate\Support\Str::limit($q->success_message ?? '—', 70) }}</td></tr>
+                    <tr><td style="color:#6c757d;padding:1px 0;">Answer</td><td><code style="font-size:0.7rem;">{{ \Illuminate\Support\Str::limit($answerPreview, 60) }}</code></td></tr>
+                    <tr><td style="color:#6c757d;padding:1px 0;">Hints</td><td><code style="font-size:0.7rem;">{{ \Illuminate\Support\Str::limit($hintsPreview, 60) }}</code></td></tr>
+                </table>
+            </div>
+            @endforeach
+        </div>
+    </div>{{-- /tab-pane questions --}}
+
+    </div>{{-- /tab-content --}}
+
 </div>
 
 <script>
@@ -216,6 +305,102 @@ function changeLevel(userId, userName, currentLevel) {
             });
             Swal.fire({ icon: 'success', title: 'შეცვლილია!', text: `${userName} → ლეველი ${data.level}`, timer: 1600, showConfirmButton: false });
         });
+    });
+}
+
+function escHtml(s) {
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function editQuestion(id, level, type, question, rules, success_message, answer, hints) {
+    const answerStr = Array.isArray(answer) ? JSON.stringify(answer, null, 2) : (answer || '[]');
+    const hintsStr  = Array.isArray(hints)  ? JSON.stringify(hints,  null, 2) : (hints  || '[]');
+
+    Swal.fire({
+        title: 'კითხვის რედაქტირება',
+        width: Math.min(680, window.innerWidth - 32) + 'px',
+        html: `
+            <div style="text-align:left;font-size:0.85rem;">
+                <div class="row g-2 mb-2">
+                    <div class="col-4">
+                        <label class="form-label fw-semibold mb-1">Level</label>
+                        <input id="eq-level" type="number" min="1" class="form-control form-control-sm" value="${escHtml(level)}">
+                    </div>
+                    <div class="col-8">
+                        <label class="form-label fw-semibold mb-1">Type</label>
+                        <input id="eq-type" type="text" class="form-control form-control-sm" value="${escHtml(type)}">
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label fw-semibold mb-1">კითხვა</label>
+                    <textarea id="eq-question" class="form-control form-control-sm" rows="3">${escHtml(question)}</textarea>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label fw-semibold mb-1">Rules</label>
+                    <textarea id="eq-rules" class="form-control form-control-sm" rows="3">${escHtml(rules)}</textarea>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label fw-semibold mb-1">Success Message</label>
+                    <textarea id="eq-success" class="form-control form-control-sm" rows="2">${escHtml(success_message)}</textarea>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label fw-semibold mb-1">Answer <span class="text-muted fw-normal">(JSON)</span></label>
+                    <textarea id="eq-answer" class="form-control form-control-sm" rows="3" style="font-family:monospace;font-size:0.78rem;">${escHtml(answerStr)}</textarea>
+                </div>
+                <div class="mb-0">
+                    <label class="form-label fw-semibold mb-1">Hints <span class="text-muted fw-normal">(JSON)</span></label>
+                    <textarea id="eq-hints" class="form-control form-control-sm" rows="3" style="font-family:monospace;font-size:0.78rem;">${escHtml(hintsStr)}</textarea>
+                </div>
+            </div>`,
+        showCancelButton: true,
+        confirmButtonText: '✅ შენახვა',
+        cancelButtonText: 'გაუქმება',
+        confirmButtonColor: '#0d6efd',
+        focusConfirm: false,
+        preConfirm: () => {
+            const lvl = parseInt(document.getElementById('eq-level').value);
+            const typ = document.getElementById('eq-type').value.trim();
+            if (!lvl || lvl < 1) { Swal.showValidationMessage('Level უნდა იყოს 1 ან მეტი'); return false; }
+            if (!typ)            { Swal.showValidationMessage('Type ცარიელია');              return false; }
+            function toJsonArray(raw) {
+                raw = raw.trim();
+                if (!raw) return '[]';
+                if (raw.startsWith('[') || raw.startsWith('{')) {
+                    JSON.parse(raw); // throws if invalid
+                    return raw;
+                }
+                // comma-separated → JSON array
+                return JSON.stringify(raw.split(',').map(s => s.trim()).filter(s => s));
+            }
+            let ansRaw, hintsRaw;
+            try { ansRaw   = toJsonArray(document.getElementById('eq-answer').value); }
+            catch(e) { Swal.showValidationMessage('Answer — JSON ფორმატი არასწორია'); return false; }
+            try { hintsRaw = toJsonArray(document.getElementById('eq-hints').value); }
+            catch(e) { Swal.showValidationMessage('Hints — JSON ფორმატი არასწორია');  return false; }
+            return {
+                level:           lvl,
+                type:            typ,
+                question:        document.getElementById('eq-question').value,
+                rules:           document.getElementById('eq-rules').value,
+                success_message: document.getElementById('eq-success').value,
+                answer:          ansRaw,
+                hints:           hintsRaw,
+            };
+        }
+    }).then(result => {
+        if (!result.isConfirmed) return;
+        fetch(`/admin/questions/${id}`, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF },
+            body:    JSON.stringify(result.value),
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) { Swal.fire({ icon: 'error', title: 'შეცდომა', text: 'ვერ შეინახა' }); return; }
+            Swal.fire({ icon: 'success', title: 'შენახულია!', timer: 1400, showConfirmButton: false })
+                .then(() => location.reload());
+        })
+        .catch(() => Swal.fire({ icon: 'error', title: 'შეცდომა', text: 'სერვერთან კავშირი ვერ მოხერხდა' }));
     });
 }
 
