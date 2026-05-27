@@ -25,7 +25,8 @@ class GoogleController extends Controller
     public function redirectToGoogle()
     {
         if ($this->isInAppBrowser()) {
-            return view('auth.inapp-browser-warning');
+            $copyUrl = session('url.intended', config('app.url'));
+            return view('auth.inapp-browser-warning', compact('copyUrl'));
         }
 
         return Socialite::driver('google')->stateless()->redirect();

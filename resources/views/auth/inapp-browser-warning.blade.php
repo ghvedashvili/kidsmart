@@ -128,7 +128,7 @@
         </p>
 
         <div class="url-box" style="display:flex;align-items:center;gap:10px;justify-content:space-between;">
-            <span id="urlText" style="word-break:break-all;flex:1;user-select:all;">https://veravart.laravel.cloud/levels/4/complete?t={{ env('LEVEL4_TOKEN') }}</span>
+            <span id="urlText" style="word-break:break-all;flex:1;user-select:all;">{{ $copyUrl }}</span>
             <button onclick="copyUrl()" id="copyBtn" style="flex-shrink:0;background:#1e1e1e;border:1px solid #444;border-radius:4px;padding:4px 8px;cursor:pointer;font-size:0.85rem;color:#888;transition:all .15s;" title="კოპირება">📋</button>
         </div>
         <div id="copyToast" style="opacity:0;transition:opacity .2s;font-size:0.72rem;color:#2ecc71;margin-top:6px;margin-bottom:14px;letter-spacing:0.03em;">✓ დაკოპირდა</div>
