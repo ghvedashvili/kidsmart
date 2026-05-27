@@ -135,7 +135,7 @@
 
 /* ── dot player count label ── */
 .stepper-count {
-    font-size: 15px;
+    font-size: 12px;
     color: #666;
     white-space: nowrap;
     line-height: 1;
@@ -514,32 +514,51 @@ window.addEventListener('resize', () => {
     document.body.appendChild(tip);
 
     let hideTimer = null;
+    let touchFlag = false;
+
+    // touch-ზე mouse synthetic events-ი გამოვრთოთ
+    document.addEventListener('touchstart', () => {
+        touchFlag = true;
+        setTimeout(() => { touchFlag = false; }, 1000);
+    }, { passive: true });
 
     function show(el) {
         if (!el.dataset.tip) return;
         clearTimeout(hideTimer);
         tip.textContent = el.dataset.tip;
-        const r = el.getBoundingClientRect();
-        tip.style.opacity = '1';
-        tip.style.left = (r.left + r.width / 2) + 'px';
-        tip.style.top  = (r.top - 34) + 'px';
-        tip.style.transform = 'translateX(-50%)';
+        // off-screen-ზე გავაჩინოთ სიგანის გასაზომად
+        tip.style.left      = '-9999px';
+        tip.style.top       = '-9999px';
+        tip.style.transform = '';
+        tip.style.opacity   = '1';
+        requestAnimationFrame(() => {
+            const r    = el.getBoundingClientRect();
+            const tipW = tip.offsetWidth;
+            const pad  = 8;
+            let left = r.left + r.width / 2 - tipW / 2;
+            // viewport-ის საზღვრებში ვაclamp-ოთ
+            left = Math.max(pad, Math.min(window.innerWidth - tipW - pad, left));
+            tip.style.left = left + 'px';
+            tip.style.top  = (r.top - 34) + 'px';
+        });
     }
     function hide(delay = 0) {
         clearTimeout(hideTimer);
         hideTimer = setTimeout(() => { tip.style.opacity = '0'; }, delay);
     }
 
-    // desktop hover
+    // desktop hover — touch-ზე გამოირთება
     document.addEventListener('mouseover', e => {
+        if (touchFlag) return;
         const c = e.target.closest('.stepper-count');
         if (c) show(c);
     });
     document.addEventListener('mouseout', e => {
+        if (touchFlag) return;
         if (e.target.closest('.stepper-count')) hide();
     });
 
-    // mobile tap toggle
+    // mobile tap (touch synthetic click)
     document.addEventListener('click', e => {
         const c = e.target.closest('.stepper-count');
         if (!c) return;
