@@ -127,10 +127,11 @@
             შიდა ბრაუზერიდან.
         </p>
 
-        <div class="url-box" id="urlBox" onclick="copyUrl()" style="cursor:pointer;" title="დასაკოპირებლად დააჭირე">
-            {{ request()->fullUrl() }}
+        <div class="url-box" id="urlBox" onclick="copyUrl()" style="cursor:pointer;display:flex;align-items:center;gap:10px;justify-content:space-between;">
+            <span style="word-break:break-all;flex:1;">https://veravart.laravel.cloud/levels/4/complete?t={{ env('LEVEL4_TOKEN') }}</span>
+            <span id="copyIcon" style="flex-shrink:0;font-size:1rem;opacity:0.5;transition:opacity .15s;">📋</span>
         </div>
-        <p style="font-size:0.7rem;color:#444;margin-bottom:20px;">↑ დააჭირე დასაკოპირებლად</p>
+        <div id="copyToast" style="opacity:0;transition:opacity .2s;font-size:0.72rem;color:#2ecc71;margin-top:6px;margin-bottom:14px;letter-spacing:0.03em;">✓ დაკოპირდა</div>
 
         <div class="steps">
             <div class="step">
@@ -149,12 +150,26 @@
 
         <script>
         function copyUrl() {
-            const url = document.getElementById('urlBox').textContent.trim();
-            navigator.clipboard.writeText(url).then(() => {
-                const box = document.getElementById('urlBox');
+            const text = document.querySelector('#urlBox span').textContent.trim();
+            navigator.clipboard.writeText(text).then(() => {
+                const icon  = document.getElementById('copyIcon');
+                const toast = document.getElementById('copyToast');
+                const box   = document.getElementById('urlBox');
+
+                icon.textContent = '✓';
+                icon.style.opacity = '1';
+                icon.style.color = '#2ecc71';
                 box.style.borderColor = '#2ecc71';
-                box.style.color = '#2ecc71';
-                setTimeout(() => { box.style.borderColor = ''; box.style.color = ''; }, 1500);
+
+                toast.style.opacity = '1';
+
+                setTimeout(() => {
+                    icon.textContent = '📋';
+                    icon.style.opacity = '0.5';
+                    icon.style.color = '';
+                    box.style.borderColor = '';
+                    toast.style.opacity = '0';
+                }, 2000);
             });
         }
         </script>
