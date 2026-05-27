@@ -50,10 +50,15 @@ class GoogleController extends Controller
 
         Auth::login($user, true);
 
+        // intended URL პრიორიტეტულია (მაგ. ინსტაგრამიდან შემოსული ბმული)
+        if (session()->has('url.intended')) {
+            return redirect()->intended(RouteServiceProvider::HOME);
+        }
+
         if ($user->level > 1) {
             return redirect()->route('levels.show', $user->level);
         }
 
-        return redirect()->intended(RouteServiceProvider::HOME);
+        return redirect(RouteServiceProvider::HOME);
     }
 }

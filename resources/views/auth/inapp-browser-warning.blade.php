@@ -127,12 +127,15 @@
             შიდა ბრაუზერიდან.
         </p>
 
-        <div class="url-box">veravart.laravel.cloud</div>
+        <div class="url-box" id="urlBox" onclick="copyUrl()" style="cursor:pointer;" title="დასაკოპირებლად დააჭირე">
+            {{ request()->fullUrl() }}
+        </div>
+        <p style="font-size:0.7rem;color:#444;margin-bottom:20px;">↑ დააჭირე დასაკოპირებლად</p>
 
         <div class="steps">
             <div class="step">
                 <div class="step-num">1</div>
-                <span>დააკოპირე ზემოთ მოცემული მისამართი</span>
+                <span>დააჭირე ზემოთ მოცემულ ბმულს — დაკოპირდება</span>
             </div>
             <div class="step">
                 <div class="step-num">2</div>
@@ -140,9 +143,21 @@
             </div>
             <div class="step">
                 <div class="step-num">3</div>
-                <span>ჩასვი მისამართი და Enter დააჭირე</span>
+                <span>ჩასვი მისამართი და გახსენი</span>
             </div>
         </div>
+
+        <script>
+        function copyUrl() {
+            const url = document.getElementById('urlBox').textContent.trim();
+            navigator.clipboard.writeText(url).then(() => {
+                const box = document.getElementById('urlBox');
+                box.style.borderColor = '#2ecc71';
+                box.style.color = '#2ecc71';
+                setTimeout(() => { box.style.borderColor = ''; box.style.color = ''; }, 1500);
+            });
+        }
+        </script>
     </div>
 </body>
 </html>
