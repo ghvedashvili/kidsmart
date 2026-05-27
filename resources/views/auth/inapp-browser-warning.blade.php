@@ -127,9 +127,9 @@
             შიდა ბრაუზერიდან.
         </p>
 
-        <div class="url-box" id="urlBox" onclick="copyUrl()" style="cursor:pointer;display:flex;align-items:center;gap:10px;justify-content:space-between;">
-            <span style="word-break:break-all;flex:1;">https://veravart.laravel.cloud/levels/4/complete?t={{ env('LEVEL4_TOKEN') }}</span>
-            <span id="copyIcon" style="flex-shrink:0;font-size:1rem;opacity:0.5;transition:opacity .15s;">📋</span>
+        <div class="url-box" style="display:flex;align-items:center;gap:10px;justify-content:space-between;">
+            <span id="urlText" style="word-break:break-all;flex:1;user-select:all;">https://veravart.laravel.cloud/levels/4/complete?t={{ env('LEVEL4_TOKEN') }}</span>
+            <button onclick="copyUrl()" id="copyBtn" style="flex-shrink:0;background:#1e1e1e;border:1px solid #444;border-radius:4px;padding:4px 8px;cursor:pointer;font-size:0.85rem;color:#888;transition:all .15s;" title="კოპირება">📋</button>
         </div>
         <div id="copyToast" style="opacity:0;transition:opacity .2s;font-size:0.72rem;color:#2ecc71;margin-top:6px;margin-bottom:14px;letter-spacing:0.03em;">✓ დაკოპირდა</div>
 
@@ -150,27 +150,39 @@
 
         <script>
         function copyUrl() {
-            const text = document.querySelector('#urlBox span').textContent.trim();
-            navigator.clipboard.writeText(text).then(() => {
-                const icon  = document.getElementById('copyIcon');
-                const toast = document.getElementById('copyToast');
-                const box   = document.getElementById('urlBox');
+            const text = document.getElementById('urlText').textContent.trim();
+            const btn  = document.getElementById('copyBtn');
+            const toast = document.getElementById('copyToast');
 
-                icon.textContent = '✓';
-                icon.style.opacity = '1';
-                icon.style.color = '#2ecc71';
-                box.style.borderColor = '#2ecc71';
-
+            function onCopied() {
+                btn.textContent = '✓';
+                btn.style.borderColor = '#2ecc71';
+                btn.style.color = '#2ecc71';
                 toast.style.opacity = '1';
-
                 setTimeout(() => {
-                    icon.textContent = '📋';
-                    icon.style.opacity = '0.5';
-                    icon.style.color = '';
-                    box.style.borderColor = '';
+                    btn.textContent = '📋';
+                    btn.style.borderColor = '';
+                    btn.style.color = '';
                     toast.style.opacity = '0';
                 }, 2000);
-            });
+            }
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(onCopied).catch(fallback);
+            } else {
+                fallback();
+            }
+
+            function fallback() {
+                // in-app browser fallback
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0;';
+                document.body.appendChild(ta);
+                ta.focus(); ta.select();
+                try { document.execCommand('copy'); onCopied(); } catch(e) {}
+                document.body.removeChild(ta);
+            }
         }
         </script>
     </div>
