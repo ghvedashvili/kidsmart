@@ -190,6 +190,11 @@
 
     {{-- ── QUESTIONS TAB ── --}}
     <div class="tab-pane fade" id="tab-questions">
+        <div class="mb-3">
+            <button class="btn btn-sm btn-success" onclick="addQuestion()">
+                <i class="bi bi-plus-lg me-1"></i>ახალი კითხვა
+            </button>
+        </div>
         <div class="d-none d-md-block admin-table-wrap">
             <table class="table table-hover align-middle mb-0 admin-table" style="font-size:0.8rem;">
                 <thead class="table-dark">
@@ -308,6 +313,94 @@ function changeLevel(userId, userName, currentLevel) {
     });
 }
 
+function addQuestion() {
+    Swal.fire({
+        title: 'ახალი კითხვა',
+        width: Math.min(680, window.innerWidth - 32) + 'px',
+        html: `
+            <div style="text-align:left;font-size:0.85rem;">
+                <div class="row g-2 mb-2">
+                    <div class="col-4">
+                        <label class="form-label fw-semibold mb-1">Level</label>
+                        <input id="eq-level" type="number" min="1" class="form-control form-control-sm" value="1">
+                    </div>
+                    <div class="col-8">
+                        <label class="form-label fw-semibold mb-1">Type</label>
+                        <select id="eq-type" class="form-select form-select-sm">
+                            <option value="question">question</option>
+                            <option value="action">action</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label fw-semibold mb-1">კითხვა</label>
+                    <textarea id="eq-question" class="form-control form-control-sm" rows="3"></textarea>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label fw-semibold mb-1">Rules</label>
+                    <textarea id="eq-rules" class="form-control form-control-sm" rows="3"></textarea>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label fw-semibold mb-1">Success Message</label>
+                    <textarea id="eq-success" class="form-control form-control-sm" rows="2"></textarea>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label fw-semibold mb-1">Answer <span class="text-muted fw-normal">(JSON ან მძიმით)</span></label>
+                    <textarea id="eq-answer" class="form-control form-control-sm" rows="3" style="font-family:monospace;font-size:0.78rem;"></textarea>
+                </div>
+                <div class="mb-0">
+                    <label class="form-label fw-semibold mb-1">Hints <span class="text-muted fw-normal">(JSON ან მძიმით)</span></label>
+                    <textarea id="eq-hints" class="form-control form-control-sm" rows="3" style="font-family:monospace;font-size:0.78rem;"></textarea>
+                </div>
+            </div>`,
+        showCancelButton: true,
+        confirmButtonText: '✅ დამატება',
+        cancelButtonText: 'გაუქმება',
+        confirmButtonColor: '#198754',
+        focusConfirm: false,
+        preConfirm: () => {
+            const lvl = parseInt(document.getElementById('eq-level').value);
+            const typ = document.getElementById('eq-type').value.trim();
+            if (!lvl || lvl < 1) { Swal.showValidationMessage('Level უნდა იყოს 1 ან მეტი'); return false; }
+            if (!typ)            { Swal.showValidationMessage('Type ცარიელია');              return false; }
+            function toJsonArray(raw) {
+                raw = raw.trim();
+                if (!raw) return '[]';
+                if (raw.startsWith('[') || raw.startsWith('{')) { JSON.parse(raw); return raw; }
+                return JSON.stringify(raw.split(',').map(s => s.trim()).filter(s => s));
+            }
+            let ansRaw, hintsRaw;
+            try { ansRaw   = toJsonArray(document.getElementById('eq-answer').value); }
+            catch(e) { Swal.showValidationMessage('Answer — JSON ფორმატი არასწორია'); return false; }
+            try { hintsRaw = toJsonArray(document.getElementById('eq-hints').value); }
+            catch(e) { Swal.showValidationMessage('Hints — JSON ფორმატი არასწორია');  return false; }
+            return {
+                level:           lvl,
+                type:            typ,
+                question:        document.getElementById('eq-question').value,
+                rules:           document.getElementById('eq-rules').value,
+                success_message: document.getElementById('eq-success').value,
+                answer:          ansRaw,
+                hints:           hintsRaw,
+            };
+        }
+    }).then(result => {
+        if (!result.isConfirmed) return;
+        fetch('/admin/questions', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF },
+            body:    JSON.stringify(result.value),
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) { Swal.fire({ icon: 'error', title: 'შეცდომა', text: 'ვერ დაემატა' }); return; }
+            Swal.fire({ icon: 'success', title: 'დაემატა!', timer: 1400, showConfirmButton: false })
+                .then(() => location.reload());
+        })
+        .catch(() => Swal.fire({ icon: 'error', title: 'შეცდომა', text: 'სერვერთან კავშირი ვერ მოხერხდა' }));
+    });
+}
+
 function escHtml(s) {
     return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
@@ -328,7 +421,10 @@ function editQuestion(id, level, type, question, rules, success_message, answer,
                     </div>
                     <div class="col-8">
                         <label class="form-label fw-semibold mb-1">Type</label>
-                        <input id="eq-type" type="text" class="form-control form-control-sm" value="${escHtml(type)}">
+                        <select id="eq-type" class="form-select form-select-sm">
+                            <option value="question" ${type === 'question' ? 'selected' : ''}>question</option>
+                            <option value="action"   ${type === 'action'   ? 'selected' : ''}>action</option>
+                        </select>
                     </div>
                 </div>
                 <div class="mb-2">

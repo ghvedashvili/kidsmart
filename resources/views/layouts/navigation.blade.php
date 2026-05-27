@@ -15,19 +15,11 @@
         $totalPlayers = User::count();
         $myHints      = auth()->user()->hints ?? 0;
 
-        // % of players at or above current level
-        $atOrAbove   = User::where('level', '>=', $myLevel)->count();
-        $topPercent  = $totalPlayers > 0 ? round($atOrAbove / $totalPlayers * 100) : 100;
-
         // count users at or above each level (1 query)
         $rawCounts = User::selectRaw('level, count(*) as cnt')->groupBy('level')->pluck('cnt', 'level')->toArray();
         $levelPlayerCounts = [];
         foreach ($levels as $lvl) {
-            $c = 0;
-            foreach ($rawCounts as $ul => $cnt) {
-                if ($ul >= $lvl->level) $c += $cnt;
-            }
-            $levelPlayerCounts[$lvl->level] = $c;
+            $levelPlayerCounts[$lvl->level] = $rawCounts[$lvl->level] ?? 0;
         }
     }
 @endphp
@@ -76,24 +68,35 @@
     width: 100%;
     background: #111;
     border-top: 1px solid #2a2a2a;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
     max-height: 0;
     transition: max-height 0.3s ease;
     display: flex;
     align-items: center;
-    padding: 0 24px;
+    cursor: grab;
 }
+.stepper-panel::-webkit-scrollbar { display: none; }
 .stepper-panel.open {
-    max-height: 52px;
-    height: 52px;
+    max-height: 62px;
+    height: 62px;
 }
 
 .stepper-track {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;
     gap: 0;
-    width: 100%;
+    padding: 6px 0;
+}
+
+.stepper-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
 }
 
 /* ── dots ── */
@@ -130,36 +133,21 @@
     background: #fff;
 }
 
-/* ── dot hover tooltip ── */
-.stepper-dot {
-    position: relative;
-}
-.stepper-dot::after {
-    content: attr(data-count) " 👥";
-    position: absolute;
-    bottom: calc(100% + 7px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: #1a1a1a;
-    color: #ccc;
-    font-size: 10px;
+/* ── dot player count label ── */
+.stepper-count {
+    font-size: 9px;
+    color: #666;
     white-space: nowrap;
-    padding: 3px 7px;
-    border-radius: 4px;
     pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.15s;
-}
-.stepper-dot:hover::after {
-    opacity: 1;
+    line-height: 1;
 }
 
 .stepper-line {
-    flex: 1;
+    flex: none;
+    width: 24px;
     height: 2px;
     background: #2a2a2a;
-    max-width: 32px;
-    min-width: 6px;
+    margin-top: 6px;
 }
 .line-done { background: #2ecc71; }
 
@@ -204,33 +192,6 @@
     cursor: default;
 }
 
-.nav-stat {
-    color: rgba(255,255,255,0.4);
-    font-size: 0.95rem;
-    padding: 4px 6px;
-    cursor: default;
-    letter-spacing: 0.02em;
-    position: relative;
-}
-.nav-stat::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    top: calc(100% + 7px);
-    right: 0;
-    background: #1a1a1a;
-    color: #ccc;
-    font-size: 11px;
-    white-space: nowrap;
-    padding: 5px 10px;
-    border-radius: 5px;
-    border: 1px solid #333;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.15s;
-    z-index: 9999;
-}
-.nav-stat:hover { color: rgba(255,255,255,0.75); }
-.nav-stat:hover::after { opacity: 1; }
 
 /* ── mobile toggler ── */
 .nav-toggler {
@@ -315,9 +276,6 @@
 
                 <span class="nav-hints">💡 {{ $myHints }}</span>
 
-                <span class="nav-stat"
-                      data-tooltip="ამ ლეველს {{ $topPercent }}%-მა შეძლო">🏆 top {{ $topPercent }}%</span>
-
                 @if(auth()->user()->isAdmin())
                 <a class="nav-link-item text-danger fw-bold" href="{{ route('admin.panel') }}">
                     <i class="bi bi-shield-lock-fill"></i> Admin
@@ -358,9 +316,13 @@
                     $cnt         = $levelPlayerCounts[$lvl->level] ?? 0;
                 @endphp
 
-                <a @if(!$isLocked) href="{{ route('levels.show', $lvl->level) }}" data-loader data-loader-text="Loading…" @else href="#" @endif
-                   class="stepper-dot {{ $isCompleted ? 'dot-done' : ($isCurrent ? 'dot-current' : 'dot-locked') }}"
-                   data-count="{{ $cnt }}">@if($currentPageLevel === $lvl->level)<span class="dot-v"></span>@endif</a>
+                <div class="stepper-item">
+                    <a @if(!$isLocked) href="{{ route('levels.show', $lvl->level) }}" data-loader data-loader-text="Loading…" @else href="#" @endif
+                       class="stepper-dot {{ $isCompleted ? 'dot-done' : ($isCurrent ? 'dot-current' : 'dot-locked') }}">
+                        @if($currentPageLevel === $lvl->level)<span class="dot-v"></span>@endif
+                    </a>
+                    <span class="stepper-count">👥{{ $cnt }}</span>
+                </div>
 
                 @if(!$isLast)
                     <div class="stepper-line {{ $isCompleted ? 'line-done' : '' }}"></div>
@@ -377,10 +339,6 @@
         <span class="nav-collapse-item" style="cursor:default;color:#666;padding-top:0;">
             💡 {{ $myHints }} hints
         </span>
-        <span class="nav-collapse-item" style="cursor:default;color:#666;padding-top:0;" title="ამ ლეველს {{ $topPercent }}%-მა შეძლო">
-            🏆 top {{ $topPercent }}%
-        </span>
-
         @if(auth()->user()->isAdmin())
         <a class="nav-collapse-item text-danger" href="{{ route('admin.panel') }}">
             <i class="bi bi-shield-lock-fill"></i> Admin Panel
@@ -421,7 +379,9 @@ function toggleStepper() {
             const h = nav.offsetHeight + 'px';
             document.body.style.paddingTop = h;
             document.documentElement.style.setProperty('--nav-h', h);
-            panel.style.overflow = 'visible';
+            panel.style.overflow = '';
+            setupStepper();
+            scrollToCurrentLevel(true);
         }, 310);
     } else {
         const h = (navH - panelH) + 'px';
@@ -429,6 +389,102 @@ function toggleStepper() {
         document.documentElement.style.setProperty('--nav-h', h);
     }
 }
+
+let _infScrollHandler = null;
+
+function setupStepper() {
+    const panel = document.getElementById('stepperPanel');
+    const track = panel && panel.querySelector('.stepper-track');
+    if (!panel || !track) return;
+
+    // clean up previous state
+    if (_infScrollHandler) { panel.removeEventListener('scroll', _infScrollHandler); _infScrollHandler = null; }
+    track.querySelectorAll('[data-clone],[data-spacer]').forEach(el => el.remove());
+    track.style.justifyContent = '';
+    track.style.width = '';
+    panel.style.overflowX = '';
+    panel.style.cursor = '';
+
+    const origItems       = Array.from(track.children);
+    const rawContentWidth = origItems.reduce((s, el) => s + el.offsetWidth, 0);
+    const panelWidth      = panel.offsetWidth;
+
+    if (rawContentWidth <= panelWidth) {
+        // ყველა ეტევა – ცენტრში, სქროლი გამორთულია
+        track.style.justifyContent = 'center';
+        track.style.width          = '100%';
+        panel.style.overflowX      = 'hidden';
+        panel.style.cursor         = 'default';
+        return;
+    }
+
+    // არ ეტევა – infinite carousel
+    // ბოლო ლეველის შემდეგ invisible spacer (=ხაზის სიგანე) → loop-junction-ზე თანაბარი მანძილი, ხაზი არ ჩანს
+    const spacer = document.createElement('div');
+    spacer.dataset.spacer = '1';
+    spacer.style.cssText  = 'flex:none;width:24px;';
+    track.appendChild(spacer);
+
+    const allItems     = Array.from(track.children);
+    const contentWidth = allItems.reduce((s, el) => s + el.offsetWidth, 0);
+
+    panel.style.overflowX = 'auto';
+    panel.style.cursor    = 'grab';
+
+    const cloneBefore = allItems.map(el => { const c = el.cloneNode(true); c.dataset.clone = 'b'; return c; });
+    const cloneAfter  = allItems.map(el => { const c = el.cloneNode(true); c.dataset.clone = 'a'; return c; });
+    cloneBefore.reverse().forEach(el => track.insertBefore(el, track.firstChild));
+    cloneAfter.forEach(el => track.appendChild(el));
+
+    // middle set-ზე დასეტვა (instant)
+    panel.scrollLeft = contentWidth;
+
+    _infScrollHandler = () => {
+        const s = panel.scrollLeft;
+        if (s < contentWidth * 0.5)  panel.scrollLeft = s + contentWidth;
+        else if (s > contentWidth * 1.5) panel.scrollLeft = s - contentWidth;
+    };
+    panel.addEventListener('scroll', _infScrollHandler, { passive: true });
+}
+
+function scrollToCurrentLevel(instant = false) {
+    const panel = document.getElementById('stepperPanel');
+    if (!panel || panel.style.overflowX === 'hidden') return;
+    const track = panel.querySelector('.stepper-track');
+    // target original (non-cloned) current item
+    const currentItem = Array.from(track.querySelectorAll('.stepper-item')).find(
+        el => !el.dataset.clone && el.querySelector('.dot-current')
+    );
+    if (!currentItem) return;
+    const panelRect = panel.getBoundingClientRect();
+    const itemRect  = currentItem.getBoundingClientRect();
+    const delta = (itemRect.left + itemRect.width / 2) - (panelRect.left + panelRect.width / 2);
+    panel.scrollBy({ left: delta, behavior: instant ? 'instant' : 'smooth' });
+}
+
+// drag-to-scroll (desktop)
+(function() {
+    const panel = document.getElementById('stepperPanel');
+    if (!panel) return;
+    let isDown = false, startX, scrollLeft;
+    panel.addEventListener('mousedown', e => {
+        if (panel.style.overflowX === 'hidden') return;
+        isDown = true; startX = e.pageX - panel.offsetLeft; scrollLeft = panel.scrollLeft;
+        panel.style.cursor = 'grabbing';
+    });
+    panel.addEventListener('mouseleave', () => { isDown = false; if (panel.style.overflowX !== 'hidden') panel.style.cursor = 'grab'; });
+    panel.addEventListener('mouseup',    () => { isDown = false; if (panel.style.overflowX !== 'hidden') panel.style.cursor = 'grab'; });
+    panel.addEventListener('mousemove', e => {
+        if (!isDown) return;
+        e.preventDefault();
+        panel.scrollLeft = scrollLeft - (e.pageX - panel.offsetLeft - startX) * 1.5;
+    });
+})();
+
+window.addEventListener('resize', () => {
+    const panel = document.getElementById('stepperPanel');
+    if (panel && panel.classList.contains('open')) { setupStepper(); scrollToCurrentLevel(true); }
+});
 
 function toggleMobileNav(btn, forceClose = false) {
     const mobileNav = document.getElementById('mobileNav');
