@@ -1,45 +1,116 @@
 @if($userLevel == $level)
 
 <style>
-    /*! normalize + Laravel error page utilities — identical to vendor minimal.blade.php */
-    html{line-height:1.15;-webkit-text-size-adjust:100%}body{margin:0}html{font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif;line-height:1.5}*,:after,:before{box-sizing:border-box;border:0 solid #e2e8f0}.bg-gray-100{background-color:#f7fafc}.border-gray-400{border-color:#cbd5e0}.border-r{border-right-width:1px}.flex{display:flex}.items-center{align-items:center}.items-top{align-items:flex-start}.justify-center{justify-content:center}.text-sm{font-size:.875rem}.text-lg{font-size:1.125rem}.mx-auto{margin-left:auto;margin-right:auto}.mt-2{margin-top:.5rem}.mt-4{margin-top:1rem}.ml-4{margin-left:1rem}.max-w-xl{max-width:36rem}.min-h-screen{min-height:100vh}.px-4{padding-left:1rem;padding-right:1rem}.pt-8{padding-top:2rem}.relative{position:relative}.text-center{text-align:center}.text-gray-400{color:#cbd5e0}.text-gray-500{color:#a0aec0}.text-xs{font-size:.75rem}.uppercase{text-transform:uppercase}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.tracking-wider{letter-spacing:.05em}@media(min-width:640px){.sm\:items-center{align-items:center}.sm\:justify-start{justify-content:flex-start}.sm\:pt-0{padding-top:0}.sm\:px-6{padding-left:1.5rem;padding-right:1.5rem}}@media(min-width:1024px){.lg\:px-8{padding-left:2rem;padding-right:2rem}}
-
     nav.navbar { display: none !important; }
 
-    html, body {
-        background-color: #f7fafc !important;
-        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
+    body {
         margin: 0;
         padding: 0 !important;
+        overflow: hidden;
+        background: #080808 !important;
+        height: 100dvh;
         height: 100vh;
     }
 
     body.dot-light::before { display: none; }
+
+    .level4-hero {
+        height: 100dvh;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .level4-hero::before {
+        content: '';
+        position: absolute;
+        inset: -100%;
+        background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
+        background-size: 28px 28px;
+        animation: gridMove 18s linear infinite;
+        pointer-events: none;
+    }
+
+    @keyframes gridMove {
+        0%   { transform: translate(0, 0); }
+        100% { transform: translate(28px, 28px); }
+    }
+
+    .level4-card {
+        position: relative;
+        z-index: 1;
+        max-width: 480px;
+        width: 100%;
+        padding: 0 24px;
+        font-family: 'Goldman', monospace;
+    }
+
+    .level4-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+        flex-wrap: nowrap;
+    }
+
+    .level4-code {
+        font-size: clamp(0.85rem, 3vw, 1.05rem);
+        color: #555;
+        letter-spacing: 0.08em;
+        padding-right: 20px;
+        border-right: 1px solid #2a2a2a;
+        white-space: nowrap;
+    }
+
+    .level4-info {
+        padding-left: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .level4-type {
+        font-size: clamp(0.72rem, 2.2vw, 0.88rem);
+        color: #4a4a4a;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    .level4-severity {
+        font-size: clamp(0.65rem, 2vw, 0.78rem);
+        color: #333;
+        letter-spacing: 0.05em;
+    }
+
+    .level4-severity span {
+        font-size: 1em;
+        opacity: 0.8;
+    }
+
+    .level4-initiator {
+        margin-top: 20px;
+        text-align: center;
+        font-size: clamp(0.65rem, 2vw, 0.75rem);
+        color: #333;
+        letter-spacing: 0.06em;
+    }
 </style>
 
-<div class="relative flex items-center justify-center min-h-screen bg-gray-100">
-    <div class="max-w-xl mx-auto px-6">
-        <div class="flex items-center justify-center" style="flex-wrap:nowrap;">
-
-            <div class="px-4 text-lg text-gray-500 border-r border-gray-400 tracking-wider" style="white-space:nowrap;">
-                ERROR 004
-            </div>
-
-            <div class="ml-4">
-                <div class="text-gray-500 uppercase tracking-wider" style="font-size:clamp(12px,2.5vw,1.125rem);">
-                    Type: user not recognized
-                </div>
-                <div class="text-sm text-gray-500 tracking-wider mt-2">
-                    Severity: not fol <span class="text-xs" style="opacity:.5;font-weight:400;">(low error)</span>
+<div class="level4-hero">
+    <div class="level4-card">
+        <div class="level4-row">
+            <div class="level4-code">ERROR 004</div>
+            <div class="level4-info">
+                <div class="level4-type">Type: user not recognized</div>
+                <div class="level4-severity">
+                    Severity: not fol <span>(low error)</span>
                 </div>
             </div>
-
         </div>
-        <div class="mt-4 text-sm text-gray-500 tracking-wider text-center">
-            iniciator: @veravart_game
-        </div>
+        <div class="level4-initiator">iniciator: @veravart_game</div>
     </div>
 </div>
 
