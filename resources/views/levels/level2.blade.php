@@ -112,6 +112,39 @@
     @keyframes shake { 0%,100%{transform:translateX(0);}10%,30%,50%,70%,90%{transform:translateX(-5px);}20%,40%,60%,80%{transform:translateX(5px);} }
     .shake { animation: shake 0.6s ease; border-color: var(--google-red) !important; }
 
+    /* ── scratch card ── */
+    .scratch-wrapper {
+        position: relative;
+        background-color: #f1f3f4;
+        border-radius: 4px;
+        border: 2px solid #dfe1e5;
+        min-height: 70px;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+    .scratch-reveal {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Courier New', monospace;
+        font-weight: 600;
+        font-size: 2rem;
+        letter-spacing: 0.6rem;
+        color: #202124;
+        user-select: none;
+        z-index: 1;
+    }
+    #scratchCanvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 2;
+        touch-action: none;
+    }
+
     .btn-verify.loading { position: relative; color: transparent; }
     .btn-verify.loading::after {
         content: ''; position: absolute; top: 50%; left: 50%; width: 20px; height: 20px; margin: -10px 0 0 -10px;
@@ -158,11 +191,14 @@
             </div>
         </div>
 
-        <!-- Step 2: Selection CAPTCHA (moved from step3) -->
+        <!-- Step 2: Scratch Card CAPTCHA -->
         <div class="captcha-challenge" id="step2">
             <div class="captcha-display-container">
-                 <span class="captcha-label text-center"><i class="bi bi-info-circle text-primary"> არ არსებობს დაფარული, რომ არ გამოჩნდეს, და არც რამ საიდუმლო რომ არ გამჟღავნდეს.</i></span>
-                <div class="captcha-display selectable" id="selectionDisplay">********</div>
+                <span class="captcha-label text-center"><i class="bi bi-info-circle text-primary"> არ არსებობს დაფარული, რომ არ გამოჩნდეს, და არც რამ საიდუმლო რომ არ გამჟღავნდეს.</i></span>
+                <div class="scratch-wrapper" id="scratchWrapper">
+                    <div class="scratch-reveal" id="scratchReveal"></div>
+                    <canvas id="scratchCanvas"></canvas>
+                </div>
             </div>
             <div class="captcha-input-container">
                 <input type="text" class="captcha-input" id="input2" placeholder="ჩაწერეთ captcha">
@@ -171,6 +207,7 @@
                 <button type="button" class="btn-verify" onclick="verify(2)">შემოწმება</button>
             </div>
         </div>
+
 
         <!-- Step 3: Georgian CAPTCHA (moved from step2) -->
         <div class="captcha-challenge" id="step3">
@@ -229,34 +266,93 @@ function updateProgress(step){
     }
 }
 
-const selectionDisplay = document.getElementById('selectionDisplay');
+// ── scratch card ──
 let revealed = false;
 
-function tryRevealSelection() {
-    if (revealed) return;
+function initScratch() {
+    const wrapper = document.getElementById('scratchWrapper');
+    const canvas  = document.getElementById('scratchCanvas');
+    const reveal  = document.getElementById('scratchReveal');
+    if (!wrapper || !canvas) return;
 
-    const sel = window.getSelection();
-    if (!sel || sel.isCollapsed) return;
+    reveal.textContent = selectionCaptcha;
 
-    const selectedText = sel.toString();
-    // მხოლოდ თუ მომხმარებელმა მინიმუმ 2 სიმბოლო მონიშნა (შეიძლება შეცვალოთ)
-    if (selectionDisplay.contains(sel.anchorNode) &&
-        selectionDisplay.contains(sel.focusNode) &&
-        selectedText.length >= 2) {
-        
-        revealed = true;
-        selectionDisplay.innerText = selectionCaptcha;
-        const input2 = document.getElementById('input2');
-        input2.focus();
-        input2.scrollIntoView({behavior: 'smooth', block: 'center'});
+    canvas.width  = wrapper.offsetWidth;
+    canvas.height = wrapper.offsetHeight;
+
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#dadce0';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    function getXY(e) {
+        const r  = canvas.getBoundingClientRect();
+        const src = e.touches ? e.touches[0] : e;
+        return {
+            x: (src.clientX - r.left) * canvas.width  / r.width,
+            y: (src.clientY - r.top)  * canvas.height / r.height
+        };
     }
+
+    function checkDone() {
+        if (revealed) return;
+        const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        let transparent = 0;
+        for (let i = 3; i < data.length; i += 4) { if (data[i] < 128) transparent++; }
+        if (transparent / (data.length / 4) > 0.50) {
+            revealed = true;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+    }
+
+    canvas.style.cursor = 'default';
+    ctx.lineJoin = 'round';
+    ctx.lineCap  = 'round';
+    ctx.lineWidth = 48;
+
+    let painting = false;
+    let firstPoint = true;
+
+    function startScratch(e) {
+        painting = true;
+        firstPoint = true;
+        const { x, y } = getXY(e);
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath();
+        ctx.arc(x, y, 24, 0, Math.PI * 2, true);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        firstPoint = false;
+        checkDone();
+    }
+
+    function moveScratch(e) {
+        if (!painting || firstPoint) return;
+        const { x, y } = getXY(e);
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        checkDone();
+    }
+
+    function stopScratch() {
+        if (!painting) return;
+        ctx.closePath();
+        painting = false;
+        firstPoint = true;
+    }
+
+    canvas.addEventListener('mousedown',  startScratch);
+    canvas.addEventListener('mousemove',  moveScratch);
+    canvas.addEventListener('mouseup',    stopScratch);
+    canvas.addEventListener('mouseleave', stopScratch);
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startScratch(e); }, { passive: false });
+    canvas.addEventListener('touchmove',  (e) => { e.preventDefault(); moveScratch(e);  }, { passive: false });
+    canvas.addEventListener('touchend',   (e) => { e.preventDefault(); stopScratch();   }, { passive: false });
 }
 
-// Desktop – mouse selection
-selectionDisplay.addEventListener('mouseup', () => setTimeout(tryRevealSelection, 50));
-
-// Mobile – touch selection
-selectionDisplay.addEventListener('touchend', () => setTimeout(tryRevealSelection, 50));
 
 
 function randomChar(){ const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'; return chars[Math.floor(Math.random()*chars.length)]; }
@@ -296,7 +392,7 @@ function verify(step){
                 allowOutsideClick:false, allowEscapeKey:false
             }).then(result=>{
                 document.querySelector('.captcha-challenge.active').classList.remove('active');
-                if(step<4){ document.getElementById('step'+(step+1)).classList.add('active'); document.getElementById('input'+(step+1)).value=''; setTimeout(()=>{document.getElementById('input'+(step+1)).focus();},100); }
+                if(step<4){ document.getElementById('step'+(step+1)).classList.add('active'); document.getElementById('input'+(step+1)).value=''; setTimeout(()=>{document.getElementById('input'+(step+1)).focus();},100); if(step===1) setTimeout(initScratch, 80); }
                 else{ if(res.newLevel){ window.location.href=`/levels/${res.newLevel}`; } else{ document.querySelector('.captcha-challenge.active')?.classList.remove('active'); document.getElementById('success').style.display='block'; } }
             });
         } else { showError(input,'არასწორი CAPTCHA. სცადეთ თავიდან.'); }
