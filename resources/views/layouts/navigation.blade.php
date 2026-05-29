@@ -209,25 +209,40 @@
 .nav-collapse {
     display: none;
     flex-direction: column;
+    align-items: center;
     width: 100%;
     background: #111;
     border-top: 1px solid #222;
-    padding: 8px 0;
+    padding: 20px 0 24px;
+    gap: 0;
 }
 .nav-collapse.open { display: flex; }
 
 .nav-collapse-item {
-    color: rgba(255,255,255,0.75);
+    font-family: 'Goldman', monospace;
+    color: rgba(255,255,255,0.65);
     text-decoration: none;
-    font-size: 1.1rem;
-    padding: 10px 20px;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    padding: 12px 24px;
+    width: 100%;
+    text-align: center;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    transition: background 0.15s;
+    transition: color 0.15s, background 0.15s;
 }
-.nav-collapse-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
-.nav-collapse-item.text-danger { color: #e74c3c; }
+.nav-collapse-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+.nav-collapse-item.text-danger { color: rgba(231,76,60,0.8); }
+.nav-collapse-item.text-danger:hover { color: #ff6b6b; background: rgba(231,76,60,0.08); }
+
+.nav-collapse-divider {
+    width: 40px;
+    height: 1px;
+    background: #2a2a2a;
+    margin: 8px 0;
+}
 
 .google-btn {
     display: flex;
@@ -251,16 +266,16 @@
 
         {{-- Left: brand --}}
         <div class="nav-left">
-            <a class="navbar-brand text-white mb-0" href="{{ url('/') }}" style="font-size:1rem;letter-spacing:.02em;">
-                GameVeravart
+            <a class="navbar-brand text-white mb-0" href="{{ url('/') }}" style="font-family:'Goldman',monospace;font-size:1.1rem;letter-spacing:0.1em;color:rgba(255,255,255,0.9)!important;">
+                VERAVART
             </a>
         </div>
 
         {{-- Center: Levels toggle (auth only) --}}
         <div class="nav-center">
             @auth
-            <button class="levels-toggle" id="levelsToggle" onclick="toggleStepper()">
-                Levels <span class="levels-caret">▾</span>
+            <button class="levels-toggle" id="levelsToggle" onclick="toggleStepper()" style="font-family:'Goldman',monospace;font-size:1.1rem;letter-spacing:0.1em;">
+                ლეველები <span class="levels-caret">▾</span>
             </button>
             @endauth
         </div>
@@ -271,21 +286,25 @@
             {{-- Desktop only --}}
             <div class="d-none d-md-flex align-items-center gap-1">
                 <span class="nav-nickname" title="{{ auth()->user()->nickname }}">
-                    👤 <span class="nick-short">{{ \Illuminate\Support\Str::limit(auth()->user()->nickname, 5, '…') }}</span><span class="nick-full">{{ auth()->user()->nickname }}</span>
+                    <i class="bi bi-person"></i>
+                    <span class="nick-short">{{ \Illuminate\Support\Str::limit(auth()->user()->nickname, 8, '…') }}</span>
+                    <span class="nick-full">{{ auth()->user()->nickname }}</span>
                 </span>
 
-                <span class="nav-hints">💡 {{ $myHints }}</span>
+                <span class="nav-hints" style="font-family:'Goldman',monospace;font-size:0.7rem;letter-spacing:0.05em;color:rgba(255,255,255,0.35);border-left:1px solid #333;padding-left:10px;margin-left:4px;">
+                    L{{ $myLevel }}
+                </span>
 
                 @if(auth()->user()->isAdmin())
                 <a class="nav-link-item text-danger fw-bold" href="{{ route('admin.panel') }}">
-                    <i class="bi bi-shield-lock-fill"></i> Admin
+                    <i class="bi bi-shield-lock-fill"></i>
                 </a>
                 @endif
 
-                <form method="POST" action="{{ route('logout') }}" data-loader data-loader-text="Signing out…" class="m-0">
+                <form method="POST" action="{{ route('logout') }}" data-loader data-loader-text="გასვლა…" class="m-0">
                     @csrf
-                    <button type="submit" class="nav-link-item text-danger" style="background:none;border:none;cursor:pointer;">
-                        Logout
+                    <button type="submit" class="nav-link-item" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.4);font-size:0.95rem;" title="გასვლა">
+                        <i class="bi bi-box-arrow-right"></i>
                     </button>
                 </form>
             </div>
@@ -295,9 +314,9 @@
                 ☰
             </button>
             @else
-            <a class="google-btn" href="{{ route('google.login') }}" data-loader data-loader-text="Signing in…">
+            <a class="google-btn" href="{{ route('google.login') }}" data-loader data-loader-text="შესვლა…" style="font-family:'Goldman',monospace;font-size:0.75rem;letter-spacing:0.06em;">
                 <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="G">
-                Login with Google
+                Google-ით შესვლა
             </a>
             @endauth
         </div>
@@ -333,22 +352,25 @@
 
     {{-- ── mobile collapse menu ── --}}
     <div class="nav-collapse d-md-none" id="mobileNav">
-        <span class="nav-collapse-item nav-nickname" style="color:#aaa;">
-            👤 <span class="nick-short">{{ \Illuminate\Support\Str::limit(auth()->user()->nickname, 5, '…') }}</span><span class="nick-full">{{ auth()->user()->nickname }}</span>
+        <span class="nav-collapse-item" style="cursor:default;color:rgba(255,255,255,0.55);font-size:0.8rem;padding-bottom:4px;">
+            <i class="bi bi-person"></i> {{ auth()->user()->nickname }}
         </span>
-        <span class="nav-collapse-item" style="cursor:default;color:#666;padding-top:0;">
-            💡 {{ $myHints }} hints
+        <span class="nav-collapse-item" style="cursor:default;color:rgba(255,255,255,0.3);font-size:0.7rem;padding-top:2px;padding-bottom:4px;">
+            {{ $myLevel }}-ე ტური
         </span>
+
+        <div class="nav-collapse-divider"></div>
+
         @if(auth()->user()->isAdmin())
-        <a class="nav-collapse-item text-danger" href="{{ route('admin.panel') }}">
-            <i class="bi bi-shield-lock-fill"></i> Admin Panel
+        <a class="nav-collapse-item text-danger" href="{{ route('admin.panel') }}" style="font-size:0.8rem;">
+            <i class="bi bi-shield-lock-fill"></i> ადმინი
         </a>
         @endif
 
-        <form method="POST" action="{{ route('logout') }}" data-loader data-loader-text="Signing out…" class="m-0">
+        <form method="POST" action="{{ route('logout') }}" data-loader data-loader-text="გასვლა…" class="m-0 w-100">
             @csrf
-            <button type="submit" class="nav-collapse-item text-danger w-100" style="background:none;border:none;text-align:left;cursor:pointer;">
-                Logout
+            <button type="submit" class="nav-collapse-item text-danger w-100" style="background:none;border:none;cursor:pointer;font-size:0.8rem;">
+                <i class="bi bi-box-arrow-right"></i> გასვლა
             </button>
         </form>
     </div>
