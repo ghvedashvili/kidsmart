@@ -15,6 +15,15 @@ class LevelController extends Controller
 {
     $user = Auth::user();
 
+    $maxLevel = Question::max('level') ?? 1;
+
+    if ($level > $maxLevel) {
+        return view('errors.level-not-found', [
+            'level'    => $level,
+            'maxLevel' => $maxLevel,
+        ]);
+    }
+
     if ($level > $user->level) {
         abort(403, 'This level is locked');
     }
