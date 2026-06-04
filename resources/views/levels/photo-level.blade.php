@@ -37,7 +37,7 @@
         padding: 10px 14px;
         border: 1px solid #ddd;
         border-radius: 4px;
-        font-size: 0.95rem;
+        font-size: 1rem;
         outline: none;
         transition: border-color 0.15s;
         background: #fff;
