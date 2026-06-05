@@ -342,7 +342,7 @@
         letter-spacing: 0.04em;
         line-height: 1.05;
         opacity: 0;
-        transition: opacity 0.6s ease;
+        transition: opacity 0.9s ease;
         white-space: nowrap;
         overflow: hidden;
         max-width: 98vw;
@@ -478,8 +478,8 @@ class TextScramble {
             const s = Array.isArray(syms) ? syms[i % syms.length] : syms;
             this.queue.push({
                 from: old[i] || '', to: text[i] || '',
-                start: now + i * 65 + Math.random() * 20,
-                end:   now + i * 65 + 540 + Math.random() * 180,
+                start: now + i * 90 + Math.random() * 25,
+                end:   now + i * 90 + 680 + Math.random() * 220,
                 syms: s, ch: '', t: 0
             });
         }
@@ -492,7 +492,7 @@ class TextScramble {
         for (const q of this.queue) {
             if (now >= q.end)        { done++; out += q.to; }
             else if (now >= q.start) {
-                if (!q.ch || now - q.t > 85) { q.ch = q.syms[Math.floor(Math.random()*q.syms.length)]; q.t = now; }
+                if (!q.ch || now - q.t > 110) { q.ch = q.syms[Math.floor(Math.random()*q.syms.length)]; q.t = now; }
                 out += `<span class="dud">${q.ch}</span>`;
             } else { out += q.from; }
         }
@@ -540,14 +540,14 @@ function animate() {
                 sVeravart.setText('veravart', symSets).then(() => {
                     return sGame.setText('game', subSyms);
                 }).then(() => {
-                    setTimeout(() => enterBtn.classList.add('visible'), 700);
+                    setTimeout(() => enterBtn.classList.add('visible'), 1000);
                 });
-            }, 500);
-        }, 1300);
+            }, 700);
+        }, 1800);
     });
 }
 
-setTimeout(animate, 700);
+setTimeout(animate, 900);
 </script>
 
 @endauth
