@@ -10,6 +10,8 @@
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+        html { background: #080808; }
+
         body {
             min-height: 100dvh;
             display: flex;
