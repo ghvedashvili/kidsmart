@@ -3,7 +3,6 @@
 @section('content')
 @guest
 <style>
-    nav.fixed-top { display: none !important; }
     body { padding-top: 0 !important; }
 </style>
 @endguest
@@ -281,8 +280,6 @@
 @php $googleUrl = route('google.login'); @endphp
 
 <style>
-    nav.navbar { display: none !important; }
-
     body {
         margin: 0;
         padding: 0 !important;
@@ -359,33 +356,6 @@
         min-height: 1.4em;
     }
 
-    .enter-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        padding: clamp(10px, 2vh, 14px) clamp(22px, 5vw, 36px);
-        color: #aaa;
-        font-family: 'Goldman', monospace;
-        font-size: clamp(0.75rem, 2.2vw, 0.9rem);
-        letter-spacing: 0.1em;
-        text-decoration: none;
-        border: 1px solid #333;
-        border-radius: 3px;
-        background: transparent;
-        transition: color 0.2s, border-color 0.2s, opacity 0.3s;
-        margin-top: clamp(4px, 1vh, 10px);
-        opacity: 0;
-        pointer-events: none;
-    }
-    .enter-btn.visible {
-        opacity: 1;
-        pointer-events: auto;
-    }
-    .enter-btn:hover {
-        color: #ddd;
-        border-color: #666;
-    }
-    .enter-btn img { width: 17px; opacity: 0.7; }
 </style>
 
 <style>
@@ -426,14 +396,6 @@
     <div class="hero-inner">
         <div class="title" id="titleEl"></div>
         <div class="subtitle" id="subtitleEl"></div>
-        <a href="{{ $googleUrl }}"
-           class="enter-btn"
-           id="enterBtn"
-           data-loader
-           data-loader-text="შესვლა...">
-            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="G">
-            <span id="btnTextEl"></span>
-        </a>
     </div>
 </div>
 
@@ -515,20 +477,13 @@
         '←↑→↓↔↕⇐⇑⇒⇓⇔➔➜➤➝',
     ];
 
-    const scrambler    = new TextScramble(document.getElementById('titleEl'));
-    const scrambler2   = new TextScramble(document.getElementById('subtitleEl'));
-    const scramblerBtn = new TextScramble(document.getElementById('btnTextEl'));
-    const subSyms      = '⠁⠂⠃♠♣♥♔♕•-±×ᚠᚢあいう←↑→'.split('');
-    const enterBtn     = document.getElementById('enterBtn');
+    const scrambler  = new TextScramble(document.getElementById('titleEl'));
+    const scrambler2 = new TextScramble(document.getElementById('subtitleEl'));
+    const subSyms    = '⠁⠂⠃♠♣♥♔♕•-±×ᚠᚢあいう←↑→'.split('');
 
     function animate() {
         scrambler2.setText('Ghvedashvili presents...', subSyms).then(() => {
-            setTimeout(() => scrambler.setText('VERAVART GAME', symSets).then(() => {
-                setTimeout(() => {
-                    enterBtn.classList.add('visible');
-                    scramblerBtn.setText('Sign in with Google', subSyms);
-                }, 2000);
-            }), 2000);
+            setTimeout(() => scrambler.setText('VERAVART GAME', symSets), 2000);
         });
     }
 

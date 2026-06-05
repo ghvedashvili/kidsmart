@@ -326,7 +326,7 @@
             @else
             <a class="google-btn" href="{{ route('google.login') }}" data-loader data-loader-text="შესვლა…" style="font-family:'Goldman',monospace;font-size:0.75rem;letter-spacing:0.06em;">
                 <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="G">
-                Google-ით შესვლა
+               Sign in
             </a>
             @endauth
         </div>
