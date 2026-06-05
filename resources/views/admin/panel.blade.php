@@ -551,14 +551,14 @@ function changeRole(userId, userName, currentRole) {
                 @csrf
                 <div class="row g-2 mb-2">
                     <div class="col-12 col-md-6">
-                        <input type="text" id="pushTitle" class="form-control form-control-sm" placeholder="სათაური" maxlength="100" required>
+                        <input type="text" id="pushTitle" class="form-control form-control-sm" placeholder="სათაური" maxlength="100" required style="font-size:1rem;">
                     </div>
                     <div class="col-12 col-md-6">
-                        <input type="text" id="pushUrl" class="form-control form-control-sm" placeholder="URL (სურვილისამებრ)" value="/">
+                        <input type="text" id="pushUrl" class="form-control form-control-sm" placeholder="URL (სურვილისამებრ)" value="/" style="font-size:1rem;">
                     </div>
                 </div>
                 <div class="mb-2">
-                    <textarea id="pushBody" class="form-control form-control-sm" rows="2" placeholder="ტექსტი" maxlength="300" required></textarea>
+                    <textarea id="pushBody" class="form-control form-control-sm" rows="2" placeholder="ტექსტი" maxlength="300" required style="font-size:1rem;"></textarea>
                 </div>
                 <div class="d-flex gap-2 align-items-center">
                     <button type="submit" class="btn btn-sm btn-dark">გაგზავნა ყველასთვის</button>
