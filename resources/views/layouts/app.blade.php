@@ -67,6 +67,15 @@
             <div class="pwa-step"><div class="pwa-step-num">3</div><div class="pwa-step-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="10" x2="12" y2="14"/><line x1="10" y1="12" x2="14" y2="12"/></svg></div><div class="pwa-step-text">სიაში იპოვე <strong>„Add to Home Screen"</strong></div></div>
             <div class="pwa-step"><div class="pwa-step-num">4</div><div class="pwa-step-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg></div><div class="pwa-step-text">ზედა მარჯვნივ დააჭირე <strong>„Add"</strong></div></div>
         </div>
+        @auth
+        <div style="margin-top:20px;padding-top:20px;border-top:1px solid #1e1e1e;">
+            <button id="pushEnableBtn" onclick="enablePushNotifications()" class="pwa-install-native-btn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+                შეტყობინებების ჩართვა
+            </button>
+        </div>
+        @endauth
+
         <div id="stepsAndroid" class="pwa-steps" style="display:none;">
             <div class="pwa-step"><div class="pwa-step-num">1</div><div class="pwa-step-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></div><div class="pwa-step-text">გახსენი <strong>Chrome</strong> ბრაუზერი</div></div>
             <div class="pwa-step"><div class="pwa-step-num">2</div><div class="pwa-step-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="#888"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></div><div class="pwa-step-text">მენიუ <strong>⋮</strong> → <strong>„Add to Home screen"</strong></div></div>
@@ -383,25 +392,32 @@ if ('serviceWorker' in navigator) {
             return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
         }
 
-        reg.pushManager.getSubscription().then(existing => {
-            if (existing) return;
+        window._swReg = reg;
+
+        window.enablePushNotifications = function() {
+            if (!window._swReg) return;
             Notification.requestPermission().then(perm => {
                 if (perm !== 'granted') return;
-                reg.pushManager.subscribe({
-                    userVisibleOnly: true,
-                    applicationServerKey: urlBase64ToUint8Array(vapidKey),
-                }).then(sub => {
-                    fetch('{{ route("push.subscribe") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        },
-                        body: JSON.stringify(sub),
+                window._swReg.pushManager.getSubscription().then(existing => {
+                    if (existing) return;
+                    window._swReg.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: urlBase64ToUint8Array(vapidKey),
+                    }).then(sub => {
+                        fetch('{{ route("push.subscribe") }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            },
+                            body: JSON.stringify(sub),
+                        });
+                        const btn = document.getElementById('pushEnableBtn');
+                        if (btn) btn.textContent = '✓ ჩართულია';
                     });
                 });
             });
-        });
+        };
         @endauth
     }).catch(err => console.error('SW error:', err));
 }
