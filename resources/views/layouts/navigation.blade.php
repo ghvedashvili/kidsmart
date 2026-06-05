@@ -301,6 +301,10 @@
                 </button>
                 @endif
 
+                <button onclick="openPwaModal()" class="nav-link-item pwa-nav-item" style="display:none;background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.4);font-size:0.95rem;" title="App-ის დაყენება">
+                    <i class="bi bi-download"></i>
+                </button>
+
                 @if(auth()->user()->isAdmin())
                 <a class="nav-link-item text-danger fw-bold" href="{{ route('admin.panel') }}">
                     <i class="bi bi-shield-lock-fill"></i>
@@ -366,6 +370,12 @@
         </span>
 
         <div class="nav-collapse-divider"></div>
+
+        <button onclick="openPwaModal();toggleMobileNav(null,true)" class="nav-collapse-item pwa-nav-item" style="display:none;background:none;border:none;cursor:pointer;font-size:0.8rem;">
+            <i class="bi bi-download"></i> App-ის დაყენება
+        </button>
+
+        <div class="nav-collapse-divider pwa-nav-item" style="display:none;"></div>
 
         @if($currentPageLevel !== null)
         <button onclick="restartLevel({{ $currentPageLevel }})" class="nav-collapse-item" style="background:none;border:none;cursor:pointer;font-size:0.8rem;">

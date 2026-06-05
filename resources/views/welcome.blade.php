@@ -388,6 +388,40 @@
     .enter-btn img { width: 17px; opacity: 0.7; }
 </style>
 
+<style>
+    .pwa-fab {
+        position: fixed;
+        bottom: 28px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.4s ease, transform 0.4s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 22px;
+        background: rgba(255,255,255,0.07);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 100px;
+        color: rgba(255,255,255,0.7);
+        font-family: 'Goldman', monospace;
+        font-size: 0.75rem;
+        letter-spacing: 0.08em;
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+        white-space: nowrap;
+        z-index: 10;
+    }
+    .pwa-fab.visible {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+        pointer-events: auto;
+    }
+    .pwa-fab:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .pwa-fab svg { flex-shrink: 0; }
+</style>
+
 <div class="hero">
     <div class="hero-inner">
         <div class="title" id="titleEl"></div>
@@ -402,6 +436,24 @@
         </a>
     </div>
 </div>
+
+{{-- PWA Install FAB --}}
+<button class="pwa-fab" id="pwaFab" onclick="openPwaModal()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2v13M8 9l4-4 4 4"/><path d="M3 17v2a2 2 0 002 2h14a2 2 0 002-2v-2"/>
+    </svg>
+    App-ის დაყენება
+</button>
+
+<script>
+    const isAlreadyInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    if (!isAlreadyInstalled) {
+        setTimeout(() => {
+            const fab = document.getElementById('pwaFab');
+            if (fab) fab.classList.add('visible');
+        }, 5000);
+    }
+</script>
 
 <script>
     class TextScramble {
