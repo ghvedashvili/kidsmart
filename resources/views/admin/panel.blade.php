@@ -542,4 +542,51 @@ function changeRole(userId, userName, currentRole) {
 
 
 </script>
+
+<div class="admin-wrap" style="position:relative;z-index:1;margin-top:0;padding-top:0;">
+    <h5 class="mb-3" style="font-family:'Goldman',monospace;font-size:0.85rem;letter-spacing:0.06em;color:#555;">Push Notification</h5>
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form id="pushForm">
+                @csrf
+                <div class="row g-2 mb-2">
+                    <div class="col-12 col-md-6">
+                        <input type="text" id="pushTitle" class="form-control form-control-sm" placeholder="სათაური" maxlength="100" required>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <input type="text" id="pushUrl" class="form-control form-control-sm" placeholder="URL (სურვილისამებრ)" value="/">
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <textarea id="pushBody" class="form-control form-control-sm" rows="2" placeholder="ტექსტი" maxlength="300" required></textarea>
+                </div>
+                <div class="d-flex gap-2 align-items-center">
+                    <button type="submit" class="btn btn-sm btn-dark">გაგზავნა ყველასთვის</button>
+                    <span id="pushResult" class="text-muted small"></span>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('pushForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const result = document.getElementById('pushResult');
+    result.textContent = 'გაგზავნა...';
+    const res = await fetch('{{ route("push.send") }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+        body: JSON.stringify({
+            title:   document.getElementById('pushTitle').value,
+            body:    document.getElementById('pushBody').value,
+            url:     document.getElementById('pushUrl').value,
+        }),
+    });
+    const data = await res.json();
+    const ok = data.results?.filter(r => r.success).length ?? 0;
+    result.textContent = `✅ გაიგზავნა: ${ok} / ${data.results?.length ?? 0}`;
+});
+</script>
+
 @endsection

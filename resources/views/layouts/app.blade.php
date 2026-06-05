@@ -372,9 +372,38 @@ document.addEventListener('click', e => {
 
 <script>
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
-        .then(() => console.log('Service Worker registered'))
-        .catch(err => console.error('SW registration failed:', err));
+    navigator.serviceWorker.register('/sw.js').then(reg => {
+        @auth
+        const vapidKey = '{{ env("VAPID_PUBLIC_KEY") }}';
+
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+            const raw = atob(base64);
+            return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+        }
+
+        reg.pushManager.getSubscription().then(existing => {
+            if (existing) return;
+            Notification.requestPermission().then(perm => {
+                if (perm !== 'granted') return;
+                reg.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(vapidKey),
+                }).then(sub => {
+                    fetch('{{ route("push.subscribe") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        },
+                        body: JSON.stringify(sub),
+                    });
+                });
+            });
+        });
+        @endauth
+    }).catch(err => console.error('SW error:', err));
 }
 </script>
 @yield('scripts')
