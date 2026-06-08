@@ -70,11 +70,18 @@
     .notif-btn.on { color: #111; border-color: #111; }
 </style>
 
-<style>nav.fixed-top { display: none !important; }</style>
-
 <div class="dash-hero">
     <div class="dash-inner">
         <div class="dash-greeting">გამარჯობა, {{ auth()->user()->name }}</div>
+
+        @if(auth()->user()->role === 'parent' && auth()->user()->parent_code)
+        <div style="text-align:center;">
+            <div style="font-family:'Goldman',monospace;font-size:0.65rem;color:#aaa;letter-spacing:0.12em;margin-bottom:8px;">შვილის კოდი</div>
+            <div style="font-family:'Goldman',monospace;font-size:clamp(1.4rem,5vw,2rem);color:#111;letter-spacing:0.25em;border:1px solid #ccc;border-radius:6px;padding:10px 24px;display:inline-block;">
+                {{ auth()->user()->parent_code }}
+            </div>
+        </div>
+        @endif
 
         <button class="notif-btn" id="notifBtn" onclick="toggleNotifications()">
             <i class="bi bi-bell" id="notifIcon"></i>

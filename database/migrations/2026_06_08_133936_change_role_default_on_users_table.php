@@ -11,18 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('questions', function (Blueprint $table) {
-            $table->string('success_message')->nullable()->after('rules');
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('role')->nullable()->default(null)->change();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::table('questions', function (Blueprint $table) {
-            $table->dropColumn('success_message');
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('role')->default('gamer')->change();
         });
     }
 };

@@ -142,7 +142,7 @@
                 <button onclick="toggleRole({{ $u->id }}, '{{ $u->role }}')"
                     style="background:none;border:1px solid #2a2a2a;color:#666;font-family:'Goldman',monospace;font-size:0.65rem;padding:3px 8px;border-radius:3px;cursor:pointer;"
                     id="role-btn-{{ $u->id }}">
-                    {{ $u->role === 'admin' ? '→ gamer' : '→ admin' }}
+                    {{ $u->role === 'admin' ? '→ user' : '→ admin' }}
                 </button>
                 @endif
             </div>
@@ -192,7 +192,7 @@ document.getElementById('pushForm').addEventListener('submit', async function(e)
 });
 
 async function toggleRole(userId, currentRole) {
-    const newRole = currentRole === 'admin' ? 'gamer' : 'admin';
+    const newRole = currentRole === 'admin' ? 'child' : 'admin';
     const btn = document.getElementById('role-btn-' + userId);
     btn.disabled = true;
     const resp = await fetch(`/admin/users/${userId}/role`, {

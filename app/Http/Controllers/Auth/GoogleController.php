@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use GuzzleHttp\Client;
 use Laravel\Socialite\Facades\Socialite;
 use App\Providers\RouteServiceProvider;
@@ -14,12 +15,20 @@ class GoogleController extends Controller
     private function isInAppBrowser(): bool
     {
         $ua = request()->header('User-Agent', '');
-        $patterns = ['FBAN', 'FBAV', 'FB_IAB', 'Instagram', 'MicroMessenger',
-                     'Musical', 'TikTok', 'Snapchat', 'Twitter', 'Line/'];
-        foreach ($patterns as $p) {
+        foreach (['FBAN', 'FBAV', 'FB_IAB', 'Instagram', 'MicroMessenger',
+                  'Musical', 'TikTok', 'Snapchat', 'Twitter', 'Line/'] as $p) {
             if (stripos($ua, $p) !== false) return true;
         }
         return false;
+    }
+
+    private function generateParentCode(): string
+    {
+        do {
+            $code = strtoupper(Str::random(6));
+        } while (User::where('parent_code', $code)->exists());
+
+        return $code;
     }
 
     public function redirectToGoogle()
@@ -38,28 +47,30 @@ class GoogleController extends Controller
         $guzzle = new Client(['verify' => $verify]);
         $googleUser = Socialite::driver('google')->setHttpClient($guzzle)->stateless()->user();
 
-        // ვამოწმებთ, თუ მომხმარებელი უკვე არსებობს
         $user = User::firstOrCreate(
             ['email' => $googleUser->getEmail()],
             [
-                'name' => $googleUser->getName(),
+                'name'      => $googleUser->getName(),
                 'google_id' => $googleUser->getId(),
-                'nickname' => $googleUser->getName(),
-                'password' => bcrypt(rand(1000,9999)) // დროებითი პაროლი
+                'password'  => bcrypt(rand(1000, 9999)),
             ]
         );
 
+        // Google-ით შემოსული ყოველთვის მშობელია
+        if ($user->role !== 'admin') {
+            $data = ['role' => 'parent'];
+            if (! $user->parent_code) {
+                $data['parent_code'] = $this->generateParentCode();
+            }
+            $user->update($data);
+        }
+
         Auth::login($user, true);
 
-        // intended URL პრიორიტეტულია (მაგ. ინსტაგრამიდან შემოსული ბმული)
         if (session()->has('url.intended')) {
             return redirect()->intended(RouteServiceProvider::HOME);
         }
 
-        if ($user->level > 1) {
-            return redirect()->route('levels.show', $user->level);
-        }
-
-        return redirect(RouteServiceProvider::HOME);
+        return redirect()->route('dashboard');
     }
 }

@@ -21,11 +21,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'nickname',
-        'level',
-        'xp',
-        'hints',
+        'google_id',
         'role',
+        'parent_code',
+        'parent_id',
     ];
 
     public function isAdmin(): bool

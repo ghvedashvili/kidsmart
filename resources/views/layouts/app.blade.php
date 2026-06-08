@@ -4,17 +4,14 @@
     <meta charset="UTF-8">
     <title>GameVeravart</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="csrf-token" content="{{ csrf_token() }}">
-<link rel="manifest" href="/manifest.json">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-<meta name="theme-color" content="#080808">
-    <!-- Preconnect hints -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <meta name="theme-color" content="#080808">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
-    <!-- Goldman font (ერთი გამოძახება მთელ საიტზე) -->
     <link href="https://fonts.googleapis.com/css2?family=Goldman&display=swap" rel="stylesheet">
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     @stack('head')
@@ -25,7 +22,7 @@
     <div class="spinner"></div>
 </div>
 
-{{-- PWA Modal (global) --}}
+{{-- PWA Modal --}}
 <style>
 .pwa-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);z-index:99999;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s ease;}
 .pwa-overlay.open{opacity:1;pointer-events:auto;}
@@ -80,120 +77,35 @@
     </div>
 </div>
 
-<div id="pull-bar" style="position:fixed;top:var(--nav-h,56px);left:0;right:0;background:#f1f3f4;border-bottom:1px solid #ddd;padding:8px 12px;display:flex;align-items:center;gap:8px;z-index:1025;transform:translateY(-100%);transition:transform 0.25s ease;font-family:monospace;">
-    <div id="pull-url-input" contenteditable="true" spellcheck="false" autocorrect="off" autocapitalize="off" style="flex:1;font-size:1rem;border:1px solid #ccc;border-radius:4px;padding:6px 10px;outline:none;font-family:monospace;color:#222;background:#fff;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;min-height:1.4em;cursor:text;"></div>
-    <button onclick="goPullUrl()" style="padding:6px 14px;background:#1a73e8;color:#fff;border:none;border-radius:4px;font-size:0.82rem;cursor:pointer;white-space:nowrap;flex-shrink:0;">→</button>
-</div>
-
 @include('layouts.navigation')
 
 <style>
-    html {
-        background: #080808;
-        overscroll-behavior: none;
-    }
-    body {
-        overscroll-behavior: none;
-    }
-    /* ── dot-grid სტილები ── */
-    body.dot-light {
-        background: #f5f5f5;
-    }
-    body.dot-light::before {
-        content: '';
-        position: fixed;
-        inset: -100%;
-        background-image: radial-gradient(rgba(0,0,0,0.13) 1px, transparent 1px);
-        background-size: 28px 28px;
-        animation: dotGrid 18s linear infinite;
-        pointer-events: none;
-        z-index: 0;
-    }
-    body.dot-dark {
-        background: #080808;
-    }
-    body.dot-dark::before {
-        content: '';
-        position: fixed;
-        inset: -100%;
-        background-image: radial-gradient(rgba(255,255,255,0.13) 1px, transparent 1px);
-        background-size: 28px 28px;
-        animation: dotGrid 18s linear infinite;
-        pointer-events: none;
-        z-index: 0;
-    }
-    @keyframes dotGrid {
-        0%   { transform: translate(0, 0); }
-        100% { transform: translate(28px, 28px); }
-    }
-    /* ───────────────────── */
-
-    body {
-        padding-top: 56px; /* navbar-ის სიმაღლე */
-    
-    }
+    html { background: #080808; overscroll-behavior: none; }
+    body { overscroll-behavior: none; padding-top: 56px; }
 
     #page-loader {
-    position: fixed;
-    inset: 0;
-    background: #080808;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 999999;
-    transition: opacity 0.3s ease;
-}
-#page-loader.fade-out {
-    opacity: 0;
-    pointer-events: none;
-}
+        position: fixed; inset: 0; background: #080808;
+        display: flex; align-items: center; justify-content: center;
+        z-index: 999999; transition: opacity 0.3s ease;
+    }
+    #page-loader.fade-out { opacity: 0; pointer-events: none; }
 
     .app-loader {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.65);
-    backdrop-filter: blur(4px);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 99999;
-}
+        position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+        backdrop-filter: blur(4px); display: flex; flex-direction: column;
+        align-items: center; justify-content: center; z-index: 99999;
+    }
+    .app-loader.hidden { display: none; }
 
-.app-loader.hidden {
-    display: none;
-}
-
-.spinner {
-    width: 52px;
-    height: 52px;
-    border: 4px solid rgba(255,255,255,0.25);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: spin 0.9s linear infinite;
-}
-
-.loader-text {
-    margin-top: 14px;
-    color: #fff;
-    font-size: 14px;
-    opacity: 0.85;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-
-.rules-bar {
-    background: #f8f9fa;
-    border-bottom: 1px solid #ddd;
-    font-size: 15px;
-    font-weight: 500;
-}
-
+    .spinner {
+        width: 52px; height: 52px;
+        border: 4px solid rgba(255,255,255,0.25);
+        border-top-color: #fff; border-radius: 50%;
+        animation: spin 0.9s linear infinite;
+    }
+    .loader-text { margin-top: 14px; color: #fff; font-size: 14px; opacity: 0.85; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 </style>
-
 
 <div class="container-fluid px-0" style="position:relative;z-index:1;">
     @yield('content')
@@ -203,13 +115,11 @@
     <div class="spinner"></div>
     <div class="loader-text">Loading…</div>
 </div>
-<!-- Bootstrap JS (აუცილებელია) -->
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-
-
-// ── PWA ──
+// ── PWA install prompt ──
 let _pwaPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
@@ -217,10 +127,6 @@ window.addEventListener('beforeinstallprompt', (e) => {
     const btn = document.getElementById('nativeInstallBtn');
     if (btn) btn.style.display = 'flex';
 });
-const _isPwa = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-if (!_isPwa) {
-    document.querySelectorAll('.pwa-nav-item').forEach(el => el.style.display = '');
-}
 function openPwaModal() {
     const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
     switchTab(isIos ? 'ios' : 'android');
@@ -241,42 +147,7 @@ function triggerNativeInstall() {
     _pwaPrompt.userChoice.then(() => { _pwaPrompt = null; closePwaModal(); });
 }
 
-(function() {
-    const bar   = document.getElementById('pull-bar');
-    const input = document.getElementById('pull-url-input');
-    if (!bar || !input) return;
-
-    const isPwa = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-    if (!isPwa) return;
-    let startY = null, shown = false;
-
-    input.textContent = window.location.href;
-    input.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') { e.preventDefault(); goPullUrl(); }
-    });
-
-    document.addEventListener('touchstart', function(e) {
-        if (bar.contains(e.target)) return;
-        startY = e.touches[0].clientY;
-    }, { passive: true });
-
-    document.addEventListener('touchend', function(e) {
-        if (bar.contains(e.target) || startY === null) return;
-        const deltaY = e.changedTouches[0].clientY - startY;
-        startY = null;
-        if (deltaY > 60 && !shown) {
-            bar.style.transform = 'translateY(0)'; shown = true;
-        } else if (deltaY < -30 && shown) {
-            bar.style.transform = 'translateY(-100%)'; shown = false;
-        }
-    }, { passive: true });
-})();
-
-function goPullUrl() {
-    const url = (document.getElementById('pull-url-input').textContent || '').trim();
-    if (url) window.location.href = url;
-}
-
+// ── Page loader ──
 window.addEventListener('load', () => {
     const pl = document.getElementById('page-loader');
     if (!pl) return;
@@ -284,33 +155,23 @@ window.addEventListener('load', () => {
     setTimeout(() => pl.remove(), 300);
 });
 
+// ── App loader ──
 window.AppLoader = {
     show(text = 'Loading…') {
         const loader = document.getElementById('app-loader');
         if (!loader) return;
-
         loader.querySelector('.loader-text').innerText = text;
         loader.classList.remove('hidden');
     },
     hide() {
         const loader = document.getElementById('app-loader');
-        if (!loader) return;
-
-        loader.classList.add('hidden');
+        if (loader) loader.classList.add('hidden');
     }
 };
 
-// ყველა form submit-ზე loader
-// document.addEventListener('submit', () => {
-//     AppLoader.show();
-// });
-
-// ყველა link-ზე სადაც data-loader არის
 document.addEventListener('click', e => {
     const link = e.target.closest('a[data-loader]');
-    if (link) {
-        AppLoader.show(link.dataset.loaderText || 'Loading…');
-    }
+    if (link) AppLoader.show(link.dataset.loaderText || 'Loading…');
 });
 </script>
 
@@ -330,32 +191,25 @@ if ('serviceWorker' in navigator) {
         window._swReg = reg;
 
         function updateNotifUI(granted) {
-            const btnD = document.getElementById('notif-btn-desktop');
-            const btnM = document.getElementById('notif-btn-mobile');
+            // nav bell (desktop)
             const iconD = document.getElementById('notif-icon-desktop');
-            const iconM = document.getElementById('notif-icon-mobile');
-            const textM = document.getElementById('notif-text-mobile');
+            const btnD  = document.getElementById('notif-btn-desktop');
             if (btnD) btnD.style.display = '';
-            if (btnM) btnM.style.display = '';
-            if (granted) {
-                if (iconD) iconD.className = 'bi bi-bell-fill';
-                if (iconM) iconM.className = 'bi bi-bell-fill';
-                if (textM) textM.textContent = 'შეტყობინებები: ჩართულია';
-                if (btnD) btnD.style.color = 'rgba(255,255,255,0.7)';
-                if (btnM) btnM.style.color = 'rgba(255,255,255,0.7)';
-            } else {
-                if (iconD) iconD.className = 'bi bi-bell';
-                if (iconM) iconM.className = 'bi bi-bell';
-                if (textM) textM.textContent = 'შეტყობინებების ჩართვა';
-            }
+            if (iconD) iconD.className = granted ? 'bi bi-bell-fill' : 'bi bi-bell';
+
+            // dashboard button
+            const dashBtn  = document.getElementById('notifBtn');
+            const dashIcon = document.getElementById('notifIcon');
+            const dashText = document.getElementById('notifText');
+            if (dashIcon) dashIcon.className = granted ? 'bi bi-bell-fill' : 'bi bi-bell';
+            if (dashText) dashText.textContent = granted ? 'შეტყობინებები: ჩართულია' : 'შეტყობინებების ჩართვა';
+            if (dashBtn)  dashBtn.classList.toggle('on', granted);
         }
 
-        const _isPwaNotif = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-        if (_isPwaNotif) {
-            reg.pushManager.getSubscription().then(sub => {
-                updateNotifUI(!!sub && Notification.permission === 'granted');
-            });
-        }
+        // გვერდის ჩატვირთვისას მდგომარეობის შემოწმება
+        reg.pushManager.getSubscription().then(sub => {
+            updateNotifUI(!!sub && Notification.permission === 'granted');
+        });
 
         window.toggleNotifications = function() {
             if (Notification.permission === 'granted') {
@@ -383,21 +237,16 @@ if ('serviceWorker' in navigator) {
             Notification.requestPermission().then(perm => {
                 if (perm !== 'granted') return;
                 window._swReg.pushManager.getSubscription().then(existing => {
-                    if (existing) return;
+                    if (existing) { updateNotifUI(true); return; }
                     window._swReg.pushManager.subscribe({
                         userVisibleOnly: true,
                         applicationServerKey: urlBase64ToUint8Array(vapidKey),
                     }).then(sub => {
                         fetch('{{ route("push.subscribe") }}', {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            },
+                            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                             body: JSON.stringify(sub),
                         });
-                        const btn = document.getElementById('pushEnableBtn');
-                        if (btn) btn.textContent = '✓ ჩართულია';
                         updateNotifUI(true);
                     });
                 });

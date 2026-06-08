@@ -17,7 +17,7 @@ class AdminController extends Controller
 
     public function updateRole(Request $request, User $user)
     {
-        $request->validate(['role' => 'required|in:gamer,admin']);
+        $request->validate(['role' => 'required|in:child,parent,admin']);
         $user->update(['role' => $request->role]);
         return response()->json(['success' => true, 'role' => $user->role]);
     }
