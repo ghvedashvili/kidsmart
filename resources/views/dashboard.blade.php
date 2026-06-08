@@ -85,7 +85,7 @@
 
         <button class="notif-btn" id="notifBtn" onclick="toggleNotifications()">
             <i class="bi bi-bell" id="notifIcon"></i>
-            <span id="notifText">შეტყობინებების ჩართვა</span>
+            <span id="notifText">შეტყობინებების ჩართვა!</span>
         </button>
 
         @if(auth()->user()->isAdmin())
