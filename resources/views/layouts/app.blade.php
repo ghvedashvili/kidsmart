@@ -191,13 +191,9 @@ if ('serviceWorker' in navigator) {
         window._swReg = reg;
 
         function updateNotifUI(granted) {
-            // nav bell (desktop)
             const iconD = document.getElementById('notif-icon-desktop');
             const btnD  = document.getElementById('notif-btn-desktop');
-            if (btnD) btnD.style.display = '';
             if (iconD) iconD.className = granted ? 'bi bi-bell-fill' : 'bi bi-bell';
-
-            // dashboard button
             const dashBtn  = document.getElementById('notifBtn');
             const dashIcon = document.getElementById('notifIcon');
             const dashText = document.getElementById('notifText');
@@ -208,7 +204,6 @@ if ('serviceWorker' in navigator) {
 
         const notifSupported = (typeof Notification !== 'undefined') && ('pushManager' in reg);
 
-        // გვერდის ჩატვირთვისას მდგომარეობის შემოწმება
         if (notifSupported) {
             reg.pushManager.getSubscription().then(sub => {
                 updateNotifUI(!!sub && Notification.permission === 'granted');
@@ -216,7 +211,13 @@ if ('serviceWorker' in navigator) {
         }
 
         window.toggleNotifications = function() {
-            if (!notifSupported) return;
+            if (!notifSupported) {
+                // iOS Safari (not PWA) — show install guide
+                const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+                const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+                if (isIos && !isStandalone && typeof openPwaModal === 'function') openPwaModal();
+                return;
+            }
             if (Notification.permission === 'granted') {
                 window._swReg.pushManager.getSubscription().then(sub => {
                     if (sub) {
@@ -253,7 +254,7 @@ if ('serviceWorker' in navigator) {
                             body: JSON.stringify(sub),
                         });
                         updateNotifUI(true);
-                    });
+                    }).catch(err => console.warn('Push subscribe failed:', err));
                 });
             });
         };
