@@ -76,6 +76,7 @@ class ChildSettingsController extends Controller
         $this->authorizeChild($child);
 
         $data = $request->validate([
+            'name'          => 'nullable|string|max:50',
             'grade_id'      => 'nullable|exists:grades,id',
             'difficulty'    => 'required|integer|min:1|max:5',
             'tests_per_week'=> 'required|integer|min:1|max:7',
@@ -84,6 +85,10 @@ class ChildSettingsController extends Controller
             'topic_ids'     => 'nullable|array',
             'topic_ids.*'   => 'exists:topics,id',
         ]);
+
+        if (!empty($data['name'])) {
+            $child->update(['name' => trim($data['name'])]);
+        }
 
         ChildSetting::updateOrCreate(
             ['user_id' => $child->id],

@@ -9,8 +9,12 @@ use App\Http\Controllers\Admin\GradeController;
 use App\Http\Controllers\Admin\ThemeController;
 use App\Http\Controllers\Admin\TopicController;
 use App\Http\Controllers\Admin\QuestionTemplateController;
+use App\Http\Controllers\ChildController;
 use App\Http\Controllers\ChildSettingsController;
 use App\Http\Controllers\TestController;
+use App\Models\Grade;
+use App\Models\Theme;
+use App\Models\Topic;
 use App\Models\User;
 
 Route::get('/', function () {
@@ -32,36 +36,31 @@ Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallb
 // ბავშვის login
 Route::post('/child-login', function (Request $request) {
     $request->validate([
-        'parent_code' => 'required|string',
-        'name'        => 'required|string|max:50',
+        'child_code' => 'required|string',
     ]);
 
-    $parent = User::where('parent_code', strtoupper(trim($request->parent_code)))->first();
+    $child = User::where('child_code', strtoupper(trim($request->child_code)))
+                 ->where('role', 'child')
+                 ->first();
 
-    if (! $parent) {
-        return back()->withErrors(['parent_code' => 'კოდი არასწორია'])->withInput();
+    if (! $child) {
+        return back()->withErrors(['child_code' => 'კოდი არასწორია'])->withInput();
     }
-
-    $child = User::firstOrCreate(
-        [
-            'parent_id' => $parent->id,
-            'name'      => trim($request->name),
-        ],
-        [
-            'email'    => 'child_' . $parent->id . '_' . \Illuminate\Support\Str::slug($request->name) . '@kidsmart.local',
-            'password' => bcrypt(\Illuminate\Support\Str::random(16)),
-            'role'     => 'child',
-        ]
-    );
 
     \Illuminate\Support\Facades\Auth::login($child, true);
 
     return redirect()->route('dashboard');
 })->name('child-login');
 
+Route::middleware(['auth'])->post('/children', [ChildController::class, 'store'])->name('child.store');
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
-        return view('dashboard');
+        return view('dashboard', [
+            'grades' => Grade::orderBy('number')->get(),
+            'themes' => Theme::all(),
+            'topics' => Topic::with('grade')->orderBy('grade_id')->get(),
+        ]);
     })->name('dashboard');
 
     Route::post('/push/subscribe',   [PushController::class, 'subscribe'])->name('push.subscribe');

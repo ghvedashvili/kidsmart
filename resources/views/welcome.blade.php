@@ -136,18 +136,15 @@
         <div class="auth-panel" id="panelChild">
             <form method="POST" action="{{ route('child-login') }}" class="child-form">
                 @csrf
-                @error('parent_code')
+                @error('child_code')
                     <div class="err-msg">{{ $message }}</div>
                 @enderror
-                <input type="text" name="parent_code" class="child-input"
-                    placeholder="მშობლის კოდი"
-                    value="{{ old('parent_code') }}"
+                <input type="text" name="child_code" class="child-input"
+                    placeholder="შენი კოდი"
+                    value="{{ old('child_code') }}"
                     maxlength="8" autocomplete="off"
+                    style="font-size:1.3rem;letter-spacing:0.2em;text-align:center;"
                     oninput="this.value = this.value.toUpperCase()">
-                <input type="text" name="name" class="child-input"
-                    placeholder="შენი სახელი"
-                    value="{{ old('name') }}"
-                    maxlength="50" autocomplete="off">
                 <button type="submit" class="child-submit">შესვლა →</button>
             </form>
         </div>

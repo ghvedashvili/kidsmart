@@ -25,6 +25,7 @@ class User extends Authenticatable
         'role',
         'parent_code',
         'parent_id',
+        'child_code',
     ];
 
     public function isAdmin(): bool
