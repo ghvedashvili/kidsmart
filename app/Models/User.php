@@ -32,6 +32,36 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
+    public function children()
+    {
+        return $this->hasMany(User::class, 'parent_id');
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(User::class, 'parent_id');
+    }
+
+    public function childSetting()
+    {
+        return $this->hasOne(ChildSetting::class);
+    }
+
+    public function themes()
+    {
+        return $this->belongsToMany(Theme::class, 'child_theme');
+    }
+
+    public function topics()
+    {
+        return $this->belongsToMany(Topic::class, 'child_topic');
+    }
+
+    public function tests()
+    {
+        return $this->hasMany(Test::class, 'child_id');
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
