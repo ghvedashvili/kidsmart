@@ -56,12 +56,15 @@ class GoogleController extends Controller
             ]
         );
 
-        // Google-ით შემოსული ყოველთვის მშობელია
+        // role: admin ინახება, დანარჩენი → parent; parent_code ყველას ეძლევა
+        $data = [];
         if ($user->role !== 'admin') {
-            $data = ['role' => 'parent'];
-            if (! $user->parent_code) {
-                $data['parent_code'] = $this->generateParentCode();
-            }
+            $data['role'] = 'parent';
+        }
+        if (! $user->parent_code) {
+            $data['parent_code'] = $this->generateParentCode();
+        }
+        if ($data) {
             $user->update($data);
         }
 
