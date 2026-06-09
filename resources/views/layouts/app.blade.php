@@ -211,8 +211,8 @@ if ('serviceWorker' in navigator) {
         }
 
         window.toggleNotifications = function() {
+            console.log('[KS] toggleNotifications called. notifSupported=', notifSupported, 'permission=', typeof Notification !== 'undefined' ? Notification.permission : 'N/A', '_swReg=', window._swReg);
             if (!notifSupported) {
-                // iOS Safari (not PWA) — show install guide
                 const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
                 const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
                 if (isIos && !isStandalone && typeof openPwaModal === 'function') openPwaModal();
@@ -239,8 +239,16 @@ if ('serviceWorker' in navigator) {
         };
 
         window.enablePushNotifications = function() {
+            console.log('[KS] enablePush. _swReg=', window._swReg, 'notifSupported=', notifSupported);
             if (!window._swReg || !notifSupported) return;
             Notification.requestPermission().then(perm => {
+                console.log('[KS] permission result:', perm);
+                if (perm === 'denied') {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({ icon: 'warning', title: 'შეტყობინებები დაბლოკილია', text: 'ბრაუზერის მისამართ ბარში 🔒 → Notifications → Allow', confirmButtonText: 'გასაგებია' });
+                    }
+                    return;
+                }
                 if (perm !== 'granted') return;
                 window._swReg.pushManager.getSubscription().then(existing => {
                     if (existing) { updateNotifUI(true); return; }
