@@ -22,6 +22,21 @@ class TestController extends Controller
             return redirect()->route('test.show', $existing);
         }
 
+        $setting  = $child->childSetting;
+        $required = $setting?->tests_per_week ?? 0;
+
+        if ($required > 0) {
+            $todayCount = Test::where('child_id', $child->id)
+                ->whereNotNull('completed_at')
+                ->whereDate('completed_at', today())
+                ->count();
+
+            if ($todayCount >= $required) {
+                return redirect()->route('dashboard')
+                    ->with('test_done', 'დღეს ' . $required . ' ტესტი შეასრულე! ✓');
+            }
+        }
+
         $result = $generator->generate($child);
 
         if (isset($result['error'])) {

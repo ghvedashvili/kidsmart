@@ -88,6 +88,15 @@
     }
     .ctag.set { color: #555; border-color: #ccc; }
     .child-arrow { color: #ccc; font-size: 0.9rem; }
+    .child-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+    .caction {
+        font-family: 'Goldman', monospace; font-size: 0.62rem; color: #bbb;
+        border: 1px solid #ebebeb; border-radius: 4px; padding: 5px 10px;
+        text-decoration: none; letter-spacing: 0.04em; transition: all 0.2s; white-space: nowrap;
+    }
+    .caction:hover { color: #333; border-color: #aaa; }
+    .caction.primary { color: #4f46e5; border-color: #c7d2fe; background: #eef2ff; }
+    .caction.primary:hover { background: #e0e7ff; border-color: #a5b4fc; }
     .no-children {
         font-family: 'Goldman', monospace; font-size: 0.72rem; color: #ccc;
         text-align: center; padding: 20px;
@@ -132,6 +141,9 @@
         @if(session('test_error'))
         <div class="flash-err">{{ session('test_error') }}</div>
         @endif
+        @if(session('test_done'))
+        <div class="flash">{{ session('test_done') }}</div>
+        @endif
 
         <div class="dash-greeting">გამარჯობა, {{ auth()->user()->name }}</div>
 
@@ -150,8 +162,11 @@
         <div class="children-section">
             <div class="section-label">შვილები · {{ $children->count() }}</div>
             @forelse($children as $child)
-            @php $s = $child->childSetting; @endphp
-            <a href="{{ route('child.settings.edit', $child) }}" class="child-card">
+            @php
+                $s = $child->childSetting;
+                $todayDone = $child->tests()->whereNotNull('completed_at')->whereDate('completed_at', today())->count();
+            @endphp
+            <div class="child-card" style="cursor:default;">
                 <div class="child-info">
                     <div class="child-name">{{ $child->name }}</div>
                     <div class="child-tags">
@@ -162,7 +177,7 @@
                         @endif
                         @if($s)
                             <span class="ctag set">დონე {{ $s->difficulty }}</span>
-                            <span class="ctag set">კვ. {{ $s->tests_per_week }}×</span>
+                            <span class="ctag set">დღეს {{ $todayDone }}/{{ $s->tests_per_week }}</span>
                         @endif
                         @foreach($child->themes->take(2) as $theme)
                             <span class="ctag set">{{ $theme->icon }} {{ $theme->name }}</span>
@@ -172,8 +187,11 @@
                         @endif
                     </div>
                 </div>
-                <span class="child-arrow">→</span>
-            </a>
+                <div class="child-actions">
+                    <a href="{{ route('child.stats', $child) }}" class="caction primary">სტატისტიკა</a>
+                    <a href="{{ route('child.settings.edit', $child) }}" class="caction">⚙</a>
+                </div>
+            </div>
             @empty
             <div class="no-children">
                 ბავშვი ჯერ არ დარეგისტრირებულა<br>
@@ -188,16 +206,33 @@
         @php
             $activeTest    = auth()->user()->tests()->whereNull('completed_at')->latest()->first();
             $lastCompleted = auth()->user()->tests()->whereNotNull('completed_at')->latest()->first();
+            $setting       = auth()->user()->childSetting;
+            $required      = $setting?->tests_per_week ?? 0;
+            $todayCount    = auth()->user()->tests()->whereNotNull('completed_at')->whereDate('completed_at', today())->count();
+            $doneToday     = $required > 0 && $todayCount >= $required && !$activeTest;
         @endphp
 
         @if($activeTest)
         <a href="{{ route('test.show', $activeTest) }}" class="test-btn">
             📝 ტესტი გელოდება →
         </a>
+        @elseif($doneToday)
+        <div style="text-align:center;">
+            <div style="font-family:'Goldman',monospace;font-size:2rem;margin-bottom:8px;">✓</div>
+            <div style="font-family:'Goldman',monospace;font-size:0.85rem;color:#111;letter-spacing:0.06em;">დღე დასრულდა!</div>
+            <div style="font-family:'Goldman',monospace;font-size:0.62rem;color:#bbb;margin-top:4px;letter-spacing:0.06em;">{{ $todayCount }} / {{ $required }} ტესტი შეასრულე</div>
+        </div>
         @else
-        <a href="{{ route('test.start') }}" class="test-btn">
-            ▶ ტესტის დაწყება
-        </a>
+        <div style="text-align:center;">
+            @if($required > 0)
+            <div style="font-family:'Goldman',monospace;font-size:0.62rem;color:#bbb;letter-spacing:0.1em;margin-bottom:10px;">
+                დღეს: {{ $todayCount }} / {{ $required }}
+            </div>
+            @endif
+            <a href="{{ route('test.start') }}" class="test-btn">
+                ▶ ტესტის დაწყება
+            </a>
+        </div>
         @endif
 
         @if($lastCompleted)

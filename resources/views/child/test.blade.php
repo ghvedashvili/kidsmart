@@ -272,9 +272,9 @@ body {
         <div class="test-theme">{{ $test->theme?->icon ?? '📝' }}</div>
     </div>
     <div class="progress-bar-wrap">
-        <div class="progress-bar-fill" id="progressFill" style="width: {{ (1/15)*100 }}%"></div>
+        <div class="progress-bar-fill" id="progressFill" style="width: {{ (1/count($questions))*100 }}%"></div>
     </div>
-    <div class="progress-text" id="progressText">1 / 15</div>
+    <div class="progress-text" id="progressText">1 / {{ count($questions) }}</div>
 
     <div class="answer-dots" id="answerDots">
         @foreach($questions as $i => $q)
@@ -308,7 +308,7 @@ body {
         <div class="q-nav">
             <button type="button" class="nav-btn" onclick="goTo({{ $i-1 }})"
                 {{ $i === 0 ? 'disabled' : '' }}>← უკან</button>
-            @if($i < 14)
+            @if($i < count($questions) - 1)
             <button type="button" class="nav-btn next" id="next-{{ $i }}"
                 onclick="goTo({{ $i+1 }})">შემდეგი →</button>
             @else
@@ -330,18 +330,19 @@ body {
 
 <script>
 let current = 0;
-const answered = new Array(15).fill(false);
+const totalQ = {{ count($questions) }};
+const answered = new Array(totalQ).fill(false);
 
 function goTo(n) {
-    if (n < 0 || n >= 15) return;
+    if (n < 0 || n >= totalQ) return;
     document.getElementById('page-' + current).classList.remove('active');
     document.getElementById('dot-' + current).classList.remove('current');
     current = n;
     document.getElementById('page-' + current).classList.add('active');
     document.getElementById('dot-' + current).classList.add('current');
-    const pct = ((current + 1) / 15 * 100).toFixed(0);
+    const pct = ((current + 1) / totalQ * 100).toFixed(0);
     document.getElementById('progressFill').style.width = pct + '%';
-    document.getElementById('progressText').textContent = (current + 1) + ' / 15';
+    document.getElementById('progressText').textContent = (current + 1) + ' / ' + totalQ;
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     const allAnswered = answered.every(Boolean);
@@ -353,14 +354,14 @@ function onAnswer(i) {
     document.getElementById('dot-' + i).classList.add('answered');
     const allAnswered = answered.every(Boolean);
     document.getElementById('submitBtn').classList.toggle('visible', allAnswered);
-    if (i < 14) {
+    if (i < totalQ - 1) {
         setTimeout(() => goTo(i + 1), 300);
     }
 }
 
 function trySubmit() {
     const missing = answered.filter(Boolean).length;
-    if (missing < 15) {
+    if (missing < totalQ) {
         const unanswered = answered.map((a, i) => a ? null : i + 1).filter(Boolean);
         document.getElementById('warnMsg').style.display = 'block';
         document.getElementById('warnMsg').textContent =

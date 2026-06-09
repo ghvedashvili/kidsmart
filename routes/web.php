@@ -68,6 +68,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/push/unsubscribe', [PushController::class, 'unsubscribe'])->name('push.unsubscribe');
 
     // შვილის პარამეტრები (მხოლოდ მშობელი)
+    Route::get('/children/{child}/stats',                [ChildSettingsController::class, 'stats'])->name('child.stats');
+    Route::get('/children/{child}/tests/{test}',         [ChildSettingsController::class, 'showTest'])->name('child.test.show');
     Route::get('/children/{child}/settings',  [ChildSettingsController::class, 'edit'])->name('child.settings.edit');
     Route::put('/children/{child}/settings',  [ChildSettingsController::class, 'update'])->name('child.settings.update');
 
@@ -108,4 +110,5 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/questions/{question}/edit',     [QuestionTemplateController::class, 'edit'])->name('admin.questions.edit');
     Route::put('/admin/questions/{question}',          [QuestionTemplateController::class, 'update'])->name('admin.questions.update');
     Route::delete('/admin/questions/{question}',       [QuestionTemplateController::class, 'destroy'])->name('admin.questions.destroy');
+
 });

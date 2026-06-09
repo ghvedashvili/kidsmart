@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ChildSetting;
 use App\Models\Grade;
+use App\Models\Test;
 use App\Models\Theme;
 use App\Models\Topic;
 use App\Models\User;
@@ -17,6 +18,39 @@ class ChildSettingsController extends Controller
             $child->parent_id !== auth()->id() || $child->role !== 'child',
             403
         );
+    }
+
+    public function stats(User $child)
+    {
+        $this->authorizeChild($child);
+
+        $tests = $child->tests()
+            ->with('theme')
+            ->whereNotNull('completed_at')
+            ->latest('completed_at')
+            ->get();
+
+        $totalTests  = $tests->count();
+        $avgScore    = $totalTests > 0
+            ? round($tests->avg(fn($t) => $t->correct_count / max($t->total_questions, 1) * 100))
+            : null;
+        $todayCount  = $tests->filter(fn($t) => $t->completed_at->isToday())->count();
+        $required    = $child->childSetting?->tests_per_week ?? 0;
+
+        return view('parent.child-stats', compact(
+            'child', 'tests', 'totalTests', 'avgScore', 'todayCount', 'required'
+        ));
+    }
+
+    public function showTest(User $child, Test $test)
+    {
+        $this->authorizeChild($child);
+        abort_if($test->child_id !== $child->id, 404);
+
+        $questions = $test->questions()->with([])->get();
+        $answers   = $test->answers()->get()->keyBy('test_question_id');
+
+        return view('parent.child-test', compact('child', 'test', 'questions', 'answers'));
     }
 
     public function edit(User $child)
