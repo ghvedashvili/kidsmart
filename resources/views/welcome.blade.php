@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@push('head')
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+@endpush
+
 @section('content')
 <style>
     nav.fixed-top { display: none !important; }
