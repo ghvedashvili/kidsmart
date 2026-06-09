@@ -104,7 +104,7 @@
 <div class="hero">
     <div class="hero-inner">
         <div>
-            <img src="/images/logo.png" alt="KidSmart"
+            <img src="/img/logo.png" alt="KidSmart"
                  style="width:clamp(180px,55vw,280px);height:auto;display:block;margin:0 auto 4px;">
             <div class="hero-sub">ვინ ხარ?</div>
         </div>

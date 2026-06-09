@@ -44,8 +44,9 @@
 <nav class="bg-dark border-bottom fixed-top" style="border-color:#2a2a2a!important;" data-bs-theme="dark">
     <div class="nav-grid" style="min-height:52px;">
         <div class="nav-left">
-            <a class="navbar-brand mb-0" href="{{ url('/') }}" style="line-height:1;">
-                <img src="/images/logo.png" alt="KidSmart" style="height:34px;width:auto;">
+            <a class="navbar-brand text-white mb-0" href="{{ url('/') }}"
+               style="font-family:'Goldman',monospace;font-size:1.1rem;letter-spacing:0.1em;color:rgba(255,255,255,0.9)!important;">
+                KidSmart
             </a>
         </div>
         <div class="nav-center"></div>
