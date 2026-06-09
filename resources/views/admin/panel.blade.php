@@ -9,10 +9,13 @@
         padding: 32px 16px 64px;
         font-family: 'Goldman', monospace;
     }
+    .anav { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 28px; }
+    .anav a { font-family: 'Goldman', monospace; font-size: 0.7rem; color: #555; letter-spacing: 0.08em; text-decoration: none; padding: 4px 12px; border: 1px solid #222; border-radius: 3px; transition: color 0.2s, border-color 0.2s; }
+    .anav a:hover, .anav a.active { color: #bbb; border-color: #444; }
     .admin-title {
-        font-size: 1.1rem;
-        color: #888;
-        letter-spacing: 0.12em;
+        font-size: 0.75rem;
+        color: #555;
+        letter-spacing: 0.14em;
         text-transform: uppercase;
         margin-bottom: 32px;
     }
@@ -86,7 +89,14 @@
 </style>
 
 <div class="admin-wrap">
-    <div class="admin-title">Admin · Push Panel</div>
+    <div class="admin-title">Admin Panel</div>
+    <nav class="anav">
+        <a href="{{ route('admin.panel') }}" class="active">Push</a>
+        <a href="{{ route('admin.grades.index') }}">კლასები</a>
+        <a href="{{ route('admin.themes.index') }}">თემები</a>
+        <a href="{{ route('admin.topics.index') }}">თოპიქები</a>
+        <a href="{{ route('admin.questions.index') }}">კითხვები</a>
+    </nav>
 
     {{-- Push Send Form --}}
     <div class="card-dark">
