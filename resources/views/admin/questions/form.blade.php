@@ -82,6 +82,13 @@
             <div class="hint">თითოეული N ცვლადისთვის min/max დიაპაზონი</div>
             @error('num_config')<div class="err">{{ $message }}</div>@enderror
 
+            <div class="lbl">სავარაუდო პასუხების დიაპაზონი (JSON, სურვილისამებრ)</div>
+            <input type="text" name="distractors" class="fc"
+                placeholder='{"min":1,"max":5}'
+                value="{{ old('distractors', $template?->distractors ? json_encode($template->distractors) : '') }}">
+            <div class="hint">სწორი პასუხიდან რამდენით განსხვავდეს — {"min":1,"max":5} ნიშნავს ±1…5. ცარიელია: default ±1…10</div>
+            @error('distractors')<div class="err">{{ $message }}</div>@enderror
+
             <div style="display:flex;gap:12px;align-items:center;margin-top:8px;">
                 <button type="submit" class="btn">{{ $template ? 'განახლება' : 'შენახვა' }}</button>
                 <a href="{{ route('admin.questions.index') }}"

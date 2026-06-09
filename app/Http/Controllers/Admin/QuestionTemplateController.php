@@ -77,6 +77,7 @@ class QuestionTemplateController extends Controller
             'template_text'   => 'required|string',
             'correct_formula' => 'required|string|max:200',
             'num_config'      => 'required|string',
+            'distractors'     => 'nullable|string',
         ]);
 
         $numConfig = json_decode($raw['num_config'], true);
@@ -86,12 +87,23 @@ class QuestionTemplateController extends Controller
             ]);
         }
 
+        $distractors = null;
+        if (! empty($raw['distractors'])) {
+            $distractors = json_decode($raw['distractors'], true);
+            if (! is_array($distractors)) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'distractors' => 'JSON ფორმატი არასწორია',
+                ]);
+            }
+        }
+
         return [
             'topic_id'        => $raw['topic_id'],
             'difficulty'      => $raw['difficulty'],
             'template_text'   => $raw['template_text'],
             'correct_formula' => $raw['correct_formula'],
             'num_config'      => $numConfig,
+            'distractors'     => $distractors,
         ];
     }
 }
