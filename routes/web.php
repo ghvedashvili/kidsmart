@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\ThemeController;
 use App\Http\Controllers\Admin\TopicController;
 use App\Http\Controllers\Admin\QuestionTemplateController;
 use App\Http\Controllers\ChildSettingsController;
+use App\Http\Controllers\TestController;
 use App\Models\User;
 
 Route::get('/', function () {
@@ -69,6 +70,12 @@ Route::middleware(['auth'])->group(function () {
     // შვილის პარამეტრები (მხოლოდ მშობელი)
     Route::get('/children/{child}/settings',  [ChildSettingsController::class, 'edit'])->name('child.settings.edit');
     Route::put('/children/{child}/settings',  [ChildSettingsController::class, 'update'])->name('child.settings.update');
+
+    // ტესტი
+    Route::get('/test/start',           [TestController::class, 'start'])->name('test.start');
+    Route::get('/test/{test}',          [TestController::class, 'show'])->name('test.show');
+    Route::post('/test/{test}/submit',  [TestController::class, 'submit'])->name('test.submit');
+    Route::get('/test/{test}/result',   [TestController::class, 'result'])->name('test.result');
 });
 
 Route::middleware(['auth', 'admin'])->group(function () {

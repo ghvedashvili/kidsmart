@@ -103,6 +103,24 @@
     .notif-btn:hover { color: #333; border-color: #aaa; }
     .notif-btn.on { color: #111; border-color: #111; }
     .flash { font-family: 'Goldman', monospace; font-size: 0.72rem; color: #2ecc71; letter-spacing: 0.06em; }
+    .flash-err { font-family: 'Goldman', monospace; font-size: 0.72rem; color: #e74c3c; letter-spacing: 0.06em; }
+    .test-btn {
+        display: inline-flex; align-items: center; gap: 10px;
+        padding: 16px 36px; border-radius: 10px;
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        color: white; font-family: 'Goldman', monospace;
+        font-size: 0.88rem; letter-spacing: 0.08em;
+        text-decoration: none; transition: all 0.2s;
+        box-shadow: 0 4px 16px rgba(79,70,229,0.3);
+    }
+    .test-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(79,70,229,0.4); }
+    .test-pending {
+        background: #fff; border: 1px solid #e8e8e8; border-radius: 10px;
+        padding: 18px 20px; width: 100%; text-align: center;
+    }
+    .test-pending-label { font-family: 'Goldman', monospace; font-size: 0.65rem; color: #bbb; letter-spacing: 0.1em; margin-bottom: 10px; }
+    .test-pending-score { font-family: 'Goldman', monospace; font-size: 1.4rem; color: #111; letter-spacing: 0.06em; }
+    .test-pending-sub { font-family: 'Goldman', monospace; font-size: 0.62rem; color: #ccc; margin-top: 4px; }
 </style>
 
 <div class="dash-hero">
@@ -110,6 +128,9 @@
 
         @if(session('success'))
         <div class="flash">{{ session('success') }}</div>
+        @endif
+        @if(session('test_error'))
+        <div class="flash-err">{{ session('test_error') }}</div>
         @endif
 
         <div class="dash-greeting">გამარჯობა, {{ auth()->user()->name }}</div>
@@ -164,10 +185,32 @@
 
         {{-- ბავშვის ხედი --}}
         @if(auth()->user()->role === 'child')
-        <div style="font-family:'Goldman',monospace;font-size:0.75rem;color:#888;letter-spacing:0.06em;text-align:center;">
-            ✓ შესული ხარ<br>
-            <span style="font-size:0.65rem;color:#bbb;margin-top:4px;display:block;">ტესტი გამოჩნდება, როდესაც მშობელი გაუგზავნის</span>
+        @php
+            $activeTest    = auth()->user()->tests()->whereNull('completed_at')->latest()->first();
+            $lastCompleted = auth()->user()->tests()->whereNotNull('completed_at')->latest()->first();
+        @endphp
+
+        @if($activeTest)
+        <a href="{{ route('test.show', $activeTest) }}" class="test-btn">
+            📝 ტესტი გელოდება →
+        </a>
+        @else
+        <a href="{{ route('test.start') }}" class="test-btn">
+            ▶ ტესტის დაწყება
+        </a>
+        @endif
+
+        @if($lastCompleted)
+        <div class="test-pending">
+            <div class="test-pending-label">ბოლო ტესტი</div>
+            <div class="test-pending-score">
+                {{ $lastCompleted->correct_count }} / {{ $lastCompleted->total_questions }}
+                @php $pct = round($lastCompleted->correct_count / $lastCompleted->total_questions * 100); @endphp
+                <span style="font-size:0.8rem;color:#bbb;"> · {{ $pct }}%</span>
+            </div>
+            <div class="test-pending-sub">{{ $lastCompleted->completed_at->diffForHumans() }}</div>
         </div>
+        @endif
         @endif
 
         <button class="notif-btn" id="notifBtn" onclick="toggleNotifications()">
