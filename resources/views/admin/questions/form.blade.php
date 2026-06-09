@@ -61,11 +61,11 @@
 
             <div class="lbl">შაბლონის ტექსტი</div>
             <textarea name="template_text" class="fc"
-                placeholder="{{'{{'}}TEAM{{'}}'}}-მა გაიტანა {{'{{'}}N1{{'}}'}} გოლი პირველ ტაიმში და {{'{{'}}N2{{'}}'}} მეორეში. სულ რამდენი გოლი?"
+                placeholder="@{{TEAM}}-მა გაიტანა @{{N1}} გოლი პირველ ტაიმში და @{{N2}} მეორეში. სულ რამდენი გოლი?"
                 required>{{ old('template_text', $template?->template_text) }}</textarea>
             <div class="hint">
-                ცვლადები: {{'{{'}}TEAM{{'}}'}}, {{'{{'}}PLAYER{{'}}'}} — თემიდან იღებს მნიშვნელობას<br>
-                რიცხვები: {{'{{'}}N1{{'}}'}}, {{'{{'}}N2{{'}}'}} — num_config-ში განსაზღვრული დიაპაზონიდან
+                ცვლადები: @{{TEAM}}, @{{PLAYER}} — თემიდან იღებს მნიშვნელობას<br>
+                რიცხვები: @{{N1}}, @{{N2}} — num_config-ში განსაზღვრული დიაპაზონიდან
             </div>
             @error('template_text')<div class="err">{{ $message }}</div>@enderror
 

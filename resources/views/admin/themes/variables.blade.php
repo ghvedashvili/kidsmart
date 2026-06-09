@@ -55,7 +55,7 @@
             <div class="hint">მხოლოდ ლათინური ასოები, ციფრები, _ (TEAM, PLAYER, PLACE)</div>
             <textarea name="values" class="fc" rows="2"
                 placeholder="მნიშვნელობები მძიმით: დინამო, რუსთავი, თბილისი" required>{{ old('values') }}</textarea>
-            <div class="hint">მძიმით გამოყოფილი სია — შაბლონში გამოიყენება {{'{{'}}TEAM{{'}}'}}</div>
+            <div class="hint">მძიმით გამოყოფილი სია — შაბლონში გამოიყენება @{{TEAM}}</div>
             @error('variable_name')<div style="color:#e74c3c;font-size:0.72rem;margin-bottom:8px;">{{ $message }}</div>@enderror
             @error('values')<div style="color:#e74c3c;font-size:0.72rem;margin-bottom:8px;">{{ $message }}</div>@enderror
             <button type="submit" class="btn">შენახვა</button>
@@ -68,7 +68,7 @@
         <div class="row">
             <div style="flex:1;">
                 <div style="color:#888;margin-bottom:6px;font-size:0.75rem;letter-spacing:0.1em;">
-                    {{'{{'}}{{ $var->variable_name }}{{'}}'}}
+                    @{{ {{ $var->variable_name }} }}
                 </div>
                 <div>
                     @foreach($var->values as $v)
