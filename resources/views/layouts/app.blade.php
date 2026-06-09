@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>GameVeravart</title>
+    <title>KidSmart</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="manifest" href="/manifest.json">
@@ -47,7 +47,7 @@
 <div class="pwa-overlay" id="pwaOverlay" onclick="if(event.target===this)closePwaModal()">
     <div class="pwa-card">
         <div class="pwa-handle"></div>
-        <div class="pwa-title">VERAVART APP</div>
+        <div class="pwa-title">KIDSMART APP</div>
         <div class="pwa-subtitle">დააყენე უფასოდ · ინტერნეტის გარეშეც</div>
         <div class="pwa-tabs">
             <button class="pwa-tab active" id="tabIos" onclick="switchTab('ios')">

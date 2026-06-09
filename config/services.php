@@ -40,7 +40,7 @@ return [
     'vapid' => [
         'public_key'  => env('VAPID_PUBLIC_KEY', 'BO95-T7kjKahylgHWfnBospqy3dkFl9O6UXfkmCEpruH05easweV2XSKB47VP3zeZwzz91YoUSjWok_MSWioafQ'),
         'private_key' => env('VAPID_PRIVATE_KEY', 'HXwrL2xH5j7jnXx9C0ttRzl-IvPATF6DvT905LKxXrk'),
-        'subject'     => env('APP_URL', 'https://veravart.laravel.cloud'),
+        'subject'     => env('APP_URL', 'https://kidsmart.laravel.cloud'),
     ],
 
 ];

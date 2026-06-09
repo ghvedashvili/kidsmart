@@ -1,7 +1,7 @@
 {
-  "name": "GameVeravart",
-  "short_name": "Veravart",
-  "description": "Interactive puzzle game with levels",
+  "name": "KidSmart",
+  "short_name": "KidSmart",
+  "description": "Children's math practice app",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f5f5f5",

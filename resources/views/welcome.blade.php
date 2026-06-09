@@ -104,7 +104,8 @@
 <div class="hero">
     <div class="hero-inner">
         <div>
-            <div class="hero-title">VERAVART</div>
+            <img src="/images/logo.png" alt="KidSmart"
+                 style="width:clamp(180px,55vw,280px);height:auto;display:block;margin:0 auto 4px;">
             <div class="hero-sub">ვინ ხარ?</div>
         </div>
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'veravart-cache-v2';
+const CACHE_NAME = 'kidsmart-cache-v1';
 
 const ASSETS_TO_CACHE = [
     '/',
@@ -35,7 +35,7 @@ self.addEventListener('fetch', event => {
 
 // Push
 self.addEventListener('push', event => {
-    const data = event.data ? event.data.json() : { title: 'VERAVART', body: '' };
+    const data = event.data ? event.data.json() : { title: 'KIDSMART', body: '' };
     event.waitUntil(
         self.registration.showNotification(data.title, {
             body: data.body,
