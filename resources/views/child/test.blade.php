@@ -4,261 +4,137 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>ტესტი</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-    --accent: #4f46e5;
-    --accent2: #7c3aed;
-    --green: #16a34a;
-    --bg: #f1f5f9;
-    --card: #ffffff;
-    --radius: 16px;
+    --green: #1a7a3c;
+    --lg: #25a352;
+    --yellow: #f9c913;
+    --orange: #ff6b2b;
+    --sky: #e8f7ff;
+    --dark: #0d2818;
 }
 
 body {
     font-family: 'Nunito', sans-serif;
-    background: var(--bg);
+    background: var(--sky);
+    background-image:
+        radial-gradient(circle at 20% 50%, rgba(37,163,82,0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(249,201,19,0.10) 0%, transparent 40%);
     min-height: 100vh;
-    padding-bottom: 40px;
+    padding-bottom: 60px;
 }
 
 /* Header */
-.test-header {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    padding: 20px 20px 28px;
-    color: white;
+.hdr {
+    background: linear-gradient(135deg, var(--green), #0f5c2a);
+    padding: 18px 20px 14px;
     position: sticky;
     top: 0;
     z-index: 50;
-    box-shadow: 0 4px 20px rgba(79,70,229,0.3);
+    box-shadow: 0 4px 20px rgba(10,60,25,0.35);
 }
-.test-header-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
-}
-.test-title {
-    font-size: 1rem;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    opacity: 0.9;
-}
-.test-theme {
-    font-size: 1.4rem;
-}
-.progress-bar-wrap {
-    background: rgba(255,255,255,0.25);
-    border-radius: 99px;
-    height: 8px;
-    overflow: hidden;
-}
-.progress-bar-fill {
-    background: white;
-    height: 100%;
-    border-radius: 99px;
-    transition: width 0.4s ease;
-}
-.progress-text {
-    font-size: 0.72rem;
-    opacity: 0.8;
-    margin-top: 5px;
-    text-align: right;
-    font-weight: 700;
+.hdr-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.hdr-name { font-family: 'Fredoka One', cursive; font-size: 1.05rem; color: rgba(255,255,255,0.9); letter-spacing: 0.04em; }
+.hdr-theme { font-size: 1.6rem; }
+.prog-bar-wrap { background: rgba(255,255,255,0.25); border-radius: 99px; height: 8px; overflow: hidden; }
+.prog-bar-fill { background: var(--yellow); height: 100%; border-radius: 99px; transition: width 0.4s ease; }
+.prog-text { font-family: 'Fredoka One', cursive; font-size: 0.75rem; color: rgba(255,255,255,0.7); margin-top: 5px; text-align: right; letter-spacing: 0.06em; }
+.pitch-strip {
+    height: 6px; margin: 12px 0 0;
+    background: repeating-linear-gradient(90deg, var(--lg) 0px, var(--lg) 24px, var(--green) 24px, var(--green) 48px);
+    border-radius: 3px;
 }
 
-/* Questions */
-.questions-wrap {
-    padding: 20px 16px;
-    max-width: 640px;
-    margin: 0 auto;
-}
-
-/* One-at-a-time display */
-.q-page { display: none; }
-.q-page.active { display: block; }
+/* Cards */
+.wrap { max-width: 640px; margin: 0 auto; padding: 24px 16px 20px; }
 
 .q-card {
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 24px 20px 20px;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-    margin-bottom: 12px;
-}
-.q-num {
-    display: inline-block;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: white;
-    font-size: 0.7rem;
-    font-weight: 800;
-    padding: 3px 12px;
-    border-radius: 99px;
-    margin-bottom: 14px;
-    letter-spacing: 0.06em;
-}
-.q-text {
-    font-size: clamp(1rem, 3.5vw, 1.15rem);
-    font-weight: 700;
-    color: #1e293b;
-    line-height: 1.6;
+    background: white;
+    border-radius: 20px;
+    padding: 28px 20px 20px;
+    box-shadow: 0 6px 24px rgba(26,122,60,0.12);
+    border-top: 6px solid var(--green);
+    position: relative;
     margin-bottom: 20px;
+    transition: box-shadow 0.2s;
+}
+.q-card:nth-child(3n+2) { border-top-color: var(--yellow); }
+.q-card:nth-child(3n+3) { border-top-color: var(--orange); }
+.q-card.answered { box-shadow: 0 6px 24px rgba(26,122,60,0.22); }
+
+.q-badge {
+    position: absolute; top: -14px; left: 18px;
+    background: var(--green); color: white;
+    font-family: 'Fredoka One', cursive; font-size: 0.9rem;
+    padding: 3px 14px; border-radius: 99px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.q-card:nth-child(3n+2) .q-badge { background: #c89800; }
+.q-card:nth-child(3n+3) .q-badge { background: var(--orange); }
+
+.q-icon { font-size: 1.8rem; margin-bottom: 8px; display: block; }
+.q-text {
+    font-size: clamp(0.95rem, 3.2vw, 1.08rem);
+    font-weight: 800; color: var(--dark);
+    line-height: 1.7; margin-bottom: 18px;
 }
 
 /* Options */
-.options-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-.option-label {
-    position: relative;
-    cursor: pointer;
-    display: block;
-}
-.option-label input {
-    position: absolute;
-    opacity: 0;
-    width: 0; height: 0;
-}
-.option-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    background: #f8fafc;
-    border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 14px 10px;
-    font-family: 'Nunito', sans-serif;
-    font-size: clamp(1rem, 4vw, 1.2rem);
-    font-weight: 800;
-    color: #475569;
-    transition: all 0.15s;
-    text-align: center;
+.opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.opt-lbl { position: relative; cursor: pointer; display: block; }
+.opt-lbl input { position: absolute; opacity: 0; width: 0; height: 0; }
+.opt-btn {
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    background: #f0faf4; border: 2.5px solid #c5e8d0;
+    border-radius: 14px; padding: 13px 10px;
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1rem, 4vw, 1.15rem);
+    color: #3a7a50; text-align: center;
+    transition: all 0.15s; min-height: 56px;
     user-select: none;
-    min-height: 58px;
 }
-.option-btn .opt-letter {
-    font-size: 0.7rem;
-    font-weight: 900;
-    color: #94a3b8;
-    min-width: 16px;
+.q-card:nth-child(3n+2) .opt-btn { background: #fffbea; border-color: #f0d960; color: #7a6000; }
+.q-card:nth-child(3n+3) .opt-btn { background: #fff5f0; border-color: #ffc4a0; color: #7a3010; }
+.opt-lbl:hover .opt-btn { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.opt-lbl input:checked + .opt-btn {
+    border-color: var(--green); background: var(--green);
+    color: white; box-shadow: 0 4px 16px rgba(26,122,60,0.35);
+    transform: translateY(-2px);
 }
-.option-label:hover .option-btn {
-    border-color: var(--accent);
-    background: #eef2ff;
-    color: #4f46e5;
-    transform: translateY(-1px);
-}
-.option-label input:checked + .option-btn {
-    border-color: var(--accent);
-    background: linear-gradient(135deg, #eef2ff, #ede9fe);
-    color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(79,70,229,0.15);
-    transform: translateY(-1px);
-}
+.q-card:nth-child(3n+2) .opt-lbl input:checked + .opt-btn { border-color: #c89800; background: #c89800; }
+.q-card:nth-child(3n+3) .opt-lbl input:checked + .opt-btn { border-color: var(--orange); background: var(--orange); }
 
-/* Nav buttons */
-.q-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 18px;
-    gap: 10px;
+.check-mark {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--green); color: white;
+    font-size: 0.9rem; display: none;
+    align-items: center; justify-content: center;
+    position: absolute; top: -10px; right: -10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
-.nav-btn {
-    background: white;
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
-    color: #64748b;
-    font-family: 'Nunito', sans-serif;
-    font-weight: 800;
-    font-size: 0.85rem;
-    padding: 10px 20px;
-    cursor: pointer;
-    transition: all 0.15s;
-}
-.nav-btn:hover { border-color: var(--accent); color: var(--accent); }
-.nav-btn:disabled { opacity: 0.3; cursor: default; }
-.nav-btn.next {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-color: transparent;
-    color: white;
-    flex: 1;
-}
-.nav-btn.next:hover { opacity: 0.9; transform: translateY(-1px); }
-
-/* Answer dots */
-.answer-dots {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    justify-content: center;
-    margin: 16px auto 0;
-    max-width: 360px;
-}
-.a-dot {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.3);
-    border: 2px solid rgba(255,255,255,0.4);
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 0.6rem;
-    font-weight: 900;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.a-dot.answered {
-    background: rgba(255,255,255,0.9);
-    border-color: white;
-    color: var(--accent);
-}
-.a-dot.current {
-    border-color: white;
-    box-shadow: 0 0 0 3px rgba(255,255,255,0.4);
-    transform: scale(1.15);
-}
+.q-card.answered .check-mark { display: flex; }
+.q-card:nth-child(3n+2).answered .check-mark { background: #c89800; }
+.q-card:nth-child(3n+3).answered .check-mark { background: var(--orange); }
 
 /* Submit */
-.submit-wrap {
-    max-width: 640px;
-    margin: 0 auto;
-    padding: 0 16px;
-}
+.submit-wrap { max-width: 640px; margin: 0 auto; padding: 0 16px 40px; }
 .submit-btn {
-    width: 100%;
-    background: linear-gradient(135deg, var(--green), #15803d);
-    border: none;
-    border-radius: var(--radius);
-    color: white;
-    font-family: 'Nunito', sans-serif;
-    font-size: 1.05rem;
-    font-weight: 900;
-    padding: 18px;
-    cursor: pointer;
-    letter-spacing: 0.04em;
-    transition: all 0.2s;
-    box-shadow: 0 4px 20px rgba(22,163,74,0.35);
+    width: 100%; background: linear-gradient(135deg, var(--green), #0f5c2a);
+    border: none; border-radius: 18px; color: white;
+    font-family: 'Fredoka One', cursive; font-size: 1.2rem;
+    letter-spacing: 0.04em; padding: 18px;
+    cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 6px 24px rgba(26,122,60,0.4);
     display: none;
 }
-.submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(22,163,74,0.4); }
-.submit-btn.visible { display: block; }
+.submit-btn.vis { display: block; animation: popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275); }
+.submit-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 32px rgba(26,122,60,0.5); }
+@keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-.unanswered-warn {
-    font-family: 'Nunito', sans-serif;
-    font-size: 0.8rem;
-    color: #ef4444;
-    font-weight: 700;
-    text-align: center;
-    margin-top: 10px;
-    display: none;
-}
+.warn { font-family: 'Nunito', sans-serif; font-size: 0.8rem; color: #e74c3c; font-weight: 800; text-align: center; margin-top: 10px; display: none; }
 </style>
 </head>
 <body>
@@ -266,54 +142,34 @@ body {
 <form method="POST" action="{{ route('test.submit', $test) }}" id="testForm">
 @csrf
 
-<div class="test-header">
-    <div class="test-header-top">
-        <div class="test-title">{{ auth()->user()->name }} · ტესტი</div>
-        <div class="test-theme">{{ $test->theme?->icon ?? '📝' }}</div>
+<div class="hdr">
+    <div class="hdr-top">
+        <div class="hdr-name">{{ auth()->user()->name }} · ტესტი</div>
+        <div class="hdr-theme">{{ $test->theme?->icon ?? '📝' }}</div>
     </div>
-    <div class="progress-bar-wrap">
-        <div class="progress-bar-fill" id="progressFill" style="width: {{ (1/count($questions))*100 }}%"></div>
+    <div class="prog-bar-wrap">
+        <div class="prog-bar-fill" id="progFill" style="width:0%"></div>
     </div>
-    <div class="progress-text" id="progressText">1 / {{ count($questions) }}</div>
-
-    <div class="answer-dots" id="answerDots">
-        @foreach($questions as $i => $q)
-        <div class="a-dot {{ $i === 0 ? 'current' : '' }}" id="dot-{{ $i }}"
-            onclick="goTo({{ $i }})">{{ $i+1 }}</div>
-        @endforeach
-    </div>
+    <div class="prog-text" id="progText">0 / {{ count($questions) }} პასუხი</div>
+    <div class="pitch-strip"></div>
 </div>
 
-<div class="questions-wrap">
+<div class="wrap">
+    @php $icons = ['⚽','🏆','🥅','🧤','🎽','🏟️','⭐','🥇','🎯','🏅','🔥','💪']; @endphp
     @foreach($questions as $i => $q)
-    <div class="q-page {{ $i === 0 ? 'active' : '' }}" id="page-{{ $i }}">
-        <div class="q-card">
-            <div class="q-num">კითხვა {{ $i+1 }}</div>
-            <div class="q-text">{{ $q->question_text }}</div>
-            <div class="options-grid">
-                @php $letters = ['A','B','C','D','E']; @endphp
-                @foreach($q->options as $j => $opt)
-                <label class="option-label">
-                    <input type="radio" name="answers[{{ $q->id }}]" value="{{ $opt }}"
-                        onchange="onAnswer({{ $i }})">
-                    <div class="option-btn">
-                        <span class="opt-letter">{{ $letters[$j] }}</span>
-                        {{ $opt }}
-                    </div>
-                </label>
-                @endforeach
-            </div>
-        </div>
-
-        <div class="q-nav">
-            <button type="button" class="nav-btn" onclick="goTo({{ $i-1 }})"
-                {{ $i === 0 ? 'disabled' : '' }}>← უკან</button>
-            @if($i < count($questions) - 1)
-            <button type="button" class="nav-btn next" id="next-{{ $i }}"
-                onclick="goTo({{ $i+1 }})">შემდეგი →</button>
-            @else
-            <button type="button" class="nav-btn next" onclick="trySubmit()">დასრულება ✓</button>
-            @endif
+    <div class="q-card" id="card-{{ $i }}">
+        <div class="q-badge">⚽ {{ $i + 1 }}</div>
+        <div class="check-mark">✓</div>
+        <span class="q-icon">{{ $icons[$i % count($icons)] }}</span>
+        <div class="q-text">{{ $q->question_text }}</div>
+        <div class="opts">
+            @foreach($q->options as $opt)
+            <label class="opt-lbl">
+                <input type="radio" name="answers[{{ $q->id }}]" value="{{ $opt }}"
+                    onchange="onAnswer({{ $i }})">
+                <div class="opt-btn">{{ $opt }}</div>
+            </label>
+            @endforeach
         </div>
     </div>
     @endforeach
@@ -323,54 +179,28 @@ body {
     <button type="submit" class="submit-btn" id="submitBtn">
         ✓ პასუხების გაგზავნა
     </button>
-    <div class="unanswered-warn" id="warnMsg"></div>
+    <div class="warn" id="warnMsg"></div>
 </div>
 
 </form>
 
 <script>
-let current = 0;
 const totalQ = {{ count($questions) }};
-const answered = new Array(totalQ).fill(false);
-
-function goTo(n) {
-    if (n < 0 || n >= totalQ) return;
-    document.getElementById('page-' + current).classList.remove('active');
-    document.getElementById('dot-' + current).classList.remove('current');
-    current = n;
-    document.getElementById('page-' + current).classList.add('active');
-    document.getElementById('dot-' + current).classList.add('current');
-    const pct = ((current + 1) / totalQ * 100).toFixed(0);
-    document.getElementById('progressFill').style.width = pct + '%';
-    document.getElementById('progressText').textContent = (current + 1) + ' / ' + totalQ;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    const allAnswered = answered.every(Boolean);
-    document.getElementById('submitBtn').classList.toggle('visible', allAnswered);
-}
+let answeredCount = 0;
+const answeredSet = new Set();
 
 function onAnswer(i) {
-    answered[i] = true;
-    document.getElementById('dot-' + i).classList.add('answered');
-    const allAnswered = answered.every(Boolean);
-    document.getElementById('submitBtn').classList.toggle('visible', allAnswered);
-    if (i < totalQ - 1) {
-        setTimeout(() => goTo(i + 1), 300);
+    if (!answeredSet.has(i)) {
+        answeredSet.add(i);
+        answeredCount++;
+        document.getElementById('card-' + i).classList.add('answered');
+        const pct = Math.round(answeredCount / totalQ * 100);
+        document.getElementById('progFill').style.width = pct + '%';
+        document.getElementById('progText').textContent = answeredCount + ' / ' + totalQ + ' პასუხი';
     }
-}
-
-function trySubmit() {
-    const missing = answered.filter(Boolean).length;
-    if (missing < totalQ) {
-        const unanswered = answered.map((a, i) => a ? null : i + 1).filter(Boolean);
-        document.getElementById('warnMsg').style.display = 'block';
-        document.getElementById('warnMsg').textContent =
-            'გამოტოვებული კითხვები: ' + unanswered.join(', ');
-        const firstMissing = unanswered[0] - 1;
-        goTo(firstMissing);
-        return;
+    if (answeredCount === totalQ) {
+        document.getElementById('submitBtn').classList.add('vis');
     }
-    document.getElementById('testForm').submit();
 }
 </script>
 </body>

@@ -56,6 +56,11 @@ class TestController extends Controller
 
         $questions = $test->questions()->get();
 
+        if ($questions->isEmpty()) {
+            $test->delete();
+            return redirect()->route('dashboard')->with('test_error', 'ტესტი ვერ ჩაიტვირთა — სცადე თავიდან');
+        }
+
         return view('child.test', [
             'test'      => $test->load('theme'),
             'questions' => $questions,

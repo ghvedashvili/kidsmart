@@ -73,7 +73,7 @@
             <input type="text" name="correct_formula" class="fc"
                 placeholder="N1+N2"
                 value="{{ old('correct_formula', $template?->correct_formula) }}" required>
-            <div class="hint">PHP გამოთვლება: N1+N2, N1*N2, N1-N2 და ა.შ.</div>
+            <div class="hint">მხოლოდ ცვლადის სახელები და ოპერატორები: N1+N2, N1*N2, N1-N2 — (@{{N1}} კი არა, N1)</div>
             @error('correct_formula')<div class="err">{{ $message }}</div>@enderror
 
             <div class="lbl">რიცხვების კონფიგი (JSON)</div>

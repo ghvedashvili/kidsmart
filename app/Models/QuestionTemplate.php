@@ -30,15 +30,22 @@ class QuestionTemplate extends Model
             $vars[$name] = $values[array_rand($values)];
         }
 
-        $text   = $this->template_text;
-        $formula = $this->correct_formula;
+        // normalize text: fix single-brace typos like {{N3} → {{N3}}
+        $text    = preg_replace('/\{\{(\w+)\}(?!\})/', '{{$1}}', $this->template_text);
+        $formula = preg_replace('/\{\{(\w+)\}\}/', '$1', $this->correct_formula);
 
         foreach ($vars as $k => $v) {
             $text    = str_replace("{{{$k}}}", $v, $text);
-            $formula = str_replace($k, $v, $formula);
+            $formula = str_replace($k, (string) $v, $formula);
         }
 
-        $correct = eval("return (int)({$formula});");
+        // remove any leftover {{...}} that had no matching var
+        $text = preg_replace('/\{\{\w+\}\}/', '?', $text);
+
+        $correct = @eval("return (int)({$formula});");
+        if ($correct === false || $correct === null) {
+            $correct = 0;
+        }
 
         $wrong = [];
         $offsets = [1, -1, 2, -2, 3, -3, 5, -5, 10, -10];

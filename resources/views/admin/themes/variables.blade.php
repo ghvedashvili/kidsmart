@@ -68,7 +68,7 @@
         <div class="row">
             <div style="flex:1;">
                 <div style="color:#888;margin-bottom:6px;font-size:0.75rem;letter-spacing:0.1em;">
-                    {{ '{{'.$var->variable_name.'}}' }}
+                    {{ '{{' . $var->variable_name . '}' . '}' }}
                 </div>
                 <div>
                     @foreach($var->values as $v)
