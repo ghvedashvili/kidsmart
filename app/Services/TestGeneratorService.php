@@ -41,16 +41,14 @@ class TestGeneratorService
         $theme = $themes->filter(fn($t) => $t->variables->isNotEmpty())->random()
             ?? $themes->random();
 
+        $pool = $templates->shuffle();
+
         $test = Test::create([
             'child_id'        => $child->id,
             'theme_id'        => $theme->id,
             'scheduled_at'    => now(),
-            'total_questions' => 15,
+            'total_questions' => $pool->count(),
         ]);
-
-        $pool = $templates->count() >= 15
-            ? $templates->shuffle()->take(15)
-            : collect(range(1, 15))->map(fn() => $templates->random());
 
         foreach ($pool as $i => $template) {
             $generated = $template->generate($theme);
