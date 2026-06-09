@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\GradeController;
 use App\Http\Controllers\Admin\ThemeController;
 use App\Http\Controllers\Admin\TopicController;
 use App\Http\Controllers\Admin\QuestionTemplateController;
+use App\Http\Controllers\ChildSettingsController;
 use App\Models\User;
 
 Route::get('/', function () {
@@ -64,6 +65,10 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/push/subscribe',   [PushController::class, 'subscribe'])->name('push.subscribe');
     Route::post('/push/unsubscribe', [PushController::class, 'unsubscribe'])->name('push.unsubscribe');
+
+    // შვილის პარამეტრები (მხოლოდ მშობელი)
+    Route::get('/children/{child}/settings',  [ChildSettingsController::class, 'edit'])->name('child.settings.edit');
+    Route::put('/children/{child}/settings',  [ChildSettingsController::class, 'update'])->name('child.settings.update');
 });
 
 Route::middleware(['auth', 'admin'])->group(function () {
