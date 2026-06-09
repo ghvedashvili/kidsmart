@@ -53,7 +53,7 @@
         <div class="nav-right">
             @auth
             <button id="notif-btn-desktop" onclick="toggleNotifications()" title="შეტყობინებები"
-                style="display:none;" class="nav-link-item">
+                class="nav-link-item">
                 <i id="notif-icon-desktop" class="bi bi-bell"></i>
             </button>
 

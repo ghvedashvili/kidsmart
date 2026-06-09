@@ -206,12 +206,17 @@ if ('serviceWorker' in navigator) {
             if (dashBtn)  dashBtn.classList.toggle('on', granted);
         }
 
+        const notifSupported = (typeof Notification !== 'undefined') && ('pushManager' in reg);
+
         // გვერდის ჩატვირთვისას მდგომარეობის შემოწმება
-        reg.pushManager.getSubscription().then(sub => {
-            updateNotifUI(!!sub && Notification.permission === 'granted');
-        });
+        if (notifSupported) {
+            reg.pushManager.getSubscription().then(sub => {
+                updateNotifUI(!!sub && Notification.permission === 'granted');
+            });
+        }
 
         window.toggleNotifications = function() {
+            if (!notifSupported) return;
             if (Notification.permission === 'granted') {
                 window._swReg.pushManager.getSubscription().then(sub => {
                     if (sub) {
@@ -233,7 +238,7 @@ if ('serviceWorker' in navigator) {
         };
 
         window.enablePushNotifications = function() {
-            if (!window._swReg) return;
+            if (!window._swReg || !notifSupported) return;
             Notification.requestPermission().then(perm => {
                 if (perm !== 'granted') return;
                 window._swReg.pushManager.getSubscription().then(existing => {
