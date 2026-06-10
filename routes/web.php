@@ -69,8 +69,9 @@ Route::middleware(['auth'])->group(function () {
     // შვილის პარამეტრები (მხოლოდ მშობელი)
     Route::get('/children/{child}/stats',                [ChildSettingsController::class, 'stats'])->name('child.stats');
     Route::get('/children/{child}/tests/{test}',         [ChildSettingsController::class, 'showTest'])->name('child.test.show');
-    Route::get('/children/{child}/settings',  [ChildSettingsController::class, 'edit'])->name('child.settings.edit');
-    Route::put('/children/{child}/settings',  [ChildSettingsController::class, 'update'])->name('child.settings.update');
+    Route::get('/children/{child}/settings',    [ChildSettingsController::class, 'edit'])->name('child.settings.edit');
+    Route::put('/children/{child}/settings',    [ChildSettingsController::class, 'update'])->name('child.settings.update');
+    Route::delete('/children/{child}',          [ChildSettingsController::class, 'destroy'])->name('child.destroy');
 
     // ტესტი
     Route::get('/test/start',           [TestController::class, 'start'])->name('test.start');

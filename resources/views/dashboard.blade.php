@@ -51,22 +51,7 @@
         letter-spacing: 0.06em;
     }
 
-    .pcode-wrap { text-align: center; width: 100%; }
-    .pcode-label {
-        font-family: 'Goldman', monospace;
-        font-size: 0.62rem; color: #aaa;
-        letter-spacing: 0.14em; margin-bottom: 8px; text-transform: uppercase;
-    }
-    .pcode {
-        font-family: 'Goldman', monospace;
-        font-size: clamp(1.6rem, 6vw, 2.2rem);
-        color: #111; letter-spacing: 0.3em;
-        border: 1px solid #ddd; border-radius: 8px;
-        padding: 12px 28px; display: inline-block;
-        cursor: pointer; transition: border-color 0.2s;
-    }
-    .pcode:hover { border-color: #aaa; }
-    .pcode-copy { font-family: 'Goldman', monospace; font-size: 0.6rem; color: #bbb; margin-top: 6px; letter-spacing: 0.08em; }
+
 
     .children-section { width: 100%; }
     .section-label {
@@ -146,6 +131,10 @@
         transition: background 0.2s;
     }
     .msave:hover { background: #333; }
+    .msave-danger {
+        background: transparent; border: 1px solid #ddd; color: #888;
+    }
+    .msave-danger:hover { border-color: #e74c3c; color: #e74c3c; background: transparent; }
     .merr { font-family: 'Goldman', monospace; font-size: 0.65rem; color: #e74c3c; margin-top: -12px; margin-bottom: 10px; }
     .child-code-badge {
         font-family: 'Goldman', monospace; font-size: 0.75rem; color: #111;
@@ -216,13 +205,7 @@
         @if(auth()->user()->role === 'parent')
         @php $children = auth()->user()->children()->with(['childSetting.grade','themes','topics'])->get(); @endphp
 
-        @if(auth()->user()->parent_code)
-        <div class="pcode-wrap">
-            <div class="pcode-label">შვილის კოდი</div>
-            <div class="pcode" onclick="copyCode(this)">{{ auth()->user()->parent_code }}</div>
-            <div class="pcode-copy" id="copyHint">დააჭირე დასაკოპირებლად</div>
-        </div>
-        @endif
+
 
         @if(session('child_added'))
         <div class="flash">{{ session('child_added') }}</div>
@@ -315,7 +298,7 @@
                     </div>
                     <input type="hidden" name="difficulty" id="edif{{ $child->id }}" value="{{ $es?->difficulty ?? 1 }}">
 
-                    <div class="mlbl">ტესტი კვირაში</div>
+                    <div class="mlbl">ტესტი დღეში</div>
                     <div class="mrow">
                         @for($i=1; $i<=7; $i++)
                         <label class="mchip {{ ($es?->tests_per_week ?? 1) == $i ? 'sel' : '' }}"
@@ -357,7 +340,18 @@
                     @endforeach
                     @endif
 
-                    <button type="submit" class="msave">შენახვა</button>
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
+                        <button type="submit" class="msave" style="margin-top:0;">შენახვა</button>
+                        <button type="button" class="msave msave-danger" style="margin-top:0;"
+                            onclick="confirmDeleteChild({{ $child->id }}, '{{ addslashes($child->name) }}')">
+                            წაშლა
+                        </button>
+                    </div>
+                </form>
+
+                <form id="deleteChildForm{{ $child->id }}" method="POST"
+                    action="{{ route('child.destroy', $child) }}" style="display:none;">
+                    @csrf @method('DELETE')
                 </form>
             </div>
         </div>
@@ -477,7 +471,7 @@
             <input type="hidden" name="difficulty" id="difficulty_input" value="{{ old('difficulty', 1) }}">
 
             {{-- Tests per week --}}
-            <div class="mlbl">ტესტი კვირაში</div>
+            <div class="mlbl">ტესტი დღეში</div>
             <div class="mrow" id="tpwRow">
                 @for($i=1; $i<=7; $i++)
                 <label class="mchip {{ old('tests_per_week', 1) == $i ? 'sel' : '' }}"
@@ -531,10 +525,22 @@
 @endif
 
 <script>
-function copyCode(el) {
-    navigator.clipboard.writeText(el.textContent.trim()).then(() => {
-        document.getElementById('copyHint').textContent = '✓ დაკოპირდა!';
-        setTimeout(() => document.getElementById('copyHint').textContent = 'დააჭირე დასაკოპირებლად', 2000);
+
+
+function confirmDeleteChild(childId, childName) {
+    Swal.fire({
+        title: childName + '-ის წაშლა?',
+        html: '<span style="color:#c0392b;font-size:0.9rem;">⚠️ წაიშლება ბავშვის მთელი ისტორია — ყველა ტესტი, შედეგი და პარამეტრი.</span><br><span style="font-size:0.82rem;color:#888;">ეს მოქმედება ვერ გაუქმდება.</span>',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#c0392b',
+        cancelButtonColor: '#aaa',
+        confirmButtonText: 'დიახ, წავშალო',
+        cancelButtonText: 'გაუქმება',
+    }).then(result => {
+        if (result.isConfirmed) {
+            document.getElementById('deleteChildForm' + childId).submit();
+        }
     });
 }
 

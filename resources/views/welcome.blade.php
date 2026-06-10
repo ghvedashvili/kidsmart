@@ -39,27 +39,17 @@
     }
 
     /* Role cards */
-    .role-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%; }
+    .role-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
     .role-card {
-        border: none; border-radius: 20px; padding: 32px 14px;
-        cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-        display: flex; align-items: center; justify-content: center;
-        background: #fff;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: 13px 10px;
+        font-family: 'Goldman', monospace; font-size: 0.82rem; letter-spacing: 0.08em;
+        background: transparent; border: 1px solid #ddd; border-radius: 4px;
+        cursor: pointer; transition: color 0.2s, border-color 0.2s;
+        color: #888;
     }
-    .role-card:hover  { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.11); }
-    .role-card.active { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.13); }
-    .role-card-parent { border-top: 5px solid #4a90d9; }
-    .role-card-child  { border-top: 5px solid #ff4b7d; }
-    .role-card.active.role-card-parent { background: #eef6ff; }
-    .role-card.active.role-card-child  { background: #fff0f4; }
-    .role-label {
-        font-family: 'Fredoka One', cursive;
-        font-size: clamp(1rem, 4vw, 1.2rem);
-        letter-spacing: 0.04em;
-    }
-    .role-card-parent .role-label { color: #4a90d9; }
-    .role-card-child  .role-label { color: #ff4b7d; }
+    .role-card:hover { border-color: #aaa; color: #333; }
+    .role-card.active { border-color: #111; color: #111; }
 
     /* Panels */
     .auth-panel { width: 100%; display: none; flex-direction: column; align-items: center; gap: 12px; }
@@ -67,37 +57,34 @@
 
     /* Google button */
     .google-btn {
-        display: inline-flex; align-items: center; justify-content: center; gap: 12px;
-        padding: 14px 32px; width: 100%;
-        font-family: 'Fredoka One', cursive;
-        font-size: clamp(0.9rem, 2.5vw, 1rem); letter-spacing: 0.06em;
-        color: #fff; background: #4a90d9; border: none; border-radius: 14px;
-        text-decoration: none;
-        box-shadow: 0 4px 16px rgba(74,144,217,0.35);
-        transition: transform 0.15s, box-shadow 0.15s;
+        display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+        padding: 13px 28px; width: 100%;
+        font-family: 'Goldman', monospace; font-size: 0.82rem; letter-spacing: 0.08em;
+        color: #fff; background: #111; border: none; border-radius: 4px;
+        text-decoration: none; cursor: pointer;
+        transition: background 0.2s;
     }
-    .google-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(74,144,217,0.45); color: #fff; }
+    .google-btn:hover { background: #333; color: #fff; }
 
     /* Child form */
     .child-form { display: flex; flex-direction: column; gap: 10px; width: 100%; }
     .child-input {
-        background: #fff; border: 2.5px solid #ffc0d0; border-radius: 14px;
-        color: #333; font-family: 'Fredoka One', cursive; font-size: 1.3rem;
-        padding: 13px 20px; outline: none; width: 100%;
+        background: #fff; border: 1px solid #ddd; border-radius: 4px;
+        color: #333; font-family: 'Goldman', monospace; font-size: 1rem;
+        padding: 13px 16px; outline: none; width: 100%;
         letter-spacing: 0.18em; text-align: center; box-sizing: border-box;
         transition: border-color 0.2s;
     }
-    .child-input:focus { border-color: #ff4b7d; }
-    .child-input::placeholder { color: #ffb3c6; letter-spacing: 0.06em; font-size: 1rem; }
+    .child-input:focus { border-color: #aaa; }
+    .child-input::placeholder { color: #bbb; letter-spacing: 0.06em; font-size: 0.82rem; }
     .child-submit {
-        background: #ff4b7d; border: none; border-radius: 14px;
-        color: #fff; font-family: 'Fredoka One', cursive; font-size: 1rem;
-        letter-spacing: 0.06em; padding: 14px; cursor: pointer; width: 100%;
-        box-shadow: 0 4px 16px rgba(255,75,125,0.35);
-        transition: transform 0.15s, box-shadow 0.15s;
+        background: #111; border: none; border-radius: 4px;
+        color: #fff; font-family: 'Goldman', monospace; font-size: 0.82rem;
+        letter-spacing: 0.08em; padding: 13px; cursor: pointer; width: 100%;
+        transition: background 0.2s;
     }
-    .child-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,75,125,0.45); }
-    .err-msg { font-family: 'Fredoka One', cursive; font-size: 0.85rem; color: #ff4b7d; }
+    .child-submit:hover { background: #333; }
+    .err-msg { font-family: 'Goldman', monospace; font-size: 0.72rem; color: #e74c3c; }
 </style>
 
 <div class="hero">
@@ -108,12 +95,8 @@
         <div class="tagline">სახალისო მათემატიკა 🎉</div>
 
         <div class="role-cards">
-            <button class="role-card role-card-parent" id="cardParent" onclick="showPanel('parent')">
-                <div class="role-label">მშობელი</div>
-            </button>
-            <button class="role-card role-card-child" id="cardChild" onclick="showPanel('child')">
-                <div class="role-label">ბავშვი</div>
-            </button>
+            <button class="role-card role-card-parent" id="cardParent" onclick="showPanel('parent')">მშობელი</button>
+            <button class="role-card role-card-child" id="cardChild" onclick="showPanel('child')">ბავშვი</button>
         </div>
 
         {{-- Parent panel --}}

@@ -71,6 +71,13 @@ class ChildSettingsController extends Controller
         ));
     }
 
+    public function destroy(User $child)
+    {
+        $this->authorizeChild($child);
+        $child->delete();
+        return redirect()->route('dashboard')->with('success', 'ბავშვის პროფილი წაიშალა');
+    }
+
     public function update(Request $request, User $child)
     {
         $this->authorizeChild($child);

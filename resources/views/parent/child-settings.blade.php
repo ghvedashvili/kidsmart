@@ -135,7 +135,7 @@
 
         {{-- კვირაში რამდენჯერ --}}
         <div class="section">
-            <div class="slabel">ტესტი კვირაში</div>
+            <div class="slabel">ტესტი დღეში</div>
             <div class="freq-row">
                 @foreach([1,2,3,4,5,6,7] as $f)
                 <button type="button"
