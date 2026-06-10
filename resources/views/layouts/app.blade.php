@@ -116,9 +116,74 @@
     <div class="loader-text">Loading…</div>
 </div>
 
+{{-- Cookie consent --}}
+<div id="cookieBanner" style="
+    display:none; position:fixed; bottom:0; left:0; right:0; z-index:9999;
+    background:#fff; border-top:1px solid #e8e8e8;
+    padding:16px 20px; font-family:'Goldman',monospace;
+    box-shadow:0 -4px 24px rgba(0,0,0,0.07);
+">
+    <div style="max-width:640px; margin:0 auto;">
+        <div style="font-size:0.78rem; color:#111; letter-spacing:0.06em; margin-bottom:6px;">
+            ჩვენ ვიყენებთ Cookies-ს
+        </div>
+        <div style="font-size:0.67rem; color:#888; letter-spacing:0.04em; line-height:1.6; margin-bottom:14px;">
+            Google Analytics გვეხმარება გავიგოთ, როგორ იყენებენ ვიზიტორები ჩვენს საიტს.
+            მონაცემები ანონიმურია და მხოლოდ საიტის გაუმჯობესებისთვის გამოიყენება.
+        </div>
+        <div style="display:flex; gap:8px;">
+            <button onclick="cookieChoice(false)" style="
+                font-family:'Goldman',monospace; font-size:0.72rem; letter-spacing:0.08em;
+                background:transparent; border:1px solid #ddd; border-radius:4px;
+                color:#888; padding:9px 20px; cursor:pointer; transition:border-color 0.2s,color 0.2s;
+            " onmouseover="this.style.borderColor='#aaa';this.style.color='#333'"
+               onmouseout="this.style.borderColor='#ddd';this.style.color='#888'">
+                უარყოფა
+            </button>
+            <button onclick="cookieChoice(true)" style="
+                font-family:'Goldman',monospace; font-size:0.72rem; letter-spacing:0.08em;
+                background:#111; border:none; border-radius:4px;
+                color:#fff; padding:9px 20px; cursor:pointer; transition:background 0.2s;
+            " onmouseover="this.style.background='#333'"
+               onmouseout="this.style.background='#111'">
+                თანხმობა
+            </button>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+// ── Cookie consent ──
+(function() {
+    var consent = localStorage.getItem('ks_cookie_consent');
+    if (consent === 'true') {
+        loadGA();
+    } else if (consent === null) {
+        document.getElementById('cookieBanner').style.display = 'block';
+    }
+})();
+
+function cookieChoice(accepted) {
+    localStorage.setItem('ks_cookie_consent', accepted ? 'true' : 'false');
+    document.getElementById('cookieBanner').style.display = 'none';
+    if (accepted) loadGA();
+}
+
+function loadGA() {
+    var GA_ID = 'G-4KBZMW9QQ3';
+    if (!GA_ID) return;
+    var s = document.createElement('script');
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
+    s.async = true;
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', GA_ID, { anonymize_ip: true });
+}
+
 // ── PWA install prompt ──
 let _pwaPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {

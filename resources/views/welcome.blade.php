@@ -8,7 +8,8 @@
 <style>
     nav.fixed-top { display: none !important; }
     body {
-        margin: 0; padding: 0 !important; overflow-x: hidden;
+        margin: 0; padding: 0 !important;
+        overflow-x: clip;
         background: #ffffff;
         background-image: radial-gradient(rgba(0,0,0,0.07) 1.5px, transparent 1.5px);
         background-size: 22px 22px;
@@ -85,6 +86,73 @@
     }
     .child-submit:hover { background: #333; }
     .err-msg { font-family: 'Goldman', monospace; font-size: 0.72rem; color: #e74c3c; }
+
+    /* ── Content section ── */
+    .content-section {
+        width: 100%; max-width: 480px; margin: 0 auto;
+        padding: 0 20px 80px;
+        display: flex; flex-direction: column; gap: 48px;
+    }
+
+    /* Stats row */
+    .stats-row {
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+        text-align: center;
+    }
+    .stat-item { display: flex; flex-direction: column; gap: 4px; }
+    .stat-num {
+        font-family: 'Goldman', monospace; font-size: clamp(1.6rem, 6vw, 2rem);
+        color: #111; letter-spacing: -0.02em;
+    }
+    .stat-lbl {
+        font-family: 'Goldman', monospace; font-size: 0.62rem;
+        color: #aaa; letter-spacing: 0.1em; text-transform: uppercase;
+    }
+
+    /* Feature cards */
+    .feat-grid { display: flex; flex-direction: column; gap: 10px; }
+    .feat-card {
+        display: flex; align-items: flex-start; gap: 14px;
+        border: 1px solid #e8e8e8; border-radius: 4px; padding: 16px 18px;
+        background: #fff;
+    }
+    .feat-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 2px; }
+    .feat-title {
+        font-family: 'Goldman', monospace; font-size: 0.78rem;
+        color: #111; letter-spacing: 0.06em; margin-bottom: 4px;
+    }
+    .feat-desc {
+        font-family: 'Goldman', monospace; font-size: 0.68rem;
+        color: #888; letter-spacing: 0.04em; line-height: 1.6;
+    }
+
+    /* Operations */
+    .ops-title {
+        font-family: 'Goldman', monospace; font-size: 0.62rem;
+        color: #aaa; letter-spacing: 0.14em; text-transform: uppercase;
+        margin-bottom: 10px;
+    }
+    .ops-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .op-card {
+        border: 1px solid #e8e8e8; border-radius: 4px; padding: 14px 16px;
+        background: #fff; display: flex; flex-direction: column; gap: 6px;
+    }
+    .op-sym {
+        font-family: 'Goldman', monospace; font-size: 1.4rem; color: #111;
+    }
+    .op-name {
+        font-family: 'Goldman', monospace; font-size: 0.68rem;
+        color: #aaa; letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .op-ex {
+        font-family: 'Goldman', monospace; font-size: 0.72rem;
+        color: #555; letter-spacing: 0.06em;
+    }
+
+    /* divider */
+    .sec-divider {
+        width: 32px; height: 1px; background: #ddd; margin: 0 auto;
+    }
 </style>
 
 <div class="hero">
@@ -128,6 +196,92 @@
             </form>
         </div>
     </div>
+</div>
+
+{{-- Content cards section --}}
+<div class="content-section">
+
+    <div class="sec-divider"></div>
+
+    {{-- Stats --}}
+    <div class="stats-row">
+        <div class="stat-item">
+            <div class="stat-num">4</div>
+            <div class="stat-lbl">ოპერაცია</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num">5</div>
+            <div class="stat-lbl">სირთულე</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num">∞</div>
+            <div class="stat-lbl">ამოცანა</div>
+        </div>
+    </div>
+
+    <div class="sec-divider"></div>
+
+    {{-- Feature cards --}}
+    <div class="feat-grid">
+        <div class="feat-card">
+            <div class="feat-icon">🎯</div>
+            <div>
+                <div class="feat-title">პერსონალიზებული ტესტები</div>
+                <div class="feat-desc">ყოველ ბავშვს საკუთარი სირთულე, თემა და დღიური დავალება. მშობელი თვითონ ირჩევს.</div>
+            </div>
+        </div>
+        <div class="feat-card">
+            <div class="feat-icon">📊</div>
+            <div>
+                <div class="feat-title">სტატისტიკა და პროგრესი</div>
+                <div class="feat-desc">მშობელი ხედავს ყველა ტესტის შედეგს, სწორ და არასწორ პასუხებს.</div>
+            </div>
+        </div>
+        <div class="feat-card">
+            <div class="feat-icon">🔢</div>
+            <div>
+                <div class="feat-title">სახალისო ამოცანები</div>
+                <div class="feat-desc">რიცხვებიანი ამბები — ფეხბურთი, საქონელი, ბაღი — მათემატიკა ცხოვრებიდან.</div>
+            </div>
+        </div>
+        <div class="feat-card">
+            <div class="feat-icon">🏆</div>
+            <div>
+                <div class="feat-title">ყოველდღიური ჩვევა</div>
+                <div class="feat-desc">შეტყობინება შეახსენებს ტესტს. განსაზღვრე რამდენი ამოცანა დღეში.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sec-divider"></div>
+
+    {{-- Operations --}}
+    <div>
+        <div class="ops-title">მოქმედებები</div>
+        <div class="ops-grid">
+            <div class="op-card">
+                <div class="op-sym">+</div>
+                <div class="op-name">შეკრება</div>
+                <div class="op-ex">347 + 285 = 632</div>
+            </div>
+            <div class="op-card">
+                <div class="op-sym">−</div>
+                <div class="op-name">გამოკლება</div>
+                <div class="op-ex">523 − 178 = 345</div>
+            </div>
+            <div class="op-card">
+                <div class="op-sym">×</div>
+                <div class="op-name">გამრავლება</div>
+                <div class="op-ex">47 × 23 = 1081</div>
+            </div>
+            <div class="op-card">
+                <div class="op-sym">÷</div>
+                <div class="op-name">გაყოფა</div>
+                <div class="op-ex">84 ÷ 7 = 12</div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script>
