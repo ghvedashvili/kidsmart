@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('content')
 <style>
-    body { background: #f5f5f5 !important; padding: 0 !important; }
+    body { background: transparent !important; padding: 0 !important; }
     .wrap {
         max-width: 520px; margin: 0 auto;
         padding: 36px 20px 80px;

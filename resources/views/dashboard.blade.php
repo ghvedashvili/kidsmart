@@ -3,7 +3,7 @@
 @section('content')
 <style>
     body {
-        background: #f5f5f5 !important;
+        background: transparent !important;
         padding-left: 0 !important;
         padding-right: 0 !important;
         overflow-x: hidden;
