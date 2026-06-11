@@ -127,15 +127,17 @@ body {
 /* ── Drag carousel (shared) ── */
 .dc {
     display: flex; gap: 16px;
-    overflow-x: auto; scroll-snap-type: x mandatory;
+    overflow-x: auto; scroll-snap-type: x proximity;
     padding: 24px 4px 20px; scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
-    cursor: grab; user-select: none;
+    cursor: grab; user-select: none; touch-action: pan-x;
 }
 .dc::-webkit-scrollbar { display: none; }
 .dc.dragging { cursor: grabbing; }
 /* ── Question cards ── */
 .car-outer { margin: 0 -24px; padding: 0 24px; overflow: hidden; }
+.ac-outer   { overflow: hidden; }
+.mkt-outer  { overflow: hidden; }
 .car-track { }
 
 .qc {
@@ -184,10 +186,10 @@ body {
 /* ── Adaptive / Detective drag carousel ── */
 .adapt-grid, .detect-grid {
     display: flex; gap: 16px;
-    overflow-x: auto; scroll-snap-type: x mandatory;
+    overflow-x: auto; scroll-snap-type: x proximity;
     padding: 8px 4px 20px; scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
-    cursor: grab; user-select: none;
+    cursor: grab; user-select: none; touch-action: pan-x;
 }
 .adapt-grid::-webkit-scrollbar, .detect-grid::-webkit-scrollbar { display: none; }
 .adapt-card {
@@ -216,10 +218,10 @@ body {
 /* ── Market drag carousel ── */
 .mkt-track {
     display: flex; gap: 16px;
-    overflow-x: auto; scroll-snap-type: x mandatory;
+    overflow-x: auto; scroll-snap-type: x proximity;
     padding: 4px 0 16px; scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
-    cursor: grab; user-select: none;
+    cursor: grab; user-select: none; touch-action: pan-x;
 }
 .mkt-track::-webkit-scrollbar { display: none; }
 .mkt-card {
@@ -229,6 +231,25 @@ body {
     transition: transform 0.15s;
 }
 .mkt-card:hover { transform: translateY(-4px); }
+
+@keyframes cardSlide {
+    from { opacity: 0; transform: translateX(36px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+.qc, .adapt-card, .detect-card, .mkt-card { opacity: 0; }
+.track-in > .qc,
+.track-in > .adapt-card,
+.track-in > .detect-card,
+.track-in > .mkt-card {
+    animation: cardSlide 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+.track-in > :nth-child(1) { animation-delay: 0s; }
+.track-in > :nth-child(2) { animation-delay: 0.09s; }
+.track-in > :nth-child(3) { animation-delay: 0.18s; }
+.track-in > :nth-child(4) { animation-delay: 0.27s; }
+.track-in > :nth-child(5) { animation-delay: 0.36s; }
+.track-in > :nth-child(6) { animation-delay: 0.45s; }
+.track-in > :nth-child(7) { animation-delay: 0.54s; }
 .mkt-ico   { font-size: 2.2rem; margin-bottom: 8px; }
 .mkt-name  { font-family: 'Fredoka One', cursive; font-size: 14px; color: var(--ink); margin-bottom: 6px; line-height: 1.3; }
 .mkt-price { font-family: 'Fredoka One', cursive; font-size: 20px; color: var(--green); }
@@ -455,24 +476,128 @@ var QDATA = [
     document.querySelectorAll('.reveal').forEach(function(el) { obs.observe(el); });
 })();
 
-// Mouse drag-to-scroll for all drag carousels
+(function() {
+    var tracks = document.querySelectorAll('#qCar, #adaptTrack, #detectTrack, .mkt-track');
+    if (!('IntersectionObserver' in window)) {
+        tracks.forEach(function(t) { t.classList.add('track-in'); });
+        return;
+    }
+    var obs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) {
+            if (!e.isIntersecting) return;
+            e.target.classList.add('track-in');
+            obs.unobserve(e.target);
+        });
+    }, { threshold: 0.08 });
+    tracks.forEach(function(t) { obs.observe(t); });
+})();
+
+// Drag-to-scroll with momentum for all carousels
+// Drag-to-scroll with desktop momentum, click prevention, and CSS Snap handling
 (function() {
     var sel = '.dc, .adapt-grid, .detect-grid, .mkt-track';
     document.querySelectorAll(sel).forEach(function(el) {
-        var down = false, startX, scrollLeft;
+        var raf, vel = 0;
+        var isDragging = false;
+
+        // ვინახავთ პირვანდელ სნაპის სტილს (მაგ. 'x proximity')
+        var originalSnap = window.getComputedStyle(el).scrollSnapType || 'x proximity';
+
+        function momentum() {
+            if (Math.abs(vel) < 0.3) {
+                // როცა სრიალი თითქმის გაჩერდება, ისევ ვაბრუნებთ CSS Snap-ს, რომ ლამაზად გასწორდეს ქარდი
+                el.style.scrollSnapType = originalSnap;
+                return;
+            }
+            el.scrollLeft += vel;
+            vel *= 0.94; // სრიალის სიმბლანტე
+            raf = requestAnimationFrame(momentum);
+        }
+
+        // ── Mouse Events ──
+        var down = false, mX, mSL, mLastX, mLastT;
+        
         el.addEventListener('mousedown', function(e) {
-            down = true; el.classList.add('dragging');
-            startX = e.pageX - el.getBoundingClientRect().left;
-            scrollLeft = el.scrollLeft;
-            e.preventDefault();
+            cancelAnimationFrame(raf); 
+            vel = 0;
+            down = true; 
+            isDragging = false;
+            el.classList.add('dragging');
+            
+            mX = mLastX = e.pageX; 
+            mSL = el.scrollLeft; 
+            mLastT = Date.now();
         });
-        el.addEventListener('mouseleave', function() { down = false; el.classList.remove('dragging'); });
-        el.addEventListener('mouseup',    function() { down = false; el.classList.remove('dragging'); });
+
+        document.addEventListener('mouseup', function(e) {
+            if (!down) return;
+            down = false; 
+            el.classList.remove('dragging');
+            
+            if (isDragging) {
+                requestAnimationFrame(momentum);
+            } else {
+                // თუ მომხმარებელმა უბრალოდ დააკლიკა და არ გაათრია, სნაპი არ უნდა გაითიშოს
+                el.style.scrollSnapType = originalSnap;
+            }
+        });
+
         el.addEventListener('mousemove', function(e) {
             if (!down) return;
-            var x = e.pageX - el.getBoundingClientRect().left;
-            el.scrollLeft = scrollLeft - (x - startX) * 1.4;
+            
+            var deltaX = Math.abs(e.pageX - mX);
+            if (deltaX > 4) {
+                isDragging = true;
+                // კრიტიკული მომენტი: თრევის დაწყებისთანავე ვთიშავთ სნაპს, რომ ქარდმა თავისუფლად ისრიალოს
+                el.style.scrollSnapType = 'none';
+            }
+
+            var now = Date.now();
+            var dt = Math.max(now - mLastT, 1);
+            
+            // ვანგარიშობთ სიჩქარეს
+            vel = -(e.pageX - mLastX) / dt * 15; 
+            
+            el.scrollLeft = mSL - (e.pageX - mX);
+            mLastX = e.pageX; 
+            mLastT = now;
+            e.preventDefault(); 
         });
+
+        // კლიკის ბლოკირება, თუ მომხმარებელი რეალურად სქროლავდა
+        el.addEventListener('click', function(e) {
+            if (isDragging) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }, true);
+
+        // ── Touch Events (მობილურზე ვტოვებთ სუფთა ნატივურ სქროლს CSS Snap-ით) ──
+        var tX, tSL, tLastX, tLastT;
+        el.addEventListener('touchstart', function(e) {
+            cancelAnimationFrame(raf); 
+            vel = 0;
+            // მობილურზე მუშაობს ბრაუზერის სნაპი, ამიტომ JS ჩარევა არ გვინდა
+            el.style.scrollSnapType = originalSnap; 
+            tX = tLastX = e.touches[0].clientX;
+            tSL = el.scrollLeft; 
+            tLastT = Date.now();
+        }, { passive: true });
+
+        el.addEventListener('touchmove', function(e) {
+            var x = e.touches[0].clientX;
+            var now = Date.now();
+            var dt = Math.max(now - tLastT, 1);
+            vel = -(x - tLastX) / dt * 15;
+            el.scrollLeft = tSL - (x - tX);
+            tLastX = x; 
+            tLastT = now;
+        }, { passive: true });
+
+        el.addEventListener('touchend', function() {
+            // მობილურზეც თუ ძალიან სწრაფად გაკრავს თითს, JS ინერცია წაეხმარება
+            requestAnimationFrame(momentum);
+        }, { passive: true });
     });
 })();
 </script>
