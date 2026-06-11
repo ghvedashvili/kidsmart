@@ -464,9 +464,7 @@ body {
     <div class="hero-orb hero-orb-1"></div>
     <div class="hero-orb hero-orb-2"></div>
     <div class="hero-orb hero-orb-3"></div>
-    <div class="hero-badge">
-        <span class="hero-badge-dot"></span>KidSmart — ლოგიკის სამყარო
-    </div>
+   
     <h1 class="hero-h1">
         ბავშვი სწავლობს იმ ენაზე,<br>
         <em>რომელიც მას უყვარს.</em>
@@ -485,7 +483,7 @@ body {
 <div id="questions">
 <div class="sec" style="padding-bottom:48px;">
     <div class="eyebrow reveal">მათემატიკა ბავშვის ენაზე</div>
-    <h2 class="sec-h2 reveal">: ფეხბურთი, კოსმოსი თუ სუპერგმირები?</h2>
+    <h2 class="sec-h2 reveal">ფეხბურთი, კოსმოსი თუ სუპერგმირები?</h2>
     <p class="sec-sub reveal">როცა ამოცანები ბავშვის სამყაროდანაა, სწავლა თავგადასავალია.</p>
     <div class="car-outer">
         <div class="car-track dc" id="qCar"></div>
@@ -742,6 +740,7 @@ body {
 
 <script>
 if (history.scrollRestoration) history.scrollRestoration = 'manual';
+window.addEventListener('load', function() { window.scrollTo(0, 0); });
 
 var QDATA = [
     { theme:'⚽ ფეხბურთი', icon:'⚽', clr:'',
