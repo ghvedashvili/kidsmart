@@ -266,6 +266,92 @@ body {
 .reveal:nth-child(3) { transition-delay: 0.16s; }
 .reveal:nth-child(4) { transition-delay: 0.24s; }
 
+/* ── Info blocks ── */
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 40px; }
+@media (max-width: 640px) { .info-grid { grid-template-columns: 1fr; } }
+.info-card {
+    background: #fff; border-radius: 20px; padding: 28px 24px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.info-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.1); }
+.info-card-icon { font-size: 2.2rem; margin-bottom: 14px; }
+.info-card-grade {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--green), var(--lg));
+    color: #fff; font-family: 'Fredoka One', cursive;
+    font-size: 13px; letter-spacing: 0.06em;
+    padding: 4px 14px; border-radius: 99px; margin-bottom: 12px;
+}
+.info-card-h { font-family: 'Fredoka One', cursive; font-size: 1.2rem; color: var(--ink); margin-bottom: 10px; }
+.info-card-p { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+/* ── Feature grid (3-col) ── */
+.feat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 40px; }
+@media (max-width: 640px) { .feat-grid { grid-template-columns: 1fr; } }
+.feat-card {
+    background: #fff; border-radius: 20px; padding: 28px 22px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.feat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.09); }
+.feat-icon { font-size: 2rem; margin-bottom: 14px; }
+.feat-h { font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: var(--ink); margin-bottom: 8px; }
+.feat-tag {
+    display: inline-block; font-size: 11px; font-weight: 800;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 99px; margin-bottom: 12px;
+    background: #f0faf4; color: var(--green);
+}
+.feat-p { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+/* ── Pricing ── */
+.price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 40px; }
+@media (max-width: 768px) { .price-grid { grid-template-columns: 1fr; } }
+.price-card {
+    background: #fff; border-radius: 24px; padding: 32px 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    border: 1.5px solid #eef0f3;
+    display: flex; flex-direction: column; gap: 0;
+    position: relative; transition: transform 0.2s, box-shadow 0.2s;
+}
+.price-card:hover { transform: translateY(-5px); box-shadow: 0 16px 40px rgba(0,0,0,0.1); }
+.price-card.featured {
+    border-color: var(--green);
+    background: linear-gradient(160deg, #f0faf4 0%, #fff 100%);
+}
+.price-badge {
+    position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--lg), var(--green));
+    color: #fff; font-family: 'Fredoka One', cursive;
+    font-size: 12px; letter-spacing: 0.08em;
+    padding: 4px 18px; border-radius: 99px;
+    white-space: nowrap;
+}
+.price-name { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: var(--ink); margin-bottom: 4px; }
+.price-sub  { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+.price-val  { font-family: 'Fredoka One', cursive; font-size: 2.4rem; color: var(--ink); line-height: 1; }
+.price-val span { font-size: 1rem; color: var(--muted); font-family: 'Nunito', sans-serif; font-weight: 700; }
+.price-divider { height: 1px; background: #eef0f3; margin: 20px 0; }
+.price-features { list-style: none; padding: 0; margin: 0 0 24px; display: flex; flex-direction: column; gap: 10px; }
+.price-features li { font-size: 14px; color: #444; display: flex; gap: 8px; align-items: flex-start; }
+.price-features li::before { content: '✓'; color: var(--green); font-weight: 900; flex-shrink: 0; margin-top: 1px; }
+.price-btn {
+    display: block; text-align: center; margin-top: auto;
+    padding: 13px 0; border-radius: 12px; font-family: 'Fredoka One', cursive;
+    font-size: 1rem; cursor: pointer; text-decoration: none;
+    transition: all 0.2s;
+}
+.price-btn-free { background: #f4f4f5; color: #444; border: none; }
+.price-btn-free:hover { background: #e4e4e7; color: #222; }
+.price-btn-main { background: linear-gradient(135deg, var(--lg), var(--green)); color: #fff; border: none; box-shadow: 0 6px 20px rgba(26,122,60,0.35); }
+.price-btn-main:hover { box-shadow: 0 10px 28px rgba(26,122,60,0.5); transform: translateY(-1px); }
+.price-btn-year { background: var(--ink); color: #fff; border: none; }
+.price-btn-year:hover { background: #1a1a2e; }
+.save-pill { display: inline-block; background: #fef9c3; color: #854d0e; font-size: 12px; font-weight: 800; padding: 2px 10px; border-radius: 99px; margin-left: 8px; vertical-align: middle; }
+
 /* ── CTA ── */
 .cta-wrap {
     background: linear-gradient(140deg, #0d2818 0%, #1a4a2e 100%);
@@ -379,6 +465,160 @@ body {
             <div class="mkt-card"><div class="mkt-ico">🍦</div><div class="mkt-name">ნაყინი</div><div class="mkt-price">5 🪙</div></div>
             <div class="mkt-card"><div class="mkt-ico">🏆</div><div class="mkt-name">სპეც. გასეირნება</div><div class="mkt-price">30 🪙</div></div>
             <div class="mkt-card"><div class="mkt-ico">📚</div><div class="mkt-name">წიგნი საჩუქრად</div><div class="mkt-price">25 🪙</div></div>
+        </div>
+    </div>
+</div>
+</div>
+
+{{-- ── Block 1: Target audience ── --}}
+<div class="sec-bg" id="audience">
+<div class="sec">
+    <div class="eyebrow reveal">სამიზნე აუდიტორია</div>
+    <h2 class="sec-h2 reveal">🎒 ზუსტად იმ ასაკისთვის,<br>როცა ლოგიკა იბადება</h2>
+    <p class="sec-sub reveal">KidSmart შექმნილია II, III, IV და V კლასის მოსწავლეებისთვის.</p>
+    <div class="info-grid">
+        <div class="info-card reveal">
+            <div class="info-card-icon">🌱</div>
+            <div class="info-card-grade">II კლასი</div>
+            <div class="info-card-h">პირველი ნაბიჯები</div>
+            <p class="info-card-p">საბაზისო არითმეტიკა, სივრცითი აღქმა და მარტივი ლოგიკური ამოცანები. ბავშვი მათემატიკას შიშის გარეშე სწავლობს.</p>
+        </div>
+        <div class="info-card reveal">
+            <div class="info-card-icon">🔍</div>
+            <div class="info-card-grade">III კლასი</div>
+            <div class="info-card-h">ლოგიკის გამყარება</div>
+            <p class="info-card-p">შაბლონები, კრებები და მცირე დეტექტიური ამოცანები. ეს კლასი ლოგიკური აზროვნების საძირკველია.</p>
+        </div>
+        <div class="info-card reveal">
+            <div class="info-card-icon">🚀</div>
+            <div class="info-card-grade">IV კლასი</div>
+            <div class="info-card-h">ნამდვილი გამოწვევები</div>
+            <p class="info-card-p">კოორდინატები, საიდუმლო კოდები და ლოგიკური ჯაჭვები. ამოცანები სკოლის პროგრამას სცდება.</p>
+        </div>
+        <div class="info-card reveal">
+            <div class="info-card-icon">🏆</div>
+            <div class="info-card-grade">V კლასი</div>
+            <div class="info-card-h">ელიტური დეტექტივი</div>
+            <p class="info-card-p">მულტი-ეტაპური გამოძიებები, სტრატეგიული აზროვნება და კოდები. ყველაზე ამბიციური ამოცანების დონე.</p>
+        </div>
+    </div>
+</div>
+</div>
+
+{{-- ── Block 2: Parent dashboard ── --}}
+<div id="parentdash">
+<div class="sec">
+    <div class="eyebrow reveal">მშობლის პანელი</div>
+    <h2 class="sec-h2 reveal">📊 მართე პროცესი და ადევნე<br>თვალი პროგრესს</h2>
+    <p class="sec-sub reveal">შენ აწესებ წესებს, KidSmart აკეთებს ანალიზს.</p>
+    <div class="feat-grid">
+        <div class="feat-card reveal">
+            <div class="feat-icon">🕒</div>
+            <div class="feat-tag">Task Manager</div>
+            <div class="feat-h">მოქნილი გრაფიკი</div>
+            <p class="feat-p">შენ განსაზღვრავ, კვირაში რამდენჯერ ან დღეში რამდენი ტესტი უნდა შეასრულოს ბავშვმა. არანაირი გადატვირთვა — მხოლოდ ჯანსაღი რუტინა.</p>
+        </div>
+        <div class="feat-card reveal">
+            <div class="feat-icon">👁️</div>
+            <div class="feat-tag">Live Feed</div>
+            <div class="feat-h">სრული კონტროლი</div>
+            <p class="feat-p">მიიღე მყისიერი წვდომა ყველა შესრულებულ დავალებაზე. ნახე, სად გაუჭირდა, სად გამოიყენა მინიშნება და რა ამოხსნა მარტივად.</p>
+        </div>
+        <div class="feat-card reveal">
+            <div class="feat-icon">📈</div>
+            <div class="feat-tag">Smart Analytics</div>
+            <div class="feat-h">ზრდის დინამიკა</div>
+            <p class="feat-p">დეტალური რეპორტები მშობლისთვის. სისტემა გაჩვენებს: „რა სირთულით დაიწყო, სად აქვს პროგრესი და რა დონეზეა ახლა".</p>
+        </div>
+        <div class="feat-card reveal">
+            <div class="feat-icon">🔔</div>
+            <div class="feat-tag">Instant Alerts</div>
+            <div class="feat-h">მყისიერი შეტყობინება</div>
+            <p class="feat-p">მიიღე Push-შეტყობინება, როგორც კი ბავშვი ტესტს დაასრულებს. ყოველთვის იცი, რა ხდება — სადაც არ უნდა იყო.</p>
+        </div>
+    </div>
+</div>
+</div>
+
+{{-- ── Block 3: Gamification ── --}}
+<div class="sec-bg" id="gamification">
+<div class="sec">
+    <div class="eyebrow reveal">გეიმიფიკაცია</div>
+    <h2 class="sec-h2 reveal">🏠 ჩემი ვირტუალური ოთახი —<br>ჩემი სამყარო</h2>
+    <p class="sec-sub reveal">ყოველი ამოხსნილი ამოცანა შენი ოთახის ახალი აქსესუარია!</p>
+    <div class="feat-grid">
+        <div class="feat-card reveal">
+            <div class="feat-icon">🏅</div>
+            <div class="feat-tag">Medals & Trophies</div>
+            <div class="feat-h">დიდების კედელი</div>
+            <p class="feat-p">ყველა წარმატებული დეტექტიური გამოძიებისთვის ბავშვი იღებს უნიკალურ მედლებსა და თასებს, რომლებსაც თავის ვირტუალურ კედელზე ანთავსებს.</p>
+        </div>
+        <div class="feat-card reveal">
+            <div class="feat-icon">🎨</div>
+            <div class="feat-tag">Customization</div>
+            <div class="feat-h">პერსონალიზაცია სტიკერებით</div>
+            <p class="feat-p">დააგროვე ქულები და გახსენი სტიკერები, პოსტერები და ავეჯი შენი საყვარელი თემატიკიდან (ფეხბურთი, კოსმოსი). მოაწყვე ოთახი ისე, როგორც შენ გინდა!</p>
+        </div>
+        <div class="feat-card reveal">
+            <div class="feat-icon">🔓</div>
+            <div class="feat-tag">Mystery Boxes</div>
+            <div class="feat-h">საიდუმლო ყუთები</div>
+            <p class="feat-p">გარკვეული დონის მიღწევისას ოთახში ჩნდება საიდუმლო ყუთი, რომლის გახსნაც მხოლოდ ახალი მათემატიკური კოდის გატეხვითაა შესაძლებელი.</p>
+        </div>
+        <div class="feat-card reveal">
+            <div class="feat-icon">⭐</div>
+            <div class="feat-tag">XP & Levels</div>
+            <div class="feat-h">დონეებისა და XP სისტემა</div>
+            <p class="feat-p">ყოველი სწორი პასუხი XP ქულებს მატებს. დააგროვე XP, ამაღლდი დონეში და გახსენი ახალი ფუნქციები, რომლებიც მეგობრებს ჯერ არ აქვთ.</p>
+        </div>
+    </div>
+</div>
+</div>
+
+{{-- ── Block 4: Pricing ── --}}
+<div id="pricing">
+<div class="sec">
+    <div class="eyebrow reveal">ტარიფები</div>
+    <h2 class="sec-h2 reveal">💎 აირჩიე შენზე მორგებული პაკეტი</h2>
+    <p class="sec-sub reveal">დაიწყე უფასოდ, გადადი პრემიუმზე, როცა მზად იქნები.</p>
+    <div class="price-grid">
+        <div class="price-card reveal">
+            <div class="price-name">სცადე</div>
+            <div class="price-sub">Free</div>
+            <div class="price-val">0 ₾ <span>/ მუდამ უფასო</span></div>
+            <div class="price-divider"></div>
+            <ul class="price-features">
+                <li>1 საბაზისო თემატიკა</li>
+                <li>დღეში 1 ტესტი</li>
+                <li>მარტივი სტატისტიკა</li>
+            </ul>
+            <button class="price-btn price-btn-free" onclick="document.getElementById('loginNavBtn')?.click()">დაიწყე უფასოდ</button>
+        </div>
+        <div class="price-card featured reveal">
+            <div class="price-badge">✨ ყველაზე პოპულარული</div>
+            <div class="price-name">დეტექტივი</div>
+            <div class="price-sub">Premium</div>
+            <div class="price-val">XX ₾ <span>/ თვეში</span></div>
+            <div class="price-divider"></div>
+            <ul class="price-features">
+                <li>ყველა თემატიკა (ფეხბურთი, კოსმოსი…)</li>
+                <li>ლიმიტის გარეშე ტესტები და მინიშნებები</li>
+                <li>მშობლის სრული ანალიტიკა და გრაფიკები</li>
+                <li>ვირტუალური ოთახის სრული წვდომა</li>
+            </ul>
+            <button class="price-btn price-btn-main" onclick="document.getElementById('loginNavBtn')?.click()">გახდი პრემიუმი</button>
+        </div>
+        <div class="price-card reveal">
+            <div class="price-name">ჩემპიონი</div>
+            <div class="price-sub">Yearly <span class="save-pill">დაზოგე 30%</span></div>
+            <div class="price-val">XX ₾ <span>/ წელიწადში</span></div>
+            <div class="price-divider"></div>
+            <ul class="price-features">
+                <li>პრემიუმის ყველა ფუნქცია მთელი წლის განმავლობაში</li>
+                <li>პერსონალური სერტიფიკატი წლის ბოლოს</li>
+                <li>პრიორიტეტული მხარდაჭერა</li>
+            </ul>
+            <button class="price-btn price-btn-year" onclick="document.getElementById('loginNavBtn')?.click()">დაზოგე ახლავე</button>
         </div>
     </div>
 </div>
