@@ -181,10 +181,17 @@ body {
 .qc-opt.reveal  { border-color: var(--green) !important; background: var(--green) !important; color: #fff !important; }
 .qc-fb { font-family: 'Fredoka One', cursive; font-size: 13px; min-height: 18px; color: var(--muted); }
 
-/* ── Adaptive cards ── */
-.adapt-grid { padding: 8px 4px 20px; }
+/* ── Adaptive / Detective drag carousel ── */
+.adapt-grid, .detect-grid {
+    display: flex; gap: 16px;
+    overflow-x: auto; scroll-snap-type: x mandatory;
+    padding: 8px 4px 20px; scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    cursor: grab; user-select: none;
+}
+.adapt-grid::-webkit-scrollbar, .detect-grid::-webkit-scrollbar { display: none; }
 .adapt-card {
-    flex: 0 0 300px; scroll-snap-align: start;
+    flex: 0 0 280px; scroll-snap-align: start;
     background: #fff; border-radius: 16px; padding: 24px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.06);
     border-left: 4px solid var(--green);
@@ -193,9 +200,8 @@ body {
 .adapt-b { font-size: 14px; color: var(--muted); line-height: 1.7; font-weight: 700; }
 
 /* ── Detective ── */
-.detect-grid { padding: 8px 4px 20px; }
 .detect-card {
-    flex: 0 0 340px; scroll-snap-align: start;
+    flex: 0 0 300px; scroll-snap-align: start;
     background: #fff; border-radius: 16px; padding: 24px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.06);
 }
@@ -207,17 +213,17 @@ body {
 .hint-vis  { background: #f0faf4; color: var(--ink); }
 .hint-lock { background: #f8f8f8; color: #bbb; font-weight: 600; font-size: 13px; }
 
-/* ── Market carousel ── */
-.mkt-outer { overflow: hidden; }
+/* ── Market drag carousel ── */
 .mkt-track {
     display: flex; gap: 16px;
-    animation: mkt 22s linear infinite;
-    width: max-content; padding: 4px 0 16px;
+    overflow-x: auto; scroll-snap-type: x mandatory;
+    padding: 4px 0 16px; scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    cursor: grab; user-select: none;
 }
-.mkt-outer:hover .mkt-track { animation-play-state: paused; }
-@keyframes mkt { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+.mkt-track::-webkit-scrollbar { display: none; }
 .mkt-card {
-    flex: 0 0 162px;
+    flex: 0 0 162px; scroll-snap-align: start;
     background: #fff; border-radius: 16px; padding: 20px 14px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.07); text-align: center;
     transition: transform 0.15s;
@@ -291,15 +297,17 @@ body {
     <div class="eyebrow reveal">ადაპტური სწავლება</div>
     <h2 class="sec-h2 reveal">ამოცანები ვიტარდებიან ბავშვთან ერთად.</h2>
     <p class="sec-sub reveal">ამოცანების 5 დონე, რომლებიც ავტომატურად ერგებიან ბავშვის დონეს.</p>
-    <div class="adapt-grid dc">
-        <div class="adapt-card reveal">
+    <div class="ac-outer">
+    <div class="adapt-grid" id="adaptTrack">
+        <div class="adapt-card">
             <div class="adapt-t">3 ტესტი 95% და მეტი?</div>
             <p class="adapt-b">ავტომატურად შეიცვლება დონე — ბავშვს რომ არ მობეზრდეს.</p>
         </div>
-        <div class="adapt-card reveal">
+        <div class="adapt-card">
             <div class="adapt-t">ხშირად უშვებს შეცდომებს?</div>
             <p class="adapt-b">ამ თემაში შესაბამის დონის ამოცანებს ვთავაზობთ და ვავითარებთ ბავშვის უნარს.</p>
         </div>
+    </div>
     </div>
 </div>
 </div>
@@ -309,8 +317,9 @@ body {
     <div class="eyebrow reveal">5 ტესტი · 5 მინიშნება</div>
     <h2 class="sec-h2 reveal">მათემატიკური დეტექტივი</h2>
     <p class="sec-sub reveal">გაიარე ტესტები და გაიგე საიდუმლო:</p>
-    <div class="detect-grid dc">
-        <div class="detect-card reveal">
+    <div class="ac-outer">
+    <div class="detect-grid" id="detectTrack">
+        <div class="detect-card">
             <div style="font-family:'Fredoka One',cursive;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#aaa;margin-bottom:10px;">🔍 გამოძიება #1</div>
             <div style="font-family:'Fredoka One',cursive;font-size:1.25rem;color:var(--ink);margin-bottom:14px;">ვინ მოიგო ოქროს ბურთი?</div>
             <div class="hint-row hint-vis"><span style="min-width:20px;color:var(--green);">1.</span><span>#7 ნომრით თამაშობს</span></div>
@@ -319,7 +328,7 @@ body {
             <div class="hint-row hint-lock"><span style="min-width:20px;">4.</span><span>🔒 ჩაიტვირთება ტესტი 4-ის შემდეგ</span></div>
             <div class="hint-row hint-lock"><span style="min-width:20px;">5.</span><span>🔒 ჩაიტვირთება ტესტი 5-ის შემდეგ</span></div>
         </div>
-        <div class="detect-card reveal">
+        <div class="detect-card">
             <div style="font-family:'Fredoka One',cursive;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#aaa;margin-bottom:10px;">🔍 გამოძიება #2</div>
             <div style="font-family:'Fredoka One',cursive;font-size:1.25rem;color:var(--ink);margin-bottom:10px;">რა საიდუმლო შეტყობინება მიიღეს სუპერგმირებმა?</div>
             <div style="font-family:'Fredoka One',cursive;font-size:1.1rem;color:var(--orange);letter-spacing:.04em;background:#fff5f0;border-left:4px solid var(--orange);padding:10px 14px;border-radius:0 10px 10px 0;margin-bottom:12px;line-height:1.6;">
@@ -329,6 +338,7 @@ body {
             <div class="hint-row hint-lock"><span style="min-width:20px;">2.</span><span>🔒 ჩაიტვირთება ტესტი 2-ის შემდეგ</span></div>
             <div class="hint-row hint-lock"><span style="min-width:20px;">3.</span><span>🔒 ჩაიტვირთება ტესტი 3-ის შემდეგ</span></div>
         </div>
+    </div>
     </div>
 </div>
 
@@ -340,14 +350,6 @@ body {
     <p class="sec-sub reveal">მშობელი ქმნის საკუთარ მარკეტს სადაც აწესებს ჯილდოებს · ყველას თავისი ფასი აქვს.</p>
     <div class="mkt-outer">
         <div class="mkt-track">
-            <div class="mkt-card"><div class="mkt-ico">🍕</div><div class="mkt-name">პიცა სახლში</div><div class="mkt-price">10 🪙</div></div>
-            <div class="mkt-card"><div class="mkt-ico">🎬</div><div class="mkt-name">კინოში წასვლა</div><div class="mkt-price">20 🪙</div></div>
-            <div class="mkt-card"><div class="mkt-ico">🎁</div><div class="mkt-name">სიურპრიზი</div><div class="mkt-price">50 🪙</div></div>
-            <div class="mkt-card"><div class="mkt-ico">🎮</div><div class="mkt-name">თამაში (2 სთ)</div><div class="mkt-price">15 🪙</div></div>
-            <div class="mkt-card"><div class="mkt-ico">🍦</div><div class="mkt-name">ნაყინი</div><div class="mkt-price">5 🪙</div></div>
-            <div class="mkt-card"><div class="mkt-ico">🏆</div><div class="mkt-name">სპეც. გასეირნება</div><div class="mkt-price">30 🪙</div></div>
-            <div class="mkt-card"><div class="mkt-ico">📚</div><div class="mkt-name">წიგნი საჩუქრად</div><div class="mkt-price">25 🪙</div></div>
-            {{-- duplicate for seamless loop --}}
             <div class="mkt-card"><div class="mkt-ico">🍕</div><div class="mkt-name">პიცა სახლში</div><div class="mkt-price">10 🪙</div></div>
             <div class="mkt-card"><div class="mkt-ico">🎬</div><div class="mkt-name">კინოში წასვლა</div><div class="mkt-price">20 🪙</div></div>
             <div class="mkt-card"><div class="mkt-ico">🎁</div><div class="mkt-name">სიურპრიზი</div><div class="mkt-price">50 🪙</div></div>
@@ -453,9 +455,10 @@ var QDATA = [
     document.querySelectorAll('.reveal').forEach(function(el) { obs.observe(el); });
 })();
 
-// Mouse drag-to-scroll for all .dc carousels
+// Mouse drag-to-scroll for all drag carousels
 (function() {
-    document.querySelectorAll('.dc').forEach(function(el) {
+    var sel = '.dc, .adapt-grid, .detect-grid, .mkt-track';
+    document.querySelectorAll(sel).forEach(function(el) {
         var down = false, startX, scrollLeft;
         el.addEventListener('mousedown', function(e) {
             down = true; el.classList.add('dragging');

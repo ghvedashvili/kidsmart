@@ -40,6 +40,27 @@
 .google-btn:hover { color: #fff; background: rgba(255,255,255,0.08); }
 .google-btn img { width: 16px; }
 @media (max-width: 640px) { #secNav { display: none !important; } }
+
+/* Mobile menu */
+#mobileMenuBtn { display: none; }
+@media (max-width: 640px) { #mobileMenuBtn { display: flex; } }
+#mobileNav {
+    display: none; position: fixed;
+    top: 52px; left: 0; right: 0; z-index: 9990;
+    background: #111; border-bottom: 1px solid #222;
+    padding: 6px 12px 10px;
+    flex-direction: column; gap: 2px;
+}
+#mobileNav.open { display: flex; }
+#mobileNav a {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 14px; border-radius: 8px;
+    color: rgba(255,255,255,0.75); text-decoration: none;
+    font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 700;
+    transition: background 0.15s, color 0.15s;
+}
+#mobileNav a:hover, #mobileNav a:active { background: rgba(255,255,255,0.08); color: #fff; }
+#mobileNav .mn-icon { font-size: 1.1rem; width: 24px; text-align: center; }
 </style>
 
 <nav class="bg-dark border-bottom fixed-top" style="border-color:#2a2a2a!important;" data-bs-theme="dark">
@@ -56,6 +77,7 @@
             <a class="nav-link-item" href="/#market"    onclick="secScroll(event,'market')"    style="font-size:0.8rem;">ჯილდოები</a>
         </div>
         <div class="nav-right">
+            <button id="mobileMenuBtn" class="nav-link-item" onclick="toggleMobileMenu()" aria-label="მენიუ" style="font-size:1.1rem;">☰</button>
             @auth
             <button id="notif-btn-desktop" onclick="toggleNotifications()" title="შეტყობინებები"
                 class="nav-link-item">
@@ -84,6 +106,13 @@
         </div>
     </div>
 </nav>
+
+<div id="mobileNav">
+    <a href="/#questions" onclick="secScroll(event,'questions');toggleMobileMenu()"><span class="mn-icon">📐</span>ამოცანები</a>
+    <a href="/#adaptive"  onclick="secScroll(event,'adaptive');toggleMobileMenu()"><span class="mn-icon">🧠</span>სწავლება</a>
+    <a href="/#detective" onclick="secScroll(event,'detective');toggleMobileMenu()"><span class="mn-icon">🔍</span>დეტექტივი</a>
+    <a href="/#market"    onclick="secScroll(event,'market');toggleMobileMenu()"><span class="mn-icon">🎁</span>ჯილდოები</a>
+</div>
 
 {{-- Login mini modal --}}
 @guest
@@ -189,6 +218,18 @@ function lmSwitch(tab) {
     tC.style.background  = isParent ? 'transparent' : '#111';
     tC.style.color        = isParent ? '#888' : '#fff';
 }
+
+function toggleMobileMenu() {
+    var m = document.getElementById('mobileNav');
+    if (m) m.classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+    var m = document.getElementById('mobileNav');
+    var btn = document.getElementById('mobileMenuBtn');
+    if (m && m.classList.contains('open') && !m.contains(e.target) && btn && !btn.contains(e.target)) {
+        m.classList.remove('open');
+    }
+});
 
 function secScroll(e, id) {
     var el = document.getElementById(id);
