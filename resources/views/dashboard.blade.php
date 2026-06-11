@@ -411,10 +411,6 @@
         @endif
         @endif
 
-        <button class="notif-btn" id="notifBtn" onclick="toggleNotifications()">
-            <i class="bi bi-bell" id="notifIcon"></i>
-            <span id="notifText">შეტყობინებების ჩართვა!</span>
-        </button>
 
         @if(auth()->user()->isAdmin())
         <a href="{{ route('admin.panel') }}" style="font-family:'Goldman',monospace;font-size:0.72rem;color:#999;letter-spacing:0.06em;text-decoration:none;">
@@ -422,12 +418,6 @@
         </a>
         @endif
 
-        <form method="POST" action="{{ route('logout') }}" style="margin:0;">
-            @csrf
-            <button type="submit" style="background:none;border:none;font-family:'Goldman',monospace;font-size:0.68rem;color:#ccc;letter-spacing:0.06em;cursor:pointer;">
-                გასვლა
-            </button>
-        </form>
 
     </div>
 </div>

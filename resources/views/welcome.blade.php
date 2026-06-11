@@ -223,7 +223,7 @@ body {
 }
 .mkt-track::-webkit-scrollbar { display: none; }
 .mkt-card {
-    flex: 0 0 162px; scroll-snap-align: start;
+    flex: 0 0 calc(50% - 23px); scroll-snap-align: start;
     background: #fff; border-radius: 16px; padding: 20px 14px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.07); text-align: center;
     transition: transform 0.15s;
@@ -264,7 +264,7 @@ body {
 
 {{-- ── Hero ── --}}
 <section class="hero-mod">
-    <div class="hero-badge">✏️ AI · ქართული · 6–14 წელი</div>
+    
     <h1 class="hero-h1">
         ბავშვი სწავლობს იმ ენაზე,<br>
         <em>რომელიც მას უყვარს.</em>

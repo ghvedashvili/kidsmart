@@ -264,14 +264,30 @@ if ('serviceWorker' in navigator) {
 
         function updateNotifUI(granted) {
             const iconD = document.getElementById('notif-icon-desktop');
-            const btnD  = document.getElementById('notif-btn-desktop');
-            if (iconD) iconD.className = granted ? 'bi bi-bell-fill' : 'bi bi-bell';
+            if (iconD) { iconD.className = granted ? 'bi bi-bell-fill' : 'bi bi-bell'; iconD.style.color = granted ? '#4ade80' : ''; }
+            const iconM = document.getElementById('notif-icon-mobile');
+            if (iconM) { iconM.className = granted ? 'bi bi-bell-fill' : 'bi bi-bell'; iconM.style.color = granted ? '#4ade80' : ''; }
             const dashBtn  = document.getElementById('notifBtn');
             const dashIcon = document.getElementById('notifIcon');
             const dashText = document.getElementById('notifText');
             if (dashIcon) dashIcon.className = granted ? 'bi bi-bell-fill' : 'bi bi-bell';
             if (dashText) dashText.textContent = granted ? 'შეტყობინებები: ჩართულია' : 'შეტყობინებების ჩართვა';
             if (dashBtn)  dashBtn.classList.toggle('on', granted);
+            if (window._notifToast) {
+                window._notifToast = false;
+                var t = document.getElementById('ks-notif-toast');
+                if (!t) {
+                    t = document.createElement('div');
+                    t.id = 'ks-notif-toast';
+                    t.style.cssText = 'position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(8px);background:#1a1a1a;color:#fff;padding:9px 20px;border-radius:10px;font-family:"Nunito",sans-serif;font-size:0.85rem;font-weight:700;z-index:99999;transition:opacity 0.3s,transform 0.3s;pointer-events:none;white-space:nowrap;opacity:0;';
+                    document.body.appendChild(t);
+                }
+                t.textContent = granted ? '🔔 შეტყობინებები ჩართულია' : '🔕 შეტყობინებები გამორთულია';
+                t.style.opacity = '1';
+                t.style.transform = 'translateX(-50%) translateY(0)';
+                clearTimeout(t._tid);
+                t._tid = setTimeout(function() { t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(8px)'; }, 2500);
+            }
         }
 
         const notifSupported = (typeof Notification !== 'undefined') && ('pushManager' in reg);

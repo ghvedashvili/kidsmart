@@ -39,7 +39,22 @@
 }
 .google-btn:hover { color: #fff; background: rgba(255,255,255,0.08); }
 .google-btn img { width: 16px; }
-@media (max-width: 640px) { #secNav { display: none !important; } }
+#loginNavBtn, #loginNavBtn:hover, #loginNavBtn:active, #loginNavBtn:focus {
+    background: transparent !important;
+    color: rgba(255,255,255,0.8) !important;
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-tap-highlight-color: transparent;
+}
+#mlBtn, #mlBtn:active, #mlBtn:focus { background: none !important; outline: none; -webkit-tap-highlight-color: transparent; }
+@media (hover: hover) { #mlBtn:hover { background: rgba(255,255,255,0.08) !important; } }
+@media (max-width: 640px) {
+    #secNav { display: none !important; }
+    .desktop-only { display: none !important; }
+    .nav-grid { display: flex; justify-content: space-between; align-items: center; }
+    .nav-center { display: none !important; }
+    .nav-right { margin-left: auto; }
+}
 
 /* Mobile menu */
 #mobileMenuBtn { display: none; }
@@ -67,51 +82,133 @@
     <div class="nav-grid" style="min-height:52px;">
         <div class="nav-left">
             <a class="navbar-brand mb-0" href="{{ url('/') }}">
-                <img src="/img/logo.png" alt="KidSmart" style="height:32px;width:auto;">
+                <img src="/img/logo.png" alt="KidSmart" style="height:55px;width:auto;">
             </a>
         </div>
         <div class="nav-center" id="secNav" style="display:flex;gap:2px;">
+            @guest
             <a class="nav-link-item" href="/#questions" onclick="secScroll(event,'questions')" style="font-size:0.8rem;">ამოცანები</a>
             <a class="nav-link-item" href="/#adaptive"  onclick="secScroll(event,'adaptive')"  style="font-size:0.8rem;">სწავლება</a>
             <a class="nav-link-item" href="/#detective" onclick="secScroll(event,'detective')" style="font-size:0.8rem;">დეტექტივი</a>
             <a class="nav-link-item" href="/#market"    onclick="secScroll(event,'market')"    style="font-size:0.8rem;">ჯილდოები</a>
+            @endguest
+            @auth
+            <a class="nav-link-item" href="{{ route('dashboard') }}" style="font-size:0.8rem;"><i class="bi bi-house"></i> მთავარი</a>
+            @endauth
         </div>
         <div class="nav-right">
-            <button id="mobileMenuBtn" class="nav-link-item" onclick="toggleMobileMenu()" aria-label="მენიუ" style="font-size:1.1rem;">☰</button>
             @auth
-            <button id="notif-btn-desktop" onclick="toggleNotifications()" title="შეტყობინებები"
-                class="nav-link-item">
-                <i id="notif-icon-desktop" class="bi bi-bell"></i>
-            </button>
-
-            @if(auth()->user()->isAdmin())
-            <a class="nav-link-item" href="{{ route('admin.panel') }}" title="Admin" style="color:rgba(231,76,60,0.8);">
-                <i class="bi bi-shield-lock-fill"></i>
-            </a>
-            @endif
-
-            <form method="POST" action="{{ route('logout') }}" class="m-0">
-                @csrf
-                <button type="submit" class="nav-link-item" title="გასვლა">
-                    <i class="bi bi-box-arrow-right"></i>
+            <div class="desktop-only" style="display:flex;align-items:center;gap:4px;">
+                <button id="notif-btn-desktop" onclick="toggleNotifications()" title="შეტყობინებები"
+                    class="nav-link-item">
+                    <i id="notif-icon-desktop" class="bi bi-bell"></i>
                 </button>
-            </form>
-            @else
-            <button class="nav-link-item" onclick="toggleLoginModal(event)"
-                style="font-family:'Goldman',monospace;font-size:0.75rem;letter-spacing:0.06em;color:rgba(255,255,255,0.8);gap:6px;"
-                id="loginNavBtn">
-                <i class="bi bi-person"></i> შესვლა
-            </button>
+
+            </div>
             @endauth
+
+            @guest
+            <a id="loginNavBtn" href="#" onclick="toggleLoginModal(event)" class="google-btn desktop-only"
+                style="font-size:0.78rem;padding:6px 12px;text-decoration:none;">
+                <svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="rgba(255,255,255,0.8)"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="rgba(255,255,255,0.8)"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="rgba(255,255,255,0.8)"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="rgba(255,255,255,0.8)"/></svg>
+                შესვლა
+            </a>
+            @endguest
+
+            <button id="mobileMenuBtn" class="nav-link-item" onclick="toggleMobileMenu()" aria-label="მენიუ" style="font-size:1.1rem;">☰</button>
         </div>
     </div>
 </nav>
 
 <div id="mobileNav">
+    @guest
     <a href="/#questions" onclick="secScroll(event,'questions');toggleMobileMenu()"><span class="mn-icon">📐</span>ამოცანები</a>
     <a href="/#adaptive"  onclick="secScroll(event,'adaptive');toggleMobileMenu()"><span class="mn-icon">🧠</span>სწავლება</a>
     <a href="/#detective" onclick="secScroll(event,'detective');toggleMobileMenu()"><span class="mn-icon">🔍</span>დეტექტივი</a>
     <a href="/#market"    onclick="secScroll(event,'market');toggleMobileMenu()"><span class="mn-icon">🎁</span>ჯილდოები</a>
+    @endguest
+
+    @auth
+    <a href="{{ route('dashboard') }}" onclick="toggleMobileMenu()"><span class="mn-icon">🏠</span>მთავარი</a>
+    @if(auth()->user()->isAdmin())
+    <a href="{{ route('admin.panel') }}" onclick="toggleMobileMenu()" style="color:rgba(231,76,60,0.9);"><span class="mn-icon">🛡️</span>ადმინ პანელი</a>
+    @endif
+    <button onclick="window._notifToast=true;toggleNotifications()" style="
+        display:flex;align-items:center;gap:10px;width:100%;
+        padding:11px 14px;border-radius:8px;border:none;background:none;
+        color:rgba(255,255,255,0.75);font-family:'Nunito',sans-serif;
+        font-size:0.95rem;font-weight:700;cursor:pointer;text-align:left;
+        transition:background 0.15s;
+    " onmouseover="this.style.background='rgba(255,255,255,0.08)'"
+       onmouseout="this.style.background='none'">
+        <span class="mn-icon" style="width:24px;text-align:center;font-size:1.1rem;"><i id="notif-icon-mobile" class="bi bi-bell"></i></span>შეტყობინებები
+    </button>
+    <div style="border-top:1px solid #222;margin-top:4px;padding-top:4px;">
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" style="
+                display:flex;align-items:center;gap:10px;width:100%;
+                padding:11px 14px;border-radius:8px;border:none;background:none;
+                color:rgba(255,255,255,0.6);font-family:'Nunito',sans-serif;
+                font-size:0.95rem;font-weight:700;cursor:pointer;text-align:left;
+                transition:background 0.15s;
+            " onmouseover="this.style.background='rgba(255,255,255,0.08)'"
+               onmouseout="this.style.background='none'">
+                <span class="mn-icon">↩</span>გასვლა
+            </button>
+        </form>
+    </div>
+    @endauth
+
+    @guest
+    <div style="border-top:1px solid #222;margin-top:4px;padding-top:4px;">
+        <button onclick="mlToggle()" id="mlBtn" style="
+            display:flex;align-items:center;gap:10px;width:100%;
+            padding:11px 14px;border-radius:8px;border:none;background:none;
+            color:rgba(255,255,255,0.75);font-family:'Nunito',sans-serif;
+            font-size:0.95rem;font-weight:700;cursor:pointer;text-align:left;
+        ">
+            <span class="mn-icon">👤</span>შესვლა
+            <span id="mlArrow" style="margin-left:auto;font-size:0.75rem;opacity:0.5;transition:transform 0.2s;">▼</span>
+        </button>
+        <div id="mlSection" style="display:none;padding:0 4px 4px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;border-radius:8px;overflow:hidden;border:1px solid #222;margin-bottom:8px;">
+                <button id="mlTabP" onclick="mlSwitch('parent')" style="
+                    font-family:'Goldman',monospace;font-size:0.72rem;letter-spacing:0.06em;
+                    padding:10px;border:none;cursor:pointer;background:#222;color:#fff;transition:all 0.15s;">მშობელი</button>
+                <button id="mlTabC" onclick="mlSwitch('child')" style="
+                    font-family:'Goldman',monospace;font-size:0.72rem;letter-spacing:0.06em;
+                    padding:10px;border:none;cursor:pointer;background:transparent;color:#888;transition:all 0.15s;">ბავშვი</button>
+            </div>
+            <div id="mlPanelP">
+                <a href="{{ route('google.login') }}" data-loader data-loader-text="შესვლა…"
+                    style="display:flex;align-items:center;justify-content:center;gap:8px;
+                    padding:11px;width:100%;box-sizing:border-box;
+                    font-family:'Goldman',monospace;font-size:0.75rem;letter-spacing:0.06em;
+                    color:#fff;background:#222;border:none;border-radius:8px;
+                    text-decoration:none;cursor:pointer;transition:background 0.2s;"
+                    onmouseover="this.style.background='#333'" onmouseout="this.style.background='#222'">
+                    <svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#fff"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#fff"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#fff"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#fff"/></svg>
+                    Google-ით შესვლა
+                </a>
+            </div>
+            <div id="mlPanelC" style="display:none;">
+                <form method="POST" action="{{ route('child-login') }}">
+                    @csrf
+                    <input type="text" name="child_code" placeholder="შენი კოდი" maxlength="8"
+                        autocomplete="off" oninput="this.value=this.value.toUpperCase()"
+                        style="width:100%;box-sizing:border-box;padding:10px 12px;
+                        font-family:'Goldman',monospace;font-size:0.88rem;letter-spacing:0.2em;
+                        text-align:center;border:1px solid #333;border-radius:8px;outline:none;
+                        color:#ddd;background:#1a1a1a;margin-bottom:8px;">
+                    <button type="submit" style="width:100%;padding:11px;
+                        font-family:'Goldman',monospace;font-size:0.75rem;letter-spacing:0.06em;
+                        background:#222;color:#fff;border:none;border-radius:8px;cursor:pointer;">შესვლა →</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    @endguest
 </div>
 
 {{-- Login mini modal --}}
@@ -222,6 +319,29 @@ function lmSwitch(tab) {
 function toggleMobileMenu() {
     var m = document.getElementById('mobileNav');
     if (m) m.classList.toggle('open');
+    if (m && !m.classList.contains('open')) {
+        var s = document.getElementById('mlSection');
+        if (s) s.style.display = 'none';
+        var a = document.getElementById('mlArrow');
+        if (a) a.style.transform = '';
+    }
+}
+function mlToggle() {
+    var s = document.getElementById('mlSection');
+    var a = document.getElementById('mlArrow');
+    if (!s) return;
+    var open = s.style.display === 'none';
+    s.style.display = open ? 'block' : 'none';
+    if (a) a.style.transform = open ? 'rotate(180deg)' : '';
+}
+function mlSwitch(tab) {
+    var isP = tab === 'parent';
+    var pp = document.getElementById('mlPanelP'), pc = document.getElementById('mlPanelC');
+    var tp = document.getElementById('mlTabP'),  tc = document.getElementById('mlTabC');
+    if (pp) pp.style.display = isP ? 'block' : 'none';
+    if (pc) pc.style.display = isP ? 'none'  : 'block';
+    if (tp) { tp.style.background = isP ? '#222' : 'transparent'; tp.style.color = isP ? '#fff' : '#888'; }
+    if (tc) { tc.style.background = isP ? 'transparent' : '#222'; tc.style.color = isP ? '#888' : '#fff'; }
 }
 document.addEventListener('click', function(e) {
     var m = document.getElementById('mobileNav');
