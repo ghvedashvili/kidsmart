@@ -121,7 +121,7 @@ body {
 }
 .sec-sub {
     font-size: 15px; color: var(--muted);
-    max-width: 480px; margin-bottom: 36px; line-height: 1.7;
+   margin-bottom: 36px; line-height: 1.7;
 }
 
 /* ── Drag carousel (shared) ── */
@@ -316,9 +316,9 @@ body {
 {{-- ── Adaptive ── --}}
 <div class="sec-bg" id="adaptive">
 <div class="sec">
-    <div class="eyebrow reveal">ადაპტური სწავლება</div>
-    <h2 class="sec-h2 reveal">ამოცანები ვიტარდებიან ბავშვთან ერთად.</h2>
-    <p class="sec-sub reveal">ამოცანების 5 დონე, რომლებიც ავტომატურად ერგებიან ბავშვის დონეს.</p>
+    <div class="eyebrow reveal">ადაპტირებული სწავლება</div>
+    <h2 class="sec-h2 reveal">ჭკვიანი სისტემა, რომელიც ბავშვთან ერთად იზრდება</h2>
+    <p class="sec-sub reveal">არანაირი გადაწვა ან მოწყენილობა. KidSmart-ის ადაპტური ალგორითმი ავტომატურად აფასებს ბავშვის ცოდნას და სთავაზობს სირთულის 5 დონეს. სისტემა ფეხდაფეხ მიჰყვება მის პროგრესს — ამოცანები რთულდება და ვითარდება ბავშვთან ერთად.</p>
     <div class="ac-outer">
     <div class="adapt-grid" id="adaptTrack">
         <div class="adapt-card">
@@ -336,9 +336,9 @@ body {
 
 {{-- ── Math Detective ── --}}
 <div class="sec" id="detective">
-    <div class="eyebrow reveal">5 ტესტი · 5 მინიშნება</div>
-    <h2 class="sec-h2 reveal">მათემატიკური დეტექტივი</h2>
-    <p class="sec-sub reveal">გაიარე ტესტები და გაიგე საიდუმლო:</p>
+    <div class="eyebrow reveal">მათემატიკური დეტექტივი</div>
+    <h2 class="sec-h2 reveal">🕵️‍♂️ გახდი მათემატიკური დეტექტივი!</h2>
+    <p class="sec-sub reveal">ეს არ არის უბრალო ტესტები, ეს ნამდვილი გამოძიებაა! ყოველი სწორად ამოხსნილი ამოცანა ბავშვს აახლოებს დიდი საიდუმლოს გახსნასთან. მიეცით თქვენს შვილს შანსი, იგრძნოს თავი ნამდვილ დეტექტივად, სადაც ლოგიკა მისი მთავარი იარაღია.</p>
     <div class="ac-outer">
     <div class="detect-grid" id="detectTrack">
         <div class="detect-card">
@@ -369,7 +369,7 @@ body {
 <div class="sec">
     <div class="eyebrow reveal">ჯილდოების სისტემა</div>
     <h2 class="sec-h2 reveal">მშობელი ადგენს მიზანს · ბავშვი ირჩევს გზას</h2>
-    <p class="sec-sub reveal">მშობელი ქმნის საკუთარ მარკეტს სადაც აწესებს ჯილდოებს · ყველას თავისი ფასი აქვს.</p>
+    <p class="sec-sub reveal">შექმენით თქვენი ოჯახური „საკუთარი მარკეტი“, სადაც თავად დააწესებთ ჯილდოებს (მაგალითად: ველოსიპედით გასეირნება, დამატებითი საათი თამაშისთვის ან საყვარელი ტკბილეული). ყოველ ამოხსნილ ამოცანაში ბავშვი აგროვებს ქულებს და სწავლობს, რომ შრომას ყოველთვის მოაქვს დამსახურებული აღიარება.</p>
     <div class="mkt-outer">
         <div class="mkt-track">
             <div class="mkt-card"><div class="mkt-ico">🍕</div><div class="mkt-name">პიცა სახლში</div><div class="mkt-price">10 🪙</div></div>
