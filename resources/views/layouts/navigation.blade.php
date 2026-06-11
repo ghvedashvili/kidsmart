@@ -87,10 +87,14 @@
         </div>
         <div class="nav-center" id="secNav" style="display:flex;gap:2px;">
             @guest
-            <a class="nav-link-item" href="/#questions" onclick="secScroll(event,'questions')" style="font-size:0.8rem;">ამოცანები</a>
-            <a class="nav-link-item" href="/#adaptive"  onclick="secScroll(event,'adaptive')"  style="font-size:0.8rem;">სწავლება</a>
-            <a class="nav-link-item" href="/#detective" onclick="secScroll(event,'detective')" style="font-size:0.8rem;">დეტექტივი</a>
-            <a class="nav-link-item" href="/#market"    onclick="secScroll(event,'market')"    style="font-size:0.8rem;">ჯილდოები</a>
+            <a class="nav-link-item" href="/#questions"   onclick="secScroll(event,'questions')"   style="font-size:0.8rem;">ამოცანები</a>
+            <a class="nav-link-item" href="/#adaptive"    onclick="secScroll(event,'adaptive')"    style="font-size:0.8rem;">სწავლება</a>
+            <a class="nav-link-item" href="/#detective"   onclick="secScroll(event,'detective')"   style="font-size:0.8rem;">დეტექტივი</a>
+            <a class="nav-link-item" href="/#market"      onclick="secScroll(event,'market')"      style="font-size:0.8rem;">ჯილდოები</a>
+            <a class="nav-link-item" href="/#audience"    onclick="secScroll(event,'audience')"    style="font-size:0.8rem;">აუდიტორია</a>
+            <a class="nav-link-item" href="/#parentdash"  onclick="secScroll(event,'parentdash')"  style="font-size:0.8rem;">მშობელი</a>
+            <a class="nav-link-item" href="/#gamification" onclick="secScroll(event,'gamification')" style="font-size:0.8rem;">გეიმი</a>
+            <a class="nav-link-item" href="/#pricing"     onclick="secScroll(event,'pricing')"     style="font-size:0.8rem;">ფასები</a>
             @endguest
             @auth
             <a class="nav-link-item" href="{{ route('dashboard') }}" style="font-size:0.8rem;"><i class="bi bi-house"></i> მთავარი</a>
@@ -122,10 +126,14 @@
 
 <div id="mobileNav">
     @guest
-    <a href="/#questions" onclick="secScroll(event,'questions');toggleMobileMenu()"><span class="mn-icon">📐</span>ამოცანები</a>
-    <a href="/#adaptive"  onclick="secScroll(event,'adaptive');toggleMobileMenu()"><span class="mn-icon">🧠</span>სწავლება</a>
-    <a href="/#detective" onclick="secScroll(event,'detective');toggleMobileMenu()"><span class="mn-icon">🔍</span>დეტექტივი</a>
-    <a href="/#market"    onclick="secScroll(event,'market');toggleMobileMenu()"><span class="mn-icon">🎁</span>ჯილდოები</a>
+    <a href="/#questions"    onclick="secScroll(event,'questions');toggleMobileMenu()"><span class="mn-icon">📐</span>ამოცანები</a>
+    <a href="/#adaptive"     onclick="secScroll(event,'adaptive');toggleMobileMenu()"><span class="mn-icon">🧠</span>სწავლება</a>
+    <a href="/#detective"    onclick="secScroll(event,'detective');toggleMobileMenu()"><span class="mn-icon">🔍</span>დეტექტივი</a>
+    <a href="/#market"       onclick="secScroll(event,'market');toggleMobileMenu()"><span class="mn-icon">🎁</span>ჯილდოები</a>
+    <a href="/#audience"     onclick="secScroll(event,'audience');toggleMobileMenu()"><span class="mn-icon">🎒</span>აუდიტორია</a>
+    <a href="/#parentdash"   onclick="secScroll(event,'parentdash');toggleMobileMenu()"><span class="mn-icon">📊</span>მშობლის პანელი</a>
+    <a href="/#gamification" onclick="secScroll(event,'gamification');toggleMobileMenu()"><span class="mn-icon">🏠</span>გეიმიფიკაცია</a>
+    <a href="/#pricing"      onclick="secScroll(event,'pricing');toggleMobileMenu()"><span class="mn-icon">💎</span>ფასები</a>
     @endguest
 
     @auth

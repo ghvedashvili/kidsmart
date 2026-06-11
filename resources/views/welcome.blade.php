@@ -390,9 +390,9 @@ body {
 {{-- ── Question cards carousel ── --}}
 <div id="questions">
 <div class="sec" style="padding-bottom:48px;">
-    <div class="eyebrow reveal">სცადე ახლავე</div>
-    <h2 class="sec-h2 reveal">ბავშვის სამყაროდან ამოცანები</h2>
-    <p class="sec-sub reveal">ფეხბურთი, სუპერგმირები, კოსმოსი — ბავშვი ირჩევს, ჩვენ ვქმნით.</p>
+    <div class="eyebrow reveal">მათემატიკა ბავშვის ენაზე</div>
+    <h2 class="sec-h2 reveal">: ფეხბურთი, კოსმოსი თუ სუპერგმირები?</h2>
+    <p class="sec-sub reveal">როცა ამოცანები ბავშვის სამყაროდანაა, სწავლა თავგადასავალია.</p>
     <div class="car-outer">
         <div class="car-track dc" id="qCar"></div>
     </div>
@@ -450,26 +450,6 @@ body {
     </div>
 </div>
 
-{{-- ── Parent Market ── --}}
-<div class="sec-bg" id="market">
-<div class="sec">
-    <div class="eyebrow reveal">ჯილდოების სისტემა</div>
-    <h2 class="sec-h2 reveal">მშობელი ადგენს მიზანს · ბავშვი ირჩევს გზას</h2>
-    <p class="sec-sub reveal">შექმენით თქვენი ოჯახური „საკუთარი მარკეტი“, სადაც თავად დააწესებთ ჯილდოებს (მაგალითად: ველოსიპედით გასეირნება, დამატებითი საათი თამაშისთვის ან საყვარელი ტკბილეული). ყოველ ამოხსნილ ამოცანაში ბავშვი აგროვებს ქულებს და სწავლობს, რომ შრომას ყოველთვის მოაქვს დამსახურებული აღიარება.</p>
-    <div class="mkt-outer">
-        <div class="mkt-track">
-            <div class="mkt-card"><div class="mkt-ico">🍕</div><div class="mkt-name">პიცა სახლში</div><div class="mkt-price">10 🪙</div></div>
-            <div class="mkt-card"><div class="mkt-ico">🎬</div><div class="mkt-name">კინოში წასვლა</div><div class="mkt-price">20 🪙</div></div>
-            <div class="mkt-card"><div class="mkt-ico">🎁</div><div class="mkt-name">სიურპრიზი</div><div class="mkt-price">50 🪙</div></div>
-            <div class="mkt-card"><div class="mkt-ico">🎮</div><div class="mkt-name">თამაში (2 სთ)</div><div class="mkt-price">15 🪙</div></div>
-            <div class="mkt-card"><div class="mkt-ico">🍦</div><div class="mkt-name">ნაყინი</div><div class="mkt-price">5 🪙</div></div>
-            <div class="mkt-card"><div class="mkt-ico">🏆</div><div class="mkt-name">სპეც. გასეირნება</div><div class="mkt-price">30 🪙</div></div>
-            <div class="mkt-card"><div class="mkt-ico">📚</div><div class="mkt-name">წიგნი საჩუქრად</div><div class="mkt-price">25 🪙</div></div>
-        </div>
-    </div>
-</div>
-</div>
-
 {{-- ── Block 1: Target audience ── --}}
 <div class="sec-bg" id="audience">
 <div class="sec">
@@ -500,6 +480,61 @@ body {
             <div class="info-card-grade">V კლასი</div>
             <div class="info-card-h">ელიტური დეტექტივი</div>
             <p class="info-card-p">მულტი-ეტაპური გამოძიებები, სტრატეგიული აზროვნება და კოდები. ყველაზე ამბიციური ამოცანების დონე.</p>
+        </div>
+    </div>
+</div>
+</div>
+
+{{-- ── Parent Market ── --}}
+<div class="sec-bg" id="market">
+<div class="sec">
+    <div class="eyebrow reveal">ჯილდოების სისტემა</div>
+    <h2 class="sec-h2 reveal">მშობელი ადგენს მიზანს · ბავშვი ირჩევს გზას</h2>
+    <p class="sec-sub reveal">შექმენით თქვენი ოჯახური „საკუთარი მარკეტი“, სადაც თავად დააწესებთ ჯილდოებს (მაგალითად: ველოსიპედით გასეირნება, დამატებითი საათი თამაშისთვის ან საყვარელი ტკბილეული). ყოველ ამოხსნილ ამოცანაში ბავშვი აგროვებს ქულებს და სწავლობს, რომ შრომას ყოველთვის მოაქვს დამსახურებული აღიარება.</p>
+    <div class="mkt-outer">
+        <div class="mkt-track">
+            <div class="mkt-card"><div class="mkt-ico">🍕</div><div class="mkt-name">პიცა სახლში</div><div class="mkt-price">10 🪙</div></div>
+            <div class="mkt-card"><div class="mkt-ico">🎬</div><div class="mkt-name">კინოში წასვლა</div><div class="mkt-price">20 🪙</div></div>
+            <div class="mkt-card"><div class="mkt-ico">🎁</div><div class="mkt-name">სიურპრიზი</div><div class="mkt-price">50 🪙</div></div>
+            <div class="mkt-card"><div class="mkt-ico">🎮</div><div class="mkt-name">თამაში (2 სთ)</div><div class="mkt-price">15 🪙</div></div>
+            <div class="mkt-card"><div class="mkt-ico">🍦</div><div class="mkt-name">ნაყინი</div><div class="mkt-price">5 🪙</div></div>
+            <div class="mkt-card"><div class="mkt-ico">🏆</div><div class="mkt-name">სპეც. გასეირნება</div><div class="mkt-price">30 🪙</div></div>
+            <div class="mkt-card"><div class="mkt-ico">📚</div><div class="mkt-name">წიგნი საჩუქრად</div><div class="mkt-price">25 🪙</div></div>
+        </div>
+    </div>
+</div>
+</div>
+
+{{-- ── Block 3: Gamification ── --}}
+<div class="sec-bg" id="gamification">
+<div class="sec">
+    <div class="eyebrow reveal">გეიმიფიკაცია</div>
+    <h2 class="sec-h2 reveal">🏠 ჩემი ვირტუალური ოთახი —<br>ჩემი სამყარო</h2>
+    <p class="sec-sub reveal">ყოველი ამოხსნილი ამოცანა შენი ოთახის ახალი აქსესუარია!</p>
+    <div class="feat-grid">
+        <div class="feat-card reveal">
+            <div class="feat-icon">🏅</div>
+            <div class="feat-tag">Medals & Trophies</div>
+            <div class="feat-h">დიდების კედელი</div>
+            <p class="feat-p">ყველა წარმატებული დეტექტიური გამოძიებისთვის ბავშვი იღებს უნიკალურ მედლებსა და თასებს, რომლებსაც თავის ვირტუალურ კედელზე ანთავსებს.</p>
+        </div>
+        <div class="feat-card reveal">
+            <div class="feat-icon">🎨</div>
+            <div class="feat-tag">Customization</div>
+            <div class="feat-h">პერსონალიზაცია სტიკერებით</div>
+            <p class="feat-p">დააგროვე ქულები და გახსენი სტიკერები, პოსტერები და ავეჯი შენი საყვარელი თემატიკიდან (ფეხბურთი, კოსმოსი). მოაწყვე ოთახი ისე, როგორც შენ გინდა!</p>
+        </div>
+        <div class="feat-card reveal">
+            <div class="feat-icon">🔓</div>
+            <div class="feat-tag">Mystery Boxes</div>
+            <div class="feat-h">საიდუმლო ყუთები</div>
+            <p class="feat-p">გარკვეული დონის მიღწევისას ოთახში ჩნდება საიდუმლო ყუთი, რომლის გახსნაც მხოლოდ ახალი მათემატიკური კოდის გატეხვითაა შესაძლებელი.</p>
+        </div>
+        <div class="feat-card reveal">
+            <div class="feat-icon">⭐</div>
+            <div class="feat-tag">XP & Levels</div>
+            <div class="feat-h">დონეებისა და XP სისტემა</div>
+            <p class="feat-p">ყოველი სწორი პასუხი XP ქულებს მატებს. დააგროვე XP, ამაღლდი დონეში და გახსენი ახალი ფუნქციები, რომლებიც მეგობრებს ჯერ არ აქვთ.</p>
         </div>
     </div>
 </div>
@@ -540,40 +575,7 @@ body {
 </div>
 </div>
 
-{{-- ── Block 3: Gamification ── --}}
-<div class="sec-bg" id="gamification">
-<div class="sec">
-    <div class="eyebrow reveal">გეიმიფიკაცია</div>
-    <h2 class="sec-h2 reveal">🏠 ჩემი ვირტუალური ოთახი —<br>ჩემი სამყარო</h2>
-    <p class="sec-sub reveal">ყოველი ამოხსნილი ამოცანა შენი ოთახის ახალი აქსესუარია!</p>
-    <div class="feat-grid">
-        <div class="feat-card reveal">
-            <div class="feat-icon">🏅</div>
-            <div class="feat-tag">Medals & Trophies</div>
-            <div class="feat-h">დიდების კედელი</div>
-            <p class="feat-p">ყველა წარმატებული დეტექტიური გამოძიებისთვის ბავშვი იღებს უნიკალურ მედლებსა და თასებს, რომლებსაც თავის ვირტუალურ კედელზე ანთავსებს.</p>
-        </div>
-        <div class="feat-card reveal">
-            <div class="feat-icon">🎨</div>
-            <div class="feat-tag">Customization</div>
-            <div class="feat-h">პერსონალიზაცია სტიკერებით</div>
-            <p class="feat-p">დააგროვე ქულები და გახსენი სტიკერები, პოსტერები და ავეჯი შენი საყვარელი თემატიკიდან (ფეხბურთი, კოსმოსი). მოაწყვე ოთახი ისე, როგორც შენ გინდა!</p>
-        </div>
-        <div class="feat-card reveal">
-            <div class="feat-icon">🔓</div>
-            <div class="feat-tag">Mystery Boxes</div>
-            <div class="feat-h">საიდუმლო ყუთები</div>
-            <p class="feat-p">გარკვეული დონის მიღწევისას ოთახში ჩნდება საიდუმლო ყუთი, რომლის გახსნაც მხოლოდ ახალი მათემატიკური კოდის გატეხვითაა შესაძლებელი.</p>
-        </div>
-        <div class="feat-card reveal">
-            <div class="feat-icon">⭐</div>
-            <div class="feat-tag">XP & Levels</div>
-            <div class="feat-h">დონეებისა და XP სისტემა</div>
-            <p class="feat-p">ყოველი სწორი პასუხი XP ქულებს მატებს. დააგროვე XP, ამაღლდი დონეში და გახსენი ახალი ფუნქციები, რომლებიც მეგობრებს ჯერ არ აქვთ.</p>
-        </div>
-    </div>
-</div>
-</div>
+
 
 {{-- ── Block 4: Pricing ── --}}
 <div id="pricing">
