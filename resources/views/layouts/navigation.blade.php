@@ -39,6 +39,7 @@
 }
 .google-btn:hover { color: #fff; background: rgba(255,255,255,0.08); }
 .google-btn img { width: 16px; }
+@media (max-width: 640px) { #secNav { display: none !important; } }
 </style>
 
 <nav class="bg-dark border-bottom fixed-top" style="border-color:#2a2a2a!important;" data-bs-theme="dark">
@@ -48,7 +49,12 @@
                 <img src="/img/logo.png" alt="KidSmart" style="height:32px;width:auto;">
             </a>
         </div>
-        <div class="nav-center"></div>
+        <div class="nav-center" id="secNav" style="display:flex;gap:2px;">
+            <a class="nav-link-item" href="/#questions" onclick="secScroll(event,'questions')" style="font-size:0.8rem;">ამოცანები</a>
+            <a class="nav-link-item" href="/#adaptive"  onclick="secScroll(event,'adaptive')"  style="font-size:0.8rem;">სწავლება</a>
+            <a class="nav-link-item" href="/#detective" onclick="secScroll(event,'detective')" style="font-size:0.8rem;">დეტექტივი</a>
+            <a class="nav-link-item" href="/#market"    onclick="secScroll(event,'market')"    style="font-size:0.8rem;">ჯილდოები</a>
+        </div>
         <div class="nav-right">
             @auth
             <button id="notif-btn-desktop" onclick="toggleNotifications()" title="შეტყობინებები"
@@ -182,6 +188,11 @@ function lmSwitch(tab) {
     tP.style.color       = isParent ? '#fff' : '#888';
     tC.style.background  = isParent ? 'transparent' : '#111';
     tC.style.color        = isParent ? '#888' : '#fff';
+}
+
+function secScroll(e, id) {
+    var el = document.getElementById(id);
+    if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 }
 
 document.addEventListener('click', function(e) {

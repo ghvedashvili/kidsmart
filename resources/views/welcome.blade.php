@@ -124,24 +124,19 @@ body {
     max-width: 480px; margin-bottom: 36px; line-height: 1.7;
 }
 
-/* ── Question cards (child test style) ── */
-.car-outer { position: relative; }
-.car-track {
+/* ── Drag carousel (shared) ── */
+.dc {
     display: flex; gap: 16px;
     overflow-x: auto; scroll-snap-type: x mandatory;
     padding: 24px 4px 20px; scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
+    cursor: grab; user-select: none;
 }
-.car-track::-webkit-scrollbar { display: none; }
-.car-nav { display: flex; gap: 8px; justify-content: center; margin-top: 4px; }
-.car-nav button {
-    background: var(--green); color: #fff; border: none;
-    border-radius: 99px; width: 40px; height: 40px;
-    font-size: 16px; cursor: pointer;
-    box-shadow: 0 2px 8px rgba(26,122,60,0.3);
-    transition: all 0.15s;
-}
-.car-nav button:hover { background: #0f5c2a; transform: scale(1.06); }
+.dc::-webkit-scrollbar { display: none; }
+.dc.dragging { cursor: grabbing; }
+/* ── Question cards ── */
+.car-outer { margin: 0 -24px; padding: 0 24px; overflow: hidden; }
+.car-track { }
 
 .qc {
     flex: 0 0 296px; scroll-snap-align: start;
@@ -187,20 +182,20 @@ body {
 .qc-fb { font-family: 'Fredoka One', cursive; font-size: 13px; min-height: 18px; color: var(--muted); }
 
 /* ── Adaptive cards ── */
-.adapt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.adapt-grid { padding: 8px 4px 20px; }
 .adapt-card {
+    flex: 0 0 300px; scroll-snap-align: start;
     background: #fff; border-radius: 16px; padding: 24px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.06);
     border-left: 4px solid var(--green);
-    transition: transform 0.15s;
 }
-.adapt-card:hover { transform: translateY(-3px); }
 .adapt-t { font-family: 'Fredoka One', cursive; font-size: 1.2rem; color: var(--ink); margin-bottom: 8px; }
 .adapt-b { font-size: 14px; color: var(--muted); line-height: 1.7; font-weight: 700; }
 
 /* ── Detective ── */
-.detect-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+.detect-grid { padding: 8px 4px 20px; }
 .detect-card {
+    flex: 0 0 340px; scroll-snap-align: start;
     background: #fff; border-radius: 16px; padding: 24px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.06);
 }
@@ -231,6 +226,17 @@ body {
 .mkt-ico   { font-size: 2.2rem; margin-bottom: 8px; }
 .mkt-name  { font-family: 'Fredoka One', cursive; font-size: 14px; color: var(--ink); margin-bottom: 6px; line-height: 1.3; }
 .mkt-price { font-family: 'Fredoka One', cursive; font-size: 20px; color: var(--green); }
+
+/* ── Scroll reveal ── */
+.reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.in { opacity: 1; transform: translateY(0); }
+.reveal:nth-child(2) { transition-delay: 0.1s; }
+.reveal:nth-child(3) { transition-delay: 0.2s; }
+.reveal:nth-child(4) { transition-delay: 0.3s; }
 
 /* ── CTA ── */
 .cta-wrap {
@@ -270,31 +276,27 @@ body {
 {{-- ── Question cards carousel ── --}}
 <div id="questions">
 <div class="sec" style="padding-bottom:48px;">
-    <div class="eyebrow">სცადე ახლავე</div>
-    <h2 class="sec-h2">ბავშვის სამყაროდან ამოცანები</h2>
-    <p class="sec-sub">ფეხბურთი, სუპერგმირები, კოსმოსი — ბავშვი ირჩევს, ჩვენ ვქმნით.</p>
+    <div class="eyebrow reveal">სცადე ახლავე</div>
+    <h2 class="sec-h2 reveal">ბავშვის სამყაროდან ამოცანები</h2>
+    <p class="sec-sub reveal">ფეხბურთი, სუპერგმირები, კოსმოსი — ბავშვი ირჩევს, ჩვენ ვქმნით.</p>
     <div class="car-outer">
-        <div class="car-track" id="qCar"></div>
-    </div>
-    <div class="car-nav" style="margin-top:12px;">
-        <button onclick="scrollCar('qCar',-1)">←</button>
-        <button onclick="scrollCar('qCar',1)">→</button>
+        <div class="car-track dc" id="qCar"></div>
     </div>
 </div>
 </div>
 
 {{-- ── Adaptive ── --}}
-<div class="sec-bg">
+<div class="sec-bg" id="adaptive">
 <div class="sec">
-    <div class="eyebrow">ადაპტური სწავლება</div>
-    <h2 class="sec-h2">ამოცანები ვიტარდებიან ბავშვთან ერთად.</h2>
-    <p class="sec-sub">ამოცანების 5 დონე, რომლებიც ავტომატურად ერგებიან ბავშვის დონეს.</p>
-    <div class="adapt-grid">
-        <div class="adapt-card">
+    <div class="eyebrow reveal">ადაპტური სწავლება</div>
+    <h2 class="sec-h2 reveal">ამოცანები ვიტარდებიან ბავშვთან ერთად.</h2>
+    <p class="sec-sub reveal">ამოცანების 5 დონე, რომლებიც ავტომატურად ერგებიან ბავშვის დონეს.</p>
+    <div class="adapt-grid dc">
+        <div class="adapt-card reveal">
             <div class="adapt-t">3 ტესტი 95% და მეტი?</div>
             <p class="adapt-b">ავტომატურად შეიცვლება დონე — ბავშვს რომ არ მობეზრდეს.</p>
         </div>
-        <div class="adapt-card">
+        <div class="adapt-card reveal">
             <div class="adapt-t">ხშირად უშვებს შეცდომებს?</div>
             <p class="adapt-b">ამ თემაში შესაბამის დონის ამოცანებს ვთავაზობთ და ვავითარებთ ბავშვის უნარს.</p>
         </div>
@@ -303,12 +305,12 @@ body {
 </div>
 
 {{-- ── Math Detective ── --}}
-<div class="sec">
-    <div class="eyebrow">5 ტესტი · 5 მინიშნება</div>
-    <h2 class="sec-h2">მათემატიკური დეტექტივი</h2>
-    <p class="sec-sub">გაიარე ტესტები და გაიგე საიდუმლო:</p>
-    <div class="detect-grid">
-        <div class="detect-card">
+<div class="sec" id="detective">
+    <div class="eyebrow reveal">5 ტესტი · 5 მინიშნება</div>
+    <h2 class="sec-h2 reveal">მათემატიკური დეტექტივი</h2>
+    <p class="sec-sub reveal">გაიარე ტესტები და გაიგე საიდუმლო:</p>
+    <div class="detect-grid dc">
+        <div class="detect-card reveal">
             <div style="font-family:'Fredoka One',cursive;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#aaa;margin-bottom:10px;">🔍 გამოძიება #1</div>
             <div style="font-family:'Fredoka One',cursive;font-size:1.25rem;color:var(--ink);margin-bottom:14px;">ვინ მოიგო ოქროს ბურთი?</div>
             <div class="hint-row hint-vis"><span style="min-width:20px;color:var(--green);">1.</span><span>#7 ნომრით თამაშობს</span></div>
@@ -317,7 +319,7 @@ body {
             <div class="hint-row hint-lock"><span style="min-width:20px;">4.</span><span>🔒 ჩაიტვირთება ტესტი 4-ის შემდეგ</span></div>
             <div class="hint-row hint-lock"><span style="min-width:20px;">5.</span><span>🔒 ჩაიტვირთება ტესტი 5-ის შემდეგ</span></div>
         </div>
-        <div class="detect-card">
+        <div class="detect-card reveal">
             <div style="font-family:'Fredoka One',cursive;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#aaa;margin-bottom:10px;">🔍 გამოძიება #2</div>
             <div style="font-family:'Fredoka One',cursive;font-size:1.25rem;color:var(--ink);margin-bottom:10px;">რა საიდუმლო შეტყობინება მიიღეს სუპერგმირებმა?</div>
             <div style="font-family:'Fredoka One',cursive;font-size:1.1rem;color:var(--orange);letter-spacing:.04em;background:#fff5f0;border-left:4px solid var(--orange);padding:10px 14px;border-radius:0 10px 10px 0;margin-bottom:12px;line-height:1.6;">
@@ -331,11 +333,11 @@ body {
 </div>
 
 {{-- ── Parent Market ── --}}
-<div class="sec-bg">
+<div class="sec-bg" id="market">
 <div class="sec">
-    <div class="eyebrow">ჯილდოების სისტემა</div>
-    <h2 class="sec-h2">მშობელი ადგენს მიზანს · ბავშვი ირჩევს გზას</h2>
-    <p class="sec-sub">მშობელი ქმნის საკუთარ მარკეტს სადაც აწესებს ჯილდოებს · ყველას თავისი ფასი აქვს.</p>
+    <div class="eyebrow reveal">ჯილდოების სისტემა</div>
+    <h2 class="sec-h2 reveal">მშობელი ადგენს მიზანს · ბავშვი ირჩევს გზას</h2>
+    <p class="sec-sub reveal">მშობელი ქმნის საკუთარ მარკეტს სადაც აწესებს ჯილდოებს · ყველას თავისი ფასი აქვს.</p>
     <div class="mkt-outer">
         <div class="mkt-track">
             <div class="mkt-card"><div class="mkt-ico">🍕</div><div class="mkt-name">პიცა სახლში</div><div class="mkt-price">10 🪙</div></div>
@@ -399,42 +401,76 @@ var QDATA = [
 (function() {
     var track = document.getElementById('qCar');
     if (!track) return;
-    QDATA.forEach(function(c, i) {
-        var div = document.createElement('div');
-        div.className = 'qc' + (c.clr ? ' ' + c.clr : '');
-        div.innerHTML =
-            '<div class="qc-badge">' + c.theme + '</div>' +
-            '<span class="qc-icon">' + c.icon + '</span>' +
-            '<div class="qc-text">' + c.q + '</div>' +
-            '<div class="qc-opts" id="qo' + i + '"></div>' +
-            '<div class="qc-fb" id="qf' + i + '"></div>';
-        track.appendChild(div);
 
-        var el = div.querySelector('#qo' + i);
-        c.opts.forEach(function(opt) {
-            var b = document.createElement('button');
-            b.className = 'qc-opt';
-            b.textContent = opt;
-            b.onclick = function() {
-                if (el.dataset.done) return;
-                el.dataset.done = '1';
-                el.querySelectorAll('.qc-opt').forEach(function(btn) {
-                    btn.disabled = true;
-                    if (btn.textContent === c.ans) btn.classList.add('correct');
-                    else if (btn.textContent === opt) btn.classList.add('wrong');
-                });
-                div.querySelector('#qf' + i).innerHTML = opt === c.ans
-                    ? '<span style="color:var(--green);">&#10003; სწორია! +10 🪙</span>'
-                    : '<span style="color:#ef4444;">&#10007; სწ: ' + c.ans + '</span>';
-            };
-            el.appendChild(b);
+    function buildSet(prefix) {
+        QDATA.forEach(function(c, i) {
+            var uid = prefix + i;
+            var div = document.createElement('div');
+            div.className = 'qc' + (c.clr ? ' ' + c.clr : '');
+            div.innerHTML =
+                '<div class="qc-badge">' + c.theme + '</div>' +
+                '<span class="qc-icon">' + c.icon + '</span>' +
+                '<div class="qc-text">' + c.q + '</div>' +
+                '<div class="qc-opts" id="qo' + uid + '"></div>' +
+                '<div class="qc-fb" id="qf' + uid + '"></div>';
+            track.appendChild(div);
+
+            var el = div.querySelector('#qo' + uid);
+            c.opts.forEach(function(opt) {
+                var b = document.createElement('button');
+                b.className = 'qc-opt';
+                b.textContent = opt;
+                b.onclick = function() {
+                    if (el.dataset.done) return;
+                    el.dataset.done = '1';
+                    el.querySelectorAll('.qc-opt').forEach(function(btn) {
+                        btn.disabled = true;
+                        if (btn.textContent === c.ans) btn.classList.add('correct');
+                        else if (btn.textContent === opt) btn.classList.add('wrong');
+                    });
+                    div.querySelector('#qf' + uid).innerHTML = opt === c.ans
+                        ? '<span style="color:var(--green);">✓ სწორია! +10 🪙</span>'
+                        : '<span style="color:#ef4444;">✗ სწ: ' + c.ans + '</span>';
+                };
+                el.appendChild(b);
+            });
+        });
+    }
+
+    buildSet('a');
+})();
+
+(function() {
+    if (!('IntersectionObserver' in window)) {
+        document.querySelectorAll('.reveal').forEach(function(el) { el.classList.add('in'); });
+        return;
+    }
+    var obs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) {
+            if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); }
+        });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach(function(el) { obs.observe(el); });
+})();
+
+// Mouse drag-to-scroll for all .dc carousels
+(function() {
+    document.querySelectorAll('.dc').forEach(function(el) {
+        var down = false, startX, scrollLeft;
+        el.addEventListener('mousedown', function(e) {
+            down = true; el.classList.add('dragging');
+            startX = e.pageX - el.getBoundingClientRect().left;
+            scrollLeft = el.scrollLeft;
+            e.preventDefault();
+        });
+        el.addEventListener('mouseleave', function() { down = false; el.classList.remove('dragging'); });
+        el.addEventListener('mouseup',    function() { down = false; el.classList.remove('dragging'); });
+        el.addEventListener('mousemove', function(e) {
+            if (!down) return;
+            var x = e.pageX - el.getBoundingClientRect().left;
+            el.scrollLeft = scrollLeft - (x - startX) * 1.4;
         });
     });
 })();
-
-function scrollCar(id, d) {
-    var el = document.getElementById(id);
-    if (el) el.scrollBy({ left: d * 312, behavior: 'smooth' });
-}
 </script>
 @endsection

@@ -86,6 +86,7 @@
             repeating-linear-gradient(transparent, transparent 31px, rgba(173,200,222,0.55) 31px, rgba(173,200,222,0.55) 32px),
             repeating-linear-gradient(90deg, transparent, transparent 31px, rgba(173,200,222,0.55) 31px, rgba(173,200,222,0.55) 32px);
         overscroll-behavior: none;
+        scroll-behavior: smooth;
     }
     body { background: transparent; overscroll-behavior: none; padding-top: 56px; }
 
