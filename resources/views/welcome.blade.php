@@ -127,10 +127,10 @@ body {
 /* ── Drag carousel (shared) ── */
 .dc {
     display: flex; gap: 16px;
-    overflow-x: auto; scroll-snap-type: x proximity;
+    overflow-x: auto; scroll-snap-type: none;
     padding: 24px 4px 20px; scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
-    cursor: grab; user-select: none; touch-action: pan-x;
+    cursor: grab; user-select: none;
 }
 .dc::-webkit-scrollbar { display: none; }
 .dc.dragging { cursor: grabbing; }
@@ -186,10 +186,10 @@ body {
 /* ── Adaptive / Detective drag carousel ── */
 .adapt-grid, .detect-grid {
     display: flex; gap: 16px;
-    overflow-x: auto; scroll-snap-type: x proximity;
+    overflow-x: auto; scroll-snap-type: none;
     padding: 8px 4px 20px; scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
-    cursor: grab; user-select: none; touch-action: pan-x;
+    cursor: grab; user-select: none;
 }
 .adapt-grid::-webkit-scrollbar, .detect-grid::-webkit-scrollbar { display: none; }
 .adapt-card {
@@ -218,10 +218,10 @@ body {
 /* ── Market drag carousel ── */
 .mkt-track {
     display: flex; gap: 16px;
-    overflow-x: auto; scroll-snap-type: x proximity;
+    overflow-x: auto; scroll-snap-type: none;
     padding: 4px 0 16px; scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
-    cursor: grab; user-select: none; touch-action: pan-x;
+    cursor: grab; user-select: none;
 }
 .mkt-track::-webkit-scrollbar { display: none; }
 .mkt-card {
@@ -231,25 +231,26 @@ body {
     transition: transform 0.15s;
 }
 .mkt-card:hover { transform: translateY(-4px); }
+@media (min-width: 641px) { .mkt-card { flex: 0 0 190px; } }
 
 @keyframes cardSlide {
-    from { opacity: 0; transform: translateX(36px); }
-    to   { opacity: 1; transform: translateX(0); }
+    from { opacity: 0; transform: translateX(40px) scale(0.96); }
+    to   { opacity: 1; transform: translateX(0)   scale(1);    }
 }
 .qc, .adapt-card, .detect-card, .mkt-card { opacity: 0; }
 .track-in > .qc,
 .track-in > .adapt-card,
 .track-in > .detect-card,
 .track-in > .mkt-card {
-    animation: cardSlide 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+    animation: cardSlide 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 .track-in > :nth-child(1) { animation-delay: 0s; }
-.track-in > :nth-child(2) { animation-delay: 0.09s; }
-.track-in > :nth-child(3) { animation-delay: 0.18s; }
-.track-in > :nth-child(4) { animation-delay: 0.27s; }
-.track-in > :nth-child(5) { animation-delay: 0.36s; }
-.track-in > :nth-child(6) { animation-delay: 0.45s; }
-.track-in > :nth-child(7) { animation-delay: 0.54s; }
+.track-in > :nth-child(2) { animation-delay: 0.07s; }
+.track-in > :nth-child(3) { animation-delay: 0.14s; }
+.track-in > :nth-child(4) { animation-delay: 0.21s; }
+.track-in > :nth-child(5) { animation-delay: 0.28s; }
+.track-in > :nth-child(6) { animation-delay: 0.35s; }
+.track-in > :nth-child(7) { animation-delay: 0.42s; }
 .mkt-ico   { font-size: 2.2rem; margin-bottom: 8px; }
 .mkt-name  { font-family: 'Fredoka One', cursive; font-size: 14px; color: var(--ink); margin-bottom: 6px; line-height: 1.3; }
 .mkt-price { font-family: 'Fredoka One', cursive; font-size: 20px; color: var(--green); }
@@ -257,13 +258,13 @@ body {
 /* ── Scroll reveal ── */
 .reveal {
     opacity: 0;
-    transform: translateY(28px);
-    transition: opacity 0.7s ease, transform 0.7s ease;
+    transform: translateY(24px);
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .reveal.in { opacity: 1; transform: translateY(0); }
-.reveal:nth-child(2) { transition-delay: 0.1s; }
-.reveal:nth-child(3) { transition-delay: 0.2s; }
-.reveal:nth-child(4) { transition-delay: 0.3s; }
+.reveal:nth-child(2) { transition-delay: 0.08s; }
+.reveal:nth-child(3) { transition-delay: 0.16s; }
+.reveal:nth-child(4) { transition-delay: 0.24s; }
 
 /* ── CTA ── */
 .cta-wrap {
@@ -500,17 +501,10 @@ var QDATA = [
         var raf, vel = 0;
         var isDragging = false;
 
-        // ვინახავთ პირვანდელ სნაპის სტილს (მაგ. 'x proximity')
-        var originalSnap = window.getComputedStyle(el).scrollSnapType || 'x proximity';
-
         function momentum() {
-            if (Math.abs(vel) < 0.3) {
-                // როცა სრიალი თითქმის გაჩერდება, ისევ ვაბრუნებთ CSS Snap-ს, რომ ლამაზად გასწორდეს ქარდი
-                el.style.scrollSnapType = originalSnap;
-                return;
-            }
+            if (Math.abs(vel) < 0.3) return;
             el.scrollLeft += vel;
-            vel *= 0.94; // სრიალის სიმბლანტე
+            vel *= 0.94;
             raf = requestAnimationFrame(momentum);
         }
 
@@ -534,12 +528,7 @@ var QDATA = [
             down = false; 
             el.classList.remove('dragging');
             
-            if (isDragging) {
-                requestAnimationFrame(momentum);
-            } else {
-                // თუ მომხმარებელმა უბრალოდ დააკლიკა და არ გაათრია, სნაპი არ უნდა გაითიშოს
-                el.style.scrollSnapType = originalSnap;
-            }
+            if (isDragging) requestAnimationFrame(momentum);
         });
 
         el.addEventListener('mousemove', function(e) {
@@ -548,8 +537,6 @@ var QDATA = [
             var deltaX = Math.abs(e.pageX - mX);
             if (deltaX > 4) {
                 isDragging = true;
-                // კრიტიკული მომენტი: თრევის დაწყებისთანავე ვთიშავთ სნაპს, რომ ქარდმა თავისუფლად ისრიალოს
-                el.style.scrollSnapType = 'none';
             }
 
             var now = Date.now();
@@ -572,31 +559,35 @@ var QDATA = [
             }
         }, true);
 
-        // ── Touch Events (მობილურზე ვტოვებთ სუფთა ნატივურ სქროლს CSS Snap-ით) ──
-        var tX, tSL, tLastX, tLastT;
+        // ── Touch Events ──
+        var tX, tY, tSL, tLastX, tLastT, tDir;
         el.addEventListener('touchstart', function(e) {
-            cancelAnimationFrame(raf); 
-            vel = 0;
-            // მობილურზე მუშაობს ბრაუზერის სნაპი, ამიტომ JS ჩარევა არ გვინდა
-            el.style.scrollSnapType = originalSnap; 
+            cancelAnimationFrame(raf); vel = 0;
             tX = tLastX = e.touches[0].clientX;
-            tSL = el.scrollLeft; 
+            tY = e.touches[0].clientY;
+            tSL = el.scrollLeft;
             tLastT = Date.now();
+            tDir = null;
         }, { passive: true });
 
         el.addEventListener('touchmove', function(e) {
             var x = e.touches[0].clientX;
-            var now = Date.now();
-            var dt = Math.max(now - tLastT, 1);
+            var y = e.touches[0].clientY;
+            if (tDir === null) {
+                var dx = Math.abs(x - tX), dy = Math.abs(y - tY);
+                if (dx < 4 && dy < 4) return;
+                tDir = dx >= dy ? 'h' : 'v';
+            }
+            if (tDir !== 'h') return;
+            e.preventDefault();
+            var now = Date.now(), dt = Math.max(now - tLastT, 1);
             vel = -(x - tLastX) / dt * 15;
             el.scrollLeft = tSL - (x - tX);
-            tLastX = x; 
-            tLastT = now;
-        }, { passive: true });
+            tLastX = x; tLastT = now;
+        }, { passive: false });
 
         el.addEventListener('touchend', function() {
-            // მობილურზეც თუ ძალიან სწრაფად გაკრავს თითს, JS ინერცია წაეხმარება
-            requestAnimationFrame(momentum);
+            if (tDir === 'h') requestAnimationFrame(momentum);
         }, { passive: true });
     });
 })();
