@@ -1,27 +1,27 @@
 @extends('layouts.app')
 @section('content')
 <style>
-    body { background: #0d0d0d !important; }
+    body { background: transparent !important; }
     .aw { max-width: 680px; margin: 0 auto; padding: 32px 16px 64px; font-family: 'Goldman', monospace; }
-    .atitle { font-size: 0.75rem; color: #555; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 8px; }
+    .atitle { font-size: 0.75rem; color: #94a3b8; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 8px; }
     .anav { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 32px; }
-    .anav a { font-family: 'Goldman', monospace; font-size: 0.7rem; color: #555; letter-spacing: 0.08em; text-decoration: none; padding: 4px 12px; border: 1px solid #222; border-radius: 3px; transition: color 0.2s, border-color 0.2s; }
-    .anav a:hover, .anav a.active { color: #bbb; border-color: #444; }
-    .card-dark { background: #111; border: 1px solid #1e1e1e; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
-    .card-label { font-size: 0.68rem; color: #444; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px; }
-    .fc { background: #0d0d0d; border: 1px solid #2a2a2a; border-radius: 4px; color: #ccc; font-family: 'Goldman', monospace; font-size: 0.82rem; padding: 9px 13px; width: 100%; outline: none; margin-bottom: 10px; box-sizing: border-box; }
-    .fc:focus { border-color: #444; }
-    .fc::placeholder { color: #444; }
+    .anav a { font-family: 'Goldman', monospace; font-size: 0.7rem; color: #64748b; letter-spacing: 0.08em; text-decoration: none; padding: 4px 12px; border: 1px solid #e2e8f0; border-radius: 3px; transition: color 0.2s, border-color 0.2s; }
+    .anav a:hover, .anav a.active { color: #1e293b; border-color: #94a3b8; }
+    .card-dark { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .card-label { font-size: 0.68rem; color: #94a3b8; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px; }
+    .fc { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; color: #374151; font-family: 'Goldman', monospace; font-size: 0.82rem; padding: 9px 13px; width: 100%; outline: none; margin-bottom: 10px; box-sizing: border-box; }
+    .fc:focus { border-color: #94a3b8; }
+    .fc::placeholder { color: #cbd5e1; }
     select.fc { cursor: pointer; }
-    .btn { background: #1a1a1a; border: 1px solid #2a2a2a; color: #bbb; font-family: 'Goldman', monospace; font-size: 0.78rem; letter-spacing: 0.08em; padding: 9px 22px; border-radius: 4px; cursor: pointer; transition: all 0.2s; }
-    .btn:hover { border-color: #444; color: #fff; }
-    .btn-del { background: none; border: none; color: #333; font-size: 0.72rem; cursor: pointer; padding: 0 4px; transition: color 0.2s; }
-    .btn-del:hover { color: #e74c3c; }
-    .row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #1a1a1a; font-size: 0.8rem; color: #777; }
+    .btn { background: #f8fafc; border: 1px solid #e2e8f0; color: #64748b; font-family: 'Goldman', monospace; font-size: 0.78rem; letter-spacing: 0.08em; padding: 9px 22px; border-radius: 4px; cursor: pointer; transition: all 0.2s; }
+    .btn:hover { border-color: #94a3b8; color: #1e293b; }
+    .btn-del { background: none; border: none; color: #cbd5e1; font-size: 0.72rem; cursor: pointer; padding: 0 4px; transition: color 0.2s; }
+    .btn-del:hover { color: #ef4444; }
+    .row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.8rem; color: #374151; }
     .row:last-child { border-bottom: none; }
-    .badge { font-size: 0.65rem; color: #444; border: 1px solid #222; border-radius: 2px; padding: 1px 6px; margin-left: 8px; }
-    .msg { font-size: 0.75rem; color: #2ecc71; margin-bottom: 16px; }
-    .grade-group { color: #555; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 0 4px; }
+    .badge { font-size: 0.65rem; color: #64748b; border: 1px solid #e2e8f0; border-radius: 2px; padding: 1px 6px; margin-left: 8px; }
+    .msg { font-size: 0.75rem; color: #059669; margin-bottom: 16px; }
+    .grade-group { color: #94a3b8; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 0 4px; }
 </style>
 
 <div class="aw">

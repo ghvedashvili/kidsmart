@@ -7,9 +7,28 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class QuestionTemplate extends Model
 {
-    protected $fillable = ['topic_id', 'difficulty', 'template_text', 'correct_formula', 'num_config', 'distractors'];
+    protected $fillable = ['topic_id', 'difficulty', 'template_text', 'hint_text', 'correct_formula', 'num_config', 'distractors', 'conditions'];
 
-    protected $casts = ['num_config' => 'array', 'distractors' => 'array'];
+    protected $casts = ['num_config' => 'array', 'distractors' => 'array', 'conditions' => 'array'];
+
+    private function conditionsMet(array $conditions, array $vars): bool
+    {
+        foreach ($conditions as $c) {
+            $l = is_numeric($c['left'])  ? (int)$c['left']  : (int)($vars[$c['left']]  ?? 0);
+            $r = is_numeric($c['right']) ? (int)$c['right'] : (int)($vars[$c['right']] ?? 0);
+            $ok = match($c['op'] ?? '') {
+                '>'  => $l > $r,
+                '<'  => $l < $r,
+                '>=' => $l >= $r,
+                '<=' => $l <= $r,
+                '!=' => $l !== $r,
+                '%0' => $r !== 0 && $l % $r === 0,
+                default => true,
+            };
+            if (!$ok) return false;
+        }
+        return true;
+    }
 
     public function topic(): BelongsTo
     {
@@ -22,23 +41,26 @@ class QuestionTemplate extends Model
         $numConf = $this->num_config ?? [];
         $baseFormula = preg_replace('/\{\{(\w+)\}\}/', '$1', $this->correct_formula);
 
-        // retry until correct answer is a positive integer (max 20 attempts)
+        // retry until correct answer is a positive integer AND all conditions pass (max 40 attempts)
+        $conditions = $this->conditions ?? [];
         $numVars = [];
         $correct = 0;
-        for ($attempt = 0; $attempt < 20; $attempt++) {
+        for ($attempt = 0; $attempt < 40; $attempt++) {
             $numVars = [];
             foreach ($numConf as $key => $conf) {
-                $numVars[$key] = rand($conf['min'], $conf['max']);
+                $step = max(1, (int) ($conf['step'] ?? 1));
+                $steps = (int) (($conf['max'] - $conf['min']) / $step);
+                $numVars[$key] = $conf['min'] + rand(0, $steps) * $step;
             }
             $f = $baseFormula;
             foreach ($numVars as $k => $v) {
                 $f = str_replace($k, (string) $v, $f);
             }
             $result = @eval("return (int)({$f});");
-            if ($result !== false && $result > 0) {
-                $correct = $result;
-                break;
-            }
+            if ($result === false || $result <= 0) continue;
+            if (!$this->conditionsMet($conditions, $numVars)) continue;
+            $correct = $result;
+            break;
         }
 
         // theme vars (strings — only used in text, not formula)
@@ -74,8 +96,15 @@ class QuestionTemplate extends Model
         $options = array_merge([$correct], $wrong);
         shuffle($options);
 
+        $hintRaw = preg_replace('/\{\{(\w+)\}\}(?!\})/', '{{$1}}', $this->hint_text ?? '');
+        foreach ($vars as $k => $v) {
+            $hintRaw = str_replace("{{{$k}}}", $v, $hintRaw);
+        }
+        $hint = trim(preg_replace('/\{\{\w+\}\}/', '?', $hintRaw)) ?: null;
+
         return [
             'question_text'  => $text,
+            'hint_text'      => $hint,
             'options'        => array_map('strval', $options),
             'correct_answer' => (string) $correct,
         ];

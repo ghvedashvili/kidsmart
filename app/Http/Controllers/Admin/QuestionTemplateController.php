@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Grade;
 use App\Models\QuestionTemplate;
+use App\Models\ThemeVariable;
 use App\Models\Topic;
 use Illuminate\Http\Request;
 
@@ -35,9 +36,10 @@ class QuestionTemplateController extends Controller
     public function create()
     {
         return view('admin.questions.form', [
-            'template' => null,
-            'grades'   => Grade::orderBy('number')->get(),
-            'topics'   => Topic::with('grade')->orderBy('grade_id')->get(),
+            'template'      => null,
+            'topics'        => Topic::with('grade')->orderBy('grade_id')->get(),
+            'themeVarNames' => $this->themeVarNames(),
+            'themeVarMap'   => $this->themeVarMap(),
         ]);
     }
 
@@ -51,9 +53,10 @@ class QuestionTemplateController extends Controller
     public function edit(QuestionTemplate $question)
     {
         return view('admin.questions.form', [
-            'template' => $question,
-            'grades'   => Grade::orderBy('number')->get(),
-            'topics'   => Topic::with('grade')->orderBy('grade_id')->get(),
+            'template'      => $question,
+            'topics'        => Topic::with('grade')->orderBy('grade_id')->get(),
+            'themeVarNames' => $this->themeVarNames(),
+            'themeVarMap'   => $this->themeVarMap(),
         ]);
     }
 
@@ -69,15 +72,34 @@ class QuestionTemplateController extends Controller
         return back()->with('success', 'წაიშალა');
     }
 
+    private function themeVarNames(): array
+    {
+        return ThemeVariable::distinct()->pluck('variable_name')->sort()->values()->all();
+    }
+
+    private function themeVarMap(): array
+    {
+        $map = [];
+        ThemeVariable::all()->each(function ($tv) use (&$map) {
+            $map[$tv->variable_name] = array_merge(
+                $map[$tv->variable_name] ?? [],
+                $tv->values ?? []
+            );
+        });
+        return $map;
+    }
+
     private function validated(Request $request): array
     {
         $raw = $request->validate([
             'topic_id'        => 'required|exists:topics,id',
             'difficulty'      => 'required|integer|min:1|max:5',
             'template_text'   => 'required|string',
+            'hint_text'       => 'nullable|string',
             'correct_formula' => 'required|string|max:200',
             'num_config'      => 'required|string',
             'distractors'     => 'nullable|string',
+            'conditions'      => 'nullable|string',
         ]);
 
         $numConfig = json_decode($raw['num_config'], true);
@@ -90,20 +112,23 @@ class QuestionTemplateController extends Controller
         $distractors = null;
         if (! empty($raw['distractors'])) {
             $distractors = json_decode($raw['distractors'], true);
-            if (! is_array($distractors)) {
-                throw \Illuminate\Validation\ValidationException::withMessages([
-                    'distractors' => 'JSON ფორმატი არასწორია',
-                ]);
-            }
+        }
+
+        $conditions = null;
+        if (! empty($raw['conditions'])) {
+            $conditions = json_decode($raw['conditions'], true);
+            if (! is_array($conditions)) $conditions = null;
         }
 
         return [
             'topic_id'        => $raw['topic_id'],
             'difficulty'      => $raw['difficulty'],
             'template_text'   => $raw['template_text'],
+            'hint_text'       => $raw['hint_text'] ?? null,
             'correct_formula' => $raw['correct_formula'],
             'num_config'      => $numConfig,
             'distractors'     => $distractors,
+            'conditions'      => $conditions,
         ];
     }
 }

@@ -9,7 +9,7 @@ class TestQuestion extends Model
 {
     public $timestamps = false;
 
-    protected $fillable = ['test_id', 'template_id', 'question_text', 'options', 'correct_answer', 'order'];
+    protected $fillable = ['test_id', 'template_id', 'question_text', 'hint_text', 'options', 'correct_answer', 'order'];
 
     protected $casts = ['options' => 'array'];
 

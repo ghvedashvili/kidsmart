@@ -56,6 +56,7 @@ class TestGeneratorService
                 'test_id'        => $test->id,
                 'template_id'    => $template->id,
                 'question_text'  => $generated['question_text'],
+                'hint_text'      => $generated['hint_text'] ?? null,
                 'options'        => $generated['options'],
                 'correct_answer' => $generated['correct_answer'],
                 'order'          => $i + 1,

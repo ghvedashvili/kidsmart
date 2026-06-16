@@ -68,7 +68,8 @@ body {
 .q-card:nth-child(3n+3) .q-badge { background: var(--orange); }
 
 .q-icon { font-size: 1.8rem; margin-bottom: 8px; display: block; }
-.q-text { font-size: clamp(0.95rem, 3.2vw, 1.08rem); font-weight: 800; color: var(--dark); line-height: 1.7; margin-bottom: 18px; }
+.q-text { font-size: clamp(0.95rem, 3.2vw, 1.08rem); font-weight: 800; color: var(--dark); line-height: 1.7; margin-bottom: 6px; }
+.q-hint { font-size: 0.78rem; color: #64748b; font-style: italic; margin-bottom: 14px; line-height: 1.5; }
 
 .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .opt-lbl { position: relative; cursor: pointer; display: block; }
@@ -138,6 +139,7 @@ body {
         <div class="check-mark">✓</div>
         <span class="q-icon">{{ $icons[$i % count($icons)] }}</span>
         <div class="q-text">{{ $q->question_text }}</div>
+        @if($q->hint_text)<div class="q-hint">{{ $q->hint_text }}</div>@endif
         <div class="opts">
             @foreach($q->options as $opt)
             <label class="opt-lbl">
