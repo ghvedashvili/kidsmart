@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\GradeController;
 use App\Http\Controllers\Admin\ThemeController;
 use App\Http\Controllers\Admin\TopicController;
 use App\Http\Controllers\Admin\QuestionTemplateController;
+use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\ChildController;
 use App\Http\Controllers\ChildSettingsController;
 use App\Http\Controllers\TestController;
@@ -72,6 +73,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/children/{child}/settings',    [ChildSettingsController::class, 'edit'])->name('child.settings.edit');
     Route::put('/children/{child}/settings',    [ChildSettingsController::class, 'update'])->name('child.settings.update');
     Route::delete('/children/{child}',          [ChildSettingsController::class, 'destroy'])->name('child.destroy');
+
+    // მიღწევები
+    Route::get('/achievements', [AchievementController::class, 'index'])->name('achievements');
 
     // ტესტი
     Route::get('/test/start',           [TestController::class, 'start'])->name('test.start');

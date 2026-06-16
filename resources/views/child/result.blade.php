@@ -87,6 +87,38 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
 .ans-wrong   { color: #ef4444; }
 .ans-note    { color: #64748b; }
 
+/* Coins + achievements banner */
+.reward-bar {
+    max-width: 640px; margin: 0 auto;
+    padding: 16px 16px 0;
+}
+.coins-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: white; border-radius: 99px;
+    padding: 10px 20px; font-size: 1rem; font-weight: 900;
+    box-shadow: 0 4px 14px rgba(245,158,11,0.35);
+    margin-bottom: 12px;
+}
+.ach-unlocked {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;
+}
+.ach-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white; border-radius: 99px;
+    padding: 8px 16px; font-size: 0.78rem; font-weight: 800;
+    box-shadow: 0 3px 10px rgba(99,102,241,0.3);
+    animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes popIn {
+    from { transform: scale(0.5); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+}
+.ach-pill:nth-child(2) { animation-delay: 0.1s; }
+.ach-pill:nth-child(3) { animation-delay: 0.2s; }
+.ach-pill:nth-child(4) { animation-delay: 0.3s; }
+
 /* Bottom */
 .bottom-btns {
     position: fixed; bottom: 0; left: 0; right: 0;
@@ -137,6 +169,25 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
     <div class="theme-badge">{{ $test->theme->icon }} {{ $test->theme->name }}</div>
     @endif
 </div>
+
+@if($achievement_result)
+<div class="reward-bar">
+    <div>
+        <span class="coins-pill">
+            💰 +{{ $achievement_result['coins'] }} მონეტა
+            <span style="font-size:0.7rem;opacity:0.85;font-weight:700;">სულ: {{ $achievement_result['total_coins'] }}</span>
+        </span>
+    </div>
+    @if(count($achievement_result['new_achievements']))
+    <div class="ach-unlocked">
+        @foreach($achievement_result['new_achievements'] as $ach)
+        <span class="ach-pill">{{ $ach['emoji'] }} {{ $ach['name'] }}</span>
+        @endforeach
+    </div>
+    @endif
+    <a href="{{ route('achievements') }}" style="font-size:0.72rem;color:#6366f1;font-weight:700;text-decoration:none;display:inline-block;margin-bottom:8px;">🏆 ჩემი მიღწევები →</a>
+</div>
+@endif
 
 <div class="review-wrap">
     <div class="section-title">კითხვების განხილვა</div>

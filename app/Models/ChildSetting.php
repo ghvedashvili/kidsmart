@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ChildSetting extends Model
 {
-    protected $fillable = ['user_id', 'grade_id', 'difficulty', 'tests_per_week'];
+    protected $fillable = ['user_id', 'grade_id', 'difficulty', 'tests_per_week', 'coins', 'difficulty_streak'];
 
     public function user(): BelongsTo
     {

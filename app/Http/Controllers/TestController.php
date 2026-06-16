@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Test;
 use App\Models\TestAnswer;
+use App\Services\AchievementService;
 use App\Services\TestGeneratorService;
 use Illuminate\Http\Request;
 
@@ -69,8 +70,12 @@ class TestController extends Controller
 
     public function submit(Request $request, Test $test)
     {
-        abort_if($test->child_id !== auth()->id(), 403);
-        abort_if($test->isCompleted(), 403);
+        $child = auth()->user();
+        abort_if($test->child_id !== $child->id, 403);
+
+        if ($test->isCompleted()) {
+            return redirect()->route('test.result', $test);
+        }
 
         $answers  = $request->input('answers', []);
         $correct  = 0;
@@ -95,21 +100,31 @@ class TestController extends Controller
             'correct_count' => $correct,
         ]);
 
-        return redirect()->route('test.result', $test);
+        $result = (new AchievementService)->handleTestCompletion($test, $child);
+
+        return redirect()->route('test.result', $test)->with('achievement_result', $result);
     }
 
     public function result(Test $test)
     {
-        abort_if($test->child_id !== auth()->id(), 403);
+        $child = auth()->user();
+        abort_if($test->child_id !== $child->id, 403);
         abort_if(! $test->isCompleted(), 403);
+
+        // coins_earned is null when AchievementService didn't run (e.g. first submit errored)
+        $achievementResult = session('achievement_result');
+        if ($test->coins_earned === null && $child->childSetting) {
+            $achievementResult = (new AchievementService)->handleTestCompletion($test, $child);
+        }
 
         $questions = $test->questions()->get();
         $answers   = $test->answers()->get()->keyBy('test_question_id');
 
         return view('child.result', [
-            'test'      => $test->load('theme'),
-            'questions' => $questions,
-            'answers'   => $answers,
+            'test'               => $test->load('theme'),
+            'questions'          => $questions,
+            'answers'            => $answers,
+            'achievement_result' => $achievementResult,
         ]);
     }
 }

@@ -118,19 +118,12 @@
 
         {{-- სირთულის დონე --}}
         <div class="section">
-            <div class="slabel">სირთულის დონე</div>
-            <div class="diff-row">
-                @php $diffLabels = ['', 'ძალიან მარტივი', 'მარტივი', 'საშუალო', 'რთული', 'ძალიან რთული']; @endphp
-                @for($i=1; $i<=5; $i++)
-                <div>
-                    <button type="button"
-                        class="diff-btn {{ old('difficulty', $setting->difficulty) == $i ? 'sel' : '' }}"
-                        onclick="setDiff({{ $i }}, this)">{{ $i }}</button>
-                    <div class="diff-label">{{ $diffLabels[$i] }}</div>
-                </div>
-                @endfor
+            <div class="slabel">მიმდინარე დონე <span style="font-size:0.65rem;opacity:0.55;font-weight:500;">(ავტომატური)</span></div>
+            @php $diffLabels = ['', 'ძალიან მარტივი', 'მარტივი', 'საშუალო', 'რთული', 'ძალიან რთული']; @endphp
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 0;">
+                <span style="background:#6366f1;color:#fff;font-size:1.1rem;font-weight:900;border-radius:10px;padding:8px 20px;">⚡ {{ $setting->difficulty }}</span>
+                <span style="font-size:0.78rem;color:#64748b;">{{ $diffLabels[$setting->difficulty] ?? '' }}<br><span style="font-size:0.65rem;opacity:0.6;">სისტემა ცვლის ტესტების შედეგების მიხედვით</span></span>
             </div>
-            <input type="hidden" name="difficulty" id="diffInput" value="{{ old('difficulty', $setting->difficulty) }}">
         </div>
 
         {{-- კვირაში რამდენჯერ --}}

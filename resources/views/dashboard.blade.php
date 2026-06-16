@@ -232,7 +232,7 @@
                             <span class="ctag">კლასი —</span>
                         @endif
                         @if($s)
-                            <span class="ctag set">დონე {{ $s->difficulty }}</span>
+                            <span class="ctag set">⚡ {{ $s->difficulty }}</span>
                             <span class="ctag set">დღეს {{ $todayDone }}/{{ $s->tests_per_week }}</span>
                         @endif
                         @foreach($child->themes->take(2) as $theme)
@@ -289,14 +289,11 @@
                     </div>
                     <input type="hidden" name="grade_id" id="egid{{ $child->id }}" value="{{ $es?->grade_id }}">
 
-                    <div class="mlbl">სირთულე</div>
-                    <div class="mrow">
-                        @for($i=1; $i<=5; $i++)
-                        <label class="mchip {{ ($es?->difficulty ?? 1) == $i ? 'sel' : '' }}"
-                            onclick="chipSingle(this,'edif{{ $child->id }}','{{ $i }}')">{{ $i }}</label>
-                        @endfor
+                    <div class="mlbl">მიმდინარე დონე <span style="font-size:0.6rem;opacity:0.6;">(ავტომატური)</span></div>
+                    <div style="display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;">
+                        <span style="background:#6366f1;color:#fff;font-size:0.78rem;font-weight:800;border-radius:8px;padding:5px 14px;">⚡ {{ $es?->difficulty ?? 1 }}</span>
+                        <span style="font-size:0.65rem;color:#94a3b8;">სისტემა ცვლის ტესტების შედეგების მიხედვით</span>
                     </div>
-                    <input type="hidden" name="difficulty" id="edif{{ $child->id }}" value="{{ $es?->difficulty ?? 1 }}">
 
                     <div class="mlbl">ტესტი დღეში</div>
                     <div class="mrow">
@@ -409,6 +406,15 @@
             <div class="test-pending-sub">{{ $lastCompleted->completed_at->diffForHumans() }}</div>
         </div>
         @endif
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding:0 2px;">
+            <span style="font-family:'Goldman',monospace;font-size:0.78rem;color:#f59e0b;font-weight:700;letter-spacing:0.04em;">
+                💰 {{ $setting?->coins ?? 0 }}
+            </span>
+            <a href="{{ route('achievements') }}" style="font-family:'Goldman',monospace;font-size:0.68rem;color:#6366f1;text-decoration:none;letter-spacing:0.06em;">
+                🏆 მიღწევები →
+            </a>
+        </div>
         @endif
 
 
@@ -449,16 +455,6 @@
             </div>
             <input type="hidden" name="grade_id" id="grade_id_input" value="{{ old('grade_id') }}">
             @error('grade_id')<div class="merr">{{ $message }}</div>@enderror
-
-            {{-- Difficulty --}}
-            <div class="mlbl">სირთულე</div>
-            <div class="mrow" id="diffRow">
-                @for($i=1; $i<=5; $i++)
-                <label class="mchip {{ old('difficulty', 1) == $i ? 'sel' : '' }}"
-                    onclick="chipSingle(this,'difficulty_input','{{ $i }}')">{{ $i }}</label>
-                @endfor
-            </div>
-            <input type="hidden" name="difficulty" id="difficulty_input" value="{{ old('difficulty', 1) }}">
 
             {{-- Tests per week --}}
             <div class="mlbl">ტესტი დღეში</div>
@@ -562,7 +558,7 @@ function chipMulti(el, name, value) {
     }
 }
 
-@if($errors->hasAny(['name','grade_id','difficulty','tests_per_week','theme_ids','topic_ids']))
+@if($errors->hasAny(['name','grade_id','tests_per_week','theme_ids','topic_ids']))
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('addChildModal').classList.add('open');
 });
