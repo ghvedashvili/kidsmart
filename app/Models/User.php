@@ -63,6 +63,11 @@ class User extends Authenticatable
         return $this->hasMany(Test::class, 'child_id');
     }
 
+    public function achievements()
+    {
+        return $this->hasMany(ChildAchievement::class, 'child_id');
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

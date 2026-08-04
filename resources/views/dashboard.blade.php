@@ -1,5 +1,11 @@
 @extends('layouts.app')
 
+@push('head')
+@if(auth()->user()->role === 'child')
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+@endif
+@endpush
+
 @section('content')
 <style>
     body {
@@ -167,23 +173,80 @@
     .notif-btn.on { color: #111; border-color: #111; }
     .flash { font-family: 'Goldman', monospace; font-size: 0.72rem; color: #2ecc71; letter-spacing: 0.06em; }
     .flash-err { font-family: 'Goldman', monospace; font-size: 0.72rem; color: #e74c3c; letter-spacing: 0.06em; }
-    .test-btn {
-        display: inline-flex; align-items: center; gap: 10px;
-        padding: 16px 36px; border-radius: 10px;
-        background: linear-gradient(135deg, #4f46e5, #7c3aed);
-        color: white; font-family: 'Goldman', monospace;
-        font-size: 0.88rem; letter-spacing: 0.08em;
-        text-decoration: none; transition: all 0.2s;
-        box-shadow: 0 4px 16px rgba(79,70,229,0.3);
+    /* ── child view ── */
+    .child-hello {
+        font-family: 'Fredoka One', cursive;
+        font-size: clamp(1.9rem, 8vw, 2.6rem);
+        color: #1a7a3c;
+        line-height: 1.1;
+        margin-top: 4px;
     }
-    .test-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(79,70,229,0.4); }
-    .test-pending {
-        background: #fff; border: 1px solid #e8e8e8; border-radius: 10px;
-        padding: 18px 20px; width: 100%; text-align: center;
+    .child-stats-row {
+        display: flex; gap: 10px; width: 100%;
     }
-    .test-pending-label { font-family: 'Goldman', monospace; font-size: 0.65rem; color: #bbb; letter-spacing: 0.1em; margin-bottom: 10px; }
-    .test-pending-score { font-family: 'Goldman', monospace; font-size: 1.4rem; color: #111; letter-spacing: 0.06em; }
-    .test-pending-sub { font-family: 'Goldman', monospace; font-size: 0.62rem; color: #ccc; margin-top: 4px; }
+    .cstat {
+        flex: 1; background: white; border-radius: 16px;
+        padding: 14px 8px; text-align: center;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        text-decoration: none; transition: transform 0.15s;
+        border: 1.5px solid #f0f0f0;
+    }
+    .cstat:hover { transform: translateY(-2px); }
+    .cstat-val {
+        font-family: 'Fredoka One', cursive;
+        font-size: 1.25rem; color: #111; margin-bottom: 2px;
+    }
+    .cstat-val sub { font-size: 0.82rem; color: #bbb; font-family: 'Nunito', sans-serif; }
+    .cstat-lbl {
+        font-family: 'Nunito', sans-serif; font-weight: 800;
+        font-size: 0.62rem; color: #bbb; text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .child-cta {
+        display: flex; align-items: center; justify-content: center; gap: 12px;
+        width: 100%; padding: 22px 20px;
+        background: linear-gradient(135deg, #1a7a3c, #0f5c2a);
+        color: white; font-family: 'Fredoka One', cursive;
+        font-size: 1.25rem; letter-spacing: 0.03em;
+        text-decoration: none; border-radius: 20px;
+        box-shadow: 0 6px 24px rgba(26,122,60,0.35);
+        transition: all 0.2s;
+    }
+    .child-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(26,122,60,0.45); color: white; }
+    .child-cta.resume {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        box-shadow: 0 6px 24px rgba(245,158,11,0.35);
+    }
+    .child-cta.resume:hover { box-shadow: 0 10px 32px rgba(245,158,11,0.45); }
+    .child-done-card {
+        background: white; border-radius: 18px; padding: 28px 20px;
+        text-align: center; width: 100%;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        border: 1.5px solid #f0f0f0;
+    }
+    .child-done-icon { font-size: 2.8rem; margin-bottom: 8px; }
+    .child-done-title { font-family: 'Fredoka One', cursive; font-size: 1.4rem; color: #1a7a3c; margin-bottom: 4px; }
+    .child-done-sub { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.8rem; color: #aaa; }
+    .child-waiting-card {
+        background: white; border-radius: 18px; padding: 28px 20px;
+        text-align: center; width: 100%;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        border: 1.5px solid #f0f0f0;
+    }
+    .child-waiting-icon { font-size: 2.5rem; margin-bottom: 8px; }
+    .child-waiting-txt { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.88rem; color: #888; line-height: 1.6; }
+    .child-last-card {
+        background: white; border-radius: 14px; padding: 14px 18px;
+        width: 100%; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        border: 1.5px solid #f0f0f0;
+        display: flex; align-items: center; gap: 14px;
+    }
+    .clt-bar { width: 3px; height: 36px; border-radius: 99px; background: #e8f5ee; flex-shrink: 0; overflow: hidden; }
+    .clt-bar-fill { width: 100%; background: #1a7a3c; border-radius: 99px; transition: height 0.6s; }
+    .clt-info { flex: 1; }
+    .clt-lbl { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.62rem; color: #bbb; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
+    .clt-score { font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: #111; }
+    .clt-pct { font-size: 0.85rem; color: #1a7a3c; margin-left: 6px; }
+    .clt-time { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.65rem; color: #ccc; flex-shrink: 0; }
 </style>
 
 <div class="dash-hero">
@@ -199,10 +262,12 @@
         <div class="flash">{{ session('test_done') }}</div>
         @endif
 
+        @if(auth()->user()->role !== 'child')
         <div class="dash-greeting">გამარჯობა, {{ auth()->user()->name }}</div>
+        @endif
 
         {{-- მშობლის ხედი --}}
-        @if(auth()->user()->role === 'parent')
+        @if(in_array(auth()->user()->role, ['parent', 'admin']))
         @php $children = auth()->user()->children()->with(['childSetting.grade','themes','topics'])->get(); @endphp
 
 
@@ -232,7 +297,7 @@
                             <span class="ctag">კლასი —</span>
                         @endif
                         @if($s)
-                            <span class="ctag set">⚡ {{ $s->difficulty }}</span>
+                            <span class="ctag set">დონე {{ $s->difficulty }}</span>
                             <span class="ctag set">დღეს {{ $todayDone }}/{{ $s->tests_per_week }}</span>
                         @endif
                         @foreach($child->themes->take(2) as $theme)
@@ -289,11 +354,14 @@
                     </div>
                     <input type="hidden" name="grade_id" id="egid{{ $child->id }}" value="{{ $es?->grade_id }}">
 
-                    <div class="mlbl">მიმდინარე დონე <span style="font-size:0.6rem;opacity:0.6;">(ავტომატური)</span></div>
-                    <div style="display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;">
-                        <span style="background:#6366f1;color:#fff;font-size:0.78rem;font-weight:800;border-radius:8px;padding:5px 14px;">⚡ {{ $es?->difficulty ?? 1 }}</span>
-                        <span style="font-size:0.65rem;color:#94a3b8;">სისტემა ცვლის ტესტების შედეგების მიხედვით</span>
+                    <div class="mlbl">სირთულე</div>
+                    <div class="mrow">
+                        @for($i=1; $i<=5; $i++)
+                        <label class="mchip {{ ($es?->difficulty ?? 1) == $i ? 'sel' : '' }}"
+                            onclick="chipSingle(this,'edif{{ $child->id }}','{{ $i }}')">{{ $i }}</label>
+                        @endfor
                     </div>
+                    <input type="hidden" name="difficulty" id="edif{{ $child->id }}" value="{{ $es?->difficulty ?? 1 }}">
 
                     <div class="mlbl">ტესტი დღეში</div>
                     <div class="mrow">
@@ -365,56 +433,68 @@
             $required      = $setting?->tests_per_week ?? 0;
             $todayCount    = auth()->user()->tests()->whereNotNull('completed_at')->whereDate('completed_at', today())->count();
             $doneToday     = $required > 0 && $todayCount >= $required && !$activeTest;
+            $coins         = $setting?->coins ?? 0;
+            $achCount      = auth()->user()->achievements()->count();
         @endphp
 
-        @if($activeTest)
-        <a href="{{ route('test.show', $activeTest) }}" class="test-btn">
-            📝 ტესტი გელოდება →
-        </a>
-        @elseif(!$setting || !$setting->grade_id)
-        <div style="text-align:center;padding:20px;">
-            <div style="font-family:'Goldman',monospace;font-size:1.6rem;margin-bottom:10px;">⏳</div>
-            <div style="font-family:'Goldman',monospace;font-size:0.8rem;color:#555;letter-spacing:0.06em;line-height:1.8;">მშობელს ჯერ<br>დავალება არ დაუყენებია</div>
-        </div>
-        @elseif($doneToday)
-        <div style="text-align:center;">
-            <div style="font-family:'Goldman',monospace;font-size:2rem;margin-bottom:8px;">✓</div>
-            <div style="font-family:'Goldman',monospace;font-size:0.85rem;color:#111;letter-spacing:0.06em;">დღე დასრულდა!</div>
-            <div style="font-family:'Goldman',monospace;font-size:0.62rem;color:#bbb;margin-top:4px;letter-spacing:0.06em;">{{ $todayCount }} / {{ $required }} ტესტი შეასრულე</div>
-        </div>
-        @else
-        <div style="text-align:center;">
-            @if($required > 0)
-            <div style="font-family:'Goldman',monospace;font-size:0.62rem;color:#bbb;letter-spacing:0.1em;margin-bottom:10px;">
-                დღეს: {{ $todayCount }} / {{ $required }}
+        <div class="child-hello">{{ auth()->user()->name }} 👋</div>
+
+        {{-- სტატუს ბარათები --}}
+        <div class="child-stats-row">
+            <div class="cstat">
+                <div class="cstat-val">💰 {{ $coins }}</div>
+                <div class="cstat-lbl">მონეტები</div>
             </div>
-            @endif
-            <a href="{{ route('test.start') }}" class="test-btn">
+            <div class="cstat">
+                <div class="cstat-val">{{ $todayCount }}<sub>/{{ $required }}</sub></div>
+                <div class="cstat-lbl">დღეს</div>
+            </div>
+            <a href="{{ route('achievements') }}" class="cstat">
+                <div class="cstat-val">🏆 {{ $achCount }}</div>
+                <div class="cstat-lbl">მიღწევები</div>
+            </a>
+        </div>
+
+        {{-- მთავარი მოქმედება --}}
+        @if($activeTest)
+            <a href="{{ route('test.show', $activeTest) }}" class="child-cta resume">
+                📝 გააგრძელე ტესტი →
+            </a>
+        @elseif(!$setting || !$setting->grade_id)
+            <div class="child-waiting-card">
+                <div class="child-waiting-icon">⏳</div>
+                <div class="child-waiting-txt">მშობელს ჯერ<br>დავალება არ დაუყენებია</div>
+            </div>
+        @elseif($doneToday)
+            <div class="child-done-card">
+                <div class="child-done-icon">🎉</div>
+                <div class="child-done-title">დღე დასრულდა!</div>
+                <div class="child-done-sub">{{ $todayCount }} ტესტი გააკეთე</div>
+            </div>
+        @else
+            <a href="{{ route('test.start') }}" class="child-cta">
                 ▶ ტესტის დაწყება
             </a>
-        </div>
         @endif
 
+        {{-- ბოლო ტესტი --}}
         @if($lastCompleted)
-        <div class="test-pending">
-            <div class="test-pending-label">ბოლო ტესტი</div>
-            <div class="test-pending-score">
-                {{ $lastCompleted->correct_count }} / {{ $lastCompleted->total_questions }}
-                @php $pct = round($lastCompleted->correct_count / $lastCompleted->total_questions * 100); @endphp
-                <span style="font-size:0.8rem;color:#bbb;"> · {{ $pct }}%</span>
+        @php $pct = round($lastCompleted->correct_count / $lastCompleted->total_questions * 100); @endphp
+        <div class="child-last-card">
+            <div class="clt-bar">
+                <div class="clt-bar-fill" style="height:{{ $pct }}%"></div>
             </div>
-            <div class="test-pending-sub">{{ $lastCompleted->completed_at->diffForHumans() }}</div>
+            <div class="clt-info">
+                <div class="clt-lbl">ბოლო ტესტი</div>
+                <div class="clt-score">
+                    {{ $lastCompleted->correct_count }}/{{ $lastCompleted->total_questions }}
+                    <span class="clt-pct">{{ $pct }}%</span>
+                </div>
+            </div>
+            <div class="clt-time">{{ $lastCompleted->completed_at->diffForHumans() }}</div>
         </div>
         @endif
 
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding:0 2px;">
-            <span style="font-family:'Goldman',monospace;font-size:0.78rem;color:#f59e0b;font-weight:700;letter-spacing:0.04em;">
-                💰 {{ $setting?->coins ?? 0 }}
-            </span>
-            <a href="{{ route('achievements') }}" style="font-family:'Goldman',monospace;font-size:0.68rem;color:#6366f1;text-decoration:none;letter-spacing:0.06em;">
-                🏆 მიღწევები →
-            </a>
-        </div>
         @endif
 
 
@@ -429,7 +509,7 @@
 </div>
 
 {{-- Add Child Modal --}}
-@if(auth()->user()->role === 'parent')
+@if(in_array(auth()->user()->role, ['parent', 'admin']))
 <div id="addChildModal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
     <div class="mbox">
         <form method="POST" action="{{ route('child.store') }}">
@@ -455,6 +535,16 @@
             </div>
             <input type="hidden" name="grade_id" id="grade_id_input" value="{{ old('grade_id') }}">
             @error('grade_id')<div class="merr">{{ $message }}</div>@enderror
+
+            {{-- Difficulty --}}
+            <div class="mlbl">სირთულე</div>
+            <div class="mrow" id="diffRow">
+                @for($i=1; $i<=5; $i++)
+                <label class="mchip {{ old('difficulty', 1) == $i ? 'sel' : '' }}"
+                    onclick="chipSingle(this,'difficulty_input','{{ $i }}')">{{ $i }}</label>
+                @endfor
+            </div>
+            <input type="hidden" name="difficulty" id="difficulty_input" value="{{ old('difficulty', 1) }}">
 
             {{-- Tests per week --}}
             <div class="mlbl">ტესტი დღეში</div>
@@ -558,7 +648,7 @@ function chipMulti(el, name, value) {
     }
 }
 
-@if($errors->hasAny(['name','grade_id','tests_per_week','theme_ids','topic_ids']))
+@if($errors->hasAny(['name','grade_id','difficulty','tests_per_week','theme_ids','topic_ids']))
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('addChildModal').classList.add('open');
 });

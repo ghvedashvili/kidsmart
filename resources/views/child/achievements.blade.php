@@ -145,6 +145,9 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
     <!-- Stickers -->
     @php $stickers = array_filter($achievements, fn($a) => $a['type'] === 'sticker'); @endphp
     <div class="sec-title">⭐ სტიკერები</div>
+    <div style="font-family:'Nunito',sans-serif;font-size:0.7rem;font-weight:700;color:#94a3b8;margin-bottom:12px;padding-left:2px;">
+        📌 დღეში მხოლოდ 1 სტიკერის გახსნა შეიძლება
+    </div>
     <div class="ach-grid">
         @foreach($stickers as $slug => $ach)
         @php $isEarned = isset($earned[$slug]); @endphp
@@ -152,7 +155,7 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
             @if($isEarned)<div class="earned-badge">✓</div>@endif
             <div class="ach-emoji">{{ $ach['emoji'] }}</div>
             <div class="ach-name">{{ $ach['name'] }}</div>
-            <div class="ach-desc">{{ $isEarned ? $ach['desc'] : '???' }}</div>
+            <div class="ach-desc">{{ $ach['desc'] }}</div>
             @if($isEarned)
             <div class="ach-date">{{ $earned[$slug]->format('d.m.Y') }}</div>
             @endif
@@ -160,23 +163,6 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
         @endforeach
     </div>
 
-    <!-- Medals -->
-    @php $medals = array_filter($achievements, fn($a) => $a['type'] === 'medal'); @endphp
-    <div class="sec-title">🏅 მედლები</div>
-    <div class="ach-grid">
-        @foreach($medals as $slug => $ach)
-        @php $isEarned = isset($earned[$slug]); @endphp
-        <div class="ach-card {{ $isEarned ? 'earned' : 'locked' }}">
-            @if($isEarned)<div class="earned-badge">✓</div>@endif
-            <div class="ach-emoji">{{ $ach['emoji'] }}</div>
-            <div class="ach-name">{{ $ach['name'] }}</div>
-            <div class="ach-desc">{{ $isEarned ? $ach['desc'] : '???' }}</div>
-            @if($isEarned)
-            <div class="ach-date">{{ $earned[$slug]->format('d.m.Y') }}</div>
-            @endif
-        </div>
-        @endforeach
-    </div>
 </div>
 
 <div class="bottom-pad"></div>

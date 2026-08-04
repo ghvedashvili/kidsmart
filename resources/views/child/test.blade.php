@@ -27,22 +27,40 @@ body {
 /* Sticky header sits below the fixed nav (56 px) */
 .hdr {
     background: linear-gradient(135deg, var(--green), #0f5c2a);
-    padding: 18px 20px 14px;
+    padding: 10px 20px;
     position: sticky;
     top: 56px;
     z-index: 50;
-    box-shadow: 0 4px 20px rgba(10,60,25,0.35);
+    box-shadow: 0 2px 12px rgba(10,60,25,0.3);
+    overflow: visible;
 }
-.hdr-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.hdr-name { font-family: 'Fredoka One', cursive; font-size: 1.05rem; color: rgba(255,255,255,0.9); letter-spacing: 0.04em; }
-.hdr-theme { font-size: 1.6rem; }
-.prog-bar-wrap { background: rgba(255,255,255,0.25); border-radius: 99px; height: 8px; overflow: hidden; }
-.prog-bar-fill { background: var(--yellow); height: 100%; border-radius: 99px; transition: width 0.4s ease; }
-.prog-text { font-family: 'Fredoka One', cursive; font-size: 0.75rem; color: rgba(255,255,255,0.7); margin-top: 5px; text-align: right; letter-spacing: 0.06em; }
-.pitch-strip {
-    height: 6px; margin: 12px 0 0;
-    background: repeating-linear-gradient(90deg, var(--lg) 0px, var(--lg) 24px, var(--green) 24px, var(--green) 48px);
-    border-radius: 3px;
+.prog-bar-wrap {
+    position: relative;
+    background: rgba(255,255,255,0.2);
+    border-radius: 99px;
+    height: 3px;
+    margin: 8px 0;
+    overflow: visible;
+}
+.prog-bar-fill {
+    height: 100%;
+    background: var(--yellow);
+    border-radius: 99px;
+    transition: width 0.35s ease;
+    width: 0%;
+}
+.prog-ball {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 11px; height: 11px;
+    border-radius: 50%;
+    background: var(--yellow);
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.4);
+    transition: left 0.35s ease;
+    pointer-events: none;
+    z-index: 2;
 }
 
 .wrap { max-width: 640px; margin: 0 auto; padding: 24px 16px 20px; }
@@ -120,15 +138,10 @@ body {
 @csrf
 
 <div class="hdr">
-    <div class="hdr-top">
-        <div class="hdr-name">{{ auth()->user()->name }} · ტესტი</div>
-        <div class="hdr-theme">{{ $test->theme?->icon ?? '📝' }}</div>
-    </div>
     <div class="prog-bar-wrap">
-        <div class="prog-bar-fill" id="progFill" style="width:0%"></div>
+        <div class="prog-bar-fill" id="progFill"></div>
+        <div class="prog-ball" id="progBall"></div>
     </div>
-    <div class="prog-text" id="progText">0 / {{ count($questions) }} პასუხი</div>
-    <div class="pitch-strip"></div>
 </div>
 
 <div class="wrap">
@@ -180,7 +193,7 @@ function onAnswer(i, qid, val) {
         document.getElementById('card-' + i).classList.add('answered');
         const pct = Math.round(answeredCount / totalQ * 100);
         document.getElementById('progFill').style.width = pct + '%';
-        document.getElementById('progText').textContent = answeredCount + ' / ' + totalQ + ' პასუხი';
+        document.getElementById('progBall').style.left = pct === 0 ? '0' : 'calc(' + pct + '% - 5px)';
     }
     if (answeredCount === totalQ) {
         document.getElementById('submitBtn').classList.add('vis');
@@ -206,7 +219,7 @@ function onAnswer(i, qid, val) {
     if (answeredCount > 0) {
         const pct = Math.round(answeredCount / totalQ * 100);
         document.getElementById('progFill').style.width = pct + '%';
-        document.getElementById('progText').textContent = answeredCount + ' / ' + totalQ + ' პასუხი';
+        document.getElementById('progBall').style.left = pct === 0 ? '0' : 'calc(' + pct + '% - 5px)';
     }
     if (answeredCount === totalQ) {
         document.getElementById('submitBtn').classList.add('vis');

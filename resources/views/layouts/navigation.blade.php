@@ -103,11 +103,21 @@
         <div class="nav-right">
             @auth
             <div class="desktop-only" style="display:flex;align-items:center;gap:4px;">
+                @if(auth()->user()->isAdmin())
+                <a class="nav-link-item" href="{{ route('admin.panel') }}" style="font-size:0.8rem;">
+                    🛡️ ადმინი
+                </a>
+                @endif
                 <button id="notif-btn-desktop" onclick="toggleNotifications()" title="შეტყობინებები"
                     class="nav-link-item">
                     <i id="notif-icon-desktop" class="bi bi-bell"></i>
                 </button>
-
+                <form method="POST" action="{{ route('logout') }}" style="margin:0;">
+                    @csrf
+                    <button type="submit" class="nav-link-item" style="font-size:0.8rem;">
+                        ↩ გასვლა
+                    </button>
+                </form>
             </div>
             @endauth
 

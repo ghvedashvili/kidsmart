@@ -14,6 +14,7 @@ class ChildController extends Controller
         $data = $request->validate([
             'name'           => 'required|string|max:50',
             'grade_id'       => 'required|exists:grades,id',
+            'difficulty'     => 'nullable|integer|min:1|max:5',
             'tests_per_week' => 'nullable|integer|min:1|max:7',
             'theme_ids'      => 'nullable|array',
             'theme_ids.*'    => 'exists:themes,id',
@@ -36,7 +37,7 @@ class ChildController extends Controller
         ChildSetting::create([
             'user_id'        => $child->id,
             'grade_id'       => $data['grade_id'],
-            'difficulty'     => 1,
+            'difficulty'     => $data['difficulty'] ?? 1,
             'tests_per_week' => $data['tests_per_week'] ?? 1,
         ]);
 

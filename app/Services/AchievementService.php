@@ -9,37 +9,17 @@ use App\Models\User;
 
 class AchievementService
 {
-    // Coins per difficulty × performance tier
-    private const COINS = [
-        1 => ['base' => 10, 'perfect' => 15, 'good' => 12, 'ok' => 10, 'low' => 6],
-        2 => ['base' => 20, 'perfect' => 30, 'good' => 24, 'ok' => 20, 'low' => 12],
-        3 => ['base' => 35, 'perfect' => 52, 'good' => 42, 'ok' => 35, 'low' => 20],
-        4 => ['base' => 55, 'perfect' => 82, 'good' => 66, 'ok' => 55, 'low' => 33],
-        5 => ['base' => 80, 'perfect' => 120, 'good' => 96, 'ok' => 80, 'low' => 48],
-    ];
-
     // All achievement definitions
     public const ACHIEVEMENTS = [
         // სტიკერები
-        'first_test'    => ['emoji' => '⭐', 'name' => 'პირველი ტესტი!',      'desc' => 'პირველი ტესტი დაასრულე',              'type' => 'sticker'],
-        'first_perfect' => ['emoji' => '💫', 'name' => 'იდეალური!',           'desc' => 'ყველა კითხვა სწორად გასცე',           'type' => 'sticker'],
-        'perfect_hard'  => ['emoji' => '🔥', 'name' => 'გენიოსი!',            'desc' => '100% სირთულე 4+ ზე',                 'type' => 'sticker'],
-        'comeback'      => ['emoji' => '💪', 'name' => 'დაბრუნება!',          'desc' => 'ცუდი ტესტის შემდეგ 80%+ მოიპოვე',   'type' => 'sticker'],
-        'early_bird'    => ['emoji' => '🐦', 'name' => 'ადრეული ჩიტი',       'desc' => 'ტესტი დილის 8:00-მდე',              'type' => 'sticker'],
-        'night_owl'     => ['emoji' => '🦉', 'name' => 'ღამის ბუ',           'desc' => 'ტესტი 21:00-ის შემდეგ',             'type' => 'sticker'],
-        // მედლები — ტესტები
-        'tests_5'       => ['emoji' => '🥉', 'name' => '5 ტესტი',            'desc' => 'სულ 5 ტესტი დაასრულე',              'type' => 'medal'],
-        'tests_25'      => ['emoji' => '🥈', 'name' => '25 ტესტი',           'desc' => 'სულ 25 ტესტი დაასრულე',             'type' => 'medal'],
-        'tests_100'     => ['emoji' => '🥇', 'name' => '100 ტესტი',          'desc' => 'სულ 100 ტესტი დაასრულე',            'type' => 'medal'],
-        // მედლები — მონეტები
-        'coins_100'     => ['emoji' => '💰', 'name' => 'პირველი საფულე',     'desc' => '100 მონეტა დააგროვე',               'type' => 'medal'],
-        'coins_500'     => ['emoji' => '💎', 'name' => 'მდიდარი',            'desc' => '500 მონეტა დააგროვე',               'type' => 'medal'],
-        'coins_2000'    => ['emoji' => '👑', 'name' => 'მეფე',               'desc' => '2000 მონეტა დააგროვე',              'type' => 'medal'],
-        // მედლები — სერია
-        'streak_3'      => ['emoji' => '🔥', 'name' => 'ცეცხლი!',           'desc' => '3 ტესტი ზედიზედ 80%+',             'type' => 'medal'],
-        'streak_7'      => ['emoji' => '⚡', 'name' => 'ელვა!',             'desc' => '7 ტესტი ზედიზედ 80%+',             'type' => 'medal'],
-        // მედლები — სირთულე
-        'expert'        => ['emoji' => '🚀', 'name' => 'ექსპერტი',          'desc' => 'სირთულე 5 დაიმსახურე',             'type' => 'medal'],
+        'first_test'    => ['emoji' => '⭐', 'name' => 'პირველი ტესტი!',      'desc' => 'პირველი ტესტი დაასრულე',                    'type' => 'sticker'],
+        'first_perfect' => ['emoji' => '🎯', 'name' => 'პედრი!',           'desc' => 'ყველა პასუხი პედრის პასებივით სწორეა',                 'type' => 'sticker'],
+        'comeback'      => ['emoji' => '💪', 'name' => 'დაბრუნება!',          'desc' => 'ცუდი ტესტის შემდეგ 80%+ მოიპოვე',          'type' => 'sticker'],
+        'early_bird'    => ['emoji' => '🌅', 'name' => 'დილა მშვიდობისა',    'desc' => 'გააკეთე ტესტი დილის 9:00-მდე',                     'type' => 'sticker'],
+        'night_owl'     => ['emoji' => '🌙', 'name' => 'ძილისნებისა',        'desc' => 'გააკეთე ტესტი 22:30-ის შემდეგ',                    'type' => 'sticker'],
+        'ronaldo'       => ['emoji' => '⚡', 'name' => 'კრისტიანო რონალდო',  'desc' => 'ტესტი 1 წუთში დაასრულე — იყავი რონალდოსავით სწრაფი!',  'type' => 'sticker'],
+        'messi'         => ['emoji' => '🐐', 'name' => 'ლეო მესი',           'desc' => '10 დღე ზედიზედ მინიმუმ 1 ტესტი',           'type' => 'sticker'],
+        'yamal'         => ['emoji' => '🌟', 'name' => 'ლამინე იამალი',      'desc' => '19 კითხვა ზედიზედ სწორად',                 'type' => 'sticker'],
     ];
 
     public function handleTestCompletion(Test $test, User $child): array
@@ -49,14 +29,10 @@ class AchievementService
         $correct = $test->correct_count ?? 0;
         $pct     = $total > 0 ? $correct / $total : 0;
 
-        // 1. Coins
-        $coins = $this->calcCoins($setting->difficulty, $pct);
+        // 1. Coins — 1 coin per correct answer
+        $coins = $correct;
         $test->update(['coins_earned' => $coins]);
         $setting->increment('coins', $coins);
-        $setting->refresh();
-
-        // 2. Difficulty auto-adjust
-        $this->adjustDifficulty($setting, $pct);
         $setting->refresh();
 
         // 3. Achievements
@@ -68,17 +44,6 @@ class AchievementService
             'new_achievements' => $newAchievements,
             'difficulty'      => $setting->difficulty,
         ];
-    }
-
-    private function calcCoins(int $difficulty, float $pct): int
-    {
-        $tiers = self::COINS[$difficulty] ?? self::COINS[1];
-        return match(true) {
-            $pct >= 1.0 => $tiers['perfect'],
-            $pct >= 0.8 => $tiers['good'],
-            $pct >= 0.6 => $tiers['ok'],
-            default     => $tiers['low'],
-        };
     }
 
     private function adjustDifficulty(ChildSetting $setting, float $pct): void
@@ -134,34 +99,71 @@ class AchievementService
             ? $prevTest->correct_count / $prevTest->total_questions
             : null;
 
+        // Messi: 10 consecutive days with at least 1 test
+        $dayStreak = 0;
+        $testDays  = Test::where('child_id', $child->id)
+            ->whereNotNull('completed_at')
+            ->get()
+            ->groupBy(fn($t) => $t->completed_at->toDateString())
+            ->keys()
+            ->flip()
+            ->toArray();
+        for ($d = 0; $d < 10; $d++) {
+            if (isset($testDays[now()->subDays($d)->toDateString()])) {
+                $dayStreak++;
+            } else {
+                break;
+            }
+        }
+
+        // Yamal: 19 consecutive correct answers across recent 100% tests
+        $consecCorrect = 0;
+        foreach ($lastTests as $t) {
+            if ($t->total_questions > 0 && $t->correct_count === $t->total_questions) {
+                $consecCorrect += $t->correct_count;
+            } else {
+                break;
+            }
+        }
+
+        // Ronaldo: test completed within 60 seconds
+        $testSeconds = $test->created_at->diffInSeconds($test->completed_at);
+
         $candidates = [
             'first_test'    => $totalTests === 1,
             'first_perfect' => $pct >= 1.0,
-            'perfect_hard'  => $pct >= 1.0 && $setting->difficulty >= 4,
             'comeback'      => $prevPct !== null && $prevPct <= 0.4 && $pct >= 0.8,
-            'early_bird'    => now()->hour < 8,
-            'night_owl'     => now()->hour >= 21,
-            'tests_5'       => $totalTests >= 5,
-            'tests_25'      => $totalTests >= 25,
-            'tests_100'     => $totalTests >= 100,
-            'coins_100'     => $setting->coins >= 100,
-            'coins_500'     => $setting->coins >= 500,
-            'coins_2000'    => $setting->coins >= 2000,
-            'streak_3'      => $streak >= 3,
-            'streak_7'      => $streak >= 7,
-            'expert'        => $setting->difficulty >= 5,
+            'early_bird'    => now()->hour < 9,
+            'night_owl'     => now()->hour > 22 || (now()->hour === 22 && now()->minute >= 30),
+            'ronaldo'       => $testSeconds <= 60,
+            'messi'         => $dayStreak >= 10,
+            'yamal'         => $consecCorrect >= 19,
         ];
 
+        $stickerSlugs = array_keys(array_filter(self::ACHIEVEMENTS, fn($a) => $a['type'] === 'sticker'));
+        $stickerEarnedToday = ChildAchievement::where('child_id', $child->id)
+            ->whereIn('slug', $stickerSlugs)
+            ->whereDate('earned_at', today())
+            ->exists();
+
         $new = [];
+        $awardedStickerNow = false;
+
         foreach ($candidates as $slug => $met) {
-            if ($met && ! isset($earned[$slug])) {
-                ChildAchievement::create([
-                    'child_id'  => $child->id,
-                    'slug'      => $slug,
-                    'earned_at' => now(),
-                ]);
-                $new[] = array_merge(['slug' => $slug], self::ACHIEVEMENTS[$slug]);
-            }
+            if (! $met || isset($earned[$slug])) continue;
+
+            $isSticker = (self::ACHIEVEMENTS[$slug]['type'] ?? '') === 'sticker';
+
+            if ($isSticker && ($stickerEarnedToday || $awardedStickerNow)) continue;
+
+            ChildAchievement::create([
+                'child_id'  => $child->id,
+                'slug'      => $slug,
+                'earned_at' => now(),
+            ]);
+            $new[] = array_merge(['slug' => $slug], self::ACHIEVEMENTS[$slug]);
+
+            if ($isSticker) $awardedStickerNow = true;
         }
 
         return $new;
