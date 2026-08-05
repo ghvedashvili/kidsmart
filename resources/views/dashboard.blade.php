@@ -148,7 +148,8 @@
         padding: 2px 10px; letter-spacing: 0.14em; cursor: pointer; transition: background 0.2s;
     }
     .child-code-badge:hover { background: #ebebeb; }
-    .child-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+    .child-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; max-width: 220px; }
+    @media (max-width: 480px) { .child-code-badge { display: none; } }
     .caction {
         font-family: 'Goldman', monospace; font-size: 0.62rem; color: #bbb;
         border: 1px solid #ebebeb; border-radius: 4px; padding: 5px 10px;
@@ -157,6 +158,17 @@
     .caction:hover { color: #333; border-color: #aaa; }
     .caction.primary { color: #4f46e5; border-color: #c7d2fe; background: #eef2ff; }
     .caction.primary:hover { background: #e0e7ff; border-color: #a5b4fc; }
+    .caction.remind { color: #059669; border-color: #a7f3d0; background: #ecfdf5; }
+    .caction.remind:hover { background: #d1fae5; border-color: #6ee7b7; }
+    .remind-modal { position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px; }
+    .remind-modal.open { display:flex; }
+    .remind-box { background:#fff;border-radius:16px;padding:24px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:modalIn 0.25s cubic-bezier(0.175,0.885,0.32,1.275); }
+    .remind-title { font-family:'Goldman',monospace;font-size:0.88rem;color:#111;letter-spacing:0.06em;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between; }
+    .remind-textarea { width:100%;border:1px solid #e8e8e8;border-radius:8px;padding:10px 12px;font-family:'Goldman',monospace;font-size:0.8rem;color:#333;resize:none;outline:none;transition:border-color 0.2s;box-sizing:border-box;background:#fafafa; }
+    .remind-textarea:focus { border-color:#aaa;background:#fff; }
+    .remind-hint { font-family:'Goldman',monospace;font-size:0.58rem;color:#ccc;margin:6px 0 14px;letter-spacing:0.04em; }
+    .remind-send { width:100%;background:#059669;border:none;border-radius:8px;color:#fff;font-family:'Goldman',monospace;font-size:0.82rem;letter-spacing:0.06em;padding:12px;cursor:pointer;transition:background 0.2s; }
+    .remind-send:hover { background:#047857; }
     .no-children {
         font-family: 'Goldman', monospace; font-size: 0.72rem; color: #ccc;
         text-align: center; padding: 20px;
@@ -313,9 +325,17 @@
                     <span class="child-code-badge" onclick="copyChildCode(this, '{{ $child->child_code }}')"
                         title="კოდის კოპირება">{{ $child->child_code }}</span>
                     @endif
+                    <button type="button"
+                        onclick="openRemind({{ $child->id }}, '{{ addslashes($child->name) }}')"
+                        style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:4px;color:#059669;font-family:'Goldman',monospace;font-size:0.72rem;padding:5px 10px;cursor:pointer;">
+                        &#128276;
+                    </button>
                     <a href="{{ route('child.stats', $child) }}" class="caction primary">სტატისტიკა</a>
                     <button type="button" class="caction" onclick="document.getElementById('editChildModal{{ $child->id }}').classList.add('open')">⚙</button>
                 </div>
+                @if(session('reminder_sent_' . $child->id))
+                <div style="font-family:'Goldman',monospace;font-size:0.62rem;color:#059669;margin-top:4px;">&#10003; შეხსენება გაიგზავნა</div>
+                @endif
             </div>
             @empty
             <div class="no-children">
@@ -508,10 +528,67 @@
     </div>
 </div>
 
+{{-- Remind Modal --}}
+@if(in_array(auth()->user()->role, ['parent', 'admin']))
+<div id="remindModal" class="remind-modal" onclick="if(event.target===this)closeRemind()">
+    <div class="remind-box">
+        <div class="remind-title">
+            <span>🔔 შეხსენება — <span id="remindChildName"></span></span>
+            <button type="button" class="modal-close" onclick="closeRemind()">✕</button>
+        </div>
+        <form id="remindForm" method="POST" action="">
+            @csrf
+            <textarea name="message" class="remind-textarea" rows="3"
+                placeholder="ტექსტი (სურვილისამებრ)&#10;მაგ: ახლავე გააკეთე ტესტი! 📝"></textarea>
+            <div class="remind-hint">ცარიელი = სტანდარტული შეტყობინება</div>
+            <button type="submit" class="remind-send">📤 გაგზავნა</button>
+        </form>
+    </div>
+</div>
+@endif
+
 {{-- Add Child Modal --}}
 @if(in_array(auth()->user()->role, ['parent', 'admin']))
 <div id="addChildModal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
     <div class="mbox">
+        {{-- Tab switcher --}}
+        <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid #f0f0f0;">
+            <button type="button" id="tabNew" onclick="switchChildTab('new')"
+                style="flex:1;background:none;border:none;border-bottom:2px solid #111;margin-bottom:-2px;
+                font-family:'Goldman',monospace;font-size:0.72rem;letter-spacing:0.06em;color:#111;
+                padding:8px;cursor:pointer;">
+                + ახალი ბავშვი
+            </button>
+            <button type="button" id="tabLink" onclick="switchChildTab('link')"
+                style="flex:1;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;
+                font-family:'Goldman',monospace;font-size:0.72rem;letter-spacing:0.06em;color:#aaa;
+                padding:8px;cursor:pointer;">
+                🔗 კოდით მიბმა
+            </button>
+        </div>
+
+        {{-- Tab: Link by code --}}
+        <div id="panelLink" style="display:none;">
+            <div class="modal-title" style="margin-bottom:12px;">
+                კოდით მიბმა
+                <button type="button" class="modal-close" onclick="document.getElementById('addChildModal').classList.remove('open')">✕</button>
+            </div>
+            <p style="font-family:'Goldman',monospace;font-size:0.7rem;color:#888;letter-spacing:0.04em;margin:0 0 16px;">
+                შვილის კოდი ჩაწერე — ბავშვი შენს ანგარიშსაც დაემატება
+            </p>
+            <form method="POST" action="{{ route('child.link') }}">
+                @csrf
+                <div class="mlbl">ბავშვის კოდი <span>*</span></div>
+                <input type="text" name="child_code" class="minput" placeholder="მაგ: AB3K7F"
+                    value="{{ old('child_code') }}" required maxlength="8" autocomplete="off"
+                    style="text-transform:uppercase;letter-spacing:0.12em;">
+                @error('child_code_link')<div class="merr">{{ $message }}</div>@enderror
+                <button type="submit" class="msave">🔗 მიბმა</button>
+            </form>
+        </div>
+
+        {{-- Tab: New child --}}
+        <div id="panelNew">
         <form method="POST" action="{{ route('child.store') }}">
             @csrf
             <div class="modal-title">
@@ -596,6 +673,7 @@
 
             <button type="submit" class="msave">+ შვილის შენახვა</button>
         </form>
+        </div>{{-- /panelNew --}}
     </div>
 </div>
 @endif
@@ -603,10 +681,29 @@
 <script>
 
 
+function switchChildTab(tab) {
+    const isNew = tab === 'new';
+    document.getElementById('panelNew').style.display  = isNew ? '' : 'none';
+    document.getElementById('panelLink').style.display = isNew ? 'none' : '';
+    document.getElementById('tabNew').style.borderBottomColor  = isNew ? '#111' : 'transparent';
+    document.getElementById('tabNew').style.color  = isNew ? '#111' : '#aaa';
+    document.getElementById('tabLink').style.borderBottomColor = isNew ? 'transparent' : '#111';
+    document.getElementById('tabLink').style.color = isNew ? '#aaa' : '#111';
+}
+
+function openRemind(childId, childName) {
+    document.getElementById('remindChildName').textContent = childName;
+    document.getElementById('remindForm').action = '/push/remind/' + childId;
+    document.getElementById('remindModal').classList.add('open');
+}
+function closeRemind() {
+    document.getElementById('remindModal').classList.remove('open');
+}
+
 function confirmDeleteChild(childId, childName) {
     Swal.fire({
         title: childName + '-ის წაშლა?',
-        html: '<span style="color:#c0392b;font-size:0.9rem;">⚠️ წაიშლება ბავშვის მთელი ისტორია — ყველა ტესტი, შედეგი და პარამეტრი.</span><br><span style="font-size:0.82rem;color:#888;">ეს მოქმედება ვერ გაუქმდება.</span>',
+        html: '<span style="font-size:0.9rem;color:#555;">შენს სიაში წაიშლება.<br>თუ სხვა მშობელი არ არის, ბაზიდანაც სრულად წაიშლება.</span>',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#c0392b',

@@ -34,6 +34,8 @@ class ChildController extends Controller
             'child_code' => $child_code,
         ]);
 
+        $parent->children()->attach($child->id);
+
         ChildSetting::create([
             'user_id'        => $child->id,
             'grade_id'       => $data['grade_id'],
@@ -49,6 +51,30 @@ class ChildController extends Controller
         }
 
         return back()->with('child_added', trim($data['name']) . ' დაემატა — კოდი: ' . $child_code);
+    }
+
+    public function link(Request $request)
+    {
+        $data = $request->validate([
+            'child_code' => 'required|string|max:8',
+        ]);
+
+        $code  = strtoupper(trim($data['child_code']));
+        $child = User::where('child_code', $code)->where('role', 'child')->first();
+
+        if (! $child) {
+            return back()->withErrors(['child_code_link' => 'კოდი არასწორია — ბავშვი ვერ მოიძებნა'])->withInput();
+        }
+
+        $parent = auth()->user();
+
+        if ($parent->children()->where('users.id', $child->id)->exists()) {
+            return back()->with('child_added', $child->name . ' უკვე დამატებულია');
+        }
+
+        $parent->children()->attach($child->id);
+
+        return back()->with('child_added', $child->name . ' დაემატა კოდის საშუალებით!');
     }
 
     private function uniqueCode(): string

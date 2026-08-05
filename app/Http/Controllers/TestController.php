@@ -6,6 +6,7 @@ use App\Models\Test;
 use App\Models\TestAnswer;
 use App\Services\AchievementService;
 use App\Services\TestGeneratorService;
+use App\Http\Controllers\PushController;
 use Illuminate\Http\Request;
 
 class TestController extends Controller
@@ -101,6 +102,14 @@ class TestController extends Controller
         ]);
 
         $result = (new AchievementService)->handleTestCompletion($test, $child);
+
+        // Push notification to parent
+        if ($child->parent_id) {
+            $total   = $test->total_questions;
+            $title   = '📊 ' . $child->name . '-მა ტესტი შეასრულა';
+            $body    = $correct . '/' . $total . ' სწორი პასუხი · ' . round($correct / max($total, 1) * 100) . '%';
+            PushController::sendToUser($child->parent_id, $title, $body, route('dashboard'));
+        }
 
         return redirect()->route('test.result', $test)->with('achievement_result', $result);
     }

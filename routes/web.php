@@ -54,6 +54,7 @@ Route::post('/child-login', function (Request $request) {
 })->name('child-login');
 
 Route::middleware(['auth'])->post('/children', [ChildController::class, 'store'])->name('child.store');
+Route::middleware(['auth'])->post('/children/link', [ChildController::class, 'link'])->name('child.link');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
@@ -64,8 +65,9 @@ Route::middleware(['auth'])->group(function () {
         ]);
     })->name('dashboard');
 
-    Route::post('/push/subscribe',   [PushController::class, 'subscribe'])->name('push.subscribe');
-    Route::post('/push/unsubscribe', [PushController::class, 'unsubscribe'])->name('push.unsubscribe');
+    Route::post('/push/subscribe',        [PushController::class, 'subscribe'])->name('push.subscribe');
+    Route::post('/push/unsubscribe',      [PushController::class, 'unsubscribe'])->name('push.unsubscribe');
+    Route::post('/push/remind/{child}',   [PushController::class, 'remind'])->name('push.remind');
 
     // შვილის პარამეტრები (მხოლოდ მშობელი)
     Route::get('/children/{child}/stats',                [ChildSettingsController::class, 'stats'])->name('child.stats');

@@ -35,7 +35,13 @@ class User extends Authenticatable
 
     public function children()
     {
-        return $this->hasMany(User::class, 'parent_id');
+        return $this->belongsToMany(User::class, 'child_parent', 'parent_id', 'child_id')
+                    ->with(['childSetting.grade', 'themes', 'topics']);
+    }
+
+    public function parents()
+    {
+        return $this->belongsToMany(User::class, 'child_parent', 'child_id', 'parent_id');
     }
 
     public function parent()

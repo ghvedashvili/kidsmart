@@ -14,10 +14,8 @@ class ChildSettingsController extends Controller
 {
     private function authorizeChild(User $child): void
     {
-        abort_if(
-            $child->parent_id !== auth()->id() || $child->role !== 'child',
-            403
-        );
+        abort_if($child->role !== 'child', 403);
+        abort_if(! $child->parents()->where('users.id', auth()->id())->exists(), 403);
     }
 
     public function stats(User $child)
@@ -74,8 +72,16 @@ class ChildSettingsController extends Controller
     public function destroy(User $child)
     {
         $this->authorizeChild($child);
-        $child->delete();
-        return redirect()->route('dashboard')->with('success', 'ბავშვის პროფილი წაიშალა');
+
+        $parent = auth()->user();
+        $parent->children()->detach($child->id);
+
+        if ($child->parents()->count() === 0) {
+            $child->delete();
+            return redirect()->route('dashboard')->with('success', $child->name . '-ის პროფილი სრულად წაიშალა');
+        }
+
+        return redirect()->route('dashboard')->with('success', $child->name . ' შენს სიაში წაიშალა');
     }
 
     public function update(Request $request, User $child)
