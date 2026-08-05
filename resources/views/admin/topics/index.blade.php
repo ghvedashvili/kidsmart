@@ -17,11 +17,25 @@
     .btn:hover { border-color: #94a3b8; color: #1e293b; }
     .btn-del { background: none; border: none; color: #cbd5e1; font-size: 0.72rem; cursor: pointer; padding: 0 4px; transition: color 0.2s; }
     .btn-del:hover { color: #ef4444; }
-    .row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.8rem; color: #374151; }
+    .row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.8rem; color: #374151; gap: 8px; }
     .row:last-child { border-bottom: none; }
     .badge { font-size: 0.65rem; color: #64748b; border: 1px solid #e2e8f0; border-radius: 2px; padding: 1px 6px; margin-left: 8px; }
     .msg { font-size: 0.75rem; color: #059669; margin-bottom: 16px; }
     .grade-group { color: #94a3b8; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 0 4px; }
+    .row-view { display:flex; align-items:center; flex:1; gap:4px; }
+    .row-edit { display:none; flex:1; gap:6px; align-items:center; }
+    .row.editing .row-view { display:none; }
+    .row.editing .row-edit { display:flex; }
+    .btn-edit { background:none; border:none; color:#cbd5e1; font-size:0.72rem; cursor:pointer; padding:0 4px; transition:color 0.2s; }
+    .btn-edit:hover { color:#64748b; }
+    .btn-del { background: none; border: none; color: #cbd5e1; font-size: 0.72rem; cursor: pointer; padding: 0 4px; transition: color 0.2s; }
+    .btn-del:hover { color: #ef4444; }
+    .fc-inline { background:#f8fafc; border:1px solid #e2e8f0; border-radius:4px; color:#374151; font-family:'Goldman',monospace; font-size:0.78rem; padding:5px 9px; outline:none; }
+    .fc-inline:focus { border-color:#94a3b8; }
+    .btn-save { background:#f8fafc; border:1px solid #e2e8f0; color:#374151; font-family:'Goldman',monospace; font-size:0.72rem; padding:5px 12px; border-radius:4px; cursor:pointer; white-space:nowrap; }
+    .btn-save:hover { border-color:#94a3b8; }
+    .btn-cancel { background:none; border:none; color:#cbd5e1; font-size:0.72rem; cursor:pointer; padding:0 4px; }
+    .btn-cancel:hover { color:#64748b; }
 </style>
 
 <div class="aw">
@@ -66,19 +80,47 @@
                 <div class="grade-group">{{ $topic->grade->name }}</div>
                 @php $lastGrade = $topic->grade_id; @endphp
             @endif
-            <div class="row">
-                <span>
-                    {{ $topic->name }}
+            <div class="row" id="topic-row-{{ $topic->id }}">
+                {{-- View mode --}}
+                <div class="row-view">
+                    <span>{{ $topic->name }}</span>
                     <span class="badge">{{ $topic->question_templates_count }} შაბლონი</span>
-                </span>
-                <form method="POST" action="{{ route('admin.topics.destroy', $topic) }}">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="btn-del" onclick="return confirm('წაიშალოს?')">✕</button>
-                </form>
+                </div>
+                <div style="display:flex;gap:2px;flex-shrink:0;">
+                    <button type="button" class="btn-edit" onclick="editTopic({{ $topic->id }})">✎</button>
+                    <form method="POST" action="{{ route('admin.topics.destroy', $topic) }}" style="display:inline;">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="btn-del" onclick="return confirm('წაიშალოს?')">✕</button>
+                    </form>
+                </div>
+
+                {{-- Edit mode --}}
+                <div class="row-edit">
+                    <form method="POST" action="{{ route('admin.topics.update', $topic) }}" style="display:flex;gap:6px;flex:1;align-items:center;">
+                        @csrf @method('PUT')
+                        <select name="grade_id" class="fc-inline" required>
+                            @foreach($grades as $grade)
+                            <option value="{{ $grade->id }}" {{ $topic->grade_id == $grade->id ? 'selected' : '' }}>{{ $grade->name }}</option>
+                            @endforeach
+                        </select>
+                        <input type="text" name="name" class="fc-inline" style="flex:1;" value="{{ $topic->name }}" required maxlength="100">
+                        <button type="submit" class="btn-save">შენახვა</button>
+                    </form>
+                    <button type="button" class="btn-cancel" onclick="cancelTopic({{ $topic->id }})">✕</button>
+                </div>
             </div>
         @empty
         <div style="color:#444;font-size:0.78rem;">თოპიქი არ არის</div>
         @endforelse
     </div>
 </div>
+
+<script>
+function editTopic(id) {
+    document.getElementById('topic-row-' + id).classList.add('editing');
+}
+function cancelTopic(id) {
+    document.getElementById('topic-row-' + id).classList.remove('editing');
+}
+</script>
 @endsection

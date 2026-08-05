@@ -27,6 +27,16 @@ class TopicController extends Controller
         return back()->with('success', 'თოპიქი დაემატა');
     }
 
+    public function update(Request $request, Topic $topic)
+    {
+        $data = $request->validate([
+            'grade_id' => 'required|exists:grades,id',
+            'name'     => 'required|string|max:100',
+        ]);
+        $topic->update($data);
+        return back()->with('success', '«' . $topic->name . '» განახლდა');
+    }
+
     public function destroy(Topic $topic)
     {
         $topic->delete();
