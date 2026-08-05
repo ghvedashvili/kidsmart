@@ -103,12 +103,11 @@ class TestController extends Controller
 
         $result = (new AchievementService)->handleTestCompletion($test, $child);
 
-        // Push notification to parent
-        if ($child->parent_id) {
-            $total   = $test->total_questions;
-            $title   = '📊 ' . $child->name . '-მა ტესტი შეასრულა';
-            $body    = $correct . '/' . $total . ' სწორი პასუხი · ' . round($correct / max($total, 1) * 100) . '%';
-            PushController::sendToUser($child->parent_id, $title, $body, route('dashboard'));
+        // Push notification to all linked parents
+        $title = '📊 ' . $child->name . '-მა ტესტი შეასრულა';
+        $body  = $correct . '/' . $test->total_questions . ' სწორი პასუხი · ' . round($correct / max($test->total_questions, 1) * 100) . '%';
+        foreach ($child->parents as $parent) {
+            PushController::sendToUser($parent->id, $title, $body, route('dashboard'));
         }
 
         return redirect()->route('test.result', $test)->with('achievement_result', $result);
