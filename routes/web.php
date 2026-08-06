@@ -114,6 +114,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/questions',                     [QuestionTemplateController::class, 'index'])->name('admin.questions.index');
     Route::get('/admin/questions/create',              [QuestionTemplateController::class, 'create'])->name('admin.questions.create');
     Route::post('/admin/questions',                    [QuestionTemplateController::class, 'store'])->name('admin.questions.store');
+    Route::post('/admin/questions/pdf',                [QuestionTemplateController::class, 'exportPdf'])->name('admin.questions.pdf');
     Route::get('/admin/questions/{question}/edit',     [QuestionTemplateController::class, 'edit'])->name('admin.questions.edit');
     Route::put('/admin/questions/{question}',          [QuestionTemplateController::class, 'update'])->name('admin.questions.update');
     Route::delete('/admin/questions/{question}',       [QuestionTemplateController::class, 'destroy'])->name('admin.questions.destroy');

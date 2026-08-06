@@ -28,6 +28,14 @@
     .pagination-wrap a, .pagination-wrap span { font-family: 'Goldman', monospace; font-size: 0.68rem; color: #64748b; border: 1px solid #e2e8f0; border-radius: 3px; padding: 4px 10px; text-decoration: none; }
     .pagination-wrap a:hover { color: #1e293b; border-color: #94a3b8; }
     .pagination-wrap span.active-page { color: #1e293b; border-color: #94a3b8; }
+    .q-check { width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; accent-color: #374151; }
+    .pdf-bar { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1e293b; border-radius: 10px; padding: 12px 20px; display: none; align-items: center; gap: 14px; box-shadow: 0 8px 32px rgba(0,0,0,0.25); z-index: 100; white-space: nowrap; }
+    .pdf-bar.show { display: flex; }
+    .pdf-count { font-family: 'Goldman', monospace; font-size: 0.75rem; color: #94a3b8; letter-spacing: 0.06em; }
+    .pdf-btn { background: #fff; border: none; border-radius: 6px; color: #1e293b; font-family: 'Goldman', monospace; font-size: 0.75rem; letter-spacing: 0.06em; padding: 8px 18px; cursor: pointer; }
+    .pdf-btn:hover { background: #f1f5f9; }
+    .pdf-clear { background: none; border: none; color: #64748b; font-size: 0.8rem; cursor: pointer; padding: 0; }
+    .pdf-clear:hover { color: #fff; }
 </style>
 
 <div class="aw">
@@ -45,7 +53,10 @@
     @endif
 
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <div style="color:#555;font-size:0.78rem;">სულ: {{ $templates->total() }} შაბლონი</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+            <input type="checkbox" id="checkAll" class="q-check" title="ყველა მონიშვნა">
+            <div style="color:#555;font-size:0.78rem;">სულ: {{ $templates->total() }} შაბლონი</div>
+        </div>
         <a href="{{ route('admin.questions.create') }}" class="btn">+ ახალი შაბლონი</a>
     </div>
 
@@ -79,7 +90,9 @@
 
     <div class="card-dark">
         @forelse($templates as $tpl)
-        <div class="q-row">
+        <div class="q-row" style="display:flex;gap:10px;align-items:flex-start;">
+            <input type="checkbox" class="q-check q-item" value="{{ $tpl->id }}" style="margin-top:3px;" onchange="updateBar()">
+            <div style="flex:1;">
             <div class="q-text">{{ $tpl->template_text }}</div>
             <div class="q-meta">
                 <span class="q-tag">{{ $tpl->topic->grade->name }}</span>
@@ -93,6 +106,7 @@
                     <button type="submit" class="btn-del" onclick="return confirm('წაიშალოს?')">✕</button>
                 </form>
             </div>
+            </div>
         </div>
         @empty
         <div style="color:#444;font-size:0.78rem;">შაბლონი არ არის</div>
@@ -103,4 +117,40 @@
         {{ $templates->withQueryString()->links('admin.pagination') }}
     </div>
 </div>
+
+{{-- Floating PDF bar --}}
+<div class="pdf-bar" id="pdfBar">
+    <span class="pdf-count" id="pdfCount">0 მონიშნული</span>
+    <form method="POST" action="{{ route('admin.questions.pdf') }}" target="_blank" id="pdfForm">
+        @csrf
+        <div id="pdfInputs"></div>
+        <button type="submit" class="pdf-btn">📄 PDF-ში</button>
+    </form>
+    <button class="pdf-clear" onclick="clearAll()" title="გასუფთავება">✕</button>
+</div>
+
+<script>
+const bar      = document.getElementById('pdfBar');
+const countEl  = document.getElementById('pdfCount');
+const inputs   = document.getElementById('pdfInputs');
+const checkAll = document.getElementById('checkAll');
+
+function updateBar() {
+    const checked = [...document.querySelectorAll('.q-item:checked')];
+    bar.classList.toggle('show', checked.length > 0);
+    countEl.textContent = checked.length + ' მონიშნული';
+    inputs.innerHTML = checked.map(c => `<input type="hidden" name="ids[]" value="${c.value}">`).join('');
+}
+
+function clearAll() {
+    document.querySelectorAll('.q-item').forEach(c => c.checked = false);
+    checkAll.checked = false;
+    updateBar();
+}
+
+checkAll.addEventListener('change', function () {
+    document.querySelectorAll('.q-item').forEach(c => { c.checked = this.checked; });
+    updateBar();
+});
+</script>
 @endsection

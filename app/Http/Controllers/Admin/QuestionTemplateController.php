@@ -66,6 +66,34 @@ class QuestionTemplateController extends Controller
         return redirect()->route('admin.questions.index')->with('success', 'განახლდა');
     }
 
+    public function exportPdf(Request $request)
+    {
+        $ids = $request->validate(['ids' => 'required|array', 'ids.*' => 'integer|exists:question_templates,id'])['ids'];
+
+        $templates = QuestionTemplate::with('topic.grade')
+            ->whereIn('id', $ids)
+            ->orderBy('topic_id')->orderBy('difficulty')
+            ->get();
+
+        // Build a universal theme from all ThemeVariables so every placeholder gets a value
+        $theme = new \App\Models\Theme();
+        $theme->setRelation('variables', \App\Models\ThemeVariable::all());
+
+        $questions = $templates->map(function ($tpl, $i) use ($theme) {
+            $generated = $tpl->generate($theme);
+            return [
+                'num'        => $i + 1,
+                'text'       => $generated['question_text'],
+                'answer'     => $generated['correct_answer'],
+                'grade'      => $tpl->topic->grade->name,
+                'topic'      => $tpl->topic->name,
+                'difficulty' => $tpl->difficulty,
+            ];
+        });
+
+        return view('admin.questions.pdf', compact('questions'));
+    }
+
     public function destroy(QuestionTemplate $question)
     {
         $question->delete();
