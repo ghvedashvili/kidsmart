@@ -10,7 +10,9 @@
     .anav a:hover, .anav a.active { color: #1e293b; border-color: #94a3b8; }
 
     .pg { display: grid; grid-template-columns: 1fr 320px; gap: 16px; align-items: start; }
-    @media (max-width: 860px) { .pg { grid-template-columns: 1fr; } }
+    .card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .card-row .card { margin-bottom: 0; }
+    @media (max-width: 860px) { .pg { grid-template-columns: 1fr; } .card-row { grid-template-columns: 1fr; } }
 
     .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px 22px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
     .sec-title { font-size: 0.58rem; color: #94a3b8; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9; }
@@ -68,18 +70,19 @@
     .btn-cancel { color: #94a3b8; font-size: 0.66rem; text-decoration: none; transition: color 0.15s; }
     .btn-cancel:hover { color: #374151; }
 
-    .preview-panel { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; position: sticky; top: 68px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-    .preview-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .preview-panel { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; position: sticky; top: 68px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); max-height: calc(100vh - 100px); overflow-y: auto; }
+    .preview-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; }
     .preview-label { font-size: 0.56rem; color: #94a3b8; letter-spacing: 0.2em; text-transform: uppercase; }
     .preview-regen { background: #f8fafc; border: 1px solid #e2e8f0; color: #64748b; font-family: 'Goldman', monospace; font-size: 0.58rem; letter-spacing: 0.08em; padding: 4px 10px; border-radius: 3px; cursor: pointer; transition: all 0.15s; }
     .preview-regen:hover { border-color: #94a3b8; color: #1e293b; }
-    .preview-q { color: #374151; font-size: 0.8rem; line-height: 1.7; margin-bottom: 14px; min-height: 48px; }
+    .preview-q { color: #1e293b; font-size: 0.84rem; line-height: 1.75; margin-bottom: 16px; min-height: 48px; font-weight: 500; }
     .preview-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-    .preview-opt { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 9px 8px; font-family: 'Goldman', monospace; font-size: 0.78rem; color: #64748b; text-align: center; }
-    .preview-opt.c { border-color: #059669; color: #059669; background: #f0fdf4; }
+    .preview-opt { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 9px 8px; font-family: 'Goldman', monospace; font-size: 0.82rem; color: #64748b; text-align: center; }
+    .preview-opt.c { border-color: #059669; color: #059669; background: #f0fdf4; font-weight: 600; }
     .preview-formula { margin-top: 12px; padding-top: 10px; border-top: 1px solid #f1f5f9; font-size: 0.6rem; color: #94a3b8; letter-spacing: 0.05em; }
     .preview-vars { margin-top: 8px; font-size: 0.58rem; color: #cbd5e1; line-height: 1.7; }
     .preview-warn { margin-top: 8px; font-size: 0.6rem; color: #f87171; }
+    .tog { margin-left: 6px; transition: transform 0.2s; }
 </style>
 
 <div class="aw">
@@ -126,22 +129,86 @@
                     value="{{ old('difficulty', $template?->difficulty ?? 1) }}">
             </div>
 
-            {{-- 2. Template text --}}
-            <div class="card">
-                <div class="sec-title">② კითხვის ტექსტი</div>
+            {{-- 2+4: Numeric vars & Formula side by side --}}
+            <div class="card-row">
+                {{-- 2. Numeric vars --}}
+                <div class="card">
+                    <div class="sec-title">② რიცხვის ცვლადები <span style="color:#94a3b8;font-size:0.54rem;letter-spacing:0.06em;">(სახელი · min · max · ნაბიჯი)</span></div>
+                    <div class="hint" style="margin-bottom:8px;">სწრაფი დაწყება — დააჭირე ან ჩამოწერე ქვემოთ:</div>
+                    <div class="starters">
+                        <button type="button" class="starter" onclick="applyStarter('add')">✚ შეკრება</button>
+                        <button type="button" class="starter" onclick="applyStarter('sub')">― გამოკლება</button>
+                        <button type="button" class="starter" onclick="applyStarter('mul')">× გამრავლება</button>
+                        <button type="button" class="starter" onclick="applyStarter('div')">÷ გაყოფა</button>
+                        <button type="button" class="starter" onclick="applyStarter('comb')">⊕ კომბო</button>
+                        <button type="button" class="starter" onclick="applyStarter('diff')">Δ სხვაობა</button>
+                    </div>
+                    <div class="nc-hdr" style="margin-top:10px;">
+                        <span>სახელი</span><span>min</span><span>max</span><span>ნაბიჯი</span><span></span>
+                    </div>
+                    <div id="ncRows"></div>
+                    <button type="button" class="nc-add" onclick="addNcRow()">+ ცვლადის დამატება</button>
+                    <input type="hidden" name="num_config" id="numConfigJson">
+                    @error('num_config')<div class="err">{{ $message }}</div>@enderror
 
-                <div class="lbl">სწრაფი შაბლონები</div>
-                <div class="starters">
-                    <button type="button" class="starter" onclick="applyStarter('add')">✚ შეკრება</button>
-                    <button type="button" class="starter" onclick="applyStarter('sub')">― გამოკლება</button>
-                    <button type="button" class="starter" onclick="applyStarter('mul')">× გამრავლება</button>
-                    <button type="button" class="starter" onclick="applyStarter('div')">÷ გაყოფა</button>
-                    <button type="button" class="starter" onclick="applyStarter('comb')">⊕ კომბო</button>
-                    <button type="button" class="starter" onclick="applyStarter('diff')">Δ სხვაობა</button>
+                    <div class="lbl" style="margin-top:10px;">პირობები <span style="color:#94a3b8;font-size:0.6rem;">(სურვილისამებრ)</span></div>
+                    <div class="hint" style="margin-bottom:6px;">ორივე მხარეს შეიძლება გამოთქმა: <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">N1 &gt; N2+N3</code></div>
+                    <div id="condChips" class="cond-chips" style="display:none;"></div>
+                    <div id="condRows"></div>
+                    <button type="button" class="nc-add" id="addCondBtn" onclick="addCond()" style="display:none;">+ პირობის დამატება</button>
+                    <span id="condNoVars" style="font-size:0.6rem;color:#94a3b8;">ჯერ დაამატეთ ცვლადები</span>
+                    <input type="hidden" name="conditions" id="conditionsJson">
                 </div>
 
+                {{-- 4. Formula --}}
+                <div class="card">
+                    <div class="sec-title">④ სწორი პასუხის ფორმულა</div>
+                    <div class="lbl">ცვლადები</div>
+                    <div class="chips" id="formulaChipBar">
+                        <span style="font-size:0.56rem;color:#94a3b8;padding:4px 2px;">② ცვლადების შემდეგ გამოჩნდება</span>
+                    </div>
+                    <div class="lbl">ოპერატორები</div>
+                    <div class="chips">
+                        <span class="chip chip-op" onclick="insertFormula('+')">+</span>
+                        <span class="chip chip-op" onclick="insertFormula('-')">−</span>
+                        <span class="chip chip-op" onclick="insertFormula('*')">×</span>
+                        <span class="chip chip-op" onclick="insertFormula('/')">/</span>
+                        <span class="chip chip-op" onclick="insertFormula('%')">%</span>
+                        <span class="chip chip-op" onclick="insertFormula('(')">(</span>
+                        <span class="chip chip-op" onclick="insertFormula(')')">)</span>
+                    </div>
+                    <input type="text" name="correct_formula" id="correctFormula" class="fc"
+                        placeholder="N1+N2"
+                        value="{{ old('correct_formula', $template?->correct_formula) }}"
+                        oninput="previewDebounce()" required>
+                    <div class="hint">მაგ: N1+N2 &nbsp;·&nbsp; (N1+N2)*N3 &nbsp;·&nbsp; N1*N2-N3 &nbsp;·&nbsp; N1%N2</div>
+                    @error('correct_formula')<div class="err">{{ $message }}</div>@enderror
+
+                    <div class="lbl" style="margin-top:10px;">მცდარი პასუხების დიაპაზონი <span style="color:#94a3b8;font-size:0.6rem;">±</span></div>
+                    <div style="display:flex;gap:10px;align-items:center;">
+                        <div class="lbl" style="margin:0;white-space:nowrap;">min</div>
+                        <input type="number" id="distMin" class="nc-inp" style="width:76px;" min="1"
+                            value="{{ $template?->distractors['min'] ?? 1 }}" oninput="previewDebounce()">
+                        <div class="lbl" style="margin:0;white-space:nowrap;">max</div>
+                        <input type="number" id="distMax" class="nc-inp" style="width:76px;" min="1"
+                            value="{{ $template?->distractors['max'] ?? 10 }}" oninput="previewDebounce()">
+                    </div>
+                    <input type="hidden" name="distractors" id="distractorsJson">
+                    @error('distractors')<div class="err">{{ $message }}</div>@enderror
+
+                    <div class="lbl" style="margin-top:10px;">მინიშნება <span style="color:#94a3b8;font-size:0.6rem;">(გამოჩნდება კითხვის ქვეშ)</span></div>
+                    <textarea name="hint_text" id="hintText" class="fc" rows="2"
+                        placeholder="@{{PLAYER}}-მ პირველ ტაიმში @{{N1}} გოლი, მეორეში @{{N2}} გოლი გაიტანა."
+                        oninput="previewDebounce()">{{ old('hint_text', $template?->hint_text) }}</textarea>
+                </div>
+            </div>
+
+            {{-- 3. Template text --}}
+            <div class="card">
+                <div class="sec-title">③ კითხვის ტექსტი</div>
+
                 @if(count($themeVarNames))
-                <div class="lbl">სტრიქონის ცვლადები (კლიკით ჩასმა)</div>
+                <div class="lbl">სტრიქონის ცვლადები</div>
                 <div class="chips">
                     @foreach($themeVarNames as $varName)
                     <span class="chip chip-theme" onclick="insertVar('{{ $varName }}')">&#123;&#123;{{ $varName }}&#125;&#125;</span>
@@ -149,89 +216,19 @@
                 </div>
                 @endif
 
-                <div class="lbl">რიცხვის ცვლადები</div>
+                <div class="lbl">რიცხვის ცვლადები (კლიკით ჩასმა)</div>
                 <div class="chips" id="numTextChipBar">
-                    <span style="font-size:0.56rem;color:#1e1e1e;padding:4px 2px;">ცვლადების დამატებისას გამოჩნდება</span>
+                    <span style="font-size:0.56rem;color:#94a3b8;padding:4px 2px;">② ცვლადების შემდეგ გამოჩნდება</span>
                 </div>
 
                 <textarea name="template_text" id="templateText" class="fc" rows="4"
                     placeholder="@{{PLAYER}}-მ @{{N1}} გოლი გაიტანა პირველ ტაიმში, @{{N2}} — მეორეში. სულ?"
                     oninput="previewDebounce()" required>{{ old('template_text', $template?->template_text) }}</textarea>
                 @error('template_text')<div class="err">{{ $message }}</div>@enderror
-
-                <div class="lbl" style="margin-top:14px;">მინიშნების ტექსტი <span style="color:#94a3b8;font-size:0.6rem;">(არასავალდებულო — გამოჩნდება კითხვის ქვეშ)</span></div>
-                <textarea name="hint_text" id="hintText" class="fc" rows="2"
-                    placeholder="@{{PLAYER}}-მ პირველ ტაიმში @{{N1}} გოლი, მეორეში @{{N2}} გოლი გაიტანა."
-                    oninput="previewDebounce()">{{ old('hint_text', $template?->hint_text) }}</textarea>
             </div>
 
-            {{-- 3. Numeric vars --}}
-            <div class="card">
-                <div class="sec-title">③ რიცხვის ცვლადები <span style="color:#1e1e1e;font-size:0.54rem;letter-spacing:0.06em;">(სახელი · min · max · ნაბიჯი)</span></div>
-                <div class="nc-hdr">
-                    <span>სახელი</span><span>min</span><span>max</span><span>ნაბიჯი</span><span></span>
-                </div>
-                <div id="ncRows"></div>
-                <button type="button" class="nc-add" onclick="addNcRow()">+ ცვლადის დამატება</button>
-                <textarea name="num_config" id="numConfigJson" class="fc"
-                    style="margin-top:10px;font-size:0.58rem;color:#1e1e1e;resize:none;" rows="1" readonly></textarea>
-                @error('num_config')<div class="err">{{ $message }}</div>@enderror
-            </div>
 
-            {{-- 4. Formula --}}
-            <div class="card">
-                <div class="sec-title">④ სწორი პასუხის ფორმულა</div>
-                <div class="lbl">ცვლადები</div>
-                <div class="chips" id="formulaChipBar">
-                    <span style="font-size:0.56rem;color:#1e1e1e;padding:4px 2px;">ცვლადების დამატებისას გამოჩნდება</span>
-                </div>
-                <div class="lbl">ოპერატორები</div>
-                <div class="chips">
-                    <span class="chip chip-op" onclick="insertFormula('+')">+</span>
-                    <span class="chip chip-op" onclick="insertFormula('-')">−</span>
-                    <span class="chip chip-op" onclick="insertFormula('*')">×</span>
-                    <span class="chip chip-op" onclick="insertFormula('/')">/</span>
-                    <span class="chip chip-op" onclick="insertFormula('%')">%</span>
-                    <span class="chip chip-op" onclick="insertFormula('(')">(</span>
-                    <span class="chip chip-op" onclick="insertFormula(')')">)</span>
-                </div>
-                <input type="text" name="correct_formula" id="correctFormula" class="fc"
-                    placeholder="N1+N2"
-                    value="{{ old('correct_formula', $template?->correct_formula) }}"
-                    oninput="previewDebounce()" required>
-                <div class="hint">მაგ: N1+N2 &nbsp;·&nbsp; (N1+N2)*N3 &nbsp;·&nbsp; N1*N2-N3 &nbsp;·&nbsp; N1%N2</div>
-                @error('correct_formula')<div class="err">{{ $message }}</div>@enderror
-            </div>
-
-            {{-- 5. Conditions --}}
-            <div class="card">
-                <div class="sec-title">⑤ პირობები <span style="color:#1e1e1e;font-size:0.54rem;letter-spacing:0.06em;">(სურვილისამებრ)</span></div>
-                <div class="hint" style="margin-bottom:8px;">ორივე მხარეს შეიძლება გამოთქმა: <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">N1 &gt; N2+N3</code>, <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">N1*2 &gt;= N3</code></div>
-                <div id="condChips" class="cond-chips" style="display:none;"></div>
-                <div id="condRows"></div>
-                <button type="button" class="nc-add" id="addCondBtn" onclick="addCond()" style="display:none;">+ პირობის დამატება</button>
-                <span id="condNoVars" style="font-size:0.6rem;color:#1e1e1e;">ჯერ დაამატეთ ცვლადები ③-ში</span>
-                <input type="hidden" name="conditions" id="conditionsJson">
-            </div>
-
-            {{-- 6. Distractors --}}
-            <div class="card">
-                <div class="sec-title">⑥ მცდარი პასუხების დიაპაზონი</div>
-                <div class="hint" style="margin-bottom:10px;">სწ. პასუხი ± random(min, max) → 3 მცდარი ვარიანტი</div>
-                <div style="display:flex;gap:10px;align-items:center;">
-                    <div class="lbl" style="margin:0;white-space:nowrap;">min</div>
-                    <input type="number" id="distMin" class="nc-inp" style="width:76px;" min="1"
-                        value="{{ $template?->distractors['min'] ?? 1 }}" oninput="previewDebounce()">
-                    <div class="lbl" style="margin:0;white-space:nowrap;">max</div>
-                    <input type="number" id="distMax" class="nc-inp" style="width:76px;" min="1"
-                        value="{{ $template?->distractors['max'] ?? 10 }}" oninput="previewDebounce()">
-                    <span style="font-size:0.58rem;color:#1e1e1e;">→ ± შემთხვევითი</span>
-                </div>
-                <input type="hidden" name="distractors" id="distractorsJson">
-                @error('distractors')<div class="err">{{ $message }}</div>@enderror
-            </div>
-
-            <div class="form-actions">
+<div class="form-actions">
                 <button type="submit" class="btn-save">{{ $template ? '↺ განახლება' : '✓ შენახვა' }}</button>
                 <a href="{{ route('admin.questions.index') }}" class="btn-cancel">გაუქმება</a>
             </div>
@@ -243,7 +240,7 @@
                 <span class="preview-label">Live Preview</span>
                 <button type="button" class="preview-regen" onclick="genPreview()">↺ ახალი</button>
             </div>
-            <div class="preview-q" id="prevQ"><span style="color:#1c1c1c;">შაბლონი არ არის...</span></div>
+            <div class="preview-q" id="prevQ"><span style="color:#94a3b8;font-size:0.72rem;line-height:1.8;">② სწრაფი შაბლონი ან<br>③ კითხვის ტექსტი + ④ ფორმულა<br>შეავსეთ preview-სთვის</span></div>
             <div id="prevHint" style="font-size:0.7rem;color:#64748b;margin:4px 0 8px;font-style:italic;min-height:0;"></div>
             <div class="preview-opts" id="prevOpts"></div>
             <div class="preview-formula" id="prevFormula"></div>
@@ -304,10 +301,11 @@ function applyStarter(key) {
     const s = STARTERS[key]; if (!s) return;
     document.getElementById('templateText').value = s.text;
     document.getElementById('correctFormula').value = s.formula;
-    ncRows = []; conditions = [];
+    ncRows = []; conditions = []; ncIdSeq = 1; condIdSeq = 1;
     s.vars.forEach(v => addNcRow(v.n, v.min, v.max, v.step || 1));
     s.conds.forEach(c => addCond(c.left, c.op, c.right, true));
-    previewDebounce();
+    clearTimeout(prevTimer);
+    genPreview();
 }
 
 // ── num_config rows
@@ -315,6 +313,12 @@ let ncRows  = [];
 let ncIdSeq = 1;
 
 function addNcRow(name = '', min = 1, max = 9, step = 1) {
+    if (!name) {
+        const used = new Set(ncRows.map(r => r.name));
+        let i = 1;
+        while (used.has('N' + i)) i++;
+        name = 'N' + i;
+    }
     ncRows.push({ id: ncIdSeq++, name, min, max, step });
     renderNcRows();
 }
@@ -507,7 +511,7 @@ function genPreview() {
     const dMax    = +document.getElementById('distMax').value || 10;
 
     if (!tmpl) {
-        document.getElementById('prevQ').innerHTML = '<span style="color:#94a3b8;">② შაბლონი ჩაწერეთ...</span>';
+        document.getElementById('prevQ').innerHTML = '<span style="color:#94a3b8;font-size:0.72rem;line-height:1.8;">② სწრაფი შაბლონი ან<br>③ კითხვის ტექსტი + ④ ფორმულა<br>შეავსეთ preview-სთვის</span>';
         document.getElementById('prevHint').textContent = '';
         document.getElementById('prevOpts').innerHTML = '';
         document.getElementById('prevFormula').innerHTML = '';
