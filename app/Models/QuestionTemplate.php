@@ -11,11 +11,22 @@ class QuestionTemplate extends Model
 
     protected $casts = ['num_config' => 'array', 'distractors' => 'array', 'conditions' => 'array'];
 
+    private function evalExpr(string $expr, array $vars): int
+    {
+        $e = $expr;
+        foreach ($vars as $k => $v) {
+            $e = str_replace($k, (string) $v, $e);
+        }
+        $e = preg_replace('/[^0-9+\-*\/()\s]/', '', $e);
+        $result = @eval("return (int)({$e});");
+        return ($result === false || !is_numeric($result)) ? 0 : (int) $result;
+    }
+
     private function conditionsMet(array $conditions, array $vars): bool
     {
         foreach ($conditions as $c) {
-            $l = is_numeric($c['left'])  ? (int)$c['left']  : (int)($vars[$c['left']]  ?? 0);
-            $r = is_numeric($c['right']) ? (int)$c['right'] : (int)($vars[$c['right']] ?? 0);
+            $l = $this->evalExpr((string) ($c['left']  ?? '0'), $vars);
+            $r = $this->evalExpr((string) ($c['right'] ?? '0'), $vars);
             $ok = match($c['op'] ?? '') {
                 '>'  => $l > $r,
                 '<'  => $l < $r,

@@ -52,10 +52,15 @@
     .nc-add { background: none; border: 1px dashed #cbd5e1; color: #94a3b8; font-family: 'Goldman', monospace; font-size: 0.6rem; letter-spacing: 0.08em; padding: 5px 14px; border-radius: 3px; cursor: pointer; transition: all 0.15s; margin-top: 4px; }
     .nc-add:hover { border-color: #64748b; color: #374151; }
 
-    .cond-row { display: grid; grid-template-columns: 1fr 100px 1fr 22px; gap: 5px; align-items: center; margin-bottom: 5px; }
+    .cond-row { display: grid; grid-template-columns: 1fr 110px 1fr 22px; gap: 5px; align-items: center; margin-bottom: 5px; }
     .cond-sel { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 3px; color: #374151; font-family: 'Goldman', monospace; font-size: 0.72rem; padding: 6px 8px; outline: none; box-sizing: border-box; width: 100%; cursor: pointer; }
     .cond-sel:focus { border-color: #94a3b8; }
     .cond-op { color: #3b82f6; border-color: #bfdbfe; background: #eff6ff; }
+    .cond-chips { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 8px; }
+    .cond-chip { font-family: 'Goldman', monospace; font-size: 0.56rem; padding: 3px 7px; border-radius: 3px; cursor: pointer; background: #f0fdf4; border: 1px solid #bbf7d0; color: #059669; user-select: none; }
+    .cond-chip:hover { border-color: #34d399; }
+    .cond-op-chip { background: #eff6ff; border: 1px solid #bfdbfe; color: #3b82f6; min-width: 22px; text-align: center; }
+    .cond-op-chip:hover { border-color: #93c5fd; }
 
     .form-actions { display: flex; gap: 12px; align-items: center; margin-top: 4px; }
     .btn-save { background: #f0fdf4; border: 1px solid #bbf7d0; color: #059669; font-family: 'Goldman', monospace; font-size: 0.76rem; letter-spacing: 0.08em; padding: 11px 26px; border-radius: 4px; cursor: pointer; transition: all 0.18s; }
@@ -201,7 +206,8 @@
             {{-- 5. Conditions --}}
             <div class="card">
                 <div class="sec-title">⑤ პირობები <span style="color:#1e1e1e;font-size:0.54rem;letter-spacing:0.06em;">(სურვილისამებრ)</span></div>
-                <div class="hint" style="margin-bottom:12px;">ცვლადების შეზღუდვები — generate() ამოწმებს ყოველ გენერაციას (max 40 მცდელობა)</div>
+                <div class="hint" style="margin-bottom:8px;">ორივე მხარეს შეიძლება გამოთქმა: <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">N1 &gt; N2+N3</code>, <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">N1*2 &gt;= N3</code></div>
+                <div id="condChips" class="cond-chips" style="display:none;"></div>
                 <div id="condRows"></div>
                 <button type="button" class="nc-add" id="addCondBtn" onclick="addCond()" style="display:none;">+ პირობის დამატება</button>
                 <span id="condNoVars" style="font-size:0.6rem;color:#1e1e1e;">ჯერ დაამატეთ ცვლადები ③-ში</span>
@@ -348,7 +354,9 @@ function updNc(id, field, val) {
 
 // ── Conditions
 let conditions = [];
+let condFocus  = null; // { id, field } — which input is focused for chip insertion
 const OP_LABELS = {'>':'> მეტია','<':'< ნაკლებია','>=':'≥ მეტი/ტოლი','<=':'≤ ნაკ/ტოლი','!=':'≠ არ ტოლდება','%0':'÷ იყოფა'};
+const OP_SYMS   = ['+','-','*','/','(', ')'];
 
 function addCond(left = '', op = '>', right = '') {
     const names = ncRows.filter(r => r.name).map(r => r.name);
@@ -364,27 +372,54 @@ function updCond(id, field, val) {
     const c = conditions.find(c => c.id === id);
     if (c) { c[field] = val; syncAll(); previewDebounce(); }
 }
+function insertIntoCond(text) {
+    if (!condFocus) return;
+    const inp = document.getElementById('cond-' + condFocus.id + '-' + condFocus.field);
+    if (!inp) return;
+    const s = inp.selectionStart ?? inp.value.length;
+    const e = inp.selectionEnd   ?? inp.value.length;
+    inp.value = inp.value.slice(0, s) + text + inp.value.slice(e);
+    inp.selectionStart = inp.selectionEnd = s + text.length;
+    inp.focus();
+    updCond(condFocus.id, condFocus.field, inp.value.trim());
+}
 function renderConds() {
     const container = document.getElementById('condRows');
     container.innerHTML = '';
-    const names = ncRows.filter(r => r.name).map(r => r.name);
+    const names   = ncRows.filter(r => r.name).map(r => r.name);
     const hasVars = names.length > 0;
 
     document.getElementById('addCondBtn').style.display = hasVars ? '' : 'none';
     document.getElementById('condNoVars').style.display = hasVars ? 'none' : '';
 
+    // chips above conditions
+    const chipBar = document.getElementById('condChips');
+    chipBar.style.display = hasVars && conditions.length ? '' : 'none';
+    chipBar.innerHTML = '';
+    names.forEach(n => {
+        const c = document.createElement('span');
+        c.className = 'cond-chip'; c.textContent = n;
+        c.onclick = () => insertIntoCond(n); chipBar.appendChild(c);
+    });
+    OP_SYMS.forEach(s => {
+        const c = document.createElement('span');
+        c.className = 'cond-chip cond-op-chip'; c.textContent = s;
+        c.onclick = () => insertIntoCond(s); chipBar.appendChild(c);
+    });
+
     conditions.forEach(cond => {
         const div = document.createElement('div');
         div.className = 'cond-row';
-
-        const leftOpts = names.map(n => `<option value="${n}" ${cond.left===n?'selected':''}>${n}</option>`).join('');
-        const opOpts   = Object.entries(OP_LABELS).map(([v,l]) => `<option value="${v}" ${cond.op===v?'selected':''}>${l}</option>`).join('');
-
+        const opOpts = Object.entries(OP_LABELS).map(([v,l]) =>
+            `<option value="${v}" ${cond.op===v?'selected':''}>${l}</option>`).join('');
         div.innerHTML = `
-            <select class="cond-sel" onchange="updCond(${cond.id},'left',this.value)">${leftOpts}</select>
+            <input id="cond-${cond.id}-left" class="nc-inp" placeholder="N1 ან N2+N3" value="${cond.left}"
+                oninput="updCond(${cond.id},'left',this.value.trim())"
+                onfocus="condFocus={id:${cond.id},field:'left'}">
             <select class="cond-sel cond-op" onchange="updCond(${cond.id},'op',this.value)">${opOpts}</select>
-            <input class="nc-inp" placeholder="N2 ან 5" value="${cond.right}"
-                oninput="updCond(${cond.id},'right',this.value.trim())">
+            <input id="cond-${cond.id}-right" class="nc-inp" placeholder="N2 ან N2+N3 ან 5" value="${cond.right}"
+                oninput="updCond(${cond.id},'right',this.value.trim())"
+                onfocus="condFocus={id:${cond.id},field:'right'}">
             <button type="button" class="nc-del" onclick="removeCond(${cond.id})">✕</button>
         `;
         container.appendChild(div);
@@ -436,11 +471,18 @@ function syncAll() {
     document.getElementById('distractorsJson').value = JSON.stringify({ min: dMin, max: dMax });
 }
 
-// ── Condition evaluator
+// ── Condition evaluator (supports expressions like N2+N3)
+function evalExpr(expr, numVars) {
+    let e = String(expr);
+    Object.entries(numVars).forEach(([k, v]) => { e = e.replaceAll(k, String(v)); });
+    e = e.replace(/[^0-9+\-*/()\s]/g, '');
+    try { const r = Function('return (' + e + ')')(); return Number.isFinite(r) ? Math.floor(r) : 0; }
+    catch(_) { return 0; }
+}
 function evalConditions(numVars) {
     return conditions.every(c => {
-        const l = /^\d+$/.test(String(c.left))  ? +c.left  : (numVars[c.left]  ?? 0);
-        const r = /^\d+$/.test(String(c.right)) ? +c.right : (numVars[c.right] ?? 0);
+        const l = evalExpr(c.left  ?? '0', numVars);
+        const r = evalExpr(c.right ?? '0', numVars);
         switch (c.op) {
             case '>':  return l > r;
             case '<':  return l < r;
