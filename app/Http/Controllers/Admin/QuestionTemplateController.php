@@ -26,10 +26,11 @@ class QuestionTemplateController extends Controller
         }
 
         return view('admin.questions.index', [
-            'templates'  => $query->latest()->paginate(20),
-            'grades'     => Grade::orderBy('number')->get(),
-            'topics'     => Topic::with('grade')->orderBy('grade_id')->get(),
-            'filters'    => $request->only('grade_id', 'topic_id', 'difficulty'),
+            'templates'   => $query->latest()->paginate(20),
+            'grades'      => Grade::orderBy('number')->get(),
+            'topics'      => Topic::with('grade')->orderBy('grade_id')->get(),
+            'filters'     => $request->only('grade_id', 'topic_id', 'difficulty'),
+            'themeVarMap' => $this->themeVarMap(),
         ]);
     }
 
