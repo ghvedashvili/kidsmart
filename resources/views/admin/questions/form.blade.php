@@ -306,15 +306,16 @@ function applyStarter(key) {
     document.getElementById('correctFormula').value = s.formula;
     ncRows = []; conditions = [];
     s.vars.forEach(v => addNcRow(v.n, v.min, v.max, v.step || 1));
-    s.conds.forEach(c => addCond(c.left, c.op, c.right));
+    s.conds.forEach(c => addCond(c.left, c.op, c.right, true));
     previewDebounce();
 }
 
 // ── num_config rows
-let ncRows = [];
+let ncRows  = [];
+let ncIdSeq = 1;
 
 function addNcRow(name = '', min = 1, max = 9, step = 1) {
-    ncRows.push({ id: Date.now() + Math.random(), name, min, max, step });
+    ncRows.push({ id: ncIdSeq++, name, min, max, step });
     renderNcRows();
 }
 function removeNcRow(id) {
@@ -329,13 +330,13 @@ function renderNcRows() {
         div.className = 'nc-row';
         div.innerHTML = `
             <input class="nc-inp nc-name" maxlength="6" placeholder="N1" value="${row.name}"
-                oninput="updNc(${row.id},'name',this.value.toUpperCase().replace(/[^A-Z0-9]/g,''));this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
+                data-nc="${row.id}" data-nc-f="name">
             <input type="number" class="nc-inp" min="0" placeholder="1" value="${row.min}"
-                oninput="updNc(${row.id},'min',+this.value)">
+                data-nc="${row.id}" data-nc-f="min">
             <input type="number" class="nc-inp" min="0" placeholder="9" value="${row.max}"
-                oninput="updNc(${row.id},'max',+this.value)">
+                data-nc="${row.id}" data-nc-f="max">
             <input type="number" class="nc-inp" min="1" placeholder="1" value="${row.step}"
-                title="ნაბიჯი: 1=ნებ, 2=ლუწი, 5=მრ5" oninput="updNc(${row.id},'step',+this.value)">
+                title="ნაბიჯი: 1=ნებ, 2=ლუწი, 5=მრ5" data-nc="${row.id}" data-nc-f="step">
             <button type="button" class="nc-del" onclick="removeNcRow(${row.id})">✕</button>
         `;
         c.appendChild(div);
@@ -354,15 +355,17 @@ function updNc(id, field, val) {
 
 // ── Conditions
 let conditions = [];
+let condIdSeq  = 1; // integer counter — avoids float ID precision bugs
 let condFocus  = null; // { id, field } — which input is focused for chip insertion
 const OP_LABELS = {'>':'> მეტია','<':'< ნაკლებია','>=':'≥ მეტი/ტოლი','<=':'≤ ნაკ/ტოლი','!=':'≠ არ ტოლდება','%0':'÷ იყოფა'};
 const OP_SYMS   = ['+','-','*','/','(', ')'];
 
-function addCond(left = '', op = '>', right = '') {
+function addCond(left = '', op = '>', right = '', silent = false) {
     const names = ncRows.filter(r => r.name).map(r => r.name);
     if (!names.length) return;
-    conditions.push({ id: Date.now() + Math.random(), left: left || names[0], op, right: right || (names[1] || names[0]) });
+    conditions.push({ id: condIdSeq++, left: left || names[0], op, right: right || (names[1] || names[0]) });
     renderConds();
+    if (!silent) previewDebounce();
 }
 function removeCond(id) {
     conditions = conditions.filter(c => c.id !== id);
@@ -414,12 +417,10 @@ function renderConds() {
             `<option value="${v}" ${cond.op===v?'selected':''}>${l}</option>`).join('');
         div.innerHTML = `
             <input id="cond-${cond.id}-left" class="nc-inp" placeholder="N1 ან N2+N3" value="${cond.left}"
-                oninput="updCond(${cond.id},'left',this.value.trim())"
-                onfocus="condFocus={id:${cond.id},field:'left'}">
-            <select class="cond-sel cond-op" onchange="updCond(${cond.id},'op',this.value)">${opOpts}</select>
+                data-ci="${cond.id}" data-cf="left">
+            <select class="cond-sel cond-op" data-ci="${cond.id}" data-cf="op">${opOpts}</select>
             <input id="cond-${cond.id}-right" class="nc-inp" placeholder="N2 ან N2+N3 ან 5" value="${cond.right}"
-                oninput="updCond(${cond.id},'right',this.value.trim())"
-                onfocus="condFocus={id:${cond.id},field:'right'}">
+                data-ci="${cond.id}" data-cf="right">
             <button type="button" class="nc-del" onclick="removeCond(${cond.id})">✕</button>
         `;
         container.appendChild(div);
@@ -505,8 +506,8 @@ function genPreview() {
     const dMin    = +document.getElementById('distMin').value || 1;
     const dMax    = +document.getElementById('distMax').value || 10;
 
-    if (!tmpl || !formula) {
-        document.getElementById('prevQ').innerHTML = '<span style="color:#1c1c1c;">შაბლონი არ არის...</span>';
+    if (!tmpl) {
+        document.getElementById('prevQ').innerHTML = '<span style="color:#94a3b8;">② შაბლონი ჩაწერეთ...</span>';
         document.getElementById('prevHint').textContent = '';
         document.getElementById('prevOpts').innerHTML = '';
         document.getElementById('prevFormula').innerHTML = '';
@@ -553,6 +554,14 @@ function genPreview() {
     document.getElementById('prevHint').textContent = hint || '';
     document.getElementById('prevWarn').innerHTML = condOk ? '' : '<span>⚠ პირობები ვერ შეხვდა 40 მცდელობაში</span>';
 
+    if (!formula) {
+        document.getElementById('prevOpts').innerHTML = '<span style="font-size:0.64rem;color:#94a3b8;">④ ფორმულა ჩაწერეთ პასუხისთვის...</span>';
+        document.getElementById('prevFormula').innerHTML = '';
+        document.getElementById('prevVars').innerHTML =
+            Object.entries(numVars).map(([k,v]) => `${k}=${v}`).join(' · ') || '';
+        return;
+    }
+
     // Evaluate formula
     let f = formula;
     Object.entries(numVars).forEach(([k,v]) => { f = f.replaceAll(k, String(v)); });
@@ -595,6 +604,31 @@ function genPreview() {
         Object.entries(numVars).map(([k,v]) => `${k}=${v}`).join(' · ') || '';
 }
 
+// ── Event delegation for dynamically rendered inputs (avoids inline-handler issues)
+document.getElementById('ncRows').addEventListener('input', function(e) {
+    const el = e.target, id = +el.dataset.nc, field = el.dataset.ncF;
+    if (!id || !field) return;
+    let val = field === 'name'
+        ? (el.value = el.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))
+        : +el.value;
+    updNc(id, field, val);
+});
+
+document.getElementById('condRows').addEventListener('input', function(e) {
+    const el = e.target, id = +el.dataset.ci, field = el.dataset.cf;
+    if (!id || !field || field === 'op') return;
+    updCond(id, field, el.value.trim());
+});
+document.getElementById('condRows').addEventListener('change', function(e) {
+    const el = e.target, id = +el.dataset.ci, field = el.dataset.cf;
+    if (!id || field !== 'op') return;
+    updCond(id, 'op', el.value);
+});
+document.getElementById('condRows').addEventListener('focusin', function(e) {
+    const el = e.target, id = +el.dataset.ci, field = el.dataset.cf;
+    if (id && field && field !== 'op') condFocus = { id, field };
+});
+
 // ── Init
 (function init() {
     const numCfg = _KS.numConfig;
@@ -608,7 +642,7 @@ function genPreview() {
     }
     const conds = _KS.conditions;
     if (Array.isArray(conds)) {
-        conds.forEach(c => addCond(c.left, c.op, c.right));
+        conds.forEach(c => addCond(c.left, c.op, c.right, true));
     }
     syncAll();
     setTimeout(genPreview, 120);
