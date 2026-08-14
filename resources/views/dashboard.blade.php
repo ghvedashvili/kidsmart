@@ -66,17 +66,17 @@
     }
     .child-card {
         background: #fff; border: 1px solid #e8e8e8; border-radius: 10px;
-        padding: 16px 18px; margin-bottom: 10px;
-        display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        padding: 14px 16px; margin-bottom: 10px;
+        display: flex; flex-direction: column; gap: 10px;
         text-decoration: none; transition: border-color 0.2s, box-shadow 0.2s;
     }
     .child-card:hover { border-color: #bbb; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
-    .child-info { flex: 1; text-align: left; }
-    .child-name { font-family: 'Goldman', monospace; font-size: 0.88rem; color: #111; letter-spacing: 0.04em; margin-bottom: 5px; }
-    .child-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+    .child-row-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .child-name { font-family: 'Goldman', monospace; font-size: 0.88rem; color: #111; letter-spacing: 0.04em; }
+    .child-row-bottom { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .ctag {
-        font-family: 'Goldman', monospace; font-size: 0.6rem; color: #ccc;
-        border: 1px solid #ebebeb; border-radius: 3px; padding: 2px 7px; letter-spacing: 0.04em;
+        font-family: 'Goldman', monospace; font-size: 0.6rem; color: #aaa;
+        border: 1px solid #ebebeb; border-radius: 3px; padding: 2px 7px; letter-spacing: 0.04em; white-space: nowrap;
     }
     .ctag.set { color: #555; border-color: #ccc; }
     .child-arrow { color: #ccc; font-size: 0.9rem; }
@@ -145,13 +145,13 @@
     .msave-danger:hover { border-color: #e74c3c; color: #e74c3c; background: transparent; }
     .merr { font-family: 'Goldman', monospace; font-size: 0.65rem; color: #e74c3c; margin-top: -12px; margin-bottom: 10px; }
     .child-code-badge {
+        display: inline-block;
         font-family: 'Goldman', monospace; font-size: 0.75rem; color: #111;
         background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 4px;
         padding: 2px 10px; letter-spacing: 0.14em; cursor: pointer; transition: background 0.2s;
     }
     .child-code-badge:hover { background: #ebebeb; }
-    .child-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; max-width: 220px; }
-    @media (max-width: 480px) { .child-code-badge { display: none; } }
+    .child-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-left: auto; }
     .caction {
         font-family: 'Goldman', monospace; font-size: 0.62rem; color: #bbb;
         border: 1px solid #ebebeb; border-radius: 4px; padding: 5px 10px;
@@ -331,38 +331,34 @@
                         style="margin-left:auto;background:none;border:1px solid #fca5a5;color:#dc2626;font-family:'Goldman',monospace;font-size:0.6rem;padding:2px 8px;border-radius:3px;cursor:pointer;white-space:nowrap;">↑ გეგმა</button>
                 </div>
                 @endif
-                <div class="child-info">
-                    <div class="child-name">{{ $child->name }}</div>
-                    <div class="child-tags">
-                        @if($s?->grade)
-                            <span class="ctag set">{{ $s->grade->name }}</span>
-                        @else
-                            <span class="ctag">კლასი —</span>
-                        @endif
-                        @if($s)
-                            <span class="ctag set">დონე {{ $s->difficulty }}</span>
-                            <span class="ctag set">დღეს {{ $todayDone }}/{{ $s->tests_per_week }}</span>
-                        @endif
-                        @foreach($child->themes->take(2) as $theme)
-                            <span class="ctag set">{{ $theme->icon }} {{ $theme->name }}</span>
-                        @endforeach
-                        @if($child->themes->count() > 2)
-                            <span class="ctag">+{{ $child->themes->count() - 2 }}</span>
-                        @endif
-                    </div>
+                {{-- ზედა ხაზი: სახელი · კლასი · დონე · დღეს --}}
+                <div class="child-row-top">
+                    <span class="child-name">{{ $child->name }}</span>
+                    @if($s?->grade)
+                        <span class="ctag set">{{ $s->grade->name }}</span>
+                    @else
+                        <span class="ctag">კლასი —</span>
+                    @endif
+                    @if($s)
+                        <span class="ctag set">დონე {{ $s->difficulty }}</span>
+                        <span class="ctag set">დღეს {{ $todayDone }}/{{ $s->tests_per_week }}</span>
+                    @endif
                 </div>
-                <div class="child-actions">
+                {{-- ქვედა ხაზი: კოდი · ღილაკები --}}
+                <div class="child-row-bottom">
                     @if($child->child_code)
                     <span class="child-code-badge" onclick="copyChildCode(this, '{{ $child->child_code }}')"
                         title="კოდის კოპირება">{{ $child->child_code }}</span>
                     @endif
-                    <button type="button"
-                        onclick="openRemind({{ $child->id }}, '{{ addslashes($child->name) }}')"
-                        style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:4px;color:#059669;font-family:'Goldman',monospace;font-size:0.72rem;padding:5px 10px;cursor:pointer;">
-                        &#128276;
-                    </button>
-                    <a href="{{ route('child.stats', $child) }}" class="caction primary">სტატისტიკა</a>
-                    <button type="button" class="caction" onclick="document.getElementById('editChildModal{{ $child->id }}').classList.add('open')">⚙</button>
+                    <div class="child-actions">
+                        <button type="button"
+                            onclick="openRemind({{ $child->id }}, '{{ addslashes($child->name) }}')"
+                            style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:4px;color:#059669;font-family:'Goldman',monospace;font-size:0.72rem;padding:5px 10px;cursor:pointer;">
+                            &#128276;
+                        </button>
+                        <a href="{{ route('child.stats', $child) }}" class="caction primary">სტატისტიკა</a>
+                        <button type="button" class="caction" onclick="document.getElementById('editChildModal{{ $child->id }}').classList.add('open')">⚙</button>
+                    </div>
                 </div>
                 @if(session('reminder_sent_' . $child->id))
                 <div style="font-family:'Goldman',monospace;font-size:0.62rem;color:#059669;margin-top:4px;">&#10003; შეხსენება გაიგზავნა</div>
@@ -802,8 +798,14 @@ function confirmDeleteChild(childId, childName) {
 function copyChildCode(el, code) {
     navigator.clipboard.writeText(code).then(() => {
         const orig = el.textContent;
+        el.style.width = el.offsetWidth + 'px';
+        el.style.textAlign = 'center';
         el.textContent = '✓';
-        setTimeout(() => el.textContent = orig, 1500);
+        setTimeout(() => {
+            el.textContent = orig;
+            el.style.width = '';
+            el.style.textAlign = '';
+        }, 1500);
     });
 }
 
