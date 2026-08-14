@@ -112,7 +112,14 @@
         <div class="nav-right">
             @auth
             <div class="desktop-only" style="display:flex;align-items:center;gap:4px;">
-                @if(auth()->user()->isAdmin())
+                @php
+                    $__u       = auth()->user();
+                    $__isAdmin = $__u->isAdmin();
+                    $__ap      = $__isAdmin ? null : (\App\Models\RolePermission::allowedPages($__u->role) ?? []);
+                    $__hasAdm  = $__isAdmin || (!empty($__ap) && collect($__ap)->contains(fn($p) => str_starts_with($p, 'admin.')));
+                    $__canAdm  = fn($key) => $__isAdmin || in_array($key, (array) $__ap);
+                @endphp
+                @if($__hasAdm)
                 <div style="position:relative;" id="adminDropWrap">
                     <button onclick="toggleAdminDrop(event)" class="nav-link-item" style="font-size:0.8rem;{{ request()->routeIs('admin.*') ? 'color:#fff;' : '' }}">
                         🛡️ ადმინი <span style="font-size:0.55rem;opacity:0.5;margin-left:1px;">▾</span>
@@ -120,14 +127,30 @@
                     <div id="adminDrop" style="display:none;position:absolute;top:calc(100% + 6px);right:0;
                         background:#111;border:1px solid #2a2a2a;border-radius:10px;padding:6px;
                         min-width:160px;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+                        @if($__canAdm('admin.panel'))
                         <a href="{{ route('admin.panel') }}" class="admin-dd-item {{ request()->routeIs('admin.panel') ? 'active' : '' }}">⚡ Push</a>
+                        @endif
+                        @if($__canAdm('admin.grades'))
                         <a href="{{ route('admin.grades.index') }}" class="admin-dd-item {{ request()->routeIs('admin.grades.*') ? 'active' : '' }}">კლასები</a>
+                        @endif
+                        @if($__canAdm('admin.themes'))
                         <a href="{{ route('admin.themes.index') }}" class="admin-dd-item {{ request()->routeIs('admin.themes.*') ? 'active' : '' }}">თემატიკა</a>
+                        @endif
+                        @if($__canAdm('admin.topics'))
                         <a href="{{ route('admin.topics.index') }}" class="admin-dd-item {{ request()->routeIs('admin.topics.*') ? 'active' : '' }}">თემები</a>
+                        @endif
+                        @if($__canAdm('admin.questions'))
                         <a href="{{ route('admin.questions.index') }}" class="admin-dd-item {{ request()->routeIs('admin.questions.*') ? 'active' : '' }}">კითხვები</a>
+                        @endif
+                        @if($__canAdm('admin.users'))
                         <a href="{{ route('admin.users.index') }}" class="admin-dd-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">მომხმარებლები</a>
+                        @endif
+                        @if($__canAdm('admin.perms'))
                         <a href="{{ route('admin.permissions.index') }}" class="admin-dd-item {{ request()->routeIs('admin.permissions.*') ? 'active' : '' }}">ნებართვები</a>
+                        @endif
+                        @if($__canAdm('admin.packages'))
                         <a href="{{ route('admin.packages.index') }}" class="admin-dd-item {{ request()->routeIs('admin.packages.*') ? 'active' : '' }}">პაკეტები</a>
+                        @endif
                     </div>
                 </div>
                 @endif
@@ -171,7 +194,14 @@
 
     @auth
     <a href="{{ route('dashboard') }}" onclick="toggleMobileMenu()"><span class="mn-icon">🏠</span>მთავარი</a>
-    @if(auth()->user()->isAdmin())
+    @php
+        $__mu       = auth()->user();
+        $__mIsAdmin = $__mu->isAdmin();
+        $__mAp      = $__mIsAdmin ? null : (\App\Models\RolePermission::allowedPages($__mu->role) ?? []);
+        $__mHasAdm  = $__mIsAdmin || (!empty($__mAp) && collect($__mAp)->contains(fn($p) => str_starts_with($p, 'admin.')));
+        $__mCan     = fn($key) => $__mIsAdmin || in_array($key, (array) $__mAp);
+    @endphp
+    @if($__mHasAdm)
     <div>
         <button onclick="toggleAdminSub()" style="
             display:flex;align-items:center;gap:10px;width:100%;
@@ -186,14 +216,30 @@
         </button>
         <div id="adminSubMenu" style="display:none;flex-direction:column;padding:0 4px 4px 20px;gap:1px;">
             @php $al = 'display:block;padding:7px 14px;border-radius:8px;color:rgba(255,255,255,0.65);text-decoration:none;font-family:\'Goldman\',monospace;font-size:0.76rem;letter-spacing:0.05em;'; @endphp
+            @if($__mCan('admin.panel'))
             <a href="{{ route('admin.panel') }}"           onclick="toggleMobileMenu()" style="{{ $al }}">⚡ Push</a>
+            @endif
+            @if($__mCan('admin.grades'))
             <a href="{{ route('admin.grades.index') }}"    onclick="toggleMobileMenu()" style="{{ $al }}">კლასები</a>
+            @endif
+            @if($__mCan('admin.themes'))
             <a href="{{ route('admin.themes.index') }}"    onclick="toggleMobileMenu()" style="{{ $al }}">თემატიკა</a>
+            @endif
+            @if($__mCan('admin.topics'))
             <a href="{{ route('admin.topics.index') }}"    onclick="toggleMobileMenu()" style="{{ $al }}">თემები</a>
+            @endif
+            @if($__mCan('admin.questions'))
             <a href="{{ route('admin.questions.index') }}" onclick="toggleMobileMenu()" style="{{ $al }}">კითხვები</a>
+            @endif
+            @if($__mCan('admin.users'))
             <a href="{{ route('admin.users.index') }}"     onclick="toggleMobileMenu()" style="{{ $al }}">მომხმარებლები</a>
+            @endif
+            @if($__mCan('admin.perms'))
             <a href="{{ route('admin.permissions.index') }}" onclick="toggleMobileMenu()" style="{{ $al }}">ნებართვები</a>
+            @endif
+            @if($__mCan('admin.packages'))
             <a href="{{ route('admin.packages.index') }}"  onclick="toggleMobileMenu()" style="{{ $al }}">პაკეტები</a>
+            @endif
         </div>
     </div>
     @endif

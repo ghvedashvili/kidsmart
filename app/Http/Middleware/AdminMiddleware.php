@@ -15,9 +15,13 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->check() || !auth()->user()->isAdmin()) {
+        if (!auth()->check()) {
             abort(403);
         }
-        return $next($request);
+        $user = auth()->user();
+        if ($user->isAdmin() || \App\Models\RolePermission::hasAnyAdminPage($user->role)) {
+            return $next($request);
+        }
+        abort(403);
     }
 }

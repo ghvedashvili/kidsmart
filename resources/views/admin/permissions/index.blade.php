@@ -55,9 +55,19 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @php $adminGroupShown = false; @endphp
                     @foreach($pages as $pageKey => $pageLabel)
+                    @php $isAdminPage = str_starts_with($pageKey, 'admin.'); @endphp
+                    @if($isAdminPage && !$adminGroupShown)
+                        @php $adminGroupShown = true; @endphp
+                        <tr>
+                            <td colspan="{{ count($roles) + 1 }}" style="padding:14px 0 4px;font-size:0.6rem;color:#94a3b8;letter-spacing:0.12em;text-transform:uppercase;border-top:2px solid #f1f5f9;border-bottom:none;">
+                                🛡️ ადმინ გვერდები
+                            </td>
+                        </tr>
+                    @endif
                     <tr>
-                        <td class="page-name">{{ $pageLabel }}</td>
+                        <td class="page-name" style="{{ $isAdminPage ? 'padding-left:22px;' : '' }}">{{ $pageLabel }}</td>
                         @foreach($roles as $role)
                         <td class="col-check">
                             <input type="checkbox" class="perm-cb"
