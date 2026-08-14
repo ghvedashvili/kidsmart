@@ -37,6 +37,17 @@
     input[type=checkbox] { accent-color: #374151; width: 14px; height: 14px; }
     .sec-title { font-size: 0.65rem; color: #94a3b8; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px; }
     input[type=number].fc { -moz-appearance: textfield; }
+    @media (max-width: 640px) {
+        .aw { padding: 14px 10px 48px; }
+        .atitle { display: none; }
+        .anav { gap: 3px; margin-bottom: 14px; }
+        .anav a { font-size: 0.6rem; padding: 3px 7px; }
+        .card, .pkg-card { padding: 14px; }
+        .row2, .row3 { grid-template-columns: 1fr; }
+        .check-row { flex-wrap: wrap; gap: 10px; }
+        .pkg-meta { gap: 8px; }
+        .pkg-actions { position: static; display: flex; gap: 6px; margin-bottom: 8px; }
+    }
 </style>
 
 <div class="aw">

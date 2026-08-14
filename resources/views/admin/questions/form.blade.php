@@ -13,6 +13,19 @@
     .card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .card-row .card { margin-bottom: 0; }
     @media (max-width: 860px) { .pg { grid-template-columns: 1fr; } .card-row { grid-template-columns: 1fr; } }
+    @media (max-width: 640px) {
+        .aw { padding: 12px 8px 48px; }
+        .atitle { display: none; }
+        .anav { gap: 3px; margin-bottom: 12px; }
+        .anav a { font-size: 0.6rem; padding: 3px 7px; }
+        .card { padding: 14px; }
+        .nc-hdr { grid-template-columns: 56px 1fr 1fr 50px 20px; }
+        .nc-row { grid-template-columns: 56px 1fr 1fr 50px 20px; }
+        .cond-row { grid-template-columns: 1fr 80px 1fr 20px; }
+        .diff-btn { width: 34px; font-size: 0.62rem; padding: 6px 0; }
+        .chips { gap: 3px; }
+        .chip { font-size: 0.58rem; padding: 3px 6px; }
+    }
 
     .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px 22px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
     .sec-title { font-size: 0.58rem; color: #94a3b8; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9; }

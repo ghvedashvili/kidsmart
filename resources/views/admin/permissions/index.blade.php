@@ -27,6 +27,16 @@
     .btn-save { background: #1e293b; border: none; color: #fff; font-family: 'Goldman', monospace; font-size: 0.78rem; letter-spacing: 0.08em; padding: 10px 28px; border-radius: 4px; cursor: pointer; transition: background 0.2s; }
     .btn-save:hover { background: #334155; }
     .col-check { padding: 0 8px; }
+    .perm-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    @media (max-width: 640px) {
+        .aw { padding: 14px 10px 48px; }
+        .atitle { display: none; }
+        .anav { gap: 3px; margin-bottom: 14px; }
+        .anav a { font-size: 0.6rem; padding: 3px 7px; }
+        .card-dark { padding: 14px; }
+        .perm-table th, .perm-table td { padding: 8px 8px; }
+        .col-check { padding: 0 4px; }
+    }
 </style>
 
 <div class="aw">
@@ -51,6 +61,7 @@
 
         <form method="POST" action="{{ route('admin.permissions.update') }}">
             @csrf
+            <div class="perm-scroll">
             <table class="perm-table">
                 <thead>
                     <tr>
@@ -76,6 +87,7 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
 
             <div style="margin-top:20px;display:flex;align-items:center;gap:16px;">
                 <button type="submit" class="btn-save">✓ შენახვა</button>

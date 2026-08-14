@@ -91,13 +91,15 @@
     /* Modal */
     .modal-overlay {
         position: fixed; inset: 0; background: rgba(0,0,0,0.45);
-        backdrop-filter: blur(4px); z-index: 100;
-        display: none; align-items: center; justify-content: center; padding: 20px;
+        backdrop-filter: blur(4px); z-index: 150;
+        display: none; flex-direction: column; align-items: center;
+        justify-content: flex-start; padding: 80px 16px 48px;
+        overflow-y: auto;
     }
     .modal-overlay.open { display: flex; }
     .mbox {
         background: #fff; border-radius: 16px; padding: 28px 24px;
-        width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto;
+        width: 100%; max-width: 440px; flex-shrink: 0;
         box-shadow: 0 20px 60px rgba(0,0,0,0.25);
         animation: modalIn 0.25s cubic-bezier(0.175,0.885,0.32,1.275);
     }
@@ -160,9 +162,9 @@
     .caction.primary:hover { background: #e0e7ff; border-color: #a5b4fc; }
     .caction.remind { color: #059669; border-color: #a7f3d0; background: #ecfdf5; }
     .caction.remind:hover { background: #d1fae5; border-color: #6ee7b7; }
-    .remind-modal { position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px; }
+    .remind-modal { position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(4px);z-index:200;display:none;flex-direction:column;align-items:center;justify-content:flex-start;padding:80px 16px 48px;overflow-y:auto; }
     .remind-modal.open { display:flex; }
-    .remind-box { background:#fff;border-radius:16px;padding:24px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:modalIn 0.25s cubic-bezier(0.175,0.885,0.32,1.275); }
+    .remind-box { background:#fff;border-radius:16px;padding:24px;width:100%;max-width:400px;flex-shrink:0;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:modalIn 0.25s cubic-bezier(0.175,0.885,0.32,1.275); }
     .remind-title { font-family:'Goldman',monospace;font-size:0.88rem;color:#111;letter-spacing:0.06em;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between; }
     .remind-textarea { width:100%;border:1px solid #e8e8e8;border-radius:8px;padding:10px 12px;font-family:'Goldman',monospace;font-size:0.8rem;color:#333;resize:none;outline:none;transition:border-color 0.2s;box-sizing:border-box;background:#fafafa; }
     .remind-textarea:focus { border-color:#aaa;background:#fff; }

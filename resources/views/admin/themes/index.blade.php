@@ -19,6 +19,13 @@
     .row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.8rem; color: #374151; }
     .row:last-child { border-bottom: none; }
     .msg { font-size: 0.75rem; color: #059669; margin-bottom: 16px; }
+    @media (max-width: 640px) {
+        .aw { padding: 14px 10px 48px; }
+        .atitle { display: none; }
+        .anav { gap: 3px; margin-bottom: 14px; }
+        .anav a { font-size: 0.6rem; padding: 3px 7px; }
+        .card-dark { padding: 14px; }
+    }
 </style>
 
 <div class="aw">

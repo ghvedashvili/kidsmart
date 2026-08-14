@@ -22,7 +22,15 @@
     .badge { font-size: 0.65rem; color: #64748b; border: 1px solid #e2e8f0; border-radius: 2px; padding: 1px 6px; margin-left: 8px; }
     .msg { font-size: 0.75rem; color: #059669; margin-bottom: 16px; }
     .grade-group { color: #94a3b8; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 0 4px; }
-    .row-view { display:flex; align-items:center; flex:1; gap:4px; }
+    .row-view { display:flex; align-items:center; flex:1; gap:4px; min-width:0; overflow:hidden; }
+    @media (max-width: 640px) {
+        .aw { padding: 14px 10px 48px; }
+        .atitle { display: none; }
+        .anav { gap: 3px; margin-bottom: 14px; }
+        .anav a { font-size: 0.6rem; padding: 3px 7px; }
+        .card-dark { padding: 14px; }
+        .row { font-size: 0.72rem; }
+    }
     .row-edit { display:none; flex:1; gap:6px; align-items:center; }
     .row.editing .row-view { display:none; }
     .row.editing .row-edit { display:flex; }

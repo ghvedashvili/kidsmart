@@ -32,9 +32,9 @@
     .pagination-wrap a, .pagination-wrap span { font-family: 'Goldman', monospace; font-size: 0.68rem; color: #64748b; border: 1px solid #e2e8f0; border-radius: 3px; padding: 4px 10px; text-decoration: none; }
     .pagination-wrap a:hover { color: #1e293b; border-color: #94a3b8; }
     /* Modal */
-    .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 200; align-items: center; justify-content: center; }
+    .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 200; flex-direction: column; align-items: center; justify-content: flex-start; overflow-y: auto; padding: 80px 16px 48px; }
     .modal-bg.open { display: flex; }
-    .sub-box { background: #fff; border-radius: 10px; padding: 26px; width: 360px; max-width: 94vw; box-shadow: 0 8px 32px rgba(0,0,0,0.18); font-family: 'Goldman', monospace; }
+    .sub-box { background: #fff; border-radius: 10px; padding: 26px; width: 360px; max-width: 100%; box-shadow: 0 8px 32px rgba(0,0,0,0.18); font-family: 'Goldman', monospace; flex-shrink: 0; }
     .sub-box-title { font-size: 0.8rem; font-weight: 600; color: #1e293b; margin-bottom: 18px; }
     .lbl { font-size: 0.6rem; color: #94a3b8; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; margin-top: 10px; }
     .sub-box select.fc, .sub-box input.fc { width: 100%; }
@@ -45,6 +45,20 @@
     .history-list { margin-top: 14px; font-size: 0.68rem; max-height: 160px; overflow-y: auto; }
     .history-item { padding: 5px 0; border-bottom: 1px solid #f1f5f9; color: #374151; }
     .history-item:last-child { border-bottom: none; }
+    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    @media (max-width: 640px) {
+        .aw { padding: 14px 10px 48px; }
+        .atitle { display: none; }
+        .anav { gap: 3px; margin-bottom: 14px; }
+        .anav a { font-size: 0.6rem; padding: 3px 7px; }
+        .filters { flex-direction: column; align-items: stretch; }
+        .filters input, .filters select { width: 100%; }
+        .filters > span { display: none; }
+        .u-table { font-size: 0.68rem; min-width: 560px; }
+        .u-table th, .u-table td { padding: 7px 8px; }
+        .role-sel { font-size: 0.65rem; max-width: 80px; }
+        .sub-box { width: calc(100vw - 32px); padding: 18px 14px; }
+    }
 </style>
 
 <div class="aw">
@@ -78,6 +92,7 @@
     </form>
 
     <div class="card-dark">
+        <div class="table-scroll">
         <table class="u-table">
             <thead>
                 <tr>
@@ -139,6 +154,7 @@
             @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 
     <div class="pagination-wrap">
@@ -207,6 +223,7 @@ function closeModal() {
 function onPackageChange() {
     const sel  = document.getElementById('mPackage');
     const opt  = sel.options[sel.selectedIndex];
+    if (!opt) return;
     const free = opt.dataset.free === '1';
     const cycleRow  = document.getElementById('mCycleRow');
     const cyclesSel = document.getElementById('mCycle');

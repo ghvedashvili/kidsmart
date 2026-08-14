@@ -25,6 +25,17 @@
     .sub-on  { background: #059669; }
     .sub-off { background: #cbd5e1; }
     select.form-ctrl { cursor: pointer; }
+    @media (max-width: 640px) {
+        .admin-wrap { padding: 14px 10px 48px; }
+        .admin-title { display: none; }
+        .anav { gap: 3px; margin-bottom: 14px; }
+        .anav a { font-size: 0.6rem; padding: 3px 7px; }
+        .card-dark { padding: 16px; }
+        #pushForm > div { flex-wrap: wrap; }
+        #pushForm > div select { min-width: 0; }
+        #pushForm > div button { width: 100%; }
+        .user-row { font-size: 0.7rem; gap: 6px; }
+    }
 </style>
 
 <div class="admin-wrap">

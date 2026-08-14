@@ -40,6 +40,17 @@
     .pdf-btn:hover { background: #f1f5f9; }
     .pdf-clear { background: none; border: none; color: #64748b; font-size: 0.8rem; cursor: pointer; padding: 0; }
     .pdf-clear:hover { color: #fff; }
+    @media (max-width: 640px) {
+        .aw { padding: 14px 10px 48px; }
+        .atitle { display: none; }
+        .anav { gap: 3px; margin-bottom: 14px; }
+        .anav a { font-size: 0.6rem; padding: 3px 7px; }
+        .filters { gap: 6px; }
+        .filters select, .filters input { font-size: 0.7rem; padding: 6px 8px; }
+        .card-dark { padding: 14px; }
+        .q-text { font-size: 0.75rem; }
+        .pdf-bar { width: calc(100% - 24px); left: 12px; transform: none; bottom: 70px; flex-wrap: wrap; gap: 8px; padding: 10px 14px; }
+    }
 </style>
 
 <div class="aw">
