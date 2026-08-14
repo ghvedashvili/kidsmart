@@ -165,7 +165,7 @@
             </div>
         </div>
 
-        {{-- თოპიქები --}}
+        {{-- თემები --}}
         <div class="section">
             <div class="slabel">თემატიკა (ცარიელი = ყველა)</div>
             <div class="check-grid" id="topicsGrid">
@@ -182,10 +182,10 @@
                     </label>
                 </div>
                 @empty
-                <div style="font-size:0.72rem;color:#ccc;">თოპიქი არ არის — ადმინმა უნდა დაამატოს</div>
+                <div style="font-size:0.72rem;color:#ccc;">თემა არ არის — ადმინმა უნდა დაამატოს</div>
                 @endforelse
             </div>
-            <div class="check-hint">არჩეული არ არის → ყველა თოპიქიდან კითხვები</div>
+            <div class="check-hint">არჩეული არ არის → ყველა თემადან კითხვები</div>
         </div>
 
         <button type="submit" class="save-btn">შენახვა</button>

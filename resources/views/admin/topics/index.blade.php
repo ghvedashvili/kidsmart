@@ -51,8 +51,8 @@
     <nav class="anav">
         <a href="{{ route('admin.panel') }}">Push</a>
         <a href="{{ route('admin.grades.index') }}">კლასები</a>
-        <a href="{{ route('admin.themes.index') }}">თემები</a>
-        <a href="{{ route('admin.topics.index') }}" class="active">თოპიქები</a>
+        <a href="{{ route('admin.themes.index') }}">თემატიკა</a>
+        <a href="{{ route('admin.topics.index') }}" class="active">თემები</a>
         <a href="{{ route('admin.questions.index') }}">კითხვები</a>
         <a href="{{ route('admin.users.index') }}">მომხმარებლები</a>
         <a href="{{ route('admin.permissions.index') }}">ნებართვები</a>
@@ -64,7 +64,7 @@
     @endif
 
     <div class="card-dark">
-        <div class="card-label">თოპიქის დამატება</div>
+        <div class="card-label">თემას დამატება</div>
         <form method="POST" action="{{ route('admin.topics.store') }}">
             @csrf
             <div style="display:flex;gap:10px;">
@@ -76,14 +76,14 @@
                     </option>
                     @endforeach
                 </select>
-                <input type="text" name="name" class="fc" placeholder="თოპიქის სახელი (100-ფარგლებში)" style="flex:1;margin-bottom:0;" required value="{{ old('name') }}">
+                <input type="text" name="name" class="fc" placeholder="თემას სახელი (100-ფარგლებში)" style="flex:1;margin-bottom:0;" required value="{{ old('name') }}">
                 <button type="submit" class="btn">+ დამატება</button>
             </div>
         </form>
     </div>
 
     <div class="card-dark">
-        <div class="card-label">თოპიქები · {{ $topics->count() }}</div>
+        <div class="card-label">თემები · {{ $topics->count() }}</div>
         @php $lastGrade = null; @endphp
         @forelse($topics as $topic)
             @if($lastGrade !== $topic->grade_id)
@@ -121,7 +121,7 @@
                 </div>
             </div>
         @empty
-        <div style="color:#444;font-size:0.78rem;">თოპიქი არ არის</div>
+        <div style="color:#444;font-size:0.78rem;">თემა არ არის</div>
         @endforelse
     </div>
 </div>

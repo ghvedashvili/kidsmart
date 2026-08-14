@@ -103,8 +103,8 @@
     <nav class="anav">
         <a href="{{ route('admin.panel') }}">Push</a>
         <a href="{{ route('admin.grades.index') }}">კლასები</a>
-        <a href="{{ route('admin.themes.index') }}">თემები</a>
-        <a href="{{ route('admin.topics.index') }}">თოპიქები</a>
+        <a href="{{ route('admin.themes.index') }}">თემატიკა</a>
+        <a href="{{ route('admin.topics.index') }}">თემები</a>
         <a href="{{ route('admin.questions.index') }}" class="active">კითხვები</a>
         <a href="{{ route('admin.users.index') }}">მომხმარებლები</a>
         <a href="{{ route('admin.permissions.index') }}">ნებართვები</a>
@@ -123,7 +123,7 @@
             {{-- 1. Context --}}
             <div class="card">
                 <div class="sec-title">① კონტექსტი</div>
-                <div class="lbl">თოპიქი</div>
+                <div class="lbl">თემა</div>
                 <select name="topic_id" class="fc" required>
                     <option value="">— აირჩიე —</option>
                     @foreach($topics as $topic)

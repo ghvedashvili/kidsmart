@@ -36,8 +36,8 @@
     <nav class="anav">
         <a href="{{ route('admin.panel') }}">Push</a>
         <a href="{{ route('admin.grades.index') }}" class="active">კლასები</a>
-        <a href="{{ route('admin.themes.index') }}">თემები</a>
-        <a href="{{ route('admin.topics.index') }}">თოპიქები</a>
+        <a href="{{ route('admin.themes.index') }}">თემატიკა</a>
+        <a href="{{ route('admin.topics.index') }}">თემები</a>
         <a href="{{ route('admin.questions.index') }}">კითხვები</a>
         <a href="{{ route('admin.users.index') }}">მომხმარებლები</a>
         <a href="{{ route('admin.permissions.index') }}">ნებართვები</a>
