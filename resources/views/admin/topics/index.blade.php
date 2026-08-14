@@ -3,10 +3,6 @@
 <style>
     body { background: transparent !important; }
     .aw { max-width: 680px; margin: 0 auto; padding: 32px 16px 64px; font-family: 'Goldman', monospace; }
-    .atitle { font-size: 0.75rem; color: #94a3b8; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 8px; }
-    .anav { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 32px; }
-    .anav a { font-family: 'Goldman', monospace; font-size: 0.7rem; color: #64748b; letter-spacing: 0.08em; text-decoration: none; padding: 4px 12px; border: 1px solid #e2e8f0; border-radius: 3px; transition: color 0.2s, border-color 0.2s; }
-    .anav a:hover, .anav a.active { color: #1e293b; border-color: #94a3b8; }
     .card-dark { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
     .card-label { font-size: 0.68rem; color: #94a3b8; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px; }
     .fc { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; color: #374151; font-family: 'Goldman', monospace; font-size: 0.82rem; padding: 9px 13px; width: 100%; outline: none; margin-bottom: 10px; box-sizing: border-box; }
@@ -25,9 +21,6 @@
     .row-view { display:flex; align-items:center; flex:1; gap:4px; min-width:0; overflow:hidden; }
     @media (max-width: 640px) {
         .aw { padding: 14px 10px 48px; }
-        .atitle { display: none; }
-        .anav { gap: 3px; margin-bottom: 14px; }
-        .anav a { font-size: 0.6rem; padding: 3px 7px; }
         .card-dark { padding: 14px; }
         .row { font-size: 0.72rem; }
     }
@@ -47,17 +40,6 @@
 </style>
 
 <div class="aw">
-    <div class="atitle">Admin Panel</div>
-    <nav class="anav">
-        <a href="{{ route('admin.panel') }}">Push</a>
-        <a href="{{ route('admin.grades.index') }}">კლასები</a>
-        <a href="{{ route('admin.themes.index') }}">თემატიკა</a>
-        <a href="{{ route('admin.topics.index') }}" class="active">თემები</a>
-        <a href="{{ route('admin.questions.index') }}">კითხვები</a>
-        <a href="{{ route('admin.users.index') }}">მომხმარებლები</a>
-        <a href="{{ route('admin.permissions.index') }}">ნებართვები</a>
-        <a href="{{ route('admin.packages.index') }}">პაკეტები</a>
-    </nav>
 
     @if(session('success'))
     <div class="msg">{{ session('success') }}</div>

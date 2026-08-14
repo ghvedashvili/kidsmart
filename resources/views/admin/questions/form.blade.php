@@ -4,10 +4,6 @@
     body { background: transparent !important; }
 
     .aw { max-width: 1200px; margin: 0 auto; padding: 28px 16px 64px; font-family: 'Goldman', monospace; }
-    .atitle { font-size: 0.68rem; color: #94a3b8; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 6px; }
-    .anav { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 28px; }
-    .anav a { font-family: 'Goldman', monospace; font-size: 0.67rem; color: #64748b; letter-spacing: 0.08em; text-decoration: none; padding: 4px 12px; border: 1px solid #e2e8f0; border-radius: 3px; transition: all 0.18s; }
-    .anav a:hover, .anav a.active { color: #1e293b; border-color: #94a3b8; }
 
     .pg { display: grid; grid-template-columns: 1fr 320px; gap: 16px; align-items: start; }
     .card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -15,9 +11,6 @@
     @media (max-width: 860px) { .pg { grid-template-columns: 1fr; } .card-row { grid-template-columns: 1fr; } }
     @media (max-width: 640px) {
         .aw { padding: 12px 8px 48px; }
-        .atitle { display: none; }
-        .anav { gap: 3px; margin-bottom: 12px; }
-        .anav a { font-size: 0.6rem; padding: 3px 7px; }
         .card { padding: 14px; }
         .nc-hdr { grid-template-columns: 56px 1fr 1fr 50px 20px; }
         .nc-row { grid-template-columns: 56px 1fr 1fr 50px 20px; }
@@ -99,17 +92,6 @@
 </style>
 
 <div class="aw">
-    <div class="atitle">Admin Panel</div>
-    <nav class="anav">
-        <a href="{{ route('admin.panel') }}">Push</a>
-        <a href="{{ route('admin.grades.index') }}">კლასები</a>
-        <a href="{{ route('admin.themes.index') }}">თემატიკა</a>
-        <a href="{{ route('admin.topics.index') }}">თემები</a>
-        <a href="{{ route('admin.questions.index') }}" class="active">კითხვები</a>
-        <a href="{{ route('admin.users.index') }}">მომხმარებლები</a>
-        <a href="{{ route('admin.permissions.index') }}">ნებართვები</a>
-        <a href="{{ route('admin.packages.index') }}">პაკეტები</a>
-    </nav>
 
     <div class="pg">
 

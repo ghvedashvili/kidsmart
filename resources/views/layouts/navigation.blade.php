@@ -56,6 +56,15 @@
     .nav-right { margin-left: auto; }
 }
 
+/* Admin dropdown */
+.admin-dd-item {
+    display: block; padding: 8px 12px; color: rgba(255,255,255,0.7);
+    text-decoration: none; font-family: 'Goldman', monospace; font-size: 0.72rem;
+    letter-spacing: 0.06em; border-radius: 6px; white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
+}
+.admin-dd-item:hover, .admin-dd-item.active { background: rgba(255,255,255,0.09); color: #fff; }
+
 /* Mobile menu */
 #mobileMenuBtn { display: none; }
 @media (max-width: 640px) { #mobileMenuBtn { display: flex; } }
@@ -104,9 +113,23 @@
             @auth
             <div class="desktop-only" style="display:flex;align-items:center;gap:4px;">
                 @if(auth()->user()->isAdmin())
-                <a class="nav-link-item" href="{{ route('admin.panel') }}" style="font-size:0.8rem;">
-                    🛡️ ადმინი
-                </a>
+                <div style="position:relative;" id="adminDropWrap">
+                    <button onclick="toggleAdminDrop(event)" class="nav-link-item" style="font-size:0.8rem;{{ request()->routeIs('admin.*') ? 'color:#fff;' : '' }}">
+                        🛡️ ადმინი <span style="font-size:0.55rem;opacity:0.5;margin-left:1px;">▾</span>
+                    </button>
+                    <div id="adminDrop" style="display:none;position:absolute;top:calc(100% + 6px);right:0;
+                        background:#111;border:1px solid #2a2a2a;border-radius:10px;padding:6px;
+                        min-width:160px;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+                        <a href="{{ route('admin.panel') }}" class="admin-dd-item {{ request()->routeIs('admin.panel') ? 'active' : '' }}">⚡ Push</a>
+                        <a href="{{ route('admin.grades.index') }}" class="admin-dd-item {{ request()->routeIs('admin.grades.*') ? 'active' : '' }}">კლასები</a>
+                        <a href="{{ route('admin.themes.index') }}" class="admin-dd-item {{ request()->routeIs('admin.themes.*') ? 'active' : '' }}">თემატიკა</a>
+                        <a href="{{ route('admin.topics.index') }}" class="admin-dd-item {{ request()->routeIs('admin.topics.*') ? 'active' : '' }}">თემები</a>
+                        <a href="{{ route('admin.questions.index') }}" class="admin-dd-item {{ request()->routeIs('admin.questions.*') ? 'active' : '' }}">კითხვები</a>
+                        <a href="{{ route('admin.users.index') }}" class="admin-dd-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">მომხმარებლები</a>
+                        <a href="{{ route('admin.permissions.index') }}" class="admin-dd-item {{ request()->routeIs('admin.permissions.*') ? 'active' : '' }}">ნებართვები</a>
+                        <a href="{{ route('admin.packages.index') }}" class="admin-dd-item {{ request()->routeIs('admin.packages.*') ? 'active' : '' }}">პაკეტები</a>
+                    </div>
+                </div>
                 @endif
                 <button id="notif-btn-desktop" onclick="toggleNotifications()" title="შეტყობინებები"
                     class="nav-link-item">
@@ -149,7 +172,30 @@
     @auth
     <a href="{{ route('dashboard') }}" onclick="toggleMobileMenu()"><span class="mn-icon">🏠</span>მთავარი</a>
     @if(auth()->user()->isAdmin())
-    <a href="{{ route('admin.panel') }}" onclick="toggleMobileMenu()" style="color:rgba(231,76,60,0.9);"><span class="mn-icon">🛡️</span>ადმინ პანელი</a>
+    <div>
+        <button onclick="toggleAdminSub()" style="
+            display:flex;align-items:center;gap:10px;width:100%;
+            padding:11px 14px;border-radius:8px;border:none;background:none;
+            color:rgba(231,76,60,0.9);font-family:'Nunito',sans-serif;
+            font-size:0.95rem;font-weight:700;cursor:pointer;text-align:left;
+            transition:background 0.15s;
+        " onmouseover="this.style.background='rgba(255,255,255,0.08)'"
+           onmouseout="this.style.background='none'">
+            <span class="mn-icon">🛡️</span>ადმინი
+            <span id="adminSubArrow" style="margin-left:auto;font-size:0.75rem;opacity:0.5;transition:transform 0.2s;">▼</span>
+        </button>
+        <div id="adminSubMenu" style="display:none;flex-direction:column;padding:0 4px 4px 20px;gap:1px;">
+            @php $al = 'display:block;padding:7px 14px;border-radius:8px;color:rgba(255,255,255,0.65);text-decoration:none;font-family:\'Goldman\',monospace;font-size:0.76rem;letter-spacing:0.05em;'; @endphp
+            <a href="{{ route('admin.panel') }}"           onclick="toggleMobileMenu()" style="{{ $al }}">⚡ Push</a>
+            <a href="{{ route('admin.grades.index') }}"    onclick="toggleMobileMenu()" style="{{ $al }}">კლასები</a>
+            <a href="{{ route('admin.themes.index') }}"    onclick="toggleMobileMenu()" style="{{ $al }}">თემატიკა</a>
+            <a href="{{ route('admin.topics.index') }}"    onclick="toggleMobileMenu()" style="{{ $al }}">თემები</a>
+            <a href="{{ route('admin.questions.index') }}" onclick="toggleMobileMenu()" style="{{ $al }}">კითხვები</a>
+            <a href="{{ route('admin.users.index') }}"     onclick="toggleMobileMenu()" style="{{ $al }}">მომხმარებლები</a>
+            <a href="{{ route('admin.permissions.index') }}" onclick="toggleMobileMenu()" style="{{ $al }}">ნებართვები</a>
+            <a href="{{ route('admin.packages.index') }}"  onclick="toggleMobileMenu()" style="{{ $al }}">პაკეტები</a>
+        </div>
+    </div>
     @endif
     <button onclick="window._notifToast=true;toggleNotifications()" style="
         display:flex;align-items:center;gap:10px;width:100%;
@@ -369,6 +415,24 @@ document.addEventListener('click', function(e) {
     }
 });
 
+function toggleAdminDrop(e) {
+    e.stopPropagation();
+    var d = document.getElementById('adminDrop');
+    if (d) d.style.display = d.style.display === 'none' ? 'block' : 'none';
+}
+document.addEventListener('click', function(e) {
+    var d = document.getElementById('adminDrop');
+    var w = document.getElementById('adminDropWrap');
+    if (d && d.style.display !== 'none' && w && !w.contains(e.target)) d.style.display = 'none';
+});
+function toggleAdminSub() {
+    var s = document.getElementById('adminSubMenu');
+    var a = document.getElementById('adminSubArrow');
+    if (!s) return;
+    var open = s.style.display === 'none' || s.style.display === '';
+    s.style.display = open ? 'flex' : 'none';
+    if (a) a.style.transform = open ? 'rotate(180deg)' : '';
+}
 function secScroll(e, id) {
     var el = document.getElementById(id);
     if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
