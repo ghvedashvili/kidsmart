@@ -22,7 +22,14 @@ class ChildController extends Controller
             'topic_ids.*'    => 'exists:topics,id',
         ]);
 
-        $parent     = auth()->user();
+        $parent  = auth()->user();
+        $pkg     = $parent->currentPackage();
+        $current = $parent->children()->count();
+
+        if ($pkg->max_children > 0 && $current >= $pkg->max_children) {
+            return back()->withErrors(['name' => 'თქვენი პლანი მხოლოდ ' . $pkg->max_children . ' ბავშვს იძლევა. გეგმის შესაცვლელად მიმართეთ ადმინს.']);
+        }
+
         $child_code = $this->uniqueCode();
 
         $child = User::create([

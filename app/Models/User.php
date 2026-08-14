@@ -26,6 +26,7 @@ class User extends Authenticatable
         'parent_code',
         'parent_id',
         'child_code',
+        'is_active',
     ];
 
     public function isAdmin(): bool
@@ -74,6 +75,45 @@ class User extends Authenticatable
         return $this->hasMany(ChildAchievement::class, 'child_id');
     }
 
+    public function subscriptions()
+    {
+        return $this->hasMany(UserSubscription::class);
+    }
+
+    public function activeSubscription(): ?UserSubscription
+    {
+        return $this->subscriptions()
+            ->with('package')
+            ->latest()
+            ->get()
+            ->first(fn($s) => $s->isActive());
+    }
+
+    public function currentPackage(): Package
+    {
+        $sub = $this->activeSubscription();
+        if ($sub) return $sub->package;
+
+        return Package::where('is_free', true)->first()
+            ?? new Package(['name' => 'Free', 'max_children' => 1, 'max_difficulty' => 2, 'is_free' => true]);
+    }
+
+    public function syncChildActivation(): void
+    {
+        $limit    = $this->currentPackage()->max_children;
+        $children = $this->belongsToMany(User::class, 'child_parent', 'parent_id', 'child_id')
+                         ->withTimestamps()
+                         ->orderByPivot('created_at', 'asc')
+                         ->get();
+
+        foreach ($children as $i => $child) {
+            $shouldBeActive = $limit === 0 || ($i + 1) <= (int) $limit;
+            if ((bool) $child->is_active !== $shouldBeActive) {
+                $child->update(['is_active' => $shouldBeActive]);
+            }
+        }
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -91,5 +131,6 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'is_active'         => 'boolean',
     ];
 }

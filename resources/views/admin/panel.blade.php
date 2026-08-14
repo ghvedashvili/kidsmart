@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('content')
 <style>
@@ -35,6 +35,9 @@
         <a href="{{ route('admin.themes.index') }}">თემები</a>
         <a href="{{ route('admin.topics.index') }}">თოპიქები</a>
         <a href="{{ route('admin.questions.index') }}">კითხვები</a>
+        <a href="{{ route('admin.users.index') }}">მომხმარებლები</a>
+        <a href="{{ route('admin.permissions.index') }}">ნებართვები</a>
+        <a href="{{ route('admin.packages.index') }}">პაკეტები</a>
     </nav>
 
     {{-- Push Send Form --}}

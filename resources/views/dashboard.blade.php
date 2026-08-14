@@ -280,9 +280,23 @@
 
         {{-- მშობლის ხედი --}}
         @if(in_array(auth()->user()->role, ['parent', 'admin']))
-        @php $children = auth()->user()->children()->with(['childSetting.grade','themes','topics'])->get(); @endphp
+        @php
+            $children = auth()->user()->children()->with(['childSetting.grade','themes','topics'])->withTimestamps()->orderByPivot('created_at','asc')->get();
+            $currentPkg = auth()->user()->currentPackage();
+            $activeSub  = auth()->user()->activeSubscription();
+        @endphp
 
-
+        {{-- Plan badge --}}
+        <button type="button" onclick="document.getElementById('plansModal').classList.add('open')"
+            style="display:inline-flex;align-items:center;gap:7px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:6px 14px;font-family:'Goldman',monospace;font-size:0.68rem;color:#374151;cursor:pointer;letter-spacing:0.04em;transition:all 0.2s;"
+            onmouseover="this.style.borderColor='#94a3b8'" onmouseout="this.style.borderColor='#e2e8f0'">
+            <span style="width:8px;height:8px;border-radius:50%;background:{{ $currentPkg->is_free ? '#10b981' : '#3b82f6' }};display:inline-block;"></span>
+            {{ $currentPkg->name }}
+            @if($activeSub?->expires_at)
+                <span style="color:#94a3b8;font-size:0.6rem;">· {{ $activeSub->expires_at->format('d.m.Y') }}-მდე</span>
+            @endif
+            <span style="color:#94a3b8;font-size:0.65rem;">↑ გეგმა</span>
+        </button>
 
         @if(session('child_added'))
         <div class="flash">{{ session('child_added') }}</div>
@@ -291,15 +305,30 @@
         <div class="children-section">
             <div class="section-label">შვილები · {{ $children->count() }}</div>
 
-            <button type="button" class="add-child-btn" onclick="document.getElementById('addChildModal').classList.add('open')">
-                + შვილის დამატება
+            @php $atChildLimit = $currentPkg->max_children > 0 && $children->count() >= $currentPkg->max_children; @endphp
+            <button type="button" class="add-child-btn"
+                onclick="document.getElementById('{{ $atChildLimit ? 'plansModal' : 'addChildModal' }}').classList.add('open')"
+                @if($atChildLimit) title="{{ $currentPkg->name }} პლანი მხოლოდ {{ $currentPkg->max_children }} ბავშვს იძლევა" @endif>
+                @if($atChildLimit)
+                    ↑ გეგმის განახლება
+                @else
+                    + შვილის დამატება
+                @endif
             </button>
             @forelse($children as $child)
             @php
                 $s = $child->childSetting;
                 $todayDone = $child->tests()->whereNotNull('completed_at')->whereDate('completed_at', today())->count();
             @endphp
-            <div class="child-card" style="cursor:default;">
+            <div class="child-card" style="cursor:default;{{ !$child->is_active ? 'opacity:0.55;' : '' }}">
+                @if(!$child->is_active)
+                <div style="display:flex;align-items:center;gap:6px;background:#fef2f2;border:1px solid #fecaca;border-radius:5px;padding:5px 10px;margin-bottom:8px;font-size:0.68rem;color:#dc2626;">
+                    <span>⊘</span>
+                    <span>გათიშული — <strong>{{ $currentPkg->name }}</strong> გეგმა ამ ბავშვს არ მოიცავს</span>
+                    <button type="button" onclick="document.getElementById('plansModal').classList.add('open')"
+                        style="margin-left:auto;background:none;border:1px solid #fca5a5;color:#dc2626;font-family:'Goldman',monospace;font-size:0.6rem;padding:2px 8px;border-radius:3px;cursor:pointer;white-space:nowrap;">↑ გეგმა</button>
+                </div>
+                @endif
                 <div class="child-info">
                     <div class="child-name">{{ $child->name }}</div>
                     <div class="child-tags">
@@ -674,6 +703,57 @@
             <button type="submit" class="msave">+ შვილის შენახვა</button>
         </form>
         </div>{{-- /panelNew --}}
+    </div>
+</div>
+@endif
+
+{{-- Plans Modal --}}
+@if(in_array(auth()->user()->role, ['parent', 'admin']))
+<div id="plansModal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('open')" style="z-index:300;">
+    <div class="mbox" style="max-width:520px;">
+        <div class="modal-title">
+            სატარიფო გეგმები
+            <button type="button" class="modal-close" onclick="document.getElementById('plansModal').classList.remove('open')">✕</button>
+        </div>
+        @php $atChildLimit = isset($currentPkg) && $currentPkg->max_children > 0 && isset($children) && $children->count() >= $currentPkg->max_children; @endphp
+        @if($atChildLimit)
+        <div style="background:#fef3c7;border:1px solid #fbbf24;border-radius:6px;padding:10px 14px;margin-bottom:14px;font-size:0.72rem;color:#92400e;">
+            თქვენი მიმდინარე გეგმა (<strong>{{ $currentPkg->name }}</strong>) მხოლოდ <strong>{{ $currentPkg->max_children }}</strong> ბავშვს იძლევა. მეტი ბავშვის დასამატებლად გადადით უფრო მაღალ გეგმაზე.
+        </div>
+        @endif
+        <div style="font-family:'Goldman',monospace;font-size:0.65rem;color:#94a3b8;letter-spacing:0.06em;margin-bottom:14px;">
+            გეგმის შესაცვლელად მიმართეთ ადმინს
+        </div>
+
+        @php $allPkgs = App\Models\Package::where('is_active', true)->orderBy('sort_order')->get(); @endphp
+
+        @foreach($allPkgs as $pkg)
+        @php $isCurrent = $currentPkg->id && $currentPkg->id === $pkg->id; @endphp
+        <div style="border:{{ $isCurrent ? '2px solid #3b82f6' : '1px solid #e2e8f0' }};border-radius:10px;padding:16px 18px;margin-bottom:10px;position:relative;">
+            @if($isCurrent)
+            <span style="position:absolute;top:10px;right:12px;background:#eff6ff;color:#3b82f6;font-size:0.58rem;padding:2px 8px;border-radius:8px;font-family:'Goldman',monospace;letter-spacing:0.06em;">მიმდინარე</span>
+            @endif
+            <div style="font-family:'Goldman',monospace;font-size:0.88rem;font-weight:700;color:#1e293b;margin-bottom:4px;">{{ $pkg->name }}</div>
+            @if($pkg->description)
+            <div style="font-size:0.7rem;color:#64748b;margin-bottom:10px;">{{ $pkg->description }}</div>
+            @endif
+            <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:0.7rem;color:#374151;margin-bottom:10px;">
+                @if($pkg->is_free)
+                    <span>✓ უფასო</span>
+                @else
+                    @if($pkg->price_monthly > 0)<span>{{ number_format($pkg->price_monthly, 2) }}₾ / თვე</span>@endif
+                    @if($pkg->price_yearly > 0)<span>{{ number_format($pkg->price_yearly, 2) }}₾ / წელი</span>@endif
+                @endif
+                <span>👶 {{ $pkg->max_children === 0 ? 'შეუზღ.' : $pkg->max_children }} ბავშვი</span>
+                <span>⭐ სირთ. {{ $pkg->max_difficulty === 5 ? 'ყველა' : '1–'.$pkg->max_difficulty }}</span>
+            </div>
+            @if(!$isCurrent && !$pkg->is_free)
+            <div style="font-family:'Goldman',monospace;font-size:0.62rem;color:#94a3b8;letter-spacing:0.04em;">
+                გეგმის გასააქტიურებლად დაუკავშირდით ადმინს
+            </div>
+            @endif
+        </div>
+        @endforeach
     </div>
 </div>
 @endif

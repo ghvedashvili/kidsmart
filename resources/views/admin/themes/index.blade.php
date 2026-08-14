@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 @section('content')
 <style>
     body { background: transparent !important; }
@@ -29,6 +29,9 @@
         <a href="{{ route('admin.themes.index') }}" class="active">თემები</a>
         <a href="{{ route('admin.topics.index') }}">თოპიქები</a>
         <a href="{{ route('admin.questions.index') }}">კითხვები</a>
+        <a href="{{ route('admin.users.index') }}">მომხმარებლები</a>
+        <a href="{{ route('admin.permissions.index') }}">ნებართვები</a>
+        <a href="{{ route('admin.packages.index') }}">პაკეტები</a>
     </nav>
 
     @if(session('success'))

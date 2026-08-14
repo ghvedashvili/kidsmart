@@ -9,6 +9,10 @@ use App\Http\Controllers\Admin\GradeController;
 use App\Http\Controllers\Admin\ThemeController;
 use App\Http\Controllers\Admin\TopicController;
 use App\Http\Controllers\Admin\QuestionTemplateController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\RolePermissionController;
+use App\Http\Controllers\Admin\PackageController;
+use App\Http\Controllers\Admin\SubscriptionController;
 use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\ChildController;
 use App\Http\Controllers\ChildSettingsController;
@@ -48,6 +52,10 @@ Route::post('/child-login', function (Request $request) {
         return back()->withErrors(['child_code' => 'კოდი არასწორია'])->withInput();
     }
 
+    if (! $child->is_active) {
+        return back()->withErrors(['child_code' => 'ანგარიში გათიშულია — მშობლის გეგმა არ მოიცავს ამ ბავშვს'])->withInput();
+    }
+
     \Illuminate\Support\Facades\Auth::login($child, true);
 
     return redirect()->route('dashboard');
@@ -56,7 +64,7 @@ Route::post('/child-login', function (Request $request) {
 Route::middleware(['auth'])->post('/children', [ChildController::class, 'store'])->name('child.store');
 Route::middleware(['auth'])->post('/children/link', [ChildController::class, 'link'])->name('child.link');
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'role.permission'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard', [
             'grades' => Grade::orderBy('number')->get(),
@@ -89,7 +97,20 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin',                       [AdminController::class, 'index'])->name('admin.panel');
     Route::post('/push/send',                  [PushController::class, 'send'])->name('push.send');
-    Route::post('/admin/users/{user}/role',    [AdminController::class, 'updateRole'])->name('admin.updateRole');
+    Route::get('/admin/users',                    [UserController::class, 'index'])->name('admin.users.index');
+    Route::post('/admin/users/{user}/role',       [UserController::class, 'updateRole'])->name('admin.updateRole');
+    Route::get('/admin/permissions',              [RolePermissionController::class, 'index'])->name('admin.permissions.index');
+    Route::post('/admin/permissions',             [RolePermissionController::class, 'update'])->name('admin.permissions.update');
+
+    // პაკეტები
+    Route::get('/admin/packages',                 [PackageController::class, 'index'])->name('admin.packages.index');
+    Route::post('/admin/packages',                [PackageController::class, 'store'])->name('admin.packages.store');
+    Route::put('/admin/packages/{package}',       [PackageController::class, 'update'])->name('admin.packages.update');
+    Route::delete('/admin/packages/{package}',    [PackageController::class, 'destroy'])->name('admin.packages.destroy');
+
+    // გამოწერები
+    Route::post('/admin/users/{user}/subscribe',  [SubscriptionController::class, 'assign'])->name('admin.subscriptions.assign');
+    Route::get('/admin/users/{user}/subscriptions', [SubscriptionController::class, 'history'])->name('admin.subscriptions.history');
 
     // კლასები
     Route::get('/admin/grades',               [GradeController::class, 'index'])->name('admin.grades.index');
