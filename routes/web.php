@@ -17,6 +17,7 @@ use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\ChildController;
 use App\Http\Controllers\ChildSettingsController;
 use App\Http\Controllers\TestController;
+use App\Http\Controllers\TestPreviewController;
 use App\Models\Grade;
 use App\Models\Theme;
 use App\Models\Topic;
@@ -92,6 +93,8 @@ Route::middleware(['auth', 'role.permission'])->group(function () {
     Route::get('/test/{test}',          [TestController::class, 'show'])->name('test.show');
     Route::post('/test/{test}/submit',  [TestController::class, 'submit'])->name('test.submit');
     Route::get('/test/{test}/result',   [TestController::class, 'result'])->name('test.result');
+
+    Route::get('/test-preview', [TestPreviewController::class, 'show'])->name('test.preview');
 });
 
 Route::middleware(['auth', 'admin'])->group(function () {

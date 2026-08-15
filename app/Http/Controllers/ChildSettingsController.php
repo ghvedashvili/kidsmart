@@ -71,9 +71,9 @@ class ChildSettingsController extends Controller
 
     public function destroy(User $child)
     {
-        $this->authorizeChild($child);
-
         $parent = auth()->user();
+        abort_if(! $parent->children()->where('users.id', $child->id)->exists(), 403);
+
         $parent->children()->detach($child->id);
 
         if ($child->parents()->count() === 0) {

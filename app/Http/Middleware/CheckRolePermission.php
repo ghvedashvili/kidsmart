@@ -21,7 +21,7 @@ class CheckRolePermission
                 ->withErrors(['child_code' => 'ანგარიში გათიშულია — მშობლის გეგმა შეიცვალა']);
         }
 
-        if ($user->role === 'admin') return $next($request);
+        if (in_array($user->role, ['admin', 'parent', 'child'])) return $next($request);
 
         $routeName = $request->route()?->getName();
         if (!$routeName) return $next($request);

@@ -471,6 +471,49 @@
 
         @endif
 
+        {{-- მასწავლებლის / სტაფის ხედი --}}
+        @if(!in_array(auth()->user()->role, ['parent', 'admin', 'child']))
+        @php
+            $_adminMap = [
+                'admin.panel'     => ['route' => 'admin.panel',             'icon' => '⚡', 'name' => 'Push'],
+                'admin.grades'    => ['route' => 'admin.grades.index',      'icon' => '🎓', 'name' => 'კლასები'],
+                'admin.themes'    => ['route' => 'admin.themes.index',      'icon' => '🎨', 'name' => 'თემატიკა'],
+                'admin.topics'    => ['route' => 'admin.topics.index',      'icon' => '📚', 'name' => 'თემები'],
+                'admin.questions' => ['route' => 'admin.questions.index',   'icon' => '❓',  'name' => 'კითხვები'],
+                'admin.users'     => ['route' => 'admin.users.index',       'icon' => '👥', 'name' => 'მომხმარებლები'],
+                'admin.perms'     => ['route' => 'admin.permissions.index', 'icon' => '🔐', 'name' => 'ნებართვები'],
+                'admin.packages'  => ['route' => 'admin.packages.index',    'icon' => '📦', 'name' => 'პაკეტები'],
+            ];
+            $_myPerms = \App\Models\RolePermission::allowedPages(auth()->user()->role) ?? [];
+            $_myAdmPages = array_filter($_myPerms, fn($p) => str_starts_with($p, 'admin.'));
+        @endphp
+        <div class="children-section">
+            {{-- ტესტის გადახედვა — ყოველთვის ხილული მასწავლებლისთვის --}}
+            <a href="{{ route('test.preview') }}" class="child-card" style="color:inherit;">
+                <div class="child-row-top">
+                    <span style="font-size:1.1rem;line-height:1;">🧪</span>
+                    <span class="child-name">ტესტის გადახედვა</span>
+                    <span style="margin-left:auto;color:#ccc;font-size:0.8rem;">→</span>
+                </div>
+            </a>
+
+            @if(!empty($_myAdmPages))
+            <div class="section-label" style="margin-top:8px;">ადმინის გვერდები · {{ count($_myAdmPages) }}</div>
+            @foreach($_adminMap as $key => $info)
+            @if(in_array($key, $_myAdmPages))
+            <a href="{{ route($info['route']) }}" class="child-card" style="color:inherit;">
+                <div class="child-row-top">
+                    <span style="font-size:1.1rem;line-height:1;">{{ $info['icon'] }}</span>
+                    <span class="child-name">{{ $info['name'] }}</span>
+                    <span style="margin-left:auto;color:#ccc;font-size:0.8rem;">→</span>
+                </div>
+            </a>
+            @endif
+            @endforeach
+            @endif
+        </div>
+        @endif
+
         {{-- ბავშვის ხედი --}}
         @if(auth()->user()->role === 'child')
         @php
