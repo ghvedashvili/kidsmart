@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Grade;
 use App\Models\QuestionTemplate;
+use App\Models\Theme;
 use App\Models\ThemeVariable;
 use App\Models\Topic;
 use Illuminate\Http\Request;
@@ -38,7 +39,9 @@ class QuestionTemplateController extends Controller
     {
         return view('admin.questions.form', [
             'template'      => null,
+            'grades'        => Grade::orderBy('number')->get(),
             'topics'        => Topic::with('grade')->orderBy('grade_id')->get(),
+            'themes'        => Theme::orderBy('name')->get(),
             'themeVarNames' => $this->themeVarNames(),
             'themeVarMap'   => $this->themeVarMap(),
         ]);
@@ -54,8 +57,10 @@ class QuestionTemplateController extends Controller
     public function edit(QuestionTemplate $question)
     {
         return view('admin.questions.form', [
-            'template'      => $question,
+            'template'      => $question->load('topic'),
+            'grades'        => Grade::orderBy('number')->get(),
             'topics'        => Topic::with('grade')->orderBy('grade_id')->get(),
+            'themes'        => Theme::orderBy('name')->get(),
             'themeVarNames' => $this->themeVarNames(),
             'themeVarMap'   => $this->themeVarMap(),
         ]);
@@ -122,6 +127,7 @@ class QuestionTemplateController extends Controller
     {
         $raw = $request->validate([
             'topic_id'        => 'required|exists:topics,id',
+            'theme_id'        => 'nullable|exists:themes,id',
             'difficulty'      => 'required|integer|min:1|max:5',
             'template_text'   => 'required|string',
             'hint_text'       => 'nullable|string',
@@ -151,6 +157,7 @@ class QuestionTemplateController extends Controller
 
         return [
             'topic_id'        => $raw['topic_id'],
+            'theme_id'        => $raw['theme_id'] ?? null,
             'difficulty'      => $raw['difficulty'],
             'template_text'   => $raw['template_text'],
             'hint_text'       => $raw['hint_text'] ?? null,

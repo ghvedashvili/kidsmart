@@ -106,16 +106,35 @@
             {{-- 1. Context --}}
             <div class="card">
                 <div class="sec-title">① კონტექსტი</div>
+
+                <div class="lbl">კლასი</div>
+                <select id="gradeFilter" class="fc" onchange="onGradeChange(this.value)">
+                    <option value="">— ყველა კლასი —</option>
+                    @foreach($grades as $grade)
+                    <option value="{{ $grade->id }}">{{ $grade->name }}</option>
+                    @endforeach
+                </select>
+
                 <div class="lbl">თემა</div>
-                <select name="topic_id" class="fc" required>
+                <select name="topic_id" id="topicSelect" class="fc" required>
                     <option value="">— აირჩიე —</option>
                     @foreach($topics as $topic)
                     <option value="{{ $topic->id }}" {{ old('topic_id', $template?->topic_id) == $topic->id ? 'selected' : '' }}>
-                        {{ $topic->grade->name }} / {{ $topic->name }}
+                        {{ $topic->name }}
                     </option>
                     @endforeach
                 </select>
                 @error('topic_id')<div class="err">{{ $message }}</div>@enderror
+
+                <div class="lbl">თემატიკა <span style="color:#94a3b8;font-size:0.6rem;">(სურვილისამებრ)</span></div>
+                <select name="theme_id" class="fc">
+                    <option value="">— სურვილისამებრ —</option>
+                    @foreach($themes as $theme)
+                    <option value="{{ $theme->id }}" {{ old('theme_id', $template?->theme_id) == $theme->id ? 'selected' : '' }}>
+                        {{ $theme->name }}
+                    </option>
+                    @endforeach
+                </select>
 
                 <div class="lbl">სირთულე</div>
                 <div class="diff-row">
@@ -252,14 +271,31 @@
 
 <script>
 const _KS = {
-    numConfig:  @json($template?->num_config ?? []),
-    conditions: @json($template?->conditions ?? []),
-    themeVarMap: @json($themeVarMap)
+    numConfig:     @json($template?->num_config ?? []),
+    conditions:    @json($template?->conditions ?? []),
+    themeVarMap:   @json($themeVarMap),
+    topicsByGrade: @json($topics->groupBy('grade_id')->map(fn($g) => $g->map(fn($t) => ['id' => $t->id, 'name' => $t->name])->values())),
+    selectedTopic: {{ (int)($template?->topic_id ?? 0) }},
 };
 </script>
 @verbatim
 <script>
 const OB = '{' + '{', CB = '}' + '}';
+
+// ── Grade → Topic cascade
+function onGradeChange(gradeId) {
+    const sel = document.getElementById('topicSelect');
+    const prev = +sel.value;
+    sel.innerHTML = '<option value="">— აირჩიე —</option>';
+    const list = gradeId
+        ? (_KS.topicsByGrade[gradeId] || [])
+        : Object.values(_KS.topicsByGrade).flat();
+    list.forEach(t => {
+        const opt = new Option(t.name, t.id);
+        if (t.id === prev || t.id === _KS.selectedTopic) opt.selected = true;
+        sel.add(opt);
+    });
+}
 
 // ── Difficulty
 function setDiff(n) {
@@ -634,6 +670,24 @@ document.getElementById('condRows').addEventListener('focusin', function(e) {
 
 // ── Init
 (function init() {
+    // Restore grade filter based on selected topic (edit / validation failure)
+    const curTopicId = +document.getElementById('topicSelect').value;
+    if (curTopicId) {
+        for (const [gId, topics] of Object.entries(_KS.topicsByGrade)) {
+            if (topics.some(t => t.id === curTopicId)) {
+                document.getElementById('gradeFilter').value = gId;
+                const sel = document.getElementById('topicSelect');
+                sel.innerHTML = '<option value="">— აირჩიე —</option>';
+                topics.forEach(t => {
+                    const opt = new Option(t.name, t.id);
+                    if (t.id === curTopicId) opt.selected = true;
+                    sel.add(opt);
+                });
+                break;
+            }
+        }
+    }
+
     const numCfg = _KS.numConfig;
     if (numCfg && typeof numCfg === 'object' && Object.keys(numCfg).length) {
         Object.entries(numCfg).forEach(([name, conf]) => {

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class QuestionTemplate extends Model
 {
-    protected $fillable = ['topic_id', 'difficulty', 'template_text', 'hint_text', 'correct_formula', 'num_config', 'distractors', 'conditions'];
+    protected $fillable = ['topic_id', 'theme_id', 'difficulty', 'template_text', 'hint_text', 'correct_formula', 'num_config', 'distractors', 'conditions'];
 
     protected $casts = ['num_config' => 'array', 'distractors' => 'array', 'conditions' => 'array'];
 
@@ -44,6 +44,11 @@ class QuestionTemplate extends Model
     public function topic(): BelongsTo
     {
         return $this->belongsTo(Topic::class);
+    }
+
+    public function theme(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Theme::class);
     }
 
     public function generate(Theme $theme): array
