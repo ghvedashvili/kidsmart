@@ -55,6 +55,7 @@
 </style>
 
 <div class="aw">
+    <a href="javascript:history.back()" style="font-family:'Goldman',monospace;font-size:0.72rem;color:#999;letter-spacing:0.06em;text-decoration:none;display:inline-block;margin-bottom:24px;">← back</a>
 
     @if(session('success'))<div class="msg">{{ session('success') }}</div>@endif
 
