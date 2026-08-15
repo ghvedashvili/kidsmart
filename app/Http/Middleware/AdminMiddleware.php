@@ -19,7 +19,7 @@ class AdminMiddleware
             abort(403);
         }
         $user = auth()->user();
-        if ($user->isAdmin() || \App\Models\RolePermission::hasAnyAdminPage($user->role)) {
+        if ($user->isAdmin() || in_array($user->role, ['teacher', 'staff'])) {
             return $next($request);
         }
         abort(403);

@@ -128,6 +128,30 @@
                     value="{{ old('difficulty', $template?->difficulty ?? 1) }}">
             </div>
 
+            {{-- 3. Template text --}}
+            <div class="card">
+                <div class="sec-title">③ კითხვის ტექსტი</div>
+
+                @if(count($themeVarNames))
+                <div class="lbl">სტრიქონის ცვლადები</div>
+                <div class="chips">
+                    @foreach($themeVarNames as $varName)
+                    <span class="chip chip-theme" onclick="insertVar('{{ $varName }}')">&#123;&#123;{{ $varName }}&#125;&#125;</span>
+                    @endforeach
+                </div>
+                @endif
+
+                <div class="lbl">რიცხვის ცვლადები (კლიკით ჩასმა)</div>
+                <div class="chips" id="numTextChipBar">
+                    <span style="font-size:0.56rem;color:#94a3b8;padding:4px 2px;">② ცვლადების შემდეგ გამოჩნდება</span>
+                </div>
+
+                <textarea name="template_text" id="templateText" class="fc" rows="4"
+                    placeholder="@{{PLAYER}}-მ @{{N1}} გოლი გაიტანა პირველ ტაიმში, @{{N2}} — მეორეში. სულ?"
+                    oninput="previewDebounce()" required>{{ old('template_text', $template?->template_text) }}</textarea>
+                @error('template_text')<div class="err">{{ $message }}</div>@enderror
+            </div>
+
             {{-- 2+4: Numeric vars & Formula side by side --}}
             <div class="card-row">
                 {{-- 2. Numeric vars --}}
@@ -200,30 +224,6 @@
                         placeholder="@{{PLAYER}}-მ პირველ ტაიმში @{{N1}} გოლი, მეორეში @{{N2}} გოლი გაიტანა."
                         oninput="previewDebounce()">{{ old('hint_text', $template?->hint_text) }}</textarea>
                 </div>
-            </div>
-
-            {{-- 3. Template text --}}
-            <div class="card">
-                <div class="sec-title">③ კითხვის ტექსტი</div>
-
-                @if(count($themeVarNames))
-                <div class="lbl">სტრიქონის ცვლადები</div>
-                <div class="chips">
-                    @foreach($themeVarNames as $varName)
-                    <span class="chip chip-theme" onclick="insertVar('{{ $varName }}')">&#123;&#123;{{ $varName }}&#125;&#125;</span>
-                    @endforeach
-                </div>
-                @endif
-
-                <div class="lbl">რიცხვის ცვლადები (კლიკით ჩასმა)</div>
-                <div class="chips" id="numTextChipBar">
-                    <span style="font-size:0.56rem;color:#94a3b8;padding:4px 2px;">② ცვლადების შემდეგ გამოჩნდება</span>
-                </div>
-
-                <textarea name="template_text" id="templateText" class="fc" rows="4"
-                    placeholder="@{{PLAYER}}-მ @{{N1}} გოლი გაიტანა პირველ ტაიმში, @{{N2}} — მეორეში. სულ?"
-                    oninput="previewDebounce()" required>{{ old('template_text', $template?->template_text) }}</textarea>
-                @error('template_text')<div class="err">{{ $message }}</div>@enderror
             </div>
 
 

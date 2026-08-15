@@ -97,9 +97,15 @@ Route::middleware(['auth', 'role.permission'])->group(function () {
     Route::get('/test-preview', [TestPreviewController::class, 'show'])->name('test.preview');
 });
 
+// /admin entry-point — ნებისმიერი admin-permissioned user შედის (per-page check არ არის)
 Route::middleware(['auth', 'admin'])->group(function () {
-    Route::get('/admin',                       [AdminController::class, 'index'])->name('admin.panel');
+    Route::get('/admin', [AdminController::class, 'index'])->name('admin.panel');
+});
+
+// დანარჩენი ადმინ-route-ები — role.permission ამოწმებს კონკრეტულ გვერდს
+Route::middleware(['auth', 'admin', 'role.permission'])->group(function () {
     Route::post('/push/send',                  [PushController::class, 'send'])->name('push.send');
+
     Route::get('/admin/users',                    [UserController::class, 'index'])->name('admin.users.index');
     Route::post('/admin/users/{user}/role',       [UserController::class, 'updateRole'])->name('admin.updateRole');
     Route::get('/admin/permissions',              [RolePermissionController::class, 'index'])->name('admin.permissions.index');
@@ -142,5 +148,4 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/questions/{question}/edit',     [QuestionTemplateController::class, 'edit'])->name('admin.questions.edit');
     Route::put('/admin/questions/{question}',          [QuestionTemplateController::class, 'update'])->name('admin.questions.update');
     Route::delete('/admin/questions/{question}',       [QuestionTemplateController::class, 'destroy'])->name('admin.questions.destroy');
-
 });

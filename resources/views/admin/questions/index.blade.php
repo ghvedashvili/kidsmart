@@ -61,8 +61,8 @@
         <a href="{{ route('admin.questions.create') }}" class="btn">+ ახალი შაბლონი</a>
     </div>
 
-    <form method="GET" class="filters">
-        <select name="grade_id" class="fc" onchange="this.form.submit()">
+    <form method="GET" class="filters" id="filterForm">
+        <select name="grade_id" class="fc" id="gradeFilter" onchange="onGradeChange(this.value)">
             <option value="">ყველა კლასი</option>
             @foreach($grades as $grade)
             <option value="{{ $grade->id }}" {{ ($filters['grade_id'] ?? '') == $grade->id ? 'selected' : '' }}>
@@ -70,7 +70,7 @@
             </option>
             @endforeach
         </select>
-        <select name="topic_id" class="fc" onchange="this.form.submit()">
+        <select name="topic_id" class="fc" id="topicFilter" onchange="this.form.submit()">
             <option value="">ყველა თემა</option>
             @foreach($topics as $topic)
             <option value="{{ $topic->id }}" {{ ($filters['topic_id'] ?? '') == $topic->id ? 'selected' : '' }}>
@@ -134,6 +134,37 @@
 </div>
 
 <script>
+// grade → topic filtering
+const _allTopics = @json($topics->map(fn($t) => ['id' => $t->id, 'name' => $t->name, 'grade_id' => $t->grade_id]));
+const _topicsByGrade = {};
+_allTopics.forEach(t => { (_topicsByGrade[t.grade_id] = _topicsByGrade[t.grade_id] || []).push(t); });
+const _selectedTopic = {{ (int)($filters['topic_id'] ?? 0) }};
+
+function onGradeChange(gradeId) {
+    const sel = document.getElementById('topicFilter');
+    const prev = sel.value;
+    sel.innerHTML = '<option value="">ყველა თემა</option>';
+    const list = gradeId ? (_topicsByGrade[gradeId] || []) : _allTopics;
+    list.forEach(t => {
+        const opt = new Option(t.name, t.id);
+        if (String(t.id) === String(prev) || t.id === _selectedTopic) opt.selected = true;
+        sel.add(opt);
+    });
+    document.getElementById('filterForm').submit();
+}
+
+(function () {
+    const gradeId = document.getElementById('gradeFilter').value;
+    if (!gradeId) return;
+    const sel = document.getElementById('topicFilter');
+    sel.innerHTML = '<option value="">ყველა თემა</option>';
+    (_topicsByGrade[gradeId] || []).forEach(t => {
+        const opt = new Option(t.name, t.id);
+        if (t.id === _selectedTopic) opt.selected = true;
+        sel.add(opt);
+    });
+})();
+
 const THEME_VARS = @json($themeVarMap);
 @verbatim
 function genVars(nc) {

@@ -1,10 +1,9 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('content')
 <style>
     body { background: transparent !important; }
     .admin-wrap { max-width: 720px; margin: 0 auto; padding: 32px 16px 64px; font-family: 'Goldman', monospace; }
-    .admin-title { font-size: 0.75rem; color: #94a3b8; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 32px; }
     .card-dark { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
     .card-label { font-size: 0.72rem; color: #94a3b8; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px; }
     .form-ctrl { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 5px; color: #374151; font-family: 'Goldman', monospace; font-size: 0.82rem; padding: 10px 14px; width: 100%; outline: none; transition: border-color 0.2s; margin-bottom: 10px; }
@@ -22,6 +21,15 @@
     .sub-on  { background: #059669; }
     .sub-off { background: #cbd5e1; }
     select.form-ctrl { cursor: pointer; }
+
+    /* nav cards grid */
+    .nav-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 28px; }
+    .nav-card { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 14px 16px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; text-decoration: none; color: inherit; transition: border-color 0.15s, box-shadow 0.15s; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+    .nav-card:hover { border-color: #94a3b8; box-shadow: 0 2px 6px rgba(0,0,0,0.07); }
+    .nav-card-icon { font-size: 1.1rem; line-height: 1; }
+    .nav-card-name { font-family: 'Goldman', monospace; font-size: 0.72rem; color: #374151; }
+    .section-lbl { font-family: 'Goldman', monospace; font-size: 0.62rem; color: #bbb; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 10px; }
+
     @media (max-width: 640px) {
         .admin-wrap { padding: 14px 10px 48px; }
         .card-dark { padding: 16px; }
@@ -29,12 +37,45 @@
         #pushForm > div select { min-width: 0; }
         #pushForm > div button { width: 100%; }
         .user-row { font-size: 0.7rem; gap: 6px; }
+        .nav-cards { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
     }
 </style>
+
+@php
+$_map = [
+    'admin.panel'     => ['route' => 'admin.panel',             'icon' => '⚡', 'name' => 'Push'],
+    'admin.grades'    => ['route' => 'admin.grades.index',      'icon' => '🎓', 'name' => 'კლასები'],
+    'admin.themes'    => ['route' => 'admin.themes.index',      'icon' => '🎨', 'name' => 'თემატიკა'],
+    'admin.topics'    => ['route' => 'admin.topics.index',      'icon' => '📚', 'name' => 'თემები'],
+    'admin.questions' => ['route' => 'admin.questions.index',   'icon' => '❓',  'name' => 'კითხვები'],
+    'admin.users'     => ['route' => 'admin.users.index',       'icon' => '👥', 'name' => 'მომხმარებლები'],
+    'admin.perms'     => ['route' => 'admin.permissions.index', 'icon' => '🔐', 'name' => 'ნებართვები'],
+    'admin.packages'  => ['route' => 'admin.packages.index',    'icon' => '📦', 'name' => 'პაკეტები'],
+];
+$_visibleMap = $isAdmin
+    ? $_map
+    : array_filter($_map, fn($key) => in_array($key, \App\Models\RolePermission::allowedPages(auth()->user()->role) ?? []), ARRAY_FILTER_USE_KEY);
+@endphp
 
 <div class="admin-wrap">
     <a href="javascript:history.back()" style="font-family:'Goldman',monospace;font-size:0.72rem;color:#999;letter-spacing:0.06em;text-decoration:none;display:inline-block;margin-bottom:24px;">← back</a>
 
+    {{-- Nav cards --}}
+    <div class="section-lbl">გვერდები</div>
+    <div class="nav-cards">
+        <a href="{{ route('test.preview') }}" class="nav-card">
+            <span class="nav-card-icon">🧪</span>
+            <span class="nav-card-name">ტესტის გადახედვა</span>
+        </a>
+        @foreach($_visibleMap as $info)
+        <a href="{{ route($info['route']) }}" class="nav-card">
+            <span class="nav-card-icon">{{ $info['icon'] }}</span>
+            <span class="nav-card-name">{{ $info['name'] }}</span>
+        </a>
+        @endforeach
+    </div>
+
+    @if($isAdmin)
     {{-- Push Send Form --}}
     <div class="card-dark">
         <div class="card-label">Push Notification</div>
@@ -96,8 +137,10 @@
         </div>
         @endforeach
     </div>
+    @endif
 </div>
 
+@if($isAdmin)
 <script>
 document.getElementById('pushForm').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -155,4 +198,5 @@ async function toggleRole(userId, currentRole) {
     btn.disabled = false;
 }
 </script>
+@endif
 @endsection

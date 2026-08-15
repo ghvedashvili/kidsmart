@@ -10,9 +10,10 @@ class AdminController extends Controller
 {
     public function index()
     {
-        $users         = User::orderBy('created_at', 'desc')->get();
-        $subscriptions = PushSubscription::with('user')->get();
-        return view('admin.panel', compact('users', 'subscriptions'));
+        $isAdmin       = auth()->user()->isAdmin();
+        $users         = $isAdmin ? User::orderBy('created_at', 'desc')->get() : collect();
+        $subscriptions = $isAdmin ? PushSubscription::with('user')->get() : collect();
+        return view('admin.panel', compact('users', 'subscriptions', 'isAdmin'));
     }
 
     public function updateRole(Request $request, User $user)
