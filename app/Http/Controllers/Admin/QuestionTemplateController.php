@@ -15,13 +15,16 @@ class QuestionTemplateController extends Controller
 {
     public function index(Request $request)
     {
-        $query = QuestionTemplate::with('topic.grade');
+        $query = QuestionTemplate::with('topic.grade', 'theme');
 
         if ($request->filled('grade_id')) {
             $query->whereHas('topic', fn($q) => $q->where('grade_id', $request->grade_id));
         }
         if ($request->filled('topic_id')) {
             $query->where('topic_id', $request->topic_id);
+        }
+        if ($request->filled('theme_id')) {
+            $query->where('theme_id', $request->theme_id);
         }
         if ($request->filled('difficulty')) {
             $query->where('difficulty', $request->difficulty);
@@ -31,7 +34,8 @@ class QuestionTemplateController extends Controller
             'templates'   => $query->latest()->paginate(20),
             'grades'      => Grade::orderBy('number')->get(),
             'topics'      => Topic::with('grade')->orderBy('grade_id')->get(),
-            'filters'     => $request->only('grade_id', 'topic_id', 'difficulty'),
+            'themes'      => Theme::orderBy('name')->get(),
+            'filters'     => $request->only('grade_id', 'topic_id', 'theme_id', 'difficulty'),
             'themeVarMap' => $this->themeVarMap(),
         ]);
     }

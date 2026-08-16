@@ -78,6 +78,14 @@
             </option>
             @endforeach
         </select>
+        <select name="theme_id" class="fc" onchange="this.form.submit()">
+            <option value="">ყველა თემატიკა</option>
+            @foreach($themes as $theme)
+            <option value="{{ $theme->id }}" {{ ($filters['theme_id'] ?? '') == $theme->id ? 'selected' : '' }}>
+                {{ $theme->icon ?? '' }} {{ $theme->name }}
+            </option>
+            @endforeach
+        </select>
         <select name="difficulty" class="fc" onchange="this.form.submit()">
             <option value="">ყველა დონე</option>
             @for($i=1;$i<=5;$i++)
@@ -100,6 +108,9 @@
             <div class="q-meta">
                 <span class="q-tag">{{ $tpl->topic->grade->name }}</span>
                 <span class="q-tag">{{ $tpl->topic->name }}</span>
+                @if($tpl->theme)
+                <span class="q-tag" style="color:#7c3aed;border-color:#e9d5ff;">{{ $tpl->theme->icon ?? '' }} {{ $tpl->theme->name }}</span>
+                @endif
                 <span class="q-tag">დონე {{ $tpl->difficulty }}</span>
                 <span class="q-tag" style="color:#888;">= {{ $tpl->correct_formula }}</span>
                 <button type="button" class="q-regen" onclick="regenPreview(this)" title="ახალი მაგალითი">↺</button>
