@@ -137,6 +137,7 @@ Route::middleware(['auth', 'admin', 'role.permission'])->group(function () {
     // თოპიქები
     Route::get('/admin/topics',               [TopicController::class, 'index'])->name('admin.topics.index');
     Route::post('/admin/topics',              [TopicController::class, 'store'])->name('admin.topics.store');
+    Route::post('/admin/topics/move',         [TopicController::class, 'moveToGrade'])->name('admin.topics.move');
     Route::put('/admin/topics/{topic}',       [TopicController::class, 'update'])->name('admin.topics.update');
     Route::delete('/admin/topics/{topic}',    [TopicController::class, 'destroy'])->name('admin.topics.destroy');
 

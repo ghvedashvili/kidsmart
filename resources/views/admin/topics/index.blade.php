@@ -7,24 +7,22 @@
     .card-label { font-size: 0.68rem; color: #94a3b8; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px; }
     .fc { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; color: #374151; font-family: 'Goldman', monospace; font-size: 0.82rem; padding: 9px 13px; outline: none; box-sizing: border-box; }
     .fc:focus { border-color: #94a3b8; }
-    .fc::placeholder { color: #cbd5e1; }
     select.fc { cursor: pointer; }
-    .btn { background: #f8fafc; border: 1px solid #e2e8f0; color: #64748b; font-family: 'Goldman', monospace; font-size: 0.78rem; letter-spacing: 0.08em; padding: 9px 22px; border-radius: 4px; cursor: pointer; transition: all 0.2s; }
+    .btn { background: #f8fafc; border: 1px solid #e2e8f0; color: #64748b; font-family: 'Goldman', monospace; font-size: 0.78rem; letter-spacing: 0.08em; padding: 9px 22px; border-radius: 4px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
     .btn:hover { border-color: #94a3b8; color: #1e293b; }
-    .btn-del { background: none; border: none; color: #cbd5e1; font-size: 0.72rem; cursor: pointer; padding: 0 4px; transition: color 0.2s; }
-    .btn-del:hover { color: #ef4444; }
+    .msg { font-size: 0.75rem; color: #059669; margin-bottom: 16px; }
+    .grade-group { color: #94a3b8; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 0 4px; }
     .row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.8rem; color: #374151; gap: 8px; }
     .row:last-child { border-bottom: none; }
     .badge { font-size: 0.65rem; color: #64748b; border: 1px solid #e2e8f0; border-radius: 2px; padding: 1px 6px; margin-left: 8px; }
-    .msg { font-size: 0.75rem; color: #059669; margin-bottom: 16px; }
-    .grade-group { color: #94a3b8; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 0 4px; }
-    .grade-group:first-child { padding-top: 0; }
-    .row-view { display:flex; align-items:center; flex:1; gap:4px; min-width:0; overflow:hidden; }
+    .row-view { display:flex; align-items:center; flex:1; gap:4px; min-width:0; }
     .row-edit { display:none; flex:1; gap:6px; align-items:center; }
     .row.editing .row-view { display:none; }
     .row.editing .row-edit { display:flex; }
     .btn-edit { background:none; border:none; color:#cbd5e1; font-size:0.72rem; cursor:pointer; padding:0 4px; transition:color 0.2s; }
     .btn-edit:hover { color:#64748b; }
+    .btn-del { background:none; border:none; color:#cbd5e1; font-size:0.72rem; cursor:pointer; padding:0 4px; transition:color 0.2s; }
+    .btn-del:hover { color:#ef4444; }
     .fc-inline { background:#f8fafc; border:1px solid #e2e8f0; border-radius:4px; color:#374151; font-family:'Goldman',monospace; font-size:0.78rem; padding:5px 9px; outline:none; }
     .fc-inline:focus { border-color:#94a3b8; }
     .btn-save { background:#f8fafc; border:1px solid #e2e8f0; color:#374151; font-family:'Goldman',monospace; font-size:0.72rem; padding:5px 12px; border-radius:4px; cursor:pointer; white-space:nowrap; }
@@ -32,7 +30,7 @@
     .btn-cancel-row { background:none; border:none; color:#cbd5e1; font-size:0.72rem; cursor:pointer; padding:0 4px; }
     .btn-cancel-row:hover { color:#64748b; }
 
-    /* topic modal — avoid Bootstrap .modal conflicts */
+    /* add modal */
     .tp-overlay { position:fixed; inset:0; background:rgba(15,23,42,0.35); display:flex; align-items:center; justify-content:center; z-index:100000; opacity:0; pointer-events:none; transition:opacity 0.15s; }
     .tp-overlay.open { opacity:1; pointer-events:all; }
     .tp-box { background:#fff; border-radius:10px; padding:28px 28px 24px; width:100%; max-width:400px; box-shadow:0 8px 32px rgba(0,0,0,0.14); transform:translateY(6px); transition:transform 0.15s; }
@@ -48,11 +46,39 @@
     .tp-btn-cancel { background:none; border:none; color:#94a3b8; font-family:'Goldman',monospace; font-size:0.68rem; cursor:pointer; }
     .tp-btn-cancel:hover { color:#374151; }
 
-    @media (max-width: 640px) {
-        .aw { padding: 14px 10px 48px; }
-        .card-dark { padding: 14px; }
-        .row { font-size: 0.72rem; }
-        .modal { margin: 0 12px; padding: 20px; }
+    /* move modal */
+    .mv-overlay { position:fixed; inset:0; background:rgba(15,23,42,0.4); display:flex; align-items:center; justify-content:center; z-index:100000; opacity:0; pointer-events:none; transition:opacity 0.15s; }
+    .mv-overlay.open { opacity:1; pointer-events:all; }
+    .mv-box { background:#fff; border-radius:10px; padding:24px 24px 20px; width:100%; max-width:460px; max-height:88vh; display:flex; flex-direction:column; box-shadow:0 8px 32px rgba(0,0,0,0.16); transform:translateY(6px); transition:transform 0.15s; }
+    .mv-overlay.open .mv-box { transform:translateY(0); }
+    .mv-head { font-size:0.7rem; color:#94a3b8; letter-spacing:0.18em; text-transform:uppercase; margin-bottom:16px; flex-shrink:0; }
+    .mv-lbl { font-size:0.58rem; color:#64748b; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:5px; }
+    .mv-fc { background:#f8fafc; border:1px solid #e2e8f0; border-radius:4px; color:#374151; font-family:'Goldman',monospace; font-size:0.8rem; padding:8px 11px; width:100%; outline:none; box-sizing:border-box; margin-bottom:14px; cursor:pointer; }
+    .mv-fc:focus { border-color:#94a3b8; }
+    .mv-topics-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; flex-shrink:0; }
+    .mv-select-all { background:none; border:none; color:#3b82f6; font-family:'Goldman',monospace; font-size:0.6rem; cursor:pointer; padding:0; letter-spacing:0.04em; }
+    .mv-select-all:hover { color:#1d4ed8; }
+    .mv-list { overflow-y:auto; flex:1; border:1px solid #f1f5f9; border-radius:6px; padding:4px 0; min-height:80px; }
+    .mv-row { display:flex; align-items:center; gap:10px; padding:8px 12px; border-bottom:1px solid #f8fafc; font-size:0.78rem; color:#374151; }
+    .mv-row:last-child { border-bottom:none; }
+    .mv-row.inactive { opacity:0.4; }
+    .mv-row input[type=checkbox] { width:15px; height:15px; accent-color:#374151; flex-shrink:0; cursor:pointer; }
+    .mv-row.inactive input[type=checkbox] { cursor:not-allowed; }
+    .mv-name { flex:1; }
+    .mv-cnt { font-size:0.62rem; color:#64748b; border:1px solid #e2e8f0; border-radius:2px; padding:1px 6px; white-space:nowrap; }
+    .mv-reason { font-size:0.58rem; color:#f59e0b; white-space:nowrap; }
+    .mv-foot { flex-shrink:0; display:flex; gap:10px; align-items:center; padding-top:14px; margin-top:4px; border-top:1px solid #f1f5f9; }
+    .mv-btn-go { background:#f0fdf4; border:1px solid #bbf7d0; color:#059669; font-family:'Goldman',monospace; font-size:0.76rem; letter-spacing:0.06em; padding:10px 22px; border-radius:4px; cursor:pointer; transition:all 0.15s; }
+    .mv-btn-go:hover:not(:disabled) { border-color:#059669; }
+    .mv-btn-go:disabled { opacity:0.45; cursor:not-allowed; }
+    .mv-btn-x { background:none; border:none; color:#94a3b8; font-family:'Goldman',monospace; font-size:0.68rem; cursor:pointer; }
+    .mv-btn-x:hover { color:#374151; }
+
+    @media (max-width:640px) {
+        .aw { padding:14px 10px 48px; }
+        .card-dark { padding:14px; }
+        .row { font-size:0.72rem; }
+        .tp-box, .mv-box { margin:0 12px; padding:18px; }
     }
 </style>
 
@@ -63,16 +89,17 @@
     <div class="msg">{{ session('success') }}</div>
     @endif
 
-    {{-- Toolbar: filter + add button --}}
-    <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;">
-        <select id="gradeFilter" class="fc" style="width:180px;" onchange="filterGrade(this.value)">
+    {{-- Toolbar --}}
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
+        <select id="gradeFilter" class="fc" style="width:170px;" onchange="filterGrade(this.value)">
             <option value="">ყველა კლასი</option>
             @foreach($grades as $grade)
             <option value="{{ $grade->id }}">{{ $grade->name }}</option>
             @endforeach
         </select>
+        <button type="button" class="btn" id="moveBtn" style="display:none;" onclick="openMoveModal()">⎘ სხვა კლასში კოპირება</button>
         <div style="flex:1;"></div>
-        <button type="button" class="btn" onclick="openModal()">+ ახალი თემა</button>
+        <button type="button" class="btn" onclick="openAddModal()">+ ახალი თემა</button>
     </div>
 
     <div class="card-dark">
@@ -80,12 +107,11 @@
         @php $lastGrade = null; @endphp
         @forelse($topics as $topic)
             @if($lastGrade !== $topic->grade_id)
-                @if($lastGrade !== null) <div class="grade-sep" data-grade="{{ $topic->grade_id }}" style="height:4px;"></div> @endif
+                @if($lastGrade !== null)<div style="height:4px;"></div>@endif
                 <div class="grade-group grade-hdr" data-grade="{{ $topic->grade_id }}">{{ $topic->grade->name }}</div>
                 @php $lastGrade = $topic->grade_id; @endphp
             @endif
             <div class="row topic-row" id="topic-row-{{ $topic->id }}" data-grade="{{ $topic->grade_id }}">
-                {{-- View mode --}}
                 <div class="row-view">
                     <span>{{ $topic->name }}</span>
                     <span class="badge">{{ $topic->question_templates_count }} შაბლონი</span>
@@ -97,8 +123,6 @@
                         <button type="submit" class="btn-del" onclick="return confirm('წაიშალოს?')">✕</button>
                     </form>
                 </div>
-
-                {{-- Edit mode --}}
                 <div class="row-edit">
                     <form method="POST" action="{{ route('admin.topics.update', $topic) }}" style="display:flex;gap:6px;flex:1;align-items:center;">
                         @csrf @method('PUT')
@@ -119,8 +143,8 @@
     </div>
 </div>
 
-{{-- Modal --}}
-<div class="tp-overlay" id="tpOverlay" onclick="overlayClick(event)">
+{{-- Add modal --}}
+<div class="tp-overlay" id="tpOverlay" onclick="tpOverlayClick(event)">
     <div class="tp-box">
         <div class="tp-title">ახალი თემა</div>
         <form method="POST" action="{{ route('admin.topics.store') }}">
@@ -129,62 +153,161 @@
             <select name="grade_id" class="tp-fc" required>
                 <option value="">— კლასი —</option>
                 @foreach($grades as $grade)
-                <option value="{{ $grade->id }}" {{ old('grade_id') == $grade->id ? 'selected' : '' }}>
-                    {{ $grade->name }}
-                </option>
+                <option value="{{ $grade->id }}" {{ old('grade_id') == $grade->id ? 'selected' : '' }}>{{ $grade->name }}</option>
                 @endforeach
             </select>
-
             <div class="tp-lbl">თემის სახელი</div>
             <input type="text" name="name" id="tpNameInput" class="tp-fc" placeholder="მაგ: გამრავლება" maxlength="100" required value="{{ old('name') }}">
-
             <div class="tp-actions">
                 <button type="submit" class="tp-btn-add">+ დამატება</button>
-                <button type="button" class="tp-btn-cancel" onclick="closeModal()">გაუქმება</button>
+                <button type="button" class="tp-btn-cancel" onclick="closeAddModal()">გაუქმება</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- Move modal --}}
+<div class="mv-overlay" id="mvOverlay" onclick="mvOverlayClick(event)">
+    <div class="mv-box">
+        <div class="mv-head">კოპირება — <span id="mvGradeName"></span></div>
+
+        <form method="POST" action="{{ route('admin.topics.move') }}" id="mvForm">
+            @csrf
+            <input type="hidden" name="target_grade_id" id="mvTargetInput">
+
+            <div class="mv-lbl">სამიზნე კლასი</div>
+            <select id="mvTargetGrade" class="mv-fc" onchange="onTargetGradeChange(this.value)">
+                <option value="">— კლასი —</option>
+            </select>
+
+            <div class="mv-topics-hdr">
+                <div class="mv-lbl" style="margin-bottom:0;">თემები</div>
+                <button type="button" class="mv-select-all" onclick="selectAllActive()">ყველა აქტიური ✓</button>
+            </div>
+            <div class="mv-list" id="mvList"></div>
+
+            <div class="mv-foot">
+                <button type="submit" class="mv-btn-go" id="mvSubmitBtn" disabled>⎘ კოპირება</button>
+                <button type="button" class="mv-btn-x" onclick="closeMoveModal()">გაუქმება</button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
-function openModal() {
-    document.getElementById('tpOverlay').classList.add('open');
-    setTimeout(() => document.getElementById('tpNameInput').focus(), 120);
-}
-function closeModal() {
-    document.getElementById('tpOverlay').classList.remove('open');
-}
-function overlayClick(e) {
-    if (e.target === document.getElementById('tpOverlay')) closeModal();
-}
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+const _topics = @json($topicsJson);
+const _grades = @json($gradesJson);
+const _namesByGrade = @json($namesByGrade);
 
-function editTopic(id) {
-    document.getElementById('topic-row-' + id).classList.add('editing');
-}
-function cancelTopic(id) {
-    document.getElementById('topic-row-' + id).classList.remove('editing');
-}
+let _sourceGradeId = null;
 
+// ── Grade filter
 function filterGrade(gradeId) {
     const rows    = document.querySelectorAll('.topic-row');
     const headers = document.querySelectorAll('.grade-hdr');
     let visible   = 0;
-
     rows.forEach(r => {
         const show = !gradeId || r.dataset.grade === gradeId;
         r.style.display = show ? '' : 'none';
         if (show) visible++;
     });
     headers.forEach(h => {
-        const show = !gradeId || h.dataset.grade === gradeId;
-        h.style.display = show ? '' : 'none';
+        h.style.display = (!gradeId || h.dataset.grade === gradeId) ? '' : 'none';
     });
     document.getElementById('topicCount').textContent = visible;
+
+    const moveBtn = document.getElementById('moveBtn');
+    moveBtn.style.display = gradeId ? '' : 'none';
+    _sourceGradeId = gradeId || null;
 }
 
-@if($errors->any())
-openModal();
-@endif
+// ── Inline edit
+function editTopic(id) { document.getElementById('topic-row-' + id).classList.add('editing'); }
+function cancelTopic(id) { document.getElementById('topic-row-' + id).classList.remove('editing'); }
+
+// ── Add modal
+function openAddModal() {
+    document.getElementById('tpOverlay').classList.add('open');
+    setTimeout(() => document.getElementById('tpNameInput').focus(), 120);
+}
+function closeAddModal() { document.getElementById('tpOverlay').classList.remove('open'); }
+function tpOverlayClick(e) { if (e.target === document.getElementById('tpOverlay')) closeAddModal(); }
+
+// ── Move modal
+function openMoveModal() {
+    if (!_sourceGradeId) return;
+    const grade = _grades.find(g => String(g.id) === String(_sourceGradeId));
+    document.getElementById('mvGradeName').textContent = grade ? grade.name : '';
+
+    // populate target grade dropdown (exclude source)
+    const sel = document.getElementById('mvTargetGrade');
+    sel.innerHTML = '<option value="">— კლასი —</option>';
+    _grades.forEach(g => {
+        if (String(g.id) !== String(_sourceGradeId)) {
+            sel.add(new Option(g.name, g.id));
+        }
+    });
+    document.getElementById('mvTargetInput').value = '';
+
+    buildMvList('');
+    document.getElementById('mvOverlay').classList.add('open');
+}
+function closeMoveModal() { document.getElementById('mvOverlay').classList.remove('open'); }
+function mvOverlayClick(e) { if (e.target === document.getElementById('mvOverlay')) closeMoveModal(); }
+
+function onTargetGradeChange(val) {
+    document.getElementById('mvTargetInput').value = val;
+    buildMvList(val);
+}
+
+function buildMvList(targetGradeId) {
+    const list = document.getElementById('mvList');
+    const sourceTopics = _topics.filter(t => String(t.grade_id) === String(_sourceGradeId));
+
+    const targetNames = targetGradeId
+        ? (_namesByGrade[targetGradeId] || []).map(n => n.toLowerCase().trim())
+        : [];
+
+    list.innerHTML = '';
+    sourceTopics.forEach(t => {
+        const noTemplates  = t.count === 0;
+        const nameConflict = targetGradeId && targetNames.includes(t.name.toLowerCase().trim());
+        const inactive     = noTemplates || nameConflict;
+        const reason       = noTemplates ? 'შაბლონი არ არის' : nameConflict ? 'სახელი არსებობს' : '';
+
+        const row = document.createElement('div');
+        row.className = 'mv-row' + (inactive ? ' inactive' : '');
+        row.innerHTML =
+            '<input type="checkbox" name="topic_ids[]" value="' + t.id + '"' +
+            (inactive ? ' disabled' : '') + ' class="mv-chk" onchange="updateMvBtn()">' +
+            '<span class="mv-name">' + escHtml(t.name) + '</span>' +
+            '<span class="mv-cnt">' + t.count + ' შაბლ.</span>' +
+            (reason ? '<span class="mv-reason">' + escHtml(reason) + '</span>' : '');
+        list.appendChild(row);
+    });
+
+    updateMvBtn();
+}
+
+function selectAllActive() {
+    document.querySelectorAll('.mv-chk:not(:disabled)').forEach(c => c.checked = true);
+    updateMvBtn();
+}
+
+function updateMvBtn() {
+    const anyChecked = document.querySelectorAll('.mv-chk:checked').length > 0;
+    const hasTarget  = document.getElementById('mvTargetInput').value !== '';
+    document.getElementById('mvSubmitBtn').disabled = !(anyChecked && hasTarget);
+}
+
+function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeAddModal(); closeMoveModal(); }
+});
+
+@if($errors->any()) openAddModal(); @endif
 </script>
 @endsection
