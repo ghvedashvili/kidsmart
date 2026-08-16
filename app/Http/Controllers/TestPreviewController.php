@@ -18,14 +18,25 @@ class TestPreviewController extends Controller
         }
 
         $grades = Grade::orderBy('number')->get();
-        $themes = Theme::with('variables')->get();
+        $themes = Theme::orderBy('name')->get();
         $topics = Topic::orderBy('grade_id')->orderBy('name')->get();
+
+        // all template combinations for cascading filters in JS
+        $templateCombos = QuestionTemplate::select('topic_id', 'theme_id', 'difficulty')
+            ->with('topic:id,grade_id')
+            ->get()
+            ->map(fn($t) => [
+                'grade_id'   => $t->topic->grade_id,
+                'topic_id'   => $t->topic_id,
+                'theme_id'   => $t->theme_id,
+                'difficulty' => $t->difficulty,
+            ])->values();
 
         $questions        = null;
         $selectedTheme    = null;
         $error            = null;
         $selectedGradeId  = $request->input('grade_id');
-        $selectedDiff     = (int) $request->input('difficulty', 3);
+        $selectedDiff     = (int) $request->input('difficulty', 1);
         $selectedTopicId  = $request->input('topic_id');
         $selectedThemeId  = $request->input('theme_id');
 
@@ -37,26 +48,24 @@ class TestPreviewController extends Controller
                 'theme_id'   => 'nullable|exists:themes,id',
             ]);
 
+            $themeId = $validated['theme_id'] ?? null;
+
             $templates = QuestionTemplate::where('difficulty', $validated['difficulty'])
                 ->whereHas('topic', fn($q) => $q->where('grade_id', $validated['grade_id']))
                 ->when(!empty($validated['topic_id']), fn($q) => $q->where('topic_id', $validated['topic_id']))
+                ->when(!empty($themeId), fn($q) => $q->where('theme_id', $themeId))
                 ->with('topic')
                 ->get();
 
             if ($templates->isEmpty()) {
                 $error = 'ამ პარამეტრებისთვის კითხვები ჯერ არ დამატებულა';
             } else {
-                $selectedTheme = !empty($validated['theme_id'])
-                    ? Theme::with('variables')->find($validated['theme_id'])
-                    : null;
-
-                if (!$selectedTheme || $selectedTheme->variables->isEmpty()) {
-                    $selectedTheme = $themes->filter(fn($t) => $t->variables->isNotEmpty())->random()
-                        ?? $themes->first();
-                }
+                $selectedTheme = $themeId
+                    ? Theme::find($themeId)
+                    : Theme::find($templates->pluck('theme_id')->filter()->first());
 
                 if (!$selectedTheme) {
-                    $error = 'თემა არ არის — ადმინმა უნდა დაამატოს';
+                    $error = 'თემა ვერ მოიძებნა — გთხოვთ თემატიკა აირჩიოთ';
                 } else {
                     $questions = $templates->shuffle()->map(fn($t) => array_merge(
                         ['topic_name' => $t->topic->name],
@@ -67,7 +76,7 @@ class TestPreviewController extends Controller
         }
 
         return view('teacher.test-preview', compact(
-            'grades', 'themes', 'topics',
+            'grades', 'themes', 'topics', 'templateCombos',
             'questions', 'selectedTheme', 'error',
             'selectedGradeId', 'selectedDiff', 'selectedTopicId', 'selectedThemeId'
         ));

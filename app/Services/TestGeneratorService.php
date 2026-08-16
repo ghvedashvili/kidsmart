@@ -20,26 +20,32 @@ class TestGeneratorService
 
         $topicIds = $child->topics()->pluck('id')->toArray();
 
-        $templates = QuestionTemplate::where('difficulty', $setting->difficulty)
+        $baseQuery = fn() => QuestionTemplate::where('difficulty', $setting->difficulty)
             ->whereHas('topic', fn($q) => $q->where('grade_id', $setting->grade_id))
-            ->when(! empty($topicIds), fn($q) => $q->whereIn('topic_id', $topicIds))
-            ->with('topic')
-            ->get();
+            ->when(! empty($topicIds), fn($q) => $q->whereIn('topic_id', $topicIds));
 
-        if ($templates->isEmpty()) {
+        // theme IDs that actually have templates for this child's settings
+        $availableThemeIds = $baseQuery()->whereNotNull('theme_id')->pluck('theme_id')->unique();
+
+        if ($availableThemeIds->isEmpty()) {
             return ['error' => 'ამ პარამეტრებისთვის კითხვები ჯერ არ დამატებულა'];
         }
 
-        $themes = $child->themes()->with('variables')->get();
-        if ($themes->isEmpty()) {
-            $themes = Theme::with('variables')->get();
-        }
-        if ($themes->isEmpty()) {
-            return ['error' => 'თემა არ არის — ადმინმა უნდა დაამატოს'];
+        // prefer themes assigned to this child; fall back to any available theme
+        $childThemeIds = $child->themes()->pluck('id');
+        $candidateIds  = $availableThemeIds->intersect($childThemeIds);
+        if ($candidateIds->isEmpty()) {
+            $candidateIds = $availableThemeIds;
         }
 
-        $theme = $themes->filter(fn($t) => $t->variables->isNotEmpty())->random()
-            ?? $themes->random();
+        $themeId   = $candidateIds->random();
+        $theme     = Theme::find($themeId);
+
+        if (! $theme) {
+            return ['error' => 'თემა ვერ მოიძებნა'];
+        }
+
+        $templates = $baseQuery()->where('theme_id', $themeId)->with('topic')->get();
 
         $pool = $templates->shuffle();
 

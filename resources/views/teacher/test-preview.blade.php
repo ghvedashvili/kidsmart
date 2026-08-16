@@ -69,17 +69,25 @@
                     <label class="pill-btn">
                         <input type="radio" name="grade_id" value="{{ $g->id }}"
                                {{ $selectedGradeId == $g->id ? 'checked' : '' }}
-                               onchange="filterTopics(this.value)">
+                               onchange="onGradeChange(this.value)">
                         <span>{{ $g->name }}</span>
                     </label>
                     @endforeach
                 </div>
             </div>
+            <div class="dd-row" style="margin-bottom:8px;">
+                <select name="topic_id" id="sel_topic" class="fc-sm" onchange="onTopicChange(this.value)">
+                    <option value="">— თემა —</option>
+                </select>
+                <select name="theme_id" id="sel_theme" class="fc-sm" onchange="onThemeChange(this.value)">
+                    <option value="">— თემატიკა —</option>
+                </select>
+            </div>
             <div class="filter-group">
                 <div class="filter-lbl">დონე</div>
-                <div class="pill-row">
+                <div class="pill-row" id="diffPills">
                     @for($d = 1; $d <= 5; $d++)
-                    <label class="pill-btn">
+                    <label class="pill-btn" data-diff="{{ $d }}">
                         <input type="radio" name="difficulty" value="{{ $d }}" {{ $selectedDiff == $d ? 'checked' : '' }}>
                         <span>{{ $d }}</span>
                     </label>
@@ -87,16 +95,7 @@
                 </div>
             </div>
             <div class="dd-row">
-                <select name="topic_id" id="topic_id" class="fc-sm">
-                    <option value="">— თემა —</option>
-                </select>
-                <select name="theme_id" class="fc-sm">
-                    <option value="">— თემატიკა —</option>
-                    @foreach($themes as $t)
-                    <option value="{{ $t->id }}" {{ $selectedThemeId == $t->id ? 'selected' : '' }}>{{ $t->name }}</option>
-                    @endforeach
-                </select>
-                <button type="submit" class="btn-gen">გენერაცია →</button>
+                <button type="submit" class="btn-gen" style="margin-left:0;">გენერაცია →</button>
             </div>
         </form>
     </div>
@@ -129,25 +128,98 @@
 </div>
 
 <script>
-const topicsByGrade = @json($topics->groupBy('grade_id'));
-const preSelectedTopic = {{ $selectedTopicId ? (int)$selectedTopicId : 'null' }};
+const _combos   = @json($templateCombos);
+const _topics   = @json($topics->map(fn($t) => ['id' => $t->id, 'name' => $t->name, 'grade_id' => $t->grade_id])->values());
+const _themes   = @json($themes->map(fn($t) => ['id' => $t->id, 'name' => $t->name, 'icon' => $t->icon ?? ''])->values());
+const _preTopic = {{ $selectedTopicId ? (int)$selectedTopicId : 'null' }};
+const _preTheme = {{ $selectedThemeId ? (int)$selectedThemeId : 'null' }};
+const _preDiff  = {{ (int)$selectedDiff }};
+</script>
+@verbatim
+<script>
+function gradeId()  { const r = document.querySelector('input[name="grade_id"]:checked'); return r ? +r.value : null; }
+function topicId()  { return +document.getElementById('sel_topic').value || null; }
+function themeId()  { return +document.getElementById('sel_theme').value || null; }
 
-function filterTopics(gradeId) {
-    const sel = document.getElementById('topic_id');
+function filteredCombos(gid, tid, thid) {
+    return _combos.filter(c =>
+        (!gid  || c.grade_id  == gid)  &&
+        (!tid  || c.topic_id  == tid)  &&
+        (!thid || c.theme_id  == thid)
+    );
+}
+
+function updateTopics(gid) {
+    const sel  = document.getElementById('sel_topic');
+    const prev = topicId();
+    const avail = new Set(filteredCombos(gid, null, null).map(c => c.topic_id));
     sel.innerHTML = '<option value="">— თემა —</option>';
-    if (!gradeId || !topicsByGrade[gradeId]) return;
-    topicsByGrade[gradeId].forEach(t => {
-        const opt = document.createElement('option');
-        opt.value = t.id;
-        opt.textContent = t.name;
-        if (preSelectedTopic && t.id === preSelectedTopic) opt.selected = true;
-        sel.appendChild(opt);
+    _topics.filter(t => !gid || t.grade_id == gid).forEach(t => {
+        if (!avail.has(t.id)) return;
+        const o = new Option(t.name, t.id, false, t.id === prev || t.id === _preTopic);
+        sel.add(o);
     });
 }
 
+function updateThemes(gid, tid) {
+    const sel  = document.getElementById('sel_theme');
+    const prev = themeId();
+    const avail = new Set(filteredCombos(gid, tid, null).map(c => c.theme_id).filter(Boolean));
+    sel.innerHTML = '<option value="">— თემატიკა —</option>';
+    _themes.filter(t => avail.has(t.id)).forEach(t => {
+        const o = new Option((t.icon ? t.icon + ' ' : '') + t.name, t.id, false, t.id === prev || t.id === _preTheme);
+        sel.add(o);
+    });
+}
+
+function updateDiffs(gid, tid, thid) {
+    const avail = new Set(filteredCombos(gid, tid, thid).map(c => c.difficulty));
+    let anyChecked = false;
+    document.querySelectorAll('#diffPills .pill-btn').forEach(pill => {
+        const d = +pill.dataset.diff;
+        const has = avail.has(d);
+        pill.style.display = has ? '' : 'none';
+        const inp = pill.querySelector('input');
+        if (!has && inp.checked) inp.checked = false;
+        if (inp.checked) anyChecked = true;
+    });
+    // auto-select first available diff if none selected
+    if (!anyChecked && avail.size) {
+        const first = Math.min(...avail);
+        const inp = document.querySelector('#diffPills .pill-btn[data-diff="' + first + '"] input');
+        if (inp) inp.checked = true;
+    }
+}
+
+function onGradeChange(gid) {
+    updateTopics(gid);
+    updateThemes(gid, null);
+    updateDiffs(gid, null, null);
+}
+function onTopicChange(tid) {
+    const gid = gradeId();
+    updateThemes(gid, tid || null);
+    updateDiffs(gid, tid || null, null);
+}
+function onThemeChange(thid) {
+    updateDiffs(gradeId(), topicId(), thid || null);
+}
+
 document.addEventListener('DOMContentLoaded', function () {
-    const checked = document.querySelector('input[name="grade_id"]:checked');
-    if (checked) filterTopics(checked.value);
+    const gid  = gradeId();
+    updateTopics(gid);
+    updateThemes(gid, _preTopic);
+    // restore preselected topic
+    if (_preTopic) document.getElementById('sel_topic').value = _preTopic;
+    // restore preselected theme
+    if (_preTheme) document.getElementById('sel_theme').value = _preTheme;
+    updateDiffs(gid, _preTopic, _preTheme);
+    // restore preselected difficulty
+    if (_preDiff) {
+        const inp = document.querySelector('#diffPills input[value="' + _preDiff + '"]');
+        if (inp) inp.checked = true;
+    }
 });
 </script>
+@endverbatim
 @endsection
