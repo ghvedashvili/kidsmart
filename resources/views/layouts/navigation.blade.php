@@ -24,6 +24,7 @@
     cursor: pointer;
 }
 .nav-link-item:hover { color: #fff; background: rgba(255,255,255,0.08); }
+.nav-link-item.nav-act { color: #fff; background: rgba(255,255,255,0.12); }
 .google-btn {
     display: flex;
     align-items: center;
@@ -56,14 +57,6 @@
     .nav-right { margin-left: auto; }
 }
 
-/* Admin dropdown */
-.admin-dd-item {
-    display: block; padding: 8px 12px; color: rgba(255,255,255,0.7);
-    text-decoration: none; font-family: 'Goldman', monospace; font-size: 0.72rem;
-    letter-spacing: 0.06em; border-radius: 6px; white-space: nowrap;
-    transition: background 0.15s, color 0.15s;
-}
-.admin-dd-item:hover, .admin-dd-item.active { background: rgba(255,255,255,0.09); color: #fff; }
 
 /* Mobile menu */
 #mobileMenuBtn { display: none; }
@@ -94,75 +87,67 @@
                 <img src="/img/logo.png" alt="KidSmart" style="height:55px;width:auto;">
             </a>
         </div>
-        <div class="nav-center" id="secNav" style="display:flex;gap:2px;">
+        @auth
+        @php
+            $__u       = auth()->user();
+            $__isAdmin = $__u->isAdmin();
+            $__ap      = $__isAdmin ? null : (\App\Models\RolePermission::allowedPages($__u->role) ?? []);
+            $__hasAdm  = $__isAdmin || (!empty($__ap) && collect($__ap)->contains(fn($p) => str_starts_with($p, 'admin.')));
+            $__canAdm  = fn($key) => $__isAdmin || in_array($key, (array) $__ap);
+        @endphp
+        @endauth
+        <div class="nav-center" id="secNav" style="display:flex;gap:2px;flex-wrap:wrap;">
             @guest
-            <a class="nav-link-item" href="/#questions"   onclick="secScroll(event,'questions')"   style="font-size:0.8rem;">ამოცანები</a>
-            <a class="nav-link-item" href="/#adaptive"    onclick="secScroll(event,'adaptive')"    style="font-size:0.8rem;">სწავლება</a>
-            <a class="nav-link-item" href="/#detective"   onclick="secScroll(event,'detective')"   style="font-size:0.8rem;">დეტექტივი</a>
-            <a class="nav-link-item" href="/#market"      onclick="secScroll(event,'market')"      style="font-size:0.8rem;">ჯილდოები</a>
-            <a class="nav-link-item" href="/#audience"    onclick="secScroll(event,'audience')"    style="font-size:0.8rem;">აუდიტორია</a>
-            <a class="nav-link-item" href="/#parentdash"  onclick="secScroll(event,'parentdash')"  style="font-size:0.8rem;">მშობელი</a>
+            <a class="nav-link-item" href="/#questions"    onclick="secScroll(event,'questions')"    style="font-size:0.8rem;">ამოცანები</a>
+            <a class="nav-link-item" href="/#adaptive"     onclick="secScroll(event,'adaptive')"     style="font-size:0.8rem;">სწავლება</a>
+            <a class="nav-link-item" href="/#detective"    onclick="secScroll(event,'detective')"    style="font-size:0.8rem;">დეტექტივი</a>
+            <a class="nav-link-item" href="/#market"       onclick="secScroll(event,'market')"       style="font-size:0.8rem;">ჯილდოები</a>
+            <a class="nav-link-item" href="/#audience"     onclick="secScroll(event,'audience')"     style="font-size:0.8rem;">აუდიტორია</a>
+            <a class="nav-link-item" href="/#parentdash"   onclick="secScroll(event,'parentdash')"   style="font-size:0.8rem;">მშობელი</a>
             <a class="nav-link-item" href="/#gamification" onclick="secScroll(event,'gamification')" style="font-size:0.8rem;">გეიმი</a>
-            <a class="nav-link-item" href="/#pricing"     onclick="secScroll(event,'pricing')"     style="font-size:0.8rem;">ფასები</a>
+            <a class="nav-link-item" href="/#pricing"      onclick="secScroll(event,'pricing')"      style="font-size:0.8rem;">ფასები</a>
             @endguest
             @auth
-            <a class="nav-link-item" href="{{ route('dashboard') }}" style="font-size:0.8rem;"><i class="bi bi-house"></i> მთავარი</a>
+            <a class="nav-link-item{{ request()->routeIs('dashboard') ? ' nav-act' : '' }}"
+               href="{{ route('dashboard') }}" style="font-size:0.78rem;"><i class="bi bi-house"></i></a>
+            @if($__hasAdm)
+            @if($__canAdm('admin.panel'))
+            <a class="nav-link-item{{ request()->routeIs('admin.panel') ? ' nav-act' : '' }}" href="{{ route('admin.panel') }}" style="font-size:0.74rem;">⚡</a>
+            @endif
+            @if($__canAdm('admin.grades'))
+            <a class="nav-link-item{{ request()->routeIs('admin.grades.*') ? ' nav-act' : '' }}" href="{{ route('admin.grades.index') }}" style="font-size:0.74rem;">კლასები</a>
+            @endif
+            @if($__canAdm('admin.themes'))
+            <a class="nav-link-item{{ request()->routeIs('admin.themes.*') ? ' nav-act' : '' }}" href="{{ route('admin.themes.index') }}" style="font-size:0.74rem;">თემატიკა</a>
+            @endif
+            @if($__canAdm('admin.topics'))
+            <a class="nav-link-item{{ request()->routeIs('admin.topics.*') ? ' nav-act' : '' }}" href="{{ route('admin.topics.index') }}" style="font-size:0.74rem;">თემები</a>
+            @endif
+            @if($__canAdm('admin.questions'))
+            <a class="nav-link-item{{ request()->routeIs('admin.questions.*') ? ' nav-act' : '' }}" href="{{ route('admin.questions.index') }}" style="font-size:0.74rem;">კითხვები</a>
+            @endif
+            @if($__canAdm('admin.users'))
+            <a class="nav-link-item{{ request()->routeIs('admin.users.*') ? ' nav-act' : '' }}" href="{{ route('admin.users.index') }}" style="font-size:0.74rem;">მომხ.</a>
+            @endif
+            @if($__canAdm('admin.perms'))
+            <a class="nav-link-item{{ request()->routeIs('admin.permissions.*') ? ' nav-act' : '' }}" href="{{ route('admin.permissions.index') }}" style="font-size:0.74rem;">ნებ.</a>
+            @endif
+            @if($__canAdm('admin.packages'))
+            <a class="nav-link-item{{ request()->routeIs('admin.packages.*') ? ' nav-act' : '' }}" href="{{ route('admin.packages.index') }}" style="font-size:0.74rem;">პაკ.</a>
+            @endif
+            @endif
             @endauth
         </div>
         <div class="nav-right">
             @auth
             <div class="desktop-only" style="display:flex;align-items:center;gap:4px;">
-                @php
-                    $__u       = auth()->user();
-                    $__isAdmin = $__u->isAdmin();
-                    $__ap      = $__isAdmin ? null : (\App\Models\RolePermission::allowedPages($__u->role) ?? []);
-                    $__hasAdm  = $__isAdmin || (!empty($__ap) && collect($__ap)->contains(fn($p) => str_starts_with($p, 'admin.')));
-                    $__canAdm  = fn($key) => $__isAdmin || in_array($key, (array) $__ap);
-                @endphp
-                @if($__hasAdm)
-                <div style="position:relative;" id="adminDropWrap">
-                    <button onclick="toggleAdminDrop(event)" class="nav-link-item" style="font-size:0.8rem;{{ request()->routeIs('admin.*') ? 'color:#fff;' : '' }}">
-                        🛡️ ადმინი <span style="font-size:0.55rem;opacity:0.5;margin-left:1px;">▾</span>
-                    </button>
-                    <div id="adminDrop" style="display:none;position:absolute;top:calc(100% + 6px);right:0;
-                        background:#111;border:1px solid #2a2a2a;border-radius:10px;padding:6px;
-                        min-width:160px;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,0.5);">
-                        @if($__canAdm('admin.panel'))
-                        <a href="{{ route('admin.panel') }}" class="admin-dd-item {{ request()->routeIs('admin.panel') ? 'active' : '' }}">⚡ Push</a>
-                        @endif
-                        @if($__canAdm('admin.grades'))
-                        <a href="{{ route('admin.grades.index') }}" class="admin-dd-item {{ request()->routeIs('admin.grades.*') ? 'active' : '' }}">კლასები</a>
-                        @endif
-                        @if($__canAdm('admin.themes'))
-                        <a href="{{ route('admin.themes.index') }}" class="admin-dd-item {{ request()->routeIs('admin.themes.*') ? 'active' : '' }}">თემატიკა</a>
-                        @endif
-                        @if($__canAdm('admin.topics'))
-                        <a href="{{ route('admin.topics.index') }}" class="admin-dd-item {{ request()->routeIs('admin.topics.*') ? 'active' : '' }}">თემები</a>
-                        @endif
-                        @if($__canAdm('admin.questions'))
-                        <a href="{{ route('admin.questions.index') }}" class="admin-dd-item {{ request()->routeIs('admin.questions.*') ? 'active' : '' }}">კითხვები</a>
-                        @endif
-                        @if($__canAdm('admin.users'))
-                        <a href="{{ route('admin.users.index') }}" class="admin-dd-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">მომხმარებლები</a>
-                        @endif
-                        @if($__canAdm('admin.perms'))
-                        <a href="{{ route('admin.permissions.index') }}" class="admin-dd-item {{ request()->routeIs('admin.permissions.*') ? 'active' : '' }}">ნებართვები</a>
-                        @endif
-                        @if($__canAdm('admin.packages'))
-                        <a href="{{ route('admin.packages.index') }}" class="admin-dd-item {{ request()->routeIs('admin.packages.*') ? 'active' : '' }}">პაკეტები</a>
-                        @endif
-                    </div>
-                </div>
-                @endif
                 <button id="notif-btn-desktop" onclick="toggleNotifications()" title="შეტყობინებები"
                     class="nav-link-item">
                     <i id="notif-icon-desktop" class="bi bi-bell"></i>
                 </button>
                 <form method="POST" action="{{ route('logout') }}" style="margin:0;">
                     @csrf
-                    <button type="submit" class="nav-link-item" style="font-size:0.8rem;">
-                        ↩ გასვლა
-                    </button>
+                    <button type="submit" class="nav-link-item" style="font-size:0.8rem;">↩</button>
                 </form>
             </div>
             @endauth
@@ -202,46 +187,30 @@
         $__mCan     = fn($key) => $__mIsAdmin || in_array($key, (array) $__mAp);
     @endphp
     @if($__mHasAdm)
-    <div>
-        <button onclick="toggleAdminSub()" style="
-            display:flex;align-items:center;gap:10px;width:100%;
-            padding:11px 14px;border-radius:8px;border:none;background:none;
-            color:rgba(231,76,60,0.9);font-family:'Nunito',sans-serif;
-            font-size:0.95rem;font-weight:700;cursor:pointer;text-align:left;
-            transition:background 0.15s;
-        " onmouseover="this.style.background='rgba(255,255,255,0.08)'"
-           onmouseout="this.style.background='none'">
-            <span class="mn-icon">🛡️</span>ადმინი
-            <span id="adminSubArrow" style="margin-left:auto;font-size:0.75rem;opacity:0.5;transition:transform 0.2s;">▼</span>
-        </button>
-        <div id="adminSubMenu" style="display:none;flex-direction:column;padding:0 4px 4px 20px;gap:1px;">
-            @php $al = 'display:block;padding:7px 14px;border-radius:8px;color:rgba(255,255,255,0.65);text-decoration:none;font-family:\'Goldman\',monospace;font-size:0.76rem;letter-spacing:0.05em;'; @endphp
-            @if($__mCan('admin.panel'))
-            <a href="{{ route('admin.panel') }}"           onclick="toggleMobileMenu()" style="{{ $al }}">⚡ Push</a>
-            @endif
-            @if($__mCan('admin.grades'))
-            <a href="{{ route('admin.grades.index') }}"    onclick="toggleMobileMenu()" style="{{ $al }}">კლასები</a>
-            @endif
-            @if($__mCan('admin.themes'))
-            <a href="{{ route('admin.themes.index') }}"    onclick="toggleMobileMenu()" style="{{ $al }}">თემატიკა</a>
-            @endif
-            @if($__mCan('admin.topics'))
-            <a href="{{ route('admin.topics.index') }}"    onclick="toggleMobileMenu()" style="{{ $al }}">თემები</a>
-            @endif
-            @if($__mCan('admin.questions'))
-            <a href="{{ route('admin.questions.index') }}" onclick="toggleMobileMenu()" style="{{ $al }}">კითხვები</a>
-            @endif
-            @if($__mCan('admin.users'))
-            <a href="{{ route('admin.users.index') }}"     onclick="toggleMobileMenu()" style="{{ $al }}">მომხმარებლები</a>
-            @endif
-            @if($__mCan('admin.perms'))
-            <a href="{{ route('admin.permissions.index') }}" onclick="toggleMobileMenu()" style="{{ $al }}">ნებართვები</a>
-            @endif
-            @if($__mCan('admin.packages'))
-            <a href="{{ route('admin.packages.index') }}"  onclick="toggleMobileMenu()" style="{{ $al }}">პაკეტები</a>
-            @endif
-        </div>
-    </div>
+    @if($__mCan('admin.panel'))
+    <a href="{{ route('admin.panel') }}" onclick="toggleMobileMenu()"><span class="mn-icon">⚡</span>Push</a>
+    @endif
+    @if($__mCan('admin.grades'))
+    <a href="{{ route('admin.grades.index') }}" onclick="toggleMobileMenu()"><span class="mn-icon">🏫</span>კლასები</a>
+    @endif
+    @if($__mCan('admin.themes'))
+    <a href="{{ route('admin.themes.index') }}" onclick="toggleMobileMenu()"><span class="mn-icon">🎨</span>თემატიკა</a>
+    @endif
+    @if($__mCan('admin.topics'))
+    <a href="{{ route('admin.topics.index') }}" onclick="toggleMobileMenu()"><span class="mn-icon">📚</span>თემები</a>
+    @endif
+    @if($__mCan('admin.questions'))
+    <a href="{{ route('admin.questions.index') }}" onclick="toggleMobileMenu()"><span class="mn-icon">❓</span>კითხვები</a>
+    @endif
+    @if($__mCan('admin.users'))
+    <a href="{{ route('admin.users.index') }}" onclick="toggleMobileMenu()"><span class="mn-icon">👥</span>მომხმარებლები</a>
+    @endif
+    @if($__mCan('admin.perms'))
+    <a href="{{ route('admin.permissions.index') }}" onclick="toggleMobileMenu()"><span class="mn-icon">🔑</span>ნებართვები</a>
+    @endif
+    @if($__mCan('admin.packages'))
+    <a href="{{ route('admin.packages.index') }}" onclick="toggleMobileMenu()"><span class="mn-icon">📦</span>პაკეტები</a>
+    @endif
     @endif
     <button onclick="window._notifToast=true;toggleNotifications()" style="
         display:flex;align-items:center;gap:10px;width:100%;
@@ -461,24 +430,6 @@ document.addEventListener('click', function(e) {
     }
 });
 
-function toggleAdminDrop(e) {
-    e.stopPropagation();
-    var d = document.getElementById('adminDrop');
-    if (d) d.style.display = d.style.display === 'none' ? 'block' : 'none';
-}
-document.addEventListener('click', function(e) {
-    var d = document.getElementById('adminDrop');
-    var w = document.getElementById('adminDropWrap');
-    if (d && d.style.display !== 'none' && w && !w.contains(e.target)) d.style.display = 'none';
-});
-function toggleAdminSub() {
-    var s = document.getElementById('adminSubMenu');
-    var a = document.getElementById('adminSubArrow');
-    if (!s) return;
-    var open = s.style.display === 'none' || s.style.display === '';
-    s.style.display = open ? 'flex' : 'none';
-    if (a) a.style.transform = open ? 'rotate(180deg)' : '';
-}
 function secScroll(e, id) {
     var el = document.getElementById(id);
     if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
