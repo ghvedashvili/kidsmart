@@ -204,7 +204,6 @@ function regenPreview(btn) {
     if (el) renderPreview(el);
 }
 
-document.querySelectorAll('.q-preview').forEach(renderPreview);
 @endverbatim
 
 const bar      = document.getElementById('pdfBar');
