@@ -707,62 +707,36 @@
             <input type="hidden" name="grade_id" id="grade_id_input" value="{{ old('grade_id') }}">
             @error('grade_id')<div class="merr">{{ $message }}</div>@enderror
 
-            {{-- Difficulty --}}
-            <div class="mlbl">სირთულე</div>
-            <div class="mrow" id="diffRow">
-                @for($i=1; $i<=5; $i++)
-                <label class="mchip {{ old('difficulty', 1) == $i ? 'sel' : '' }}"
-                    onclick="chipSingle(this,'difficulty_input','{{ $i }}')">{{ $i }}</label>
-                @endfor
-            </div>
-            <input type="hidden" name="difficulty" id="difficulty_input" value="{{ old('difficulty', 1) }}">
-
-            {{-- Tests per week --}}
+            {{-- Tests per day --}}
             <div class="mlbl">ტესტი დღეში</div>
             <div class="mrow" id="tpwRow">
                 @for($i=1; $i<=7; $i++)
-                <label class="mchip {{ old('tests_per_week', 1) == $i ? 'sel' : '' }}"
+                <label class="mchip {{ old('tests_per_week', 3) == $i ? 'sel' : '' }}"
                     onclick="chipSingle(this,'tpw_input','{{ $i }}')">{{ $i }}</label>
                 @endfor
             </div>
-            <input type="hidden" name="tests_per_week" id="tpw_input" value="{{ old('tests_per_week', 1) }}">
+            <input type="hidden" name="tests_per_week" id="tpw_input" value="{{ old('tests_per_week', 3) }}">
 
-            {{-- Themes --}}
+            {{-- Theme (optional, default სტანდარტი) --}}
             @if($themes->count())
-            <div class="mlbl">თემატიკა</div>
-            <div class="mrow">
+            @php
+                $addThemeOld = old('theme_ids', []);
+                $addDefaultThemeId = $defaultThemeId ?? null;
+            @endphp
+            <div class="mlbl">თემატიკა <span style="color:#aaa;font-size:0.9em;">(სურვილისამებრ)</span></div>
+            <div class="mrow" id="addThemeRow">
                 @foreach($themes as $theme)
-                @php $themeOld = old('theme_ids', []); @endphp
-                <label class="mchip {{ in_array($theme->id, $themeOld) ? 'sel' : '' }}"
-                    onclick="chipMulti(this,'theme_ids[]','{{ $theme->id }}')">{{ $theme->icon }} {{ $theme->name }}</label>
+                @php
+                    $isSelected = count($addThemeOld)
+                        ? in_array($theme->id, $addThemeOld)
+                        : ($theme->id == $addDefaultThemeId);
+                @endphp
+                <label class="mchip {{ $isSelected ? 'sel' : '' }}"
+                    onclick="chipSingleTheme(this, '{{ $theme->id }}')">{{ $theme->icon }} {{ $theme->name }}</label>
                 @endforeach
             </div>
-            @foreach($themes as $theme)
-                @if(in_array($theme->id, old('theme_ids', [])))
-                <input type="hidden" name="theme_ids[]" value="{{ $theme->id }}" class="theme-hidden">
-                @endif
-            @endforeach
-            @endif
-
-            {{-- Topics --}}
-            @if($topics->count())
-            <div class="mlbl">საყვარელი თემები</div>
-            @php $groupedTopics = $topics->groupBy(fn($t) => $t->grade?->name ?? '—'); @endphp
-            @foreach($groupedTopics as $gradeName => $gradeTopics)
-            <div style="font-family:'Goldman',monospace;font-size:0.58rem;color:#bbb;letter-spacing:0.1em;margin-bottom:4px;margin-top:4px;">{{ $gradeName }}</div>
-            <div class="mrow" style="margin-bottom:8px;">
-                @foreach($gradeTopics as $topic)
-                @php $topicOld = old('topic_ids', []); @endphp
-                <label class="mchip {{ in_array($topic->id, $topicOld) ? 'sel' : '' }}"
-                    onclick="chipMulti(this,'topic_ids[]','{{ $topic->id }}')">{{ $topic->name }}</label>
-                @endforeach
-            </div>
-            @foreach($gradeTopics as $topic)
-                @if(in_array($topic->id, old('topic_ids', [])))
-                <input type="hidden" name="topic_ids[]" value="{{ $topic->id }}" class="topic-hidden">
-                @endif
-            @endforeach
-            @endforeach
+            <input type="hidden" name="theme_ids[]" id="add_theme_input"
+                value="{{ count($addThemeOld) ? ($addThemeOld[0] ?? '') : ($addDefaultThemeId ?? '') }}">
             @endif
 
             <button type="submit" class="msave">+ შვილის შენახვა</button>
@@ -882,6 +856,12 @@ function chipSingle(el, inputId, value) {
     document.getElementById(inputId).value = value;
 }
 
+function chipSingleTheme(el, value) {
+    document.getElementById('addThemeRow').querySelectorAll('.mchip').forEach(c => c.classList.remove('sel'));
+    el.classList.add('sel');
+    document.getElementById('add_theme_input').value = value;
+}
+
 function chipMulti(el, name, value) {
     el.classList.toggle('sel');
     const existing = el.closest('form').querySelector('input[type="hidden"][name="' + name + '"][value="' + value + '"]');
@@ -896,7 +876,7 @@ function chipMulti(el, name, value) {
     }
 }
 
-@if($errors->hasAny(['name','grade_id','difficulty','tests_per_week','theme_ids','topic_ids']))
+@if($errors->hasAny(['name','grade_id','tests_per_week','theme_ids']))
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('addChildModal').classList.add('open');
 });

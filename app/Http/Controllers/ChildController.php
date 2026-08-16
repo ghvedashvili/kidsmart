@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ChildSetting;
+use App\Models\Theme;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -47,11 +48,16 @@ class ChildController extends Controller
             'user_id'        => $child->id,
             'grade_id'       => $data['grade_id'],
             'difficulty'     => $data['difficulty'] ?? 1,
-            'tests_per_week' => $data['tests_per_week'] ?? 1,
+            'tests_per_week' => $data['tests_per_week'] ?? 3,
         ]);
 
-        if (! empty($data['theme_ids'])) {
-            $child->themes()->sync($data['theme_ids']);
+        $themeIds = $data['theme_ids'] ?? [];
+        if (empty($themeIds)) {
+            $defaultId = Theme::where('name', 'სტანდარტი')->value('id');
+            if ($defaultId) $themeIds = [$defaultId];
+        }
+        if (! empty($themeIds)) {
+            $child->themes()->sync($themeIds);
         }
         if (! empty($data['topic_ids'])) {
             $child->topics()->sync($data['topic_ids']);

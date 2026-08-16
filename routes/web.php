@@ -69,9 +69,10 @@ Route::middleware(['auth'])->post('/children/link', [ChildController::class, 'li
 Route::middleware(['auth', 'role.permission'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard', [
-            'grades' => Grade::orderBy('number')->get(),
-            'themes' => Theme::all(),
-            'topics' => Topic::with('grade')->orderBy('grade_id')->get(),
+            'grades'         => Grade::orderBy('number')->get(),
+            'themes'         => Theme::all(),
+            'topics'         => Topic::with('grade')->orderBy('grade_id')->get(),
+            'defaultThemeId' => Theme::where('name', 'სტანდარტი')->value('id'),
         ]);
     })->name('dashboard');
 
