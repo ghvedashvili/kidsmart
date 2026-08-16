@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Grade;
 use App\Models\QuestionTemplate;
 use App\Models\Theme;
+use App\Models\ThemeVarGroup;
 use App\Models\ThemeVariable;
 use App\Models\Topic;
 use Illuminate\Http\Request;
@@ -38,12 +39,14 @@ class QuestionTemplateController extends Controller
     public function create()
     {
         return view('admin.questions.form', [
-            'template'      => null,
-            'grades'        => Grade::orderBy('number')->get(),
-            'topics'        => Topic::with('grade')->orderBy('grade_id')->get(),
-            'themes'        => Theme::orderBy('name')->get(),
-            'themeVarNames' => $this->themeVarNames(),
-            'themeVarMap'   => $this->themeVarMap(),
+            'template'           => null,
+            'grades'             => Grade::orderBy('number')->get(),
+            'topics'             => Topic::with('grade')->orderBy('grade_id')->get(),
+            'themes'             => Theme::orderBy('name')->get(),
+            'themeVarNames'      => $this->themeVarNames(),
+            'themeVarMap'        => $this->themeVarMap(),
+            'themeVarGroups'     => $this->themeVarGroups(),
+            'themeVarStandalone' => $this->themeVarStandalone(),
         ]);
     }
 
@@ -57,12 +60,14 @@ class QuestionTemplateController extends Controller
     public function edit(QuestionTemplate $question)
     {
         return view('admin.questions.form', [
-            'template'      => $question->load('topic'),
-            'grades'        => Grade::orderBy('number')->get(),
-            'topics'        => Topic::with('grade')->orderBy('grade_id')->get(),
-            'themes'        => Theme::orderBy('name')->get(),
-            'themeVarNames' => $this->themeVarNames(),
-            'themeVarMap'   => $this->themeVarMap(),
+            'template'           => $question->load('topic'),
+            'grades'             => Grade::orderBy('number')->get(),
+            'topics'             => Topic::with('grade')->orderBy('grade_id')->get(),
+            'themes'             => Theme::orderBy('name')->get(),
+            'themeVarNames'      => $this->themeVarNames(),
+            'themeVarMap'        => $this->themeVarMap(),
+            'themeVarGroups'     => $this->themeVarGroups(),
+            'themeVarStandalone' => $this->themeVarStandalone(),
         ]);
     }
 
@@ -114,13 +119,36 @@ class QuestionTemplateController extends Controller
     private function themeVarMap(): array
     {
         $map = [];
-        ThemeVariable::all()->each(function ($tv) use (&$map) {
-            $map[$tv->variable_name] = array_merge(
-                $map[$tv->variable_name] ?? [],
-                $tv->values ?? []
-            );
+        ThemeVariable::with('group')->get()->each(function ($tv) use (&$map) {
+            $values = ($tv->group_id && $tv->group) ? ($tv->group->values ?? []) : ($tv->values ?? []);
+            $map[$tv->variable_name] = array_unique(array_merge($map[$tv->variable_name] ?? [], $values));
         });
         return $map;
+    }
+
+    private function themeVarGroups(): array
+    {
+        $byName = [];
+        ThemeVarGroup::with('variables')->get()->each(function ($g) use (&$byName) {
+            $name = $g->name;
+            if (!isset($byName[$name])) {
+                $byName[$name] = ['name' => $name, 'pool' => $g->values ?? [], 'slots' => []];
+            } else {
+                $byName[$name]['pool'] = array_unique(array_merge($byName[$name]['pool'], $g->values ?? []));
+            }
+            foreach ($g->variables as $v) {
+                if (!in_array($v->variable_name, $byName[$name]['slots'])) {
+                    $byName[$name]['slots'][] = $v->variable_name;
+                }
+            }
+        });
+        return array_values($byName);
+    }
+
+    private function themeVarStandalone(): array
+    {
+        return ThemeVariable::whereNull('group_id')->distinct()
+            ->pluck('variable_name')->sort()->values()->all();
     }
 
     private function validated(Request $request): array

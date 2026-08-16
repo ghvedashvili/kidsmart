@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class ThemeVariable extends Model
+class ThemeVarGroup extends Model
 {
-    protected $fillable = ['theme_id', 'group_id', 'variable_name', 'values'];
+    protected $fillable = ['theme_id', 'name', 'values'];
 
     protected $casts = ['values' => 'array'];
 
@@ -16,8 +17,8 @@ class ThemeVariable extends Model
         return $this->belongsTo(Theme::class);
     }
 
-    public function group(): BelongsTo
+    public function variables(): HasMany
     {
-        return $this->belongsTo(ThemeVarGroup::class, 'group_id');
+        return $this->hasMany(ThemeVariable::class, 'group_id');
     }
 }

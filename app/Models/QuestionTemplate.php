@@ -60,14 +60,7 @@ class QuestionTemplate extends Model
 
     private function generateText(Theme $theme): array
     {
-        $varMap = $theme->variableMap();
-
-        $vars = [];
-        foreach ($varMap as $name => $values) {
-            if (!empty($values)) {
-                $vars[$name] = $values[array_rand($values)];
-            }
-        }
+        $vars = $theme->resolveVariables();
 
         $correctVarName = $this->correct_formula;
         $correct = $vars[$correctVarName] ?? '?';
@@ -112,7 +105,6 @@ class QuestionTemplate extends Model
 
     private function generateNumeric(Theme $theme): array
     {
-        $varMap  = $theme->variableMap();
         $numConf = $this->num_config ?? [];
         $baseFormula = preg_replace('/\{\{(\w+)\}\}/', '$1', $this->correct_formula);
 
@@ -137,10 +129,7 @@ class QuestionTemplate extends Model
             break;
         }
 
-        $vars = $numVars;
-        foreach ($varMap as $name => $values) {
-            $vars[$name] = $values[array_rand($values)];
-        }
+        $vars = array_merge($numVars, $theme->resolveVariables());
 
         $text = preg_replace('/\{\{(\w+)\}(?!\})/', '{{$1}}', $this->template_text);
         foreach ($vars as $k => $v) {

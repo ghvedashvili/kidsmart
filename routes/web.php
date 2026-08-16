@@ -7,6 +7,7 @@ use App\Http\Controllers\PushController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Admin\GradeController;
 use App\Http\Controllers\Admin\ThemeController;
+use App\Models\ThemeVarGroup;
 use App\Http\Controllers\Admin\TopicController;
 use App\Http\Controllers\Admin\QuestionTemplateController;
 use App\Http\Controllers\Admin\UserController;
@@ -130,9 +131,14 @@ Route::middleware(['auth', 'admin', 'role.permission'])->group(function () {
     Route::get('/admin/themes',               [ThemeController::class, 'index'])->name('admin.themes.index');
     Route::post('/admin/themes',              [ThemeController::class, 'store'])->name('admin.themes.store');
     Route::delete('/admin/themes/{theme}',    [ThemeController::class, 'destroy'])->name('admin.themes.destroy');
-    Route::get('/admin/themes/{theme}/vars',  [ThemeController::class, 'showVariables'])->name('admin.themes.variables');
-    Route::post('/admin/themes/{theme}/vars', [ThemeController::class, 'storeVariable'])->name('admin.themes.variables.store');
-    Route::delete('/admin/vars/{variable}',   [ThemeController::class, 'destroyVariable'])->name('admin.themes.variables.destroy');
+    Route::get('/admin/themes/{theme}/vars',        [ThemeController::class, 'showVariables'])->name('admin.themes.variables');
+    Route::post('/admin/themes/{theme}/vars',       [ThemeController::class, 'storeVariable'])->name('admin.themes.variables.store');
+    Route::post('/admin/themes/{theme}/groups',     [ThemeController::class, 'storeGroup'])->name('admin.themes.groups.store');
+    Route::put('/admin/var-groups/{group}',         [ThemeController::class, 'updateGroup'])->name('admin.themes.groups.update');
+    Route::post('/admin/var-groups/{group}/slots',  [ThemeController::class, 'addSlot'])->name('admin.themes.groups.addSlot');
+    Route::put('/admin/vars/{variable}',            [ThemeController::class, 'updateVariable'])->name('admin.themes.variables.update');
+    Route::delete('/admin/vars/{variable}',         [ThemeController::class, 'destroyVariable'])->name('admin.themes.variables.destroy');
+    Route::delete('/admin/var-groups/{group}',      [ThemeController::class, 'destroyGroup'])->name('admin.themes.groups.destroy');
 
     // თოპიქები
     Route::get('/admin/topics',               [TopicController::class, 'index'])->name('admin.topics.index');
