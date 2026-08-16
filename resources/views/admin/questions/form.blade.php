@@ -44,10 +44,6 @@
     .chip-op { background: #eff6ff; border: 1px solid #bfdbfe; color: #3b82f6; min-width: 28px; text-align: center; }
     .chip-op:hover { border-color: #93c5fd; color: #1d4ed8; }
 
-    .starters { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; }
-    .starter { background: #f8fafc; border: 1px solid #e2e8f0; color: #64748b; font-family: 'Goldman', monospace; font-size: 0.6rem; letter-spacing: 0.06em; padding: 5px 11px; border-radius: 3px; cursor: pointer; transition: all 0.15s; }
-    .starter:hover { border-color: #94a3b8; color: #1e293b; background: #f1f5f9; }
-
     .nc-hdr { display: grid; grid-template-columns: 68px 1fr 1fr 64px 22px; gap: 5px; margin-bottom: 4px; }
     .nc-hdr span { font-size: 0.54rem; color: #cbd5e1; letter-spacing: 0.1em; text-transform: uppercase; text-align: center; }
     .nc-hdr span:first-child { text-align: left; padding-left: 2px; }
@@ -195,16 +191,7 @@
                 {{-- 2. Numeric vars --}}
                 <div class="card">
                     <div class="sec-title">② რიცხვის ცვლადები <span style="color:#94a3b8;font-size:0.54rem;letter-spacing:0.06em;">(სახელი · min · max · ნაბიჯი)</span></div>
-                    <div class="hint" style="margin-bottom:8px;">სწრაფი დაწყება — დააჭირე ან ჩამოწერე ქვემოთ:</div>
-                    <div class="starters">
-                        <button type="button" class="starter" onclick="applyStarter('add')">✚ შეკრება</button>
-                        <button type="button" class="starter" onclick="applyStarter('sub')">― გამოკლება</button>
-                        <button type="button" class="starter" onclick="applyStarter('mul')">× გამრავლება</button>
-                        <button type="button" class="starter" onclick="applyStarter('div')">÷ გაყოფა</button>
-                        <button type="button" class="starter" onclick="applyStarter('comb')">⊕ კომბო</button>
-                        <button type="button" class="starter" onclick="applyStarter('diff')">Δ სხვაობა</button>
-                    </div>
-                    <div class="nc-hdr" style="margin-top:10px;">
+                    <div class="nc-hdr" style="margin-top:4px;">
                         <span>სახელი</span><span>min</span><span>max</span><span>ნაბიჯი</span><span></span>
                     </div>
                     <div id="ncRows"></div>
@@ -347,26 +334,6 @@ function insertFormula(sym) {
     inp.value = inp.value.slice(0, s) + real + inp.value.slice(e);
     inp.selectionStart = inp.selectionEnd = s + real.length;
     inp.focus(); previewDebounce();
-}
-
-// ── Quick starters
-const STARTERS = {
-    add:  { text: '{{PLAYER}}-მ პირველ ტაიმში {{N1}} გოლი გაიტანა, მეორეში — {{N2}}. სულ რამდენი?', formula: 'N1+N2',     vars: [{n:'N1',min:1,max:9,step:1},{n:'N2',min:1,max:9,step:1}], conds: [] },
-    sub:  { text: '{{TEAM}}-ს {{N1}} ქულა ჰქონდა. {{N2}} ქულა დახარჯა. რამდენი დარჩა?',             formula: 'N1-N2',     vars: [{n:'N1',min:10,max:30,step:1},{n:'N2',min:1,max:9,step:1}], conds: [{left:'N1',op:'>',right:'N2'}] },
-    mul:  { text: '{{PLAYER}}-მ {{N1}} მატჩი ითამაშა, ყოველ მატჩში {{N2}} ქულა. სულ?',              formula: 'N1*N2',     vars: [{n:'N1',min:2,max:8,step:1},{n:'N2',min:2,max:9,step:1}], conds: [] },
-    div:  { text: '{{TEAM}}-ს {{N1}} ქულა აქვს, {{N2}} მოთამაშეზე თანაბრად. თითოს?',                formula: 'N1/N2',     vars: [{n:'N1',min:2,max:5,step:1},{n:'N2',min:1,max:4,step:1}], conds: [{left:'N1',op:'%0',right:'N2'}] },
-    comb: { text: '{{PLAYER}}-მ {{N1}} გოლი გაიტანა, {{N2}} გაუსწორდა. ყოველ გოლზე {{N3}} ქულა. სულ?', formula: '(N1-N2)*N3', vars: [{n:'N1',min:4,max:10,step:1},{n:'N2',min:1,max:3,step:1},{n:'N3',min:2,max:5,step:1}], conds: [{left:'N1',op:'>',right:'N2'}] },
-    diff: { text: '{{PLAYER}}-მ {{N1}} ქულა დააგროვა, {{PLAYER}}-მ — {{N2}}. სხვაობა?',              formula: 'N1-N2',     vars: [{n:'N1',min:15,max:50,step:5},{n:'N2',min:5,max:14,step:5}], conds: [{left:'N1',op:'>',right:'N2'}] },
-};
-function applyStarter(key) {
-    const s = STARTERS[key]; if (!s) return;
-    document.getElementById('templateText').value = s.text;
-    document.getElementById('correctFormula').value = s.formula;
-    ncRows = []; conditions = []; ncIdSeq = 1; condIdSeq = 1;
-    s.vars.forEach(v => addNcRow(v.n, v.min, v.max, v.step || 1));
-    s.conds.forEach(c => addCond(c.left, c.op, c.right, true));
-    clearTimeout(prevTimer);
-    genPreview();
 }
 
 // ── num_config rows
