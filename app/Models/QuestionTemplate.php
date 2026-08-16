@@ -61,6 +61,8 @@ class QuestionTemplate extends Model
     private function generateText(Theme $theme): array
     {
         $vars = $theme->resolveVariables();
+        $vars['__ALL__']  = 'ყველა პასუხი სწორეა';
+        $vars['__NONE__'] = 'არცერთი სწორი არ არის';
 
         $correctVarName = $this->correct_formula;
         $correct = $vars[$correctVarName] ?? '?';
@@ -137,13 +139,15 @@ class QuestionTemplate extends Model
         }
         $text = preg_replace('/\{\{\w+\}\}/', '?', $text);
 
-        $dist = $this->distractors;
-        $dMin = max(1, (int) ($dist['min'] ?? 1));
-        $dMax = max($dMin, (int) ($dist['max'] ?? 10));
+        $dist        = $this->distractors;
+        $dMin        = max(1, (int) ($dist['min'] ?? 1));
+        $dMax        = max($dMin, (int) ($dist['max'] ?? 10));
+        $noneCorrect = (bool) ($dist['none_correct'] ?? false);
 
         $wrong = [];
         $attempts = 0;
-        while (count($wrong) < 4 && $attempts < 100) {
+        $wrongCount = $noneCorrect ? 3 : 4;
+        while (count($wrong) < $wrongCount && $attempts < 100) {
             $attempts++;
             $delta     = rand($dMin, $dMax);
             $sign      = rand(0, 1) ? 1 : -1;
@@ -153,8 +157,16 @@ class QuestionTemplate extends Model
             }
         }
 
-        $options = array_merge([$correct], $wrong);
-        shuffle($options);
+        if ($noneCorrect) {
+            $options = array_map('strval', $wrong);
+            $options[] = 'არცერთი სწორი არ არის';
+            shuffle($options);
+            $correctAnswer = 'არცერთი სწორი არ არის';
+        } else {
+            $options = array_merge([$correct], $wrong);
+            shuffle($options);
+            $correctAnswer = (string) $correct;
+        }
 
         $hintRaw = preg_replace('/\{\{(\w+)\}\}(?!\})/', '{{$1}}', $this->hint_text ?? '');
         foreach ($vars as $k => $v) {
@@ -166,7 +178,7 @@ class QuestionTemplate extends Model
             'question_text'  => $text,
             'hint_text'      => $hint,
             'options'        => array_map('strval', $options),
-            'correct_answer' => (string) $correct,
+            'correct_answer' => $correctAnswer,
         ];
     }
 }

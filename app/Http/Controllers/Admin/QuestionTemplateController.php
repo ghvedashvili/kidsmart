@@ -39,12 +39,13 @@ class QuestionTemplateController extends Controller
     public function create()
     {
         return view('admin.questions.form', [
-            'template'      => null,
-            'grades'        => Grade::orderBy('number')->get(),
-            'topics'        => Topic::with('grade')->orderBy('grade_id')->get(),
-            'themes'        => Theme::orderBy('name')->get(),
-            'themeVarMap'   => $this->themeVarMap(),
-            'allThemesData' => $this->allThemesData(),
+            'template'       => null,
+            'grades'         => Grade::orderBy('number')->get(),
+            'topics'         => Topic::with('grade')->orderBy('grade_id')->get(),
+            'themes'         => Theme::orderBy('name')->get(),
+            'themeVarMap'    => $this->themeVarMap(),
+            'allThemesData'  => $this->allThemesData(),
+            'defaultThemeId' => Theme::where('name', 'სტანდარტი')->value('id'),
         ]);
     }
 
@@ -58,12 +59,13 @@ class QuestionTemplateController extends Controller
     public function edit(QuestionTemplate $question)
     {
         return view('admin.questions.form', [
-            'template'      => $question->load('topic'),
-            'grades'        => Grade::orderBy('number')->get(),
-            'topics'        => Topic::with('grade')->orderBy('grade_id')->get(),
-            'themes'        => Theme::orderBy('name')->get(),
-            'themeVarMap'   => $this->themeVarMap(),
-            'allThemesData' => $this->allThemesData(),
+            'template'       => $question->load('topic'),
+            'grades'         => Grade::orderBy('number')->get(),
+            'topics'         => Topic::with('grade')->orderBy('grade_id')->get(),
+            'themes'         => Theme::orderBy('name')->get(),
+            'themeVarMap'    => $this->themeVarMap(),
+            'allThemesData'  => $this->allThemesData(),
+            'defaultThemeId' => null,
         ]);
     }
 
@@ -174,7 +176,7 @@ class QuestionTemplateController extends Controller
     {
         $raw = $request->validate([
             'topic_id'        => 'required|exists:topics,id',
-            'theme_id'        => 'nullable|exists:themes,id',
+            'theme_id'        => 'required|exists:themes,id',
             'difficulty'      => 'required|integer|min:1|max:5',
             'answer_type'     => 'required|in:numeric,text',
             'template_text'   => 'required|string',

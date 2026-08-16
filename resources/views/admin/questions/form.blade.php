@@ -134,14 +134,15 @@
                     <div>
                         <div class="lbl">თემატიკა <span style="color:#94a3b8;font-size:0.55rem;">(სურვილისამებრ)</span></div>
                         <select name="theme_id" id="themeSelect" class="fc" style="margin-bottom:0;"
-                            onchange="onThemeChange(this.value)">
+                            onchange="onThemeChange(this.value)" required>
                             <option value="">— თემატიკა —</option>
                             @foreach($themes as $theme)
-                            <option value="{{ $theme->id }}" {{ old('theme_id', $template?->theme_id) == $theme->id ? 'selected' : '' }}>
+                            <option value="{{ $theme->id }}" {{ old('theme_id', $template?->theme_id ?? $defaultThemeId) == $theme->id ? 'selected' : '' }}>
                                 {{ $theme->name }}
                             </option>
                             @endforeach
                         </select>
+                        @error('theme_id')<div class="err">{{ $message }}</div>@enderror
                     </div>
                 </div>
 
@@ -182,7 +183,7 @@
 
                 <textarea name="template_text" id="templateText" class="fc" rows="4"
                     placeholder="@{{PLAYER}}-მ @{{N1}} გოლი გაიტანა პირველ ტაიმში, @{{N2}} — მეორეში. სულ?"
-                    oninput="previewDebounce()" required>{{ old('template_text', $template?->template_text) }}</textarea>
+                    oninput="onTemplateInput()" required>{{ old('template_text', $template?->template_text) }}</textarea>
                 @error('template_text')<div class="err">{{ $message }}</div>@enderror
             </div>
 
@@ -251,6 +252,9 @@
                             <input type="number" id="distMax" class="nc-inp" style="width:76px;" min="1"
                                 value="{{ $template?->answer_type !== 'text' ? ($template?->distractors['max'] ?? 10) : 10 }}" oninput="previewDebounce()">
                         </div>
+                        <div style="margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9;">
+                            <button type="button" id="noneCorrectBtn" class="at-btn" onclick="toggleNoneCorrect()">☐ არცერთი სწორეა</button>
+                        </div>
                     </div>
 
                     {{-- Text UI --}}
@@ -310,7 +314,7 @@ const _KS = {
     varGroups:          [],
     topicsByGrade:      @json($topics->groupBy('grade_id')->map(fn($g) => $g->map(fn($t) => ['id' => $t->id, 'name' => $t->name])->values())),
     selectedTopic:      {{ (int)($template?->topic_id ?? 0) }},
-    selectedTheme:      {{ (int)($template?->theme_id ?? 0) }},
+    selectedTheme:      {{ (int)($template?->theme_id ?? $defaultThemeId ?? 0) }},
     distractors:        @json($template?->distractors ?? []),
     answerType:         '{{ old('answer_type', $template?->answer_type ?? 'numeric') }}',
     editCorrectFormula: @json(old('correct_formula', $template?->correct_formula ?? '')),
@@ -320,6 +324,22 @@ const _KS = {
 @verbatim
 <script>
 const OB = '{' + '{', CB = '}' + '}';
+const SPEC = { '__ALL__': 'ყველა სწორეა', '__NONE__': 'არცერთი სწორია' };
+
+function getUsedTemplateVars() {
+    const tmpl = document.getElementById('templateText').value;
+    const matches = tmpl.match(/\{\{([A-Z0-9_]+)\}\}/g) || [];
+    return new Set(matches.map(function(m) { return m.slice(2, -2); }));
+}
+function onTemplateInput() {
+    const themeEl = document.getElementById('themeSelect');
+    if (themeEl && themeEl.value) {
+        const data = _KS.allThemesData[themeEl.value] || { groups: [], standalone: [], varMap: {} };
+        renderTextCorrectVar(data);
+        renderTextOptChips(data);
+    }
+    previewDebounce();
+}
 
 // ── Grade → Topic cascade
 function onGradeChange(gradeId) {
@@ -373,47 +393,64 @@ function renderStrVarSection(data) {
 function renderTextCorrectVar(data) {
     const sel = document.getElementById('textCorrectVar');
     const prevVal = sel.value;
+    const used = getUsedTemplateVars();
     sel.innerHTML = '<option value="">— ცვლადი —</option>';
     data.groups.forEach(function(grp) {
+        const slots = grp.slots.filter(function(s) { return used.has(s); });
+        if (!slots.length) return;
         const og = document.createElement('optgroup');
         og.label = grp.name;
-        grp.slots.forEach(function(s) { og.appendChild(new Option(s, s)); });
+        slots.forEach(function(s) { og.appendChild(new Option(s, s)); });
         sel.appendChild(og);
     });
-    if (data.standalone.length) {
+    const sa = data.standalone.filter(function(v) { return used.has(v); });
+    if (sa.length) {
         const og = document.createElement('optgroup');
         og.label = 'სხვა';
-        data.standalone.forEach(function(v) { og.appendChild(new Option(v, v)); });
+        sa.forEach(function(v) { og.appendChild(new Option(v, v)); });
         sel.appendChild(og);
     }
+    const specOg = document.createElement('optgroup');
+    specOg.label = '──────';
+    Object.entries(SPEC).forEach(function(e) { specOg.appendChild(new Option(e[1], e[0])); });
+    sel.appendChild(specOg);
     if (prevVal) sel.value = prevVal;
-    const hasVars = data.groups.length || data.standalone.length;
+    const hasVars = data.groups.some(function(g) { return g.slots.some(function(s) { return used.has(s); }); }) || sa.length;
     var hint = document.getElementById('noVarsHint');
-    if (hint) hint.style.display = hasVars ? 'none' : '';
+    if (hint) hint.style.display = (hasVars || !used.size) ? 'none' : '';
     syncAll();
 }
 function renderTextOptChips(data) {
     const el = document.getElementById('textOptChips');
     const prevSel = new Set(Array.from(document.querySelectorAll('.text-opt-chip.sel')).map(function(c) { return c.dataset.varname; }));
+    const used = getUsedTemplateVars();
     let html = '';
     data.groups.forEach(function(grp) {
+        const slots = grp.slots.filter(function(s) { return used.has(s); });
+        if (!slots.length) return;
         html += '<div style="font-size:0.52rem;color:#7c3aed;letter-spacing:0.1em;text-transform:uppercase;margin:4px 0 2px;">' + grp.name + '</div>'
             + '<div class="chips" style="margin-bottom:4px;">'
-            + grp.slots.map(function(s) {
+            + slots.map(function(s) {
                 return '<span class="chip chip-txt text-opt-chip' + (prevSel.has(s) ? ' sel' : '') + '" data-varname="' + s + '" onclick="toggleTextOpt(this)">' + s + '</span>';
             }).join('')
             + '</div>';
     });
-    if (data.standalone.length) {
+    const sa = data.standalone.filter(function(v) { return used.has(v); });
+    if (sa.length) {
         html += '<div class="chips">'
-            + data.standalone.map(function(v) {
+            + sa.map(function(v) {
                 return '<span class="chip chip-txt text-opt-chip' + (prevSel.has(v) ? ' sel' : '') + '" data-varname="' + v + '" onclick="toggleTextOpt(this)">' + v + '</span>';
             }).join('')
             + '</div>';
     }
+    html += '<div class="chips" style="margin-top:6px;border-top:1px solid #f1f5f9;padding-top:6px;">'
+        + Object.entries(SPEC).map(function(e) {
+            return '<span class="chip chip-txt text-opt-chip' + (prevSel.has(e[0]) ? ' sel' : '') + '" data-varname="' + e[0] + '" onclick="toggleTextOpt(this)">' + e[1] + '</span>';
+        }).join('')
+        + '</div>';
     el.innerHTML = html;
     var hint2 = document.getElementById('noVarsHint2');
-    if (hint2) hint2.style.display = (data.groups.length || data.standalone.length) ? 'none' : '';
+    if (hint2) hint2.style.display = 'none';
 }
 
 // ── Difficulty
@@ -429,7 +466,7 @@ function insertVar(name) {
     const ins = OB + name + CB;
     ta.value = ta.value.slice(0, s) + ins + ta.value.slice(e);
     ta.selectionStart = ta.selectionEnd = s + ins.length;
-    ta.focus(); previewDebounce();
+    ta.focus(); onTemplateInput();
 }
 function insertTextOp(str) {
     const ta = document.getElementById('templateText');
@@ -462,6 +499,18 @@ function insertFormula(sym) {
     inp.value = inp.value.slice(0, s) + real + inp.value.slice(e);
     inp.selectionStart = inp.selectionEnd = s + real.length;
     inp.focus(); previewDebounce();
+}
+
+// ── None-correct toggle (numeric mode)
+let noneCorrect = false;
+function toggleNoneCorrect() {
+    noneCorrect = !noneCorrect;
+    const btn = document.getElementById('noneCorrectBtn');
+    if (btn) {
+        btn.classList.toggle('at-sel', noneCorrect);
+        btn.textContent = (noneCorrect ? '☑' : '☐') + ' არცერთი სწორეა';
+    }
+    syncAll(); previewDebounce();
 }
 
 // ── num_config rows
@@ -636,7 +685,7 @@ function syncAll() {
         document.getElementById('correctFormulaHidden').value = document.getElementById('correctFormula').value;
         const dMin = +document.getElementById('distMin').value || 1;
         const dMax = +document.getElementById('distMax').value || 10;
-        document.getElementById('distractorsJson').value = JSON.stringify({ min: dMin, max: dMax });
+        document.getElementById('distractorsJson').value = JSON.stringify({ min: dMin, max: dMax, none_correct: noneCorrect || false });
     }
 }
 
@@ -737,12 +786,12 @@ function genPreviewText(tmpl) {
         return;
     }
 
-    const correct = themeMap[correctVar] ?? '?';
+    const correct = SPEC[correctVar] || themeMap[correctVar] || '?';
     const optVarNames = [...document.querySelectorAll('.text-opt-chip.sel')].map(c => c.dataset.varname);
     const seen = new Set();
     const opts = [];
     optVarNames.forEach(v => {
-        const val = themeMap[v] ?? '?';
+        const val = SPEC[v] || themeMap[v] || '?';
         if (!seen.has(val)) { seen.add(val); opts.push({ v: val, c: val === correct }); }
     });
     if (!seen.has(correct)) opts.unshift({ v: correct, c: true });
@@ -801,21 +850,30 @@ function genPreviewNumeric(tmpl) {
 
     const wrong = new Set();
     let tries = 0;
-    while (wrong.size < 3 && tries < 80) {
+    const wrongCount = noneCorrect ? 3 : 3;
+    while (wrong.size < wrongCount && tries < 80) {
         tries++;
         const delta = dMin + Math.floor(Math.random() * (dMax - dMin + 1));
         const cand  = correct + (Math.random() < 0.5 ? 1 : -1) * delta;
         if (cand > 0 && cand !== correct) wrong.add(cand);
     }
-    const opts = [{ v: correct, c: true }, ...[...wrong].map(v => ({ v, c: false }))];
+
+    let opts;
+    if (noneCorrect) {
+        opts = [...wrong].map(v => ({ v, c: false }));
+        opts.push({ v: 'არცერთი სწორი არ არის', c: true });
+    } else {
+        opts = [{ v: correct, c: true }, ...[...wrong].map(v => ({ v, c: false }))];
+    }
     for (let i = opts.length-1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i+1)); [opts[i], opts[j]] = [opts[j], opts[i]];
     }
 
     document.getElementById('prevOpts').innerHTML = opts.map(o =>
         `<div class="preview-opt ${o.c?'c':''}">${o.v}</div>`).join('');
-    document.getElementById('prevFormula').innerHTML =
-        `სწ. პასუხი: <span style="color:#2a7a2a;">${correct}</span>&nbsp;·&nbsp;<span style="color:#1e1e1e;">${formula} = ${f} = ${correct}</span>`;
+    document.getElementById('prevFormula').innerHTML = noneCorrect
+        ? `სწ. პასუხი: <span style="color:#2a7a2a;">არცერთი სწორი არ არის</span>&nbsp;·&nbsp;<span style="color:#94a3b8;">${formula} = ${correct} (hidden)</span>`
+        : `სწ. პასუხი: <span style="color:#2a7a2a;">${correct}</span>&nbsp;·&nbsp;<span style="color:#1e1e1e;">${formula} = ${f} = ${correct}</span>`;
     document.getElementById('prevVars').innerHTML = Object.entries(numVars).map(([k,v]) => `${k}=${v}`).join(' · ') || '';
 }
 
@@ -849,6 +907,13 @@ document.getElementById('condRows').addEventListener('focusin', function(e) {
     // Load vars for the currently selected theme (edit mode or old() restore)
     const themeEl = document.getElementById('themeSelect');
     if (themeEl && themeEl.value) onThemeChange(themeEl.value);
+
+    // Restore none_correct toggle (numeric mode)
+    if (_KS.distractors && _KS.distractors.none_correct) {
+        noneCorrect = true;
+        const btn = document.getElementById('noneCorrectBtn');
+        if (btn) { btn.classList.add('at-sel'); btn.textContent = '☑ არცერთი სწორეა'; }
+    }
 
     // Restore grade filter based on selected topic (edit / validation failure)
     const curTopicId = +document.getElementById('topicSelect').value;
