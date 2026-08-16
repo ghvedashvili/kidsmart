@@ -85,6 +85,12 @@
     .preview-vars { margin-top: 8px; font-size: 0.58rem; color: #cbd5e1; line-height: 1.7; }
     .preview-warn { margin-top: 8px; font-size: 0.6rem; color: #f87171; }
     .tog { margin-left: 6px; transition: transform 0.2s; }
+    .at-row { display:flex; gap:6px; margin-bottom:14px; }
+    .at-btn { background:#f8fafc; border:1px solid #e2e8f0; color:#94a3b8; font-family:'Goldman',monospace; font-size:0.7rem; letter-spacing:0.06em; padding:6px 16px; border-radius:4px; cursor:pointer; transition:all 0.15s; }
+    .at-btn.at-sel { border-color:#374151; color:#1e293b; background:#f1f5f9; }
+    .chip-txt { background:#faf5ff; border:1px solid #e9d5ff; color:#7c3aed; }
+    .chip-txt:hover { border-color:#c4b5fd; }
+    .chip-txt.sel { background:#7c3aed; color:#fff; border-color:#7c3aed; }
 </style>
 
 <div class="aw">
@@ -210,43 +216,85 @@
 
                 {{-- 4. Formula --}}
                 <div class="card">
-                    <div class="sec-title">④ სწორი პასუხის ფორმულა</div>
-                    <div class="lbl">ცვლადები</div>
-                    <div class="chips" id="formulaChipBar">
-                        <span style="font-size:0.56rem;color:#94a3b8;padding:4px 2px;">② ცვლადების შემდეგ გამოჩნდება</span>
-                    </div>
-                    <div class="lbl">ოპერატორები</div>
-                    <div class="chips">
-                        <span class="chip chip-op" onclick="insertFormula('+')">+</span>
-                        <span class="chip chip-op" onclick="insertFormula('-')">−</span>
-                        <span class="chip chip-op" onclick="insertFormula('*')">×</span>
-                        <span class="chip chip-op" onclick="insertFormula('/')">/</span>
-                        <span class="chip chip-op" onclick="insertFormula('%')">%</span>
-                        <span class="chip chip-op" onclick="insertFormula('(')">(</span>
-                        <span class="chip chip-op" onclick="insertFormula(')')">)</span>
-                    </div>
-                    <input type="text" name="correct_formula" id="correctFormula" class="fc"
-                        placeholder="N1+N2"
-                        value="{{ old('correct_formula', $template?->correct_formula) }}"
-                        oninput="previewDebounce()" required>
-                    <div class="hint">მაგ: N1+N2 &nbsp;·&nbsp; (N1+N2)*N3 &nbsp;·&nbsp; N1*N2-N3 &nbsp;·&nbsp; N1%N2</div>
-                    @error('correct_formula')<div class="err">{{ $message }}</div>@enderror
+                    <div class="sec-title">④ სწორი პასუხი</div>
 
-                    <div class="lbl" style="margin-top:10px;">მცდარი პასუხების დიაპაზონი <span style="color:#94a3b8;font-size:0.6rem;">±</span></div>
-                    <div style="display:flex;gap:10px;align-items:center;">
-                        <div class="lbl" style="margin:0;white-space:nowrap;">min</div>
-                        <input type="number" id="distMin" class="nc-inp" style="width:76px;" min="1"
-                            value="{{ $template?->distractors['min'] ?? 1 }}" oninput="previewDebounce()">
-                        <div class="lbl" style="margin:0;white-space:nowrap;">max</div>
-                        <input type="number" id="distMax" class="nc-inp" style="width:76px;" min="1"
-                            value="{{ $template?->distractors['max'] ?? 10 }}" oninput="previewDebounce()">
+                    <div class="at-row">
+                        <button type="button" id="atBtnNum" class="at-btn" onclick="setAnswerType('numeric')">🔢 რიცხვი</button>
+                        <button type="button" id="atBtnTxt" class="at-btn" onclick="setAnswerType('text')">🔤 ტექსტი</button>
                     </div>
+                    <input type="hidden" name="answer_type" id="answerTypeInput"
+                        value="{{ old('answer_type', $template?->answer_type ?? 'numeric') }}">
+
+                    {{-- Numeric UI --}}
+                    <div id="numAnsUi">
+                        <div class="lbl">ცვლადები</div>
+                        <div class="chips" id="formulaChipBar">
+                            <span style="font-size:0.56rem;color:#94a3b8;padding:4px 2px;">② ცვლადების შემდეგ გამოჩნდება</span>
+                        </div>
+                        <div class="lbl">ოპერატორები</div>
+                        <div class="chips">
+                            <span class="chip chip-op" onclick="insertFormula('+')">+</span>
+                            <span class="chip chip-op" onclick="insertFormula('-')">−</span>
+                            <span class="chip chip-op" onclick="insertFormula('*')">×</span>
+                            <span class="chip chip-op" onclick="insertFormula('/')">/</span>
+                            <span class="chip chip-op" onclick="insertFormula('%')">%</span>
+                            <span class="chip chip-op" onclick="insertFormula('(')">(</span>
+                            <span class="chip chip-op" onclick="insertFormula(')')">)</span>
+                        </div>
+                        <input type="text" id="correctFormula" class="fc"
+                            placeholder="N1+N2"
+                            value="{{ old('answer_type', $template?->answer_type) !== 'text' ? old('correct_formula', $template?->correct_formula) : '' }}"
+                            oninput="previewDebounce()">
+                        <div class="hint">მაგ: N1+N2 &nbsp;·&nbsp; (N1+N2)*N3 &nbsp;·&nbsp; N1*N2-N3 &nbsp;·&nbsp; N1%N2</div>
+                        @error('correct_formula')<div class="err">{{ $message }}</div>@enderror
+
+                        <div class="lbl" style="margin-top:10px;">მცდარი პასუხების დიაპაზონი <span style="color:#94a3b8;font-size:0.6rem;">±</span></div>
+                        <div style="display:flex;gap:10px;align-items:center;">
+                            <div class="lbl" style="margin:0;white-space:nowrap;">min</div>
+                            <input type="number" id="distMin" class="nc-inp" style="width:76px;" min="1"
+                                value="{{ $template?->answer_type !== 'text' ? ($template?->distractors['min'] ?? 1) : 1 }}" oninput="previewDebounce()">
+                            <div class="lbl" style="margin:0;white-space:nowrap;">max</div>
+                            <input type="number" id="distMax" class="nc-inp" style="width:76px;" min="1"
+                                value="{{ $template?->answer_type !== 'text' ? ($template?->distractors['max'] ?? 10) : 10 }}" oninput="previewDebounce()">
+                        </div>
+                    </div>
+
+                    {{-- Text UI --}}
+                    <div id="txtAnsUi" style="display:none;">
+                        <div class="lbl">სწორი პასუხი — ცვლადი</div>
+                        <select id="textCorrectVar" class="fc" onchange="syncAll();previewDebounce();">
+                            <option value="">— ცვლადი —</option>
+                            @foreach($themeVarNames as $v)
+                            <option value="{{ $v }}"
+                                {{ old('answer_type', $template?->answer_type) === 'text' && old('correct_formula', $template?->correct_formula) === $v ? 'selected' : '' }}>
+                                {{ $v }}
+                            </option>
+                            @endforeach
+                        </select>
+                        @if(!count($themeVarNames))
+                        <div style="font-size:0.6rem;color:#94a3b8;margin-top:-6px;margin-bottom:10px;">სტრიქონის ცვლადები არ არის — თემატიკაში დაამატეთ</div>
+                        @endif
+
+                        <div class="lbl" style="margin-top:4px;">ვარიანტების ცვლადები <span style="color:#94a3b8;font-size:0.6rem;">(კლიკით მონიშვნა)</span></div>
+                        <div class="chips" id="textOptChips">
+                            @foreach($themeVarNames as $v)
+                            <span class="chip chip-txt text-opt-chip" data-varname="{{ $v }}"
+                                onclick="toggleTextOpt(this)">{{ $v }}</span>
+                            @endforeach
+                        </div>
+                        @if(!count($themeVarNames))
+                        <div style="font-size:0.6rem;color:#94a3b8;margin-top:-6px;">ცვლადები არ არის</div>
+                        @endif
+                    </div>
+
+                    <input type="hidden" name="correct_formula" id="correctFormulaHidden"
+                        value="{{ old('correct_formula', $template?->correct_formula) }}">
                     <input type="hidden" name="distractors" id="distractorsJson">
                     @error('distractors')<div class="err">{{ $message }}</div>@enderror
 
                     <div class="lbl" style="margin-top:10px;">მინიშნება <span style="color:#94a3b8;font-size:0.6rem;">(გამოჩნდება კითხვის ქვეშ)</span></div>
                     <textarea name="hint_text" id="hintText" class="fc" rows="2"
-                        placeholder="@{{PLAYER}}-მ პირველ ტაიმში @{{N1}} გოლი, მეორეში @{{N2}} გოლი გაიტანა."
+                        placeholder="მინიშნება..."
                         oninput="previewDebounce()">{{ old('hint_text', $template?->hint_text) }}</textarea>
                 </div>
             </div>
@@ -282,6 +330,8 @@ const _KS = {
     themeVarMap:   @json($themeVarMap),
     topicsByGrade: @json($topics->groupBy('grade_id')->map(fn($g) => $g->map(fn($t) => ['id' => $t->id, 'name' => $t->name])->values())),
     selectedTopic: {{ (int)($template?->topic_id ?? 0) }},
+    distractors:   @json($template?->distractors ?? []),
+    answerType:    '{{ old('answer_type', $template?->answer_type ?? 'numeric') }}',
 };
 </script>
 @verbatim
@@ -324,6 +374,21 @@ function insertTextOp(str) {
     ta.value = ta.value.slice(0, s) + str + ta.value.slice(e);
     ta.selectionStart = ta.selectionEnd = s + str.length;
     ta.focus(); previewDebounce();
+}
+
+// ── Answer type toggle
+function setAnswerType(type) {
+    document.getElementById('answerTypeInput').value = type;
+    const isTxt = type === 'text';
+    document.getElementById('numAnsUi').style.display = isTxt ? 'none' : '';
+    document.getElementById('txtAnsUi').style.display = isTxt ? '' : 'none';
+    document.getElementById('atBtnNum').classList.toggle('at-sel', !isTxt);
+    document.getElementById('atBtnTxt').classList.toggle('at-sel', isTxt);
+    syncAll(); previewDebounce();
+}
+function toggleTextOpt(el) {
+    el.classList.toggle('sel');
+    syncAll(); previewDebounce();
 }
 
 // ── Insert at cursor (formula)
@@ -498,10 +563,18 @@ function syncAll() {
         conditions.map(c => ({ left: c.left, op: c.op, right: c.right }))
     );
 
-    // distractors JSON
-    const dMin = +document.getElementById('distMin').value || 1;
-    const dMax = +document.getElementById('distMax').value || 10;
-    document.getElementById('distractorsJson').value = JSON.stringify({ min: dMin, max: dMax });
+    const isTxt = document.getElementById('answerTypeInput').value === 'text';
+    if (isTxt) {
+        const selVar = document.getElementById('textCorrectVar').value;
+        document.getElementById('correctFormulaHidden').value = selVar;
+        const optVars = [...document.querySelectorAll('.text-opt-chip.sel')].map(c => c.dataset.varname);
+        document.getElementById('distractorsJson').value = JSON.stringify({ vars: optVars });
+    } else {
+        document.getElementById('correctFormulaHidden').value = document.getElementById('correctFormula').value;
+        const dMin = +document.getElementById('distMin').value || 1;
+        const dMax = +document.getElementById('distMax').value || 10;
+        document.getElementById('distractorsJson').value = JSON.stringify({ min: dMin, max: dMax });
+    }
 }
 
 // ── Condition evaluator (supports expressions like N2+N3)
@@ -532,54 +605,93 @@ function evalConditions(numVars) {
 let prevTimer = null;
 function previewDebounce() { clearTimeout(prevTimer); prevTimer = setTimeout(genPreview, 320); }
 
-function genPreview() {
-    const tmpl    = document.getElementById('templateText').value;
-    const formula = document.getElementById('correctFormula').value.trim();
-    const dMin    = +document.getElementById('distMin').value || 1;
-    const dMax    = +document.getElementById('distMax').value || 10;
-
-    if (!tmpl) {
-        document.getElementById('prevQ').innerHTML = '<span style="color:#94a3b8;font-size:0.72rem;line-height:1.8;">② სწრაფი შაბლონი ან<br>③ კითხვის ტექსტი + ④ ფორმულა<br>შეავსეთ preview-სთვის</span>';
-        document.getElementById('prevHint').textContent = '';
-        document.getElementById('prevOpts').innerHTML = '';
-        document.getElementById('prevFormula').innerHTML = '';
-        document.getElementById('prevVars').innerHTML = '';
-        document.getElementById('prevWarn').innerHTML = '';
-        return;
-    }
-
-    // Retry loop: generate num vars until conditions are met
+function pickThemeVars() {
+    const themeMap = {};
+    Object.entries(_KS.themeVarMap || {}).forEach(([name, vals]) => {
+        themeMap[name] = vals.length ? vals[Math.floor(Math.random() * vals.length)] : '[' + name + ']';
+    });
+    return themeMap;
+}
+function pickNumVars() {
     const confRows = ncRows.filter(r => r.name);
-    let numVars = {};
-    let condOk  = false;
+    let numVars = {}, condOk = false;
     for (let attempt = 0; attempt < 40; attempt++) {
         numVars = {};
         confRows.forEach(r => {
-            const step  = Math.max(1, r.step || 1);
+            const step = Math.max(1, r.step || 1);
             const steps = Math.floor((r.max - r.min) / step);
             numVars[r.name] = r.min + Math.floor(Math.random() * (steps + 1)) * step;
         });
         if (evalConditions(numVars)) { condOk = true; break; }
     }
+    return { numVars, condOk };
+}
+function clearPreview() {
+    document.getElementById('prevQ').innerHTML = '<span style="color:#94a3b8;font-size:0.72rem;line-height:1.8;">③ კითხვის ტექსტი + ④ სწორი პასუხი<br>შეავსეთ preview-სთვის</span>';
+    ['prevHint','prevFormula','prevVars','prevWarn'].forEach(id => document.getElementById(id).innerHTML = '');
+    document.getElementById('prevOpts').innerHTML = '';
+}
 
-    // Pick random value from each theme variable's actual values list
-    const themeMap = {};
-    Object.entries(_KS.themeVarMap || {}).forEach(([name, vals]) => {
-        themeMap[name] = vals.length
-            ? vals[Math.floor(Math.random() * vals.length)]
-            : '[' + name + ']';
-    });
+function genPreview() {
+    const tmpl = document.getElementById('templateText').value;
+    if (!tmpl) { clearPreview(); return; }
+    const isTxt = document.getElementById('answerTypeInput').value === 'text';
+    isTxt ? genPreviewText(tmpl) : genPreviewNumeric(tmpl);
+}
+
+function genPreviewText(tmpl) {
+    const themeMap = pickThemeVars();
+    const { numVars } = pickNumVars();
+    const allVars = {...themeMap, ...numVars};
 
     let text = tmpl;
-    Object.entries({...themeMap, ...numVars}).forEach(([k,v]) => {
-        text = text.replaceAll(OB+k+CB, v);
+    Object.entries(allVars).forEach(([k,v]) => { text = text.replaceAll(OB+k+CB, v); });
+    text = text.replace(/\{\{\w+\}\}/g, '?');
+    document.getElementById('prevQ').textContent = text;
+    document.getElementById('prevHint').textContent = '';
+    document.getElementById('prevWarn').innerHTML = '';
+
+    const correctVar = document.getElementById('textCorrectVar').value;
+    if (!correctVar) {
+        document.getElementById('prevOpts').innerHTML = '<span style="font-size:0.64rem;color:#94a3b8;">სწორი პასუხის ცვლადი აირჩიეთ...</span>';
+        document.getElementById('prevFormula').innerHTML = '';
+        document.getElementById('prevVars').innerHTML = Object.entries(themeMap).map(([k,v]) => `${k}=${v}`).join(' · ');
+        return;
+    }
+
+    const correct = themeMap[correctVar] ?? '?';
+    const optVarNames = [...document.querySelectorAll('.text-opt-chip.sel')].map(c => c.dataset.varname);
+    const seen = new Set();
+    const opts = [];
+    optVarNames.forEach(v => {
+        const val = themeMap[v] ?? '?';
+        if (!seen.has(val)) { seen.add(val); opts.push({ v: val, c: val === correct }); }
     });
+    if (!seen.has(correct)) opts.unshift({ v: correct, c: true });
+    for (let i = opts.length-1; i > 0; i--) {
+        const j = Math.floor(Math.random()*(i+1)); [opts[i],opts[j]]=[opts[j],opts[i]];
+    }
+
+    document.getElementById('prevOpts').innerHTML = opts.map(o =>
+        `<div class="preview-opt ${o.c?'c':''}">${o.v}</div>`).join('');
+    document.getElementById('prevFormula').innerHTML =
+        `სწ. პასუხი: <span style="color:#2a7a2a;">${correct}</span> <span style="color:#94a3b8;">(${correctVar})</span>`;
+    document.getElementById('prevVars').innerHTML = Object.entries(themeMap).map(([k,v]) => `${k}=${v}`).join(' · ');
+}
+
+function genPreviewNumeric(tmpl) {
+    const formula = document.getElementById('correctFormula').value.trim();
+    const dMin    = +document.getElementById('distMin').value || 1;
+    const dMax    = +document.getElementById('distMax').value || 10;
+    const { numVars, condOk } = pickNumVars();
+    const themeMap = pickThemeVars();
+
+    let text = tmpl;
+    Object.entries({...themeMap, ...numVars}).forEach(([k,v]) => { text = text.replaceAll(OB+k+CB, v); });
     text = text.replace(/\{\{\w+\}\}/g, '?');
 
     let hint = (document.getElementById('hintText').value || '').trim();
-    Object.entries({...themeMap, ...numVars}).forEach(([k,v]) => {
-        hint = hint.replaceAll(OB+k+CB, v);
-    });
+    Object.entries({...themeMap, ...numVars}).forEach(([k,v]) => { hint = hint.replaceAll(OB+k+CB, v); });
     hint = hint.replace(/\{\{\w+\}\}/g, '?');
 
     document.getElementById('prevQ').textContent = text;
@@ -589,12 +701,10 @@ function genPreview() {
     if (!formula) {
         document.getElementById('prevOpts').innerHTML = '<span style="font-size:0.64rem;color:#94a3b8;">④ ფორმულა ჩაწერეთ პასუხისთვის...</span>';
         document.getElementById('prevFormula').innerHTML = '';
-        document.getElementById('prevVars').innerHTML =
-            Object.entries(numVars).map(([k,v]) => `${k}=${v}`).join(' · ') || '';
+        document.getElementById('prevVars').innerHTML = Object.entries(numVars).map(([k,v]) => `${k}=${v}`).join(' · ') || '';
         return;
     }
 
-    // Evaluate formula
     let f = formula;
     Object.entries(numVars).forEach(([k,v]) => { f = f.replaceAll(k, String(v)); });
     f = f.replace(/[^0-9+\-*/()\s%.]/g, '');
@@ -611,7 +721,6 @@ function genPreview() {
         return;
     }
 
-    // Distractors
     const wrong = new Set();
     let tries = 0;
     while (wrong.size < 3 && tries < 80) {
@@ -626,14 +735,10 @@ function genPreview() {
     }
 
     document.getElementById('prevOpts').innerHTML = opts.map(o =>
-        `<div class="preview-opt ${o.c?'c':''}">${o.v}</div>`
-    ).join('');
-
+        `<div class="preview-opt ${o.c?'c':''}">${o.v}</div>`).join('');
     document.getElementById('prevFormula').innerHTML =
         `სწ. პასუხი: <span style="color:#2a7a2a;">${correct}</span>&nbsp;·&nbsp;<span style="color:#1e1e1e;">${formula} = ${f} = ${correct}</span>`;
-
-    document.getElementById('prevVars').innerHTML =
-        Object.entries(numVars).map(([k,v]) => `${k}=${v}`).join(' · ') || '';
+    document.getElementById('prevVars').innerHTML = Object.entries(numVars).map(([k,v]) => `${k}=${v}`).join(' · ') || '';
 }
 
 // ── Event delegation for dynamically rendered inputs (avoids inline-handler issues)
@@ -681,12 +786,29 @@ document.getElementById('condRows').addEventListener('focusin', function(e) {
         }
     }
 
+    // Restore answer type toggle
+    const initType = _KS.answerType || 'numeric';
+    document.getElementById('answerTypeInput').value = initType;
+    const isTxtInit = initType === 'text';
+    document.getElementById('numAnsUi').style.display = isTxtInit ? 'none' : '';
+    document.getElementById('txtAnsUi').style.display = isTxtInit ? '' : 'none';
+    document.getElementById('atBtnNum').classList.toggle('at-sel', !isTxtInit);
+    document.getElementById('atBtnTxt').classList.toggle('at-sel', isTxtInit);
+
+    // For text mode: restore selected option vars from distractors
+    if (isTxtInit && _KS.distractors && Array.isArray(_KS.distractors.vars)) {
+        _KS.distractors.vars.forEach(varName => {
+            const chip = document.querySelector('.text-opt-chip[data-varname="' + varName + '"]');
+            if (chip) chip.classList.add('sel');
+        });
+    }
+
     const numCfg = _KS.numConfig;
     if (numCfg && typeof numCfg === 'object' && Object.keys(numCfg).length) {
         Object.entries(numCfg).forEach(([name, conf]) => {
             addNcRow(name, conf.min ?? 1, conf.max ?? 9, conf.step ?? 1);
         });
-    } else {
+    } else if (!isTxtInit) {
         addNcRow('N1', 1, 9, 1);
         addNcRow('N2', 1, 9, 1);
     }

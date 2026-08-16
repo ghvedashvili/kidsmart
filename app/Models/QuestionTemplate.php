@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class QuestionTemplate extends Model
 {
-    protected $fillable = ['topic_id', 'theme_id', 'difficulty', 'template_text', 'hint_text', 'correct_formula', 'num_config', 'distractors', 'conditions'];
+    protected $fillable = ['topic_id', 'theme_id', 'difficulty', 'answer_type', 'template_text', 'hint_text', 'correct_formula', 'num_config', 'distractors', 'conditions'];
 
     protected $casts = ['num_config' => 'array', 'distractors' => 'array', 'conditions' => 'array'];
 
@@ -53,11 +53,69 @@ class QuestionTemplate extends Model
 
     public function generate(Theme $theme): array
     {
+        return $this->answer_type === 'text'
+            ? $this->generateText($theme)
+            : $this->generateNumeric($theme);
+    }
+
+    private function generateText(Theme $theme): array
+    {
+        $varMap = $theme->variableMap();
+
+        $vars = [];
+        foreach ($varMap as $name => $values) {
+            if (!empty($values)) {
+                $vars[$name] = $values[array_rand($values)];
+            }
+        }
+
+        $correctVarName = $this->correct_formula;
+        $correct = $vars[$correctVarName] ?? '?';
+
+        $dist = $this->distractors ?? [];
+        $optionVarNames = $dist['vars'] ?? [];
+
+        $options = [];
+        foreach ($optionVarNames as $varName) {
+            $val = $vars[$varName] ?? '?';
+            if (!in_array($val, $options, true)) {
+                $options[] = $val;
+            }
+        }
+        if (!in_array($correct, $options, true)) {
+            array_unshift($options, $correct);
+        }
+        shuffle($options);
+
+        $text = preg_replace('/\{\{(\w+)\}(?!\})/', '{{$1}}', $this->template_text);
+        foreach ($vars as $k => $v) {
+            $text = str_replace("{{{$k}}}", (string) $v, $text);
+        }
+        $text = preg_replace('/\{\{\w+\}\}/', '?', $text);
+
+        $hint = null;
+        if ($this->hint_text) {
+            $h = preg_replace('/\{\{(\w+)\}\}(?!\})/', '{{$1}}', $this->hint_text);
+            foreach ($vars as $k => $v) {
+                $h = str_replace("{{{$k}}}", (string) $v, $h);
+            }
+            $hint = trim(preg_replace('/\{\{\w+\}\}/', '?', $h)) ?: null;
+        }
+
+        return [
+            'question_text'  => $text,
+            'hint_text'      => $hint,
+            'options'        => $options,
+            'correct_answer' => $correct,
+        ];
+    }
+
+    private function generateNumeric(Theme $theme): array
+    {
         $varMap  = $theme->variableMap();
         $numConf = $this->num_config ?? [];
         $baseFormula = preg_replace('/\{\{(\w+)\}\}/', '$1', $this->correct_formula);
 
-        // retry until correct answer is a positive integer AND all conditions pass (max 40 attempts)
         $conditions = $this->conditions ?? [];
         $numVars = [];
         $correct = 0;
@@ -79,32 +137,29 @@ class QuestionTemplate extends Model
             break;
         }
 
-        // theme vars (strings — only used in text, not formula)
         $vars = $numVars;
         foreach ($varMap as $name => $values) {
             $vars[$name] = $values[array_rand($values)];
         }
 
-        // normalize text: fix single-brace typos like {{N3} → {{N3}}
         $text = preg_replace('/\{\{(\w+)\}(?!\})/', '{{$1}}', $this->template_text);
         foreach ($vars as $k => $v) {
-            $text = str_replace("{{{$k}}}", $v, $text);
+            $text = str_replace("{{{$k}}}", (string) $v, $text);
         }
-        // remove any leftover {{...}} that had no matching var
         $text = preg_replace('/\{\{\w+\}\}/', '?', $text);
 
-        $dist    = $this->distractors;
-        $dMin    = max(1, (int) ($dist['min'] ?? 1));
-        $dMax    = max($dMin, (int) ($dist['max'] ?? 10));
+        $dist = $this->distractors;
+        $dMin = max(1, (int) ($dist['min'] ?? 1));
+        $dMax = max($dMin, (int) ($dist['max'] ?? 10));
 
-        $wrong   = [];
+        $wrong = [];
         $attempts = 0;
         while (count($wrong) < 4 && $attempts < 100) {
             $attempts++;
             $delta     = rand($dMin, $dMax);
             $sign      = rand(0, 1) ? 1 : -1;
             $candidate = $correct + ($sign * $delta);
-            if ($candidate > 0 && ! in_array($candidate, $wrong) && $candidate !== $correct) {
+            if ($candidate > 0 && !in_array($candidate, $wrong) && $candidate !== $correct) {
                 $wrong[] = $candidate;
             }
         }
@@ -114,7 +169,7 @@ class QuestionTemplate extends Model
 
         $hintRaw = preg_replace('/\{\{(\w+)\}\}(?!\})/', '{{$1}}', $this->hint_text ?? '');
         foreach ($vars as $k => $v) {
-            $hintRaw = str_replace("{{{$k}}}", $v, $hintRaw);
+            $hintRaw = str_replace("{{{$k}}}", (string) $v, $hintRaw);
         }
         $hint = trim(preg_replace('/\{\{\w+\}\}/', '?', $hintRaw)) ?: null;
 
