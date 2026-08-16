@@ -107,34 +107,40 @@
             <div class="card">
                 <div class="sec-title">① კონტექსტი</div>
 
-                <div class="lbl">კლასი</div>
-                <select id="gradeFilter" class="fc" onchange="onGradeChange(this.value)">
-                    <option value="">— ყველა კლასი —</option>
-                    @foreach($grades as $grade)
-                    <option value="{{ $grade->id }}">{{ $grade->name }}</option>
-                    @endforeach
-                </select>
-
-                <div class="lbl">თემა</div>
-                <select name="topic_id" id="topicSelect" class="fc" required>
-                    <option value="">— აირჩიე —</option>
-                    @foreach($topics as $topic)
-                    <option value="{{ $topic->id }}" {{ old('topic_id', $template?->topic_id) == $topic->id ? 'selected' : '' }}>
-                        {{ $topic->name }}
-                    </option>
-                    @endforeach
-                </select>
-                @error('topic_id')<div class="err">{{ $message }}</div>@enderror
-
-                <div class="lbl">თემატიკა <span style="color:#94a3b8;font-size:0.6rem;">(სურვილისამებრ)</span></div>
-                <select name="theme_id" class="fc">
-                    <option value="">— სურვილისამებრ —</option>
-                    @foreach($themes as $theme)
-                    <option value="{{ $theme->id }}" {{ old('theme_id', $template?->theme_id) == $theme->id ? 'selected' : '' }}>
-                        {{ $theme->name }}
-                    </option>
-                    @endforeach
-                </select>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px;">
+                    <div>
+                        <div class="lbl">კლასი</div>
+                        <select id="gradeFilter" class="fc" style="margin-bottom:0;" onchange="onGradeChange(this.value)">
+                            <option value="">— კლასი —</option>
+                            @foreach($grades as $grade)
+                            <option value="{{ $grade->id }}">{{ $grade->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <div class="lbl">თემა</div>
+                        <select name="topic_id" id="topicSelect" class="fc" style="margin-bottom:0;" required>
+                            <option value="">— თემა —</option>
+                            @foreach($topics as $topic)
+                            <option value="{{ $topic->id }}" {{ old('topic_id', $template?->topic_id) == $topic->id ? 'selected' : '' }}>
+                                {{ $topic->name }}
+                            </option>
+                            @endforeach
+                        </select>
+                        @error('topic_id')<div class="err">{{ $message }}</div>@enderror
+                    </div>
+                    <div>
+                        <div class="lbl">თემატიკა <span style="color:#94a3b8;font-size:0.55rem;">(სურვილისამებრ)</span></div>
+                        <select name="theme_id" class="fc" style="margin-bottom:0;">
+                            <option value="">— თემატიკა —</option>
+                            @foreach($themes as $theme)
+                            <option value="{{ $theme->id }}" {{ old('theme_id', $template?->theme_id) == $theme->id ? 'selected' : '' }}>
+                                {{ $theme->name }}
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
 
                 <div class="lbl">სირთულე</div>
                 <div class="diff-row">
@@ -161,8 +167,21 @@
                 @endif
 
                 <div class="lbl">რიცხვის ცვლადები (კლიკით ჩასმა)</div>
-                <div class="chips" id="numTextChipBar">
-                    <span style="font-size:0.56rem;color:#94a3b8;padding:4px 2px;">② ცვლადების შემდეგ გამოჩნდება</span>
+                <div style="display:flex;align-items:flex-start;gap:6px;">
+                    <div class="chips" id="numTextChipBar" style="flex:1;min-width:0;margin-bottom:0;"></div>
+                    <button type="button" onclick="addNcRow()" style="flex-shrink:0;background:#f0fdf4;border:1px solid #bbf7d0;color:#059669;font-family:'Goldman',monospace;font-size:0.68rem;padding:3px 8px;border-radius:3px;cursor:pointer;line-height:1.4;white-space:nowrap;" title="ახალი ცვლადი">+</button>
+                </div>
+
+                <div class="lbl" style="margin-top:8px;">ოპერატორები</div>
+                <div class="chips">
+                    <span class="chip chip-op" onclick="insertTextOp('+')">+</span>
+                    <span class="chip chip-op" onclick="insertTextOp('−')">−</span>
+                    <span class="chip chip-op" onclick="insertTextOp('×')">×</span>
+                    <span class="chip chip-op" onclick="insertTextOp('÷')">÷</span>
+                    <span class="chip chip-op" onclick="insertTextOp('=')"> = </span>
+                    <span class="chip chip-op" onclick="insertTextOp('(')">( </span>
+                    <span class="chip chip-op" onclick="insertTextOp(')')"> )</span>
+                    <span class="chip chip-op" onclick="insertTextOp('?')">?</span>
                 </div>
 
                 <textarea name="template_text" id="templateText" class="fc" rows="4"
@@ -310,6 +329,13 @@ function insertVar(name) {
     const ins = OB + name + CB;
     ta.value = ta.value.slice(0, s) + ins + ta.value.slice(e);
     ta.selectionStart = ta.selectionEnd = s + ins.length;
+    ta.focus(); previewDebounce();
+}
+function insertTextOp(str) {
+    const ta = document.getElementById('templateText');
+    const s = ta.selectionStart, e = ta.selectionEnd;
+    ta.value = ta.value.slice(0, s) + str + ta.value.slice(e);
+    ta.selectionStart = ta.selectionEnd = s + str.length;
     ta.focus(); previewDebounce();
 }
 
