@@ -133,7 +133,8 @@
                     </div>
                     <div>
                         <div class="lbl">თემატიკა <span style="color:#94a3b8;font-size:0.55rem;">(სურვილისამებრ)</span></div>
-                        <select name="theme_id" class="fc" style="margin-bottom:0;">
+                        <select name="theme_id" id="themeSelect" class="fc" style="margin-bottom:0;"
+                            onchange="onThemeChange(this.value)">
                             <option value="">— თემატიკა —</option>
                             @foreach($themes as $theme)
                             <option value="{{ $theme->id }}" {{ old('theme_id', $template?->theme_id) == $theme->id ? 'selected' : '' }}>
@@ -159,26 +160,7 @@
             <div class="card">
                 <div class="sec-title">③ კითხვის ტექსტი</div>
 
-                @if(count($themeVarGroups) || count($themeVarStandalone))
-                <div class="lbl">სტრიქონის ცვლადები</div>
-                @foreach($themeVarGroups as $grp)
-                <div style="margin-bottom:6px;">
-                    <div style="font-size:0.54rem;color:#7c3aed;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:3px;">{{ $grp['name'] }}</div>
-                    <div class="chips" style="margin-bottom:0;">
-                        @foreach($grp['slots'] as $slot)
-                        <span class="chip chip-theme" onclick="insertVar('{{ $slot }}')">&#123;&#123;{{ $slot }}&#125;&#125;</span>
-                        @endforeach
-                    </div>
-                </div>
-                @endforeach
-                @if(count($themeVarStandalone))
-                <div class="chips">
-                    @foreach($themeVarStandalone as $varName)
-                    <span class="chip chip-theme" onclick="insertVar('{{ $varName }}')">&#123;&#123;{{ $varName }}&#125;&#125;</span>
-                    @endforeach
-                </div>
-                @endif
-                @endif
+                <div id="strVarSection"></div>
 
                 <div class="lbl">რიცხვის ცვლადები (კლიკით ჩასმა)</div>
                 <div style="display:flex;align-items:flex-start;gap:6px;">
@@ -273,53 +255,15 @@
 
                     {{-- Text UI --}}
                     <div id="txtAnsUi" style="display:none;">
-                        @php
-                            $isTextEdit = old('answer_type', $template?->answer_type) === 'text';
-                            $editFormula = old('correct_formula', $template?->correct_formula);
-                        @endphp
                         <div class="lbl">სწორი პასუხი — ცვლადი</div>
                         <select id="textCorrectVar" class="fc" onchange="syncAll();previewDebounce();">
                             <option value="">— ცვლადი —</option>
-                            @foreach($themeVarGroups as $grp)
-                            <optgroup label="{{ $grp['name'] }}">
-                                @foreach($grp['slots'] as $slot)
-                                <option value="{{ $slot }}" {{ $isTextEdit && $editFormula === $slot ? 'selected' : '' }}>{{ $slot }}</option>
-                                @endforeach
-                            </optgroup>
-                            @endforeach
-                            @if(count($themeVarStandalone))
-                            <optgroup label="სხვა">
-                                @foreach($themeVarStandalone as $v)
-                                <option value="{{ $v }}" {{ $isTextEdit && $editFormula === $v ? 'selected' : '' }}>{{ $v }}</option>
-                                @endforeach
-                            </optgroup>
-                            @endif
                         </select>
-                        @if(!count($themeVarNames))
-                        <div style="font-size:0.6rem;color:#94a3b8;margin-top:-6px;margin-bottom:10px;">სტრიქონის ცვლადები არ არის — თემატიკაში დაამატეთ</div>
-                        @endif
+                        <div id="noVarsHint" style="display:none;font-size:0.6rem;color:#94a3b8;margin-top:-6px;margin-bottom:10px;">სტრიქონის ცვლადები არ არის — თემატიკაში დაამატეთ</div>
 
                         <div class="lbl" style="margin-top:4px;">ვარიანტების ცვლადები <span style="color:#94a3b8;font-size:0.6rem;">(კლიკით)</span></div>
-                        <div id="textOptChips">
-                            @foreach($themeVarGroups as $grp)
-                            <div style="font-size:0.52rem;color:#7c3aed;letter-spacing:0.1em;text-transform:uppercase;margin:4px 0 2px;">{{ $grp['name'] }}</div>
-                            <div class="chips" style="margin-bottom:4px;">
-                                @foreach($grp['slots'] as $slot)
-                                <span class="chip chip-txt text-opt-chip" data-varname="{{ $slot }}" onclick="toggleTextOpt(this)">{{ $slot }}</span>
-                                @endforeach
-                            </div>
-                            @endforeach
-                            @if(count($themeVarStandalone))
-                            <div class="chips">
-                                @foreach($themeVarStandalone as $v)
-                                <span class="chip chip-txt text-opt-chip" data-varname="{{ $v }}" onclick="toggleTextOpt(this)">{{ $v }}</span>
-                                @endforeach
-                            </div>
-                            @endif
-                        </div>
-                        @if(!count($themeVarNames))
-                        <div style="font-size:0.6rem;color:#94a3b8;margin-top:4px;">ცვლადები არ არის</div>
-                        @endif
+                        <div id="textOptChips"></div>
+                        <div id="noVarsHint2" style="display:none;font-size:0.6rem;color:#94a3b8;margin-top:4px;">ცვლადები არ არის</div>
                     </div>
 
                     <input type="hidden" name="correct_formula" id="correctFormulaHidden"
@@ -360,14 +304,17 @@
 
 <script>
 const _KS = {
-    numConfig:     @json($template?->num_config ?? []),
-    conditions:    @json($template?->conditions ?? []),
-    themeVarMap:   @json($themeVarMap),
-    topicsByGrade: @json($topics->groupBy('grade_id')->map(fn($g) => $g->map(fn($t) => ['id' => $t->id, 'name' => $t->name])->values())),
-    selectedTopic: {{ (int)($template?->topic_id ?? 0) }},
-    distractors:   @json($template?->distractors ?? []),
-    answerType:    '{{ old('answer_type', $template?->answer_type ?? 'numeric') }}',
-    varGroups:     @json($themeVarGroups),
+    numConfig:          @json($template?->num_config ?? []),
+    conditions:         @json($template?->conditions ?? []),
+    themeVarMap:        {},
+    varGroups:          [],
+    topicsByGrade:      @json($topics->groupBy('grade_id')->map(fn($g) => $g->map(fn($t) => ['id' => $t->id, 'name' => $t->name])->values())),
+    selectedTopic:      {{ (int)($template?->topic_id ?? 0) }},
+    selectedTheme:      {{ (int)($template?->theme_id ?? 0) }},
+    distractors:        @json($template?->distractors ?? []),
+    answerType:         '{{ old('answer_type', $template?->answer_type ?? 'numeric') }}',
+    editCorrectFormula: @json(old('correct_formula', $template?->correct_formula ?? '')),
+    allThemesData:      @json($allThemesData),
 };
 </script>
 @verbatim
@@ -387,6 +334,86 @@ function onGradeChange(gradeId) {
         if (t.id === prev || t.id === _KS.selectedTopic) opt.selected = true;
         sel.add(opt);
     });
+}
+
+// ── Theme → variable chips
+function onThemeChange(themeId) {
+    const data = (themeId && _KS.allThemesData[themeId])
+        ? _KS.allThemesData[themeId]
+        : { groups: [], standalone: [], varMap: {} };
+    _KS.varGroups    = data.groups;
+    _KS.themeVarMap  = data.varMap;
+    renderStrVarSection(data);
+    renderTextCorrectVar(data);
+    renderTextOptChips(data);
+    previewDebounce();
+}
+function renderStrVarSection(data) {
+    const el = document.getElementById('strVarSection');
+    if (!data.groups.length && !data.standalone.length) { el.innerHTML = ''; return; }
+    let html = '<div class="lbl">სტრიქონის ცვლადები</div>';
+    data.groups.forEach(function(grp) {
+        html += '<div style="margin-bottom:6px;">'
+            + '<div style="font-size:0.54rem;color:#7c3aed;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:3px;">' + grp.name + '</div>'
+            + '<div class="chips" style="margin-bottom:0;">'
+            + grp.slots.map(function(s) {
+                return '<span class="chip chip-theme" onclick="insertVar(\'' + s + '\')">' + OB + s + CB + '</span>';
+            }).join('')
+            + '</div></div>';
+    });
+    if (data.standalone.length) {
+        html += '<div class="chips">'
+            + data.standalone.map(function(v) {
+                return '<span class="chip chip-theme" onclick="insertVar(\'' + v + '\')">' + OB + v + CB + '</span>';
+            }).join('')
+            + '</div>';
+    }
+    el.innerHTML = html;
+}
+function renderTextCorrectVar(data) {
+    const sel = document.getElementById('textCorrectVar');
+    const prevVal = sel.value;
+    sel.innerHTML = '<option value="">— ცვლადი —</option>';
+    data.groups.forEach(function(grp) {
+        const og = document.createElement('optgroup');
+        og.label = grp.name;
+        grp.slots.forEach(function(s) { og.appendChild(new Option(s, s)); });
+        sel.appendChild(og);
+    });
+    if (data.standalone.length) {
+        const og = document.createElement('optgroup');
+        og.label = 'სხვა';
+        data.standalone.forEach(function(v) { og.appendChild(new Option(v, v)); });
+        sel.appendChild(og);
+    }
+    if (prevVal) sel.value = prevVal;
+    const hasVars = data.groups.length || data.standalone.length;
+    var hint = document.getElementById('noVarsHint');
+    if (hint) hint.style.display = hasVars ? 'none' : '';
+    syncAll();
+}
+function renderTextOptChips(data) {
+    const el = document.getElementById('textOptChips');
+    const prevSel = new Set(Array.from(document.querySelectorAll('.text-opt-chip.sel')).map(function(c) { return c.dataset.varname; }));
+    let html = '';
+    data.groups.forEach(function(grp) {
+        html += '<div style="font-size:0.52rem;color:#7c3aed;letter-spacing:0.1em;text-transform:uppercase;margin:4px 0 2px;">' + grp.name + '</div>'
+            + '<div class="chips" style="margin-bottom:4px;">'
+            + grp.slots.map(function(s) {
+                return '<span class="chip chip-txt text-opt-chip' + (prevSel.has(s) ? ' sel' : '') + '" data-varname="' + s + '" onclick="toggleTextOpt(this)">' + s + '</span>';
+            }).join('')
+            + '</div>';
+    });
+    if (data.standalone.length) {
+        html += '<div class="chips">'
+            + data.standalone.map(function(v) {
+                return '<span class="chip chip-txt text-opt-chip' + (prevSel.has(v) ? ' sel' : '') + '" data-varname="' + v + '" onclick="toggleTextOpt(this)">' + v + '</span>';
+            }).join('')
+            + '</div>';
+    }
+    el.innerHTML = html;
+    var hint2 = document.getElementById('noVarsHint2');
+    if (hint2) hint2.style.display = (data.groups.length || data.standalone.length) ? 'none' : '';
 }
 
 // ── Difficulty
@@ -819,6 +846,10 @@ document.getElementById('condRows').addEventListener('focusin', function(e) {
 
 // ── Init
 (function init() {
+    // Load vars for the currently selected theme (edit mode or old() restore)
+    const themeEl = document.getElementById('themeSelect');
+    if (themeEl && themeEl.value) onThemeChange(themeEl.value);
+
     // Restore grade filter based on selected topic (edit / validation failure)
     const curTopicId = +document.getElementById('topicSelect').value;
     if (curTopicId) {
@@ -846,12 +877,17 @@ document.getElementById('condRows').addEventListener('focusin', function(e) {
     document.getElementById('atBtnNum').classList.toggle('at-sel', !isTxtInit);
     document.getElementById('atBtnTxt').classList.toggle('at-sel', isTxtInit);
 
-    // For text mode: restore selected option vars from distractors
-    if (isTxtInit && _KS.distractors && Array.isArray(_KS.distractors.vars)) {
-        _KS.distractors.vars.forEach(varName => {
-            const chip = document.querySelector('.text-opt-chip[data-varname="' + varName + '"]');
-            if (chip) chip.classList.add('sel');
-        });
+    // For text mode: restore correct var + selected option vars
+    if (isTxtInit) {
+        if (_KS.editCorrectFormula) {
+            document.getElementById('textCorrectVar').value = _KS.editCorrectFormula;
+        }
+        if (_KS.distractors && Array.isArray(_KS.distractors.vars)) {
+            _KS.distractors.vars.forEach(function(varName) {
+                const chip = document.querySelector('.text-opt-chip[data-varname="' + varName + '"]');
+                if (chip) chip.classList.add('sel');
+            });
+        }
     }
 
     const numCfg = _KS.numConfig;

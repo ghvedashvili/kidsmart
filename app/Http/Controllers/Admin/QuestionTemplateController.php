@@ -39,14 +39,12 @@ class QuestionTemplateController extends Controller
     public function create()
     {
         return view('admin.questions.form', [
-            'template'           => null,
-            'grades'             => Grade::orderBy('number')->get(),
-            'topics'             => Topic::with('grade')->orderBy('grade_id')->get(),
-            'themes'             => Theme::orderBy('name')->get(),
-            'themeVarNames'      => $this->themeVarNames(),
-            'themeVarMap'        => $this->themeVarMap(),
-            'themeVarGroups'     => $this->themeVarGroups(),
-            'themeVarStandalone' => $this->themeVarStandalone(),
+            'template'      => null,
+            'grades'        => Grade::orderBy('number')->get(),
+            'topics'        => Topic::with('grade')->orderBy('grade_id')->get(),
+            'themes'        => Theme::orderBy('name')->get(),
+            'themeVarMap'   => $this->themeVarMap(),
+            'allThemesData' => $this->allThemesData(),
         ]);
     }
 
@@ -60,14 +58,12 @@ class QuestionTemplateController extends Controller
     public function edit(QuestionTemplate $question)
     {
         return view('admin.questions.form', [
-            'template'           => $question->load('topic'),
-            'grades'             => Grade::orderBy('number')->get(),
-            'topics'             => Topic::with('grade')->orderBy('grade_id')->get(),
-            'themes'             => Theme::orderBy('name')->get(),
-            'themeVarNames'      => $this->themeVarNames(),
-            'themeVarMap'        => $this->themeVarMap(),
-            'themeVarGroups'     => $this->themeVarGroups(),
-            'themeVarStandalone' => $this->themeVarStandalone(),
+            'template'      => $question->load('topic'),
+            'grades'        => Grade::orderBy('number')->get(),
+            'topics'        => Topic::with('grade')->orderBy('grade_id')->get(),
+            'themes'        => Theme::orderBy('name')->get(),
+            'themeVarMap'   => $this->themeVarMap(),
+            'allThemesData' => $this->allThemesData(),
         ]);
     }
 
@@ -109,6 +105,29 @@ class QuestionTemplateController extends Controller
     {
         $question->delete();
         return back()->with('success', 'წაიშალა');
+    }
+
+    private function allThemesData(): array
+    {
+        $themes = Theme::with(['varGroups.variables', 'variables' => fn($q) => $q->whereNull('group_id')])->get();
+        $result = [];
+        foreach ($themes as $theme) {
+            $groups = [];
+            $varMap = [];
+            foreach ($theme->varGroups as $g) {
+                $slots = $g->variables->pluck('variable_name')->all();
+                $groups[] = ['name' => $g->name, 'pool' => $g->values ?? [], 'slots' => $slots];
+                foreach ($slots as $slot) {
+                    $varMap[$slot] = $g->values ?? [];
+                }
+            }
+            $standalone = $theme->variables->pluck('variable_name')->sort()->values()->all();
+            foreach ($theme->variables as $v) {
+                $varMap[$v->variable_name] = $v->values ?? [];
+            }
+            $result[$theme->id] = ['groups' => $groups, 'standalone' => $standalone, 'varMap' => $varMap];
+        }
+        return $result;
     }
 
     private function themeVarNames(): array
