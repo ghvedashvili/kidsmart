@@ -423,8 +423,13 @@
                     <div class="mlbl">თემატიკა</div>
                     <div class="mrow">
                         @foreach($themes as $theme)
+                        @if($theme->is_active)
                         <label class="mchip {{ in_array($theme->id, $eThemeIds) ? 'sel' : '' }}"
                             onclick="chipMulti(this,'theme_ids[]','{{ $theme->id }}')">{{ $theme->icon }} {{ $theme->name }}</label>
+                        @else
+                        <span class="mchip {{ in_array($theme->id, $eThemeIds) ? 'sel' : '' }}"
+                            style="opacity:0.4;cursor:default;pointer-events:none;">{{ $theme->icon }} {{ $theme->name }}<span style="font-size:0.75em;margin-left:4px;">მალე</span></span>
+                        @endif
                         @endforeach
                     </div>
                     @foreach($themes as $theme)
@@ -710,7 +715,7 @@
             {{-- Tests per day --}}
             <div class="mlbl">ტესტი დღეში</div>
             <div class="mrow" id="tpwRow">
-                @for($i=1; $i<=7; $i++)
+                @for($i=1; $i<=5; $i++)
                 <label class="mchip {{ old('tests_per_week', 3) == $i ? 'sel' : '' }}"
                     onclick="chipSingle(this,'tpw_input','{{ $i }}')">{{ $i }}</label>
                 @endfor
@@ -729,10 +734,14 @@
                 @php
                     $isSelected = count($addThemeOld)
                         ? in_array($theme->id, $addThemeOld)
-                        : ($theme->id == $addDefaultThemeId);
+                        : ($theme->id == $addDefaultThemeId && $theme->is_active);
                 @endphp
+                @if($theme->is_active)
                 <label class="mchip {{ $isSelected ? 'sel' : '' }}"
                     onclick="chipSingleTheme(this, '{{ $theme->id }}')">{{ $theme->icon }} {{ $theme->name }}</label>
+                @else
+                <span class="mchip" style="opacity:0.4;cursor:default;pointer-events:none;">{{ $theme->icon }} {{ $theme->name }}<span style="font-size:0.75em;margin-left:4px;color:#aaa;">მალე</span></span>
+                @endif
                 @endforeach
             </div>
             <input type="hidden" name="theme_ids[]" id="add_theme_input"

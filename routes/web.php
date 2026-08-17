@@ -129,9 +129,10 @@ Route::middleware(['auth', 'admin', 'role.permission'])->group(function () {
     Route::delete('/admin/grades/{grade}',    [GradeController::class, 'destroy'])->name('admin.grades.destroy');
 
     // თემები
-    Route::get('/admin/themes',               [ThemeController::class, 'index'])->name('admin.themes.index');
-    Route::post('/admin/themes',              [ThemeController::class, 'store'])->name('admin.themes.store');
-    Route::delete('/admin/themes/{theme}',    [ThemeController::class, 'destroy'])->name('admin.themes.destroy');
+    Route::get('/admin/themes',                      [ThemeController::class, 'index'])->name('admin.themes.index');
+    Route::post('/admin/themes',                     [ThemeController::class, 'store'])->name('admin.themes.store');
+    Route::patch('/admin/themes/{theme}/toggle',     [ThemeController::class, 'toggleActive'])->name('admin.themes.toggle');
+    Route::delete('/admin/themes/{theme}',           [ThemeController::class, 'destroy'])->name('admin.themes.destroy');
     Route::get('/admin/themes/{theme}/vars',        [ThemeController::class, 'showVariables'])->name('admin.themes.variables');
     Route::post('/admin/themes/{theme}/vars',       [ThemeController::class, 'storeVariable'])->name('admin.themes.variables.store');
     Route::post('/admin/themes/{theme}/groups',     [ThemeController::class, 'storeGroup'])->name('admin.themes.groups.store');

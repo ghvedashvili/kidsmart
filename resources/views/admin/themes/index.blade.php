@@ -15,6 +15,9 @@
     .row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.8rem; color: #374151; }
     .row:last-child { border-bottom: none; }
     .msg { font-size: 0.75rem; color: #059669; margin-bottom: 16px; }
+    .toggle-btn { display:inline-flex;align-items:center;gap:5px;font-family:'Goldman',monospace;font-size:0.64rem;letter-spacing:0.06em;border-radius:20px;padding:4px 12px;cursor:pointer;border:none;transition:all 0.2s;white-space:nowrap; }
+    .toggle-btn.on  { background:#dcfce7;color:#15803d; }
+    .toggle-btn.off { background:#f1f5f9;color:#94a3b8; }
     @media (max-width: 640px) {
         .aw { padding: 14px 10px 48px; }
         .card-dark { padding: 14px; }
@@ -45,13 +48,19 @@
         @forelse($themes as $theme)
         <div class="row">
             <div style="display:flex;align-items:center;gap:12px;">
-                <span style="font-size:1.3rem;">{{ $theme->icon }}</span>
+                <span style="font-size:1.3rem;{{ !$theme->is_active ? 'opacity:0.4;' : '' }}">{{ $theme->icon }}</span>
                 <div>
-                    <div style="color:#aaa;">{{ $theme->name }}</div>
-                    <div style="font-size:0.68rem;color:#444;">{{ $theme->variables_count }} ცვლადი</div>
+                    <div style="color:{{ $theme->is_active ? '#374151' : '#aaa' }};">{{ $theme->name }}</div>
+                    <div style="font-size:0.68rem;color:#aaa;">{{ $theme->variables_count }} ცვლადი</div>
                 </div>
             </div>
             <div style="display:flex;align-items:center;gap:10px;">
+                <form method="POST" action="{{ route('admin.themes.toggle', $theme) }}">
+                    @csrf @method('PATCH')
+                    <button type="submit" class="toggle-btn {{ $theme->is_active ? 'on' : 'off' }}">
+                        {{ $theme->is_active ? '● აქტიური' : '○ გათიშული' }}
+                    </button>
+                </form>
                 <a href="{{ route('admin.themes.variables', $theme) }}" class="btn" style="padding:5px 14px;font-size:0.7rem;">ცვლადები →</a>
                 <form method="POST" action="{{ route('admin.themes.destroy', $theme) }}">
                     @csrf @method('DELETE')

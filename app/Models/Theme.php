@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Theme extends Model
 {
-    protected $fillable = ['name', 'icon'];
+    protected $fillable = ['name', 'icon', 'is_active'];
+
+    protected $casts = ['is_active' => 'boolean'];
 
     public function variables(): HasMany
     {

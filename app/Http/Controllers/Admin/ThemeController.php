@@ -25,6 +25,12 @@ class ThemeController extends Controller
         return back()->with('success', 'თემა დაემატა');
     }
 
+    public function toggleActive(Theme $theme)
+    {
+        $theme->update(['is_active' => ! $theme->is_active]);
+        return back()->with('success', $theme->name . ($theme->is_active ? ' გააქტიურდა' : ' გაითიშა'));
+    }
+
     public function destroy(Theme $theme)
     {
         $theme->delete();

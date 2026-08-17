@@ -16,7 +16,7 @@ class ChildController extends Controller
             'name'           => 'required|string|max:50',
             'grade_id'       => 'required|exists:grades,id',
             'difficulty'     => 'nullable|integer|min:1|max:5',
-            'tests_per_week' => 'nullable|integer|min:1|max:7',
+            'tests_per_week' => 'nullable|integer|min:1|max:5',
             'theme_ids'      => 'nullable|array',
             'theme_ids.*'    => 'exists:themes,id',
             'topic_ids'      => 'nullable|array',
