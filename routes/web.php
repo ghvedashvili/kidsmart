@@ -69,7 +69,7 @@ Route::middleware(['auth'])->post('/children/link', [ChildController::class, 'li
 Route::middleware(['auth', 'role.permission'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard', [
-            'grades'         => Grade::orderBy('number')->get(),
+            'grades'         => Grade::where('is_active', true)->orderBy('number')->get(),
             'themes'         => Theme::all(),
             'topics'         => Topic::with('grade')->orderBy('grade_id')->get(),
             'defaultThemeId' => Theme::where('name', 'სტანდარტი')->value('id'),
@@ -124,9 +124,10 @@ Route::middleware(['auth', 'admin', 'role.permission'])->group(function () {
     Route::get('/admin/users/{user}/subscriptions', [SubscriptionController::class, 'history'])->name('admin.subscriptions.history');
 
     // კლასები
-    Route::get('/admin/grades',               [GradeController::class, 'index'])->name('admin.grades.index');
-    Route::post('/admin/grades',              [GradeController::class, 'store'])->name('admin.grades.store');
-    Route::delete('/admin/grades/{grade}',    [GradeController::class, 'destroy'])->name('admin.grades.destroy');
+    Route::get('/admin/grades',                    [GradeController::class, 'index'])->name('admin.grades.index');
+    Route::post('/admin/grades',                   [GradeController::class, 'store'])->name('admin.grades.store');
+    Route::patch('/admin/grades/{grade}/toggle',   [GradeController::class, 'toggleActive'])->name('admin.grades.toggle');
+    Route::delete('/admin/grades/{grade}',         [GradeController::class, 'destroy'])->name('admin.grades.destroy');
 
     // თემები
     Route::get('/admin/themes',                      [ThemeController::class, 'index'])->name('admin.themes.index');

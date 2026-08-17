@@ -23,6 +23,12 @@ class GradeController extends Controller
         return back()->with('success', 'კლასი დაემატა');
     }
 
+    public function toggleActive(Grade $grade)
+    {
+        $grade->update(['is_active' => ! $grade->is_active]);
+        return back()->with('success', $grade->name . ($grade->is_active ? ' გააქტიურდა' : ' გაითიშა'));
+    }
+
     public function destroy(Grade $grade)
     {
         $grade->delete();

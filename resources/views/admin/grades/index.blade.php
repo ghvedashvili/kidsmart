@@ -15,6 +15,9 @@
     .row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.8rem; color: #374151; }
     .row:last-child { border-bottom: none; }
     .msg { font-size: 0.75rem; color: #059669; margin-bottom: 16px; }
+    .toggle-btn { display:inline-flex;align-items:center;gap:5px;font-family:'Goldman',monospace;font-size:0.64rem;letter-spacing:0.06em;border-radius:20px;padding:4px 12px;cursor:pointer;border:none;transition:all 0.2s;white-space:nowrap; }
+    .toggle-btn.on  { background:#dcfce7;color:#15803d; }
+    .toggle-btn.off { background:#f1f5f9;color:#94a3b8; }
     @media (max-width: 640px) {
         .aw { padding: 14px 10px 48px; }
         .card-dark { padding: 14px; }
@@ -48,11 +51,21 @@
         <div class="card-label">კლასები · {{ $grades->count() }}</div>
         @forelse($grades as $grade)
         <div class="row">
-            <span><span style="color:#555;margin-right:10px;">{{ $grade->number }}</span>{{ $grade->name }}</span>
-            <form method="POST" action="{{ route('admin.grades.destroy', $grade) }}">
-                @csrf @method('DELETE')
-                <button type="submit" class="btn-del" onclick="return confirm('წაიშალოს?')">✕</button>
-            </form>
+            <span style="{{ !$grade->is_active ? 'color:#bbb;' : '' }}">
+                <span style="margin-right:10px;">{{ $grade->number }}</span>{{ $grade->name }}
+            </span>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <form method="POST" action="{{ route('admin.grades.toggle', $grade) }}">
+                    @csrf @method('PATCH')
+                    <button type="submit" class="toggle-btn {{ $grade->is_active ? 'on' : 'off' }}">
+                        {{ $grade->is_active ? '● აქტიური' : '○ გათიშული' }}
+                    </button>
+                </form>
+                <form method="POST" action="{{ route('admin.grades.destroy', $grade) }}">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="btn-del" onclick="return confirm('წაიშალოს?')">✕</button>
+                </form>
+            </div>
         </div>
         @empty
         <div style="color:#444;font-size:0.78rem;">კლასი არ არის</div>

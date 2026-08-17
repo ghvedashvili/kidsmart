@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Grade extends Model
 {
-    protected $fillable = ['number', 'name'];
+    protected $fillable = ['number', 'name', 'is_active'];
+
+    protected $casts = ['is_active' => 'boolean'];
 
     public function topics(): HasMany
     {
