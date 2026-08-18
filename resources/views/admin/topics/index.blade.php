@@ -29,6 +29,16 @@
     .btn-save:hover { border-color:#94a3b8; }
     .btn-cancel-row { background:none; border:none; color:#cbd5e1; font-size:0.72rem; cursor:pointer; padding:0 4px; }
     .btn-cancel-row:hover { color:#64748b; }
+    .btn-vid { background:none; border:1px solid #e2e8f0; border-radius:3px; color:#64748b; font-family:'Goldman',monospace; font-size:0.6rem; cursor:pointer; padding:2px 7px; transition:all 0.15s; white-space:nowrap; }
+    .btn-vid:hover { border-color:#6366f1; color:#6366f1; }
+    .btn-vid.has { border-color:#c7d2fe; background:#eef2ff; color:#4f46e5; }
+    .vid-panel { display:none; padding:10px 0 4px; border-top:1px solid #f1f5f9; }
+    .vid-item { display:flex; align-items:center; gap:8px; padding:5px 0; font-size:0.75rem; color:#374151; }
+    .vid-thumb { width:56px; height:36px; object-fit:cover; border-radius:3px; flex-shrink:0; }
+    .vid-title { flex:1; font-size:0.72rem; color:#374151; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .vid-id { font-size:0.6rem; color:#94a3b8; }
+    .vid-add-form { display:flex; gap:6px; align-items:center; margin-top:8px; flex-wrap:wrap; }
+    .vid-err { font-size:0.62rem; color:#e74c3c; margin-top:4px; }
 
     /* add modal */
     .tp-overlay { position:fixed; inset:0; background:rgba(15,23,42,0.35); display:flex; align-items:center; justify-content:center; z-index:100000; opacity:0; pointer-events:none; transition:opacity 0.15s; }
@@ -111,30 +121,59 @@
                 <div class="grade-group grade-hdr" data-grade="{{ $topic->grade_id }}">{{ $topic->grade->name }}</div>
                 @php $lastGrade = $topic->grade_id; @endphp
             @endif
-            <div class="row topic-row" id="topic-row-{{ $topic->id }}" data-grade="{{ $topic->grade_id }}">
-                <div class="row-view">
-                    <span>{{ $topic->name }}</span>
-                    <span class="badge">{{ $topic->question_templates_count }} შაბლონი</span>
+            <div class="row topic-row" id="topic-row-{{ $topic->id }}" data-grade="{{ $topic->grade_id }}" style="flex-direction:column;align-items:stretch;gap:0;">
+                <div style="display:flex;align-items:center;gap:4px;">
+                    <div class="row-view" style="flex:1;">
+                        <span>{{ $topic->name }}</span>
+                        <span class="badge">{{ $topic->question_templates_count }} შაბლონი</span>
+                    </div>
+                    <button type="button" class="btn-vid {{ $topic->videos->count() ? 'has' : '' }}"
+                        onclick="toggleVidPanel({{ $topic->id }})">
+                        📹 {{ $topic->videos->count() ?: '' }}
+                    </button>
+                    <div style="display:flex;gap:2px;flex-shrink:0;">
+                        <button type="button" class="btn-edit" onclick="editTopic({{ $topic->id }})">✎</button>
+                        <form method="POST" action="{{ route('admin.topics.destroy', $topic) }}" style="display:inline;">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="btn-del" onclick="return confirm('წაიშალოს?')">✕</button>
+                        </form>
+                    </div>
+                    <div class="row-edit" style="flex:1;">
+                        <form method="POST" action="{{ route('admin.topics.update', $topic) }}" style="display:flex;gap:6px;flex:1;align-items:center;">
+                            @csrf @method('PUT')
+                            <select name="grade_id" class="fc-inline" required>
+                                @foreach($grades as $grade)
+                                <option value="{{ $grade->id }}" {{ $topic->grade_id == $grade->id ? 'selected' : '' }}>{{ $grade->name }}</option>
+                                @endforeach
+                            </select>
+                            <input type="text" name="name" class="fc-inline" style="flex:1;" value="{{ $topic->name }}" required maxlength="100">
+                            <button type="submit" class="btn-save">შენახვა</button>
+                        </form>
+                        <button type="button" class="btn-cancel-row" onclick="cancelTopic({{ $topic->id }})">✕</button>
+                    </div>
                 </div>
-                <div style="display:flex;gap:2px;flex-shrink:0;">
-                    <button type="button" class="btn-edit" onclick="editTopic({{ $topic->id }})">✎</button>
-                    <form method="POST" action="{{ route('admin.topics.destroy', $topic) }}" style="display:inline;">
-                        @csrf @method('DELETE')
-                        <button type="submit" class="btn-del" onclick="return confirm('წაიშალოს?')">✕</button>
+                {{-- Video panel --}}
+                <div class="vid-panel" id="vp{{ $topic->id }}">
+                    @foreach($topic->videos as $vid)
+                    <div class="vid-item">
+                        <img src="{{ $vid->thumbnailUrl() }}" class="vid-thumb" alt="">
+                        <div style="flex:1;min-width:0;">
+                            <div class="vid-title">{{ $vid->title ?: $vid->youtube_id }}</div>
+                            <div class="vid-id">{{ $vid->youtube_id }}</div>
+                        </div>
+                        <form method="POST" action="{{ route('admin.topic.videos.destroy', $vid) }}" style="display:inline;">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="btn-del" onclick="return confirm('წაიშალოს?')">✕</button>
+                        </form>
+                    </div>
+                    @endforeach
+                    <form method="POST" action="{{ route('admin.topic.videos.store', $topic) }}" class="vid-add-form">
+                        @csrf
+                        <input type="text" name="youtube_url" class="fc-inline" placeholder="YouTube URL ან ID" style="flex:1;min-width:160px;" required>
+                        <input type="text" name="title" class="fc-inline" placeholder="სათაური (სურვილისამებრ)" style="flex:1;min-width:140px;">
+                        <button type="submit" class="btn-save">+ ვიდეო</button>
                     </form>
-                </div>
-                <div class="row-edit">
-                    <form method="POST" action="{{ route('admin.topics.update', $topic) }}" style="display:flex;gap:6px;flex:1;align-items:center;">
-                        @csrf @method('PUT')
-                        <select name="grade_id" class="fc-inline" required>
-                            @foreach($grades as $grade)
-                            <option value="{{ $grade->id }}" {{ $topic->grade_id == $grade->id ? 'selected' : '' }}>{{ $grade->name }}</option>
-                            @endforeach
-                        </select>
-                        <input type="text" name="name" class="fc-inline" style="flex:1;" value="{{ $topic->name }}" required maxlength="100">
-                        <button type="submit" class="btn-save">შენახვა</button>
-                    </form>
-                    <button type="button" class="btn-cancel-row" onclick="cancelTopic({{ $topic->id }})">✕</button>
+                    @error('youtube_url')<div class="vid-err">{{ $message }}</div>@enderror
                 </div>
             </div>
         @empty
@@ -224,6 +263,12 @@ function filterGrade(gradeId) {
 // ── Inline edit
 function editTopic(id) { document.getElementById('topic-row-' + id).classList.add('editing'); }
 function cancelTopic(id) { document.getElementById('topic-row-' + id).classList.remove('editing'); }
+
+// ── Video panel toggle
+function toggleVidPanel(id) {
+    const el = document.getElementById('vp' + id);
+    el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
 
 // ── Add modal
 function openAddModal() {

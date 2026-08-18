@@ -17,4 +17,9 @@ class TestQuestion extends Model
     {
         return $this->belongsTo(Test::class);
     }
+
+    public function template(): BelongsTo
+    {
+        return $this->belongsTo(QuestionTemplate::class, 'template_id');
+    }
 }

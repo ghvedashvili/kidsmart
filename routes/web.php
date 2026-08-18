@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\GradeController;
 use App\Http\Controllers\Admin\ThemeController;
 use App\Models\ThemeVarGroup;
 use App\Http\Controllers\Admin\TopicController;
+use App\Http\Controllers\Admin\TopicVideoController;
 use App\Http\Controllers\Admin\QuestionTemplateController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RolePermissionController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\SubscriptionController;
 use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\MarketController;
+use App\Http\Controllers\VideoController;
 use App\Http\Controllers\ChildController;
 use App\Http\Controllers\ChildSettingsController;
 use App\Http\Controllers\TestController;
@@ -91,6 +93,10 @@ Route::middleware(['auth', 'role.permission'])->group(function () {
     // მიღწევები
     Route::get('/achievements', [AchievementController::class, 'index'])->name('achievements');
 
+    // ვიდეოთეკა (ბავშვი)
+    Route::get('/videos', [VideoController::class, 'library'])->name('videos.library');
+    Route::get('/my/tests/{test}', [VideoController::class, 'myTest'])->name('my.test.show');
+
     // მარკეტი — parent manages
     Route::get('/children/{child}/market',              [MarketController::class, 'index'])->name('market.index');
     Route::post('/children/{child}/market/items',       [MarketController::class, 'store'])->name('market.store');
@@ -157,6 +163,10 @@ Route::middleware(['auth', 'admin', 'role.permission'])->group(function () {
     Route::put('/admin/vars/{variable}',            [ThemeController::class, 'updateVariable'])->name('admin.themes.variables.update');
     Route::delete('/admin/vars/{variable}',         [ThemeController::class, 'destroyVariable'])->name('admin.themes.variables.destroy');
     Route::delete('/admin/var-groups/{group}',      [ThemeController::class, 'destroyGroup'])->name('admin.themes.groups.destroy');
+
+    // თოპიქ-ვიდეოები
+    Route::post('/admin/topics/{topic}/videos',   [TopicVideoController::class, 'store'])->name('admin.topic.videos.store');
+    Route::delete('/admin/topic-videos/{video}',  [TopicVideoController::class, 'destroy'])->name('admin.topic.videos.destroy');
 
     // თოპიქები
     Route::get('/admin/topics',               [TopicController::class, 'index'])->name('admin.topics.index');

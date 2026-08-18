@@ -588,6 +588,21 @@
         </a>
         @endif
 
+        {{-- ვიდეოთეკა --}}
+        @php $hasVids = \App\Models\Topic::where('grade_id', $setting?->grade_id)->whereHas('videos')->exists(); @endphp
+        @if($hasVids)
+        <a href="{{ route('videos.library') }}" style="display:flex;align-items:center;justify-content:space-between;width:100%;background:linear-gradient(135deg,#ede9fe,#ddd6fe);border-radius:16px;padding:14px 18px;text-decoration:none;border:1.5px solid #ddd6fe;">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:1.5rem;">📹</span>
+                <div>
+                    <div style="font-family:'Fredoka One',cursive;font-size:0.95rem;color:#5b21b6;">ვიდეოთეკა</div>
+                    <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:0.62rem;color:#7c3aed;">ახსნა-განმარტებითი ვიდეოები</div>
+                </div>
+            </div>
+            <span style="color:#7c3aed;font-size:1rem;">→</span>
+        </a>
+        @endif
+
         {{-- ბოლო ტესტი --}}
         @if($lastCompleted)
         @php $pct = round($lastCompleted->correct_count / $lastCompleted->total_questions * 100); @endphp

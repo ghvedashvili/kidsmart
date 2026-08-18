@@ -19,4 +19,9 @@ class Topic extends Model
     {
         return $this->hasMany(QuestionTemplate::class);
     }
+
+    public function videos(): HasMany
+    {
+        return $this->hasMany(TopicVideo::class)->orderBy('order');
+    }
 }

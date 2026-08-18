@@ -85,12 +85,22 @@
     .tag-answer  { background: #4f46e5; color: white; }
 
     .no-ans { font-family: 'Nunito', sans-serif; font-size: 0.75rem; font-weight: 800; color: #f59e0b; margin-top: 10px; }
+
+    .vid-btn { display:inline-flex; align-items:center; gap:6px; margin-top:12px; padding:7px 16px; background:#ede9fe; border-radius:99px; font-family:'Nunito',sans-serif; font-weight:800; font-size:0.75rem; color:#6d28d9; text-decoration:none; border:none; cursor:pointer; }
+    .vid-btn:hover { background:#ddd6fe; }
+    .vid-panel-q { margin-top:10px; display:none; }
+    .vid-panel-q iframe { width:100%; aspect-ratio:16/9; border:none; border-radius:12px; }
+    .vid-title-q { font-family:'Nunito',sans-serif; font-weight:800; font-size:0.75rem; color:#64748b; margin-top:6px; }
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
 
 <div class="wrap">
     <div class="topbar">
+        @if(!empty($isChild))
+        <a href="{{ route('dashboard') }}" class="back">← მთავარი</a>
+        @else
         <a href="{{ route('child.stats', $child) }}" class="back">← {{ $child->name }}</a>
+        @endif
         <span class="test-date">{{ $test->completed_at->format('d.m.Y · H:i') }}</span>
     </div>
 
@@ -147,7 +157,33 @@
         @if($selected === null)
         <div class="no-ans">⚠️ პასუხი არ გაუცია</div>
         @endif
+
+        @if(!empty($isChild) && $selected !== $correct)
+        @php $topicVids = $q->template?->topic?->videos ?? collect(); @endphp
+        @if($topicVids->isNotEmpty())
+        <button class="vid-btn" onclick="toggleVidQ('vq{{ $q->id }}', this)">📹 ახსნა-ვიდეო</button>
+        <div class="vid-panel-q" id="vq{{ $q->id }}">
+            @foreach($topicVids as $vid)
+            <div style="margin-bottom:10px;">
+                <iframe src="{{ $vid->embedUrl() }}"
+                    title="{{ $vid->title ?: $q->template?->topic?->name }}"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen loading="lazy"></iframe>
+                @if($vid->title)<div class="vid-title-q">{{ $vid->title }}</div>@endif
+            </div>
+            @endforeach
+        </div>
+        @endif
+        @endif
     </div>
     @endforeach
 </div>
+<script>
+function toggleVidQ(id, btn) {
+    const el = document.getElementById(id);
+    const open = el.style.display === 'block';
+    el.style.display = open ? 'none' : 'block';
+    btn.textContent = open ? '📹 ახსნა-ვიდეო' : '📹 დახურვა';
+}
+</script>
 @endsection
