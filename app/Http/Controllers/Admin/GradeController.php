@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Grade;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class GradeController extends Controller
 {
@@ -21,6 +22,16 @@ class GradeController extends Controller
         ]);
         Grade::create($data);
         return back()->with('success', 'კლასი დაემატა');
+    }
+
+    public function update(Request $request, Grade $grade)
+    {
+        $data = $request->validate([
+            'number' => ['required', 'integer', 'min:1', 'max:12', Rule::unique('grades', 'number')->ignore($grade->id)],
+            'name'   => 'required|string|max:100',
+        ]);
+        $grade->update($data);
+        return back()->with('success', 'კლასი განახლდა');
     }
 
     public function toggleActive(Grade $grade)

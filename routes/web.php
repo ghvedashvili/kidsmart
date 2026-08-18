@@ -140,6 +140,7 @@ Route::middleware(['auth', 'admin', 'role.permission'])->group(function () {
     // კლასები
     Route::get('/admin/grades',                    [GradeController::class, 'index'])->name('admin.grades.index');
     Route::post('/admin/grades',                   [GradeController::class, 'store'])->name('admin.grades.store');
+    Route::put('/admin/grades/{grade}',             [GradeController::class, 'update'])->name('admin.grades.update');
     Route::patch('/admin/grades/{grade}/toggle',   [GradeController::class, 'toggleActive'])->name('admin.grades.toggle');
     Route::delete('/admin/grades/{grade}',         [GradeController::class, 'destroy'])->name('admin.grades.destroy');
 

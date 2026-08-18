@@ -64,22 +64,107 @@
         font-family: 'Goldman', monospace; font-size: 0.62rem; color: #bbb;
         letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 12px; text-align: left;
     }
+    /* ── Child card — game-style ── */
     .child-card {
-        background: #fff; border: 1px solid #e8e8e8; border-radius: 10px;
-        padding: 14px 16px; margin-bottom: 10px;
-        display: flex; flex-direction: column; gap: 10px;
-        text-decoration: none; transition: border-color 0.2s, box-shadow 0.2s;
+        background: #fff; border: none;
+        border-radius: 16px; padding: 0; margin-bottom: 12px;
+        overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.13);
+        transition: box-shadow 0.2s, transform 0.2s;
     }
-    .child-card:hover { border-color: #bbb; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
-    .child-row-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .child-name { font-family: 'Goldman', monospace; font-size: 0.88rem; color: #111; letter-spacing: 0.04em; }
-    .child-row-bottom { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .ctag {
-        font-family: 'Goldman', monospace; font-size: 0.6rem; color: #aaa;
-        border: 1px solid #ebebeb; border-radius: 3px; padding: 2px 7px; letter-spacing: 0.04em; white-space: nowrap;
+    .child-card:hover { box-shadow: 0 10px 32px rgba(0,0,0,0.18); transform: translateY(-2px); }
+    .cc-inactive-warn {
+        display: flex; align-items: center; gap: 6px;
+        background: #fef2f2; border-bottom: 1px solid #fecaca;
+        padding: 7px 14px; font-family: 'Goldman', monospace; font-size: 0.68rem; color: #dc2626;
     }
-    .ctag.set { color: #555; border-color: #ccc; }
-    .child-arrow { color: #ccc; font-size: 0.9rem; }
+    .cc-inactive-warn button {
+        margin-left: auto; background: none; border: 1px solid #fca5a5; color: #dc2626;
+        font-family: 'Goldman', monospace; font-size: 0.6rem; padding: 2px 8px;
+        border-radius: 3px; cursor: pointer; white-space: nowrap;
+    }
+    /* Dark gradient header */
+    .cc-header { padding: 14px 16px 14px; position: relative; }
+    .cc-header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .cc-avatar-wrap {
+        width: 48px; height: 48px; border-radius: 50%;
+        border: 2px solid; flex-shrink: 0; padding: 3px;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .cc-avatar-letter {
+        width: 100%; height: 100%; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Goldman', monospace; font-size: 1.1rem;
+    }
+    .cc-header-info { flex: 1; min-width: 0; }
+    .cc-player-name {
+        font-family: 'Goldman', monospace; font-size: 0.88rem; color: #fff;
+        letter-spacing: 0.04em; margin-bottom: 4px;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        text-shadow: 0 1px 6px rgba(0,0,0,0.4);
+    }
+    .cc-grade-txt {
+        font-family: 'Goldman', monospace; font-size: 0.55rem;
+        color: rgba(255,255,255,0.48); letter-spacing: 0.1em;
+    }
+    .cc-lvl-badge {
+        flex-shrink: 0; font-family: 'Goldman', monospace; font-size: 0.6rem;
+        letter-spacing: 0.12em; border: 1px solid; border-radius: 6px;
+        padding: 4px 10px; white-space: nowrap;
+    }
+    /* XP / progress row */
+    .cc-xp-row { display: flex; align-items: center; gap: 9px; }
+    .cc-xp-label {
+        font-family: 'Goldman', monospace; font-size: 0.5rem;
+        color: rgba(255,255,255,0.4); letter-spacing: 0.12em;
+        text-transform: uppercase; white-space: nowrap;
+    }
+    .cc-xp-track {
+        flex: 1; height: 5px; background: rgba(255,255,255,0.1);
+        border-radius: 99px; overflow: hidden;
+    }
+    .cc-xp-fill {
+        height: 100%; border-radius: 99px;
+        transition: width 0.7s cubic-bezier(0.34, 1.3, 0.64, 1);
+    }
+    .cc-xp-count {
+        font-family: 'Goldman', monospace; font-size: 0.6rem;
+        letter-spacing: 0.08em; white-space: nowrap;
+    }
+    .cc-code-over {
+        font-family: 'Goldman', monospace; font-size: 0.58rem;
+        background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16);
+        border-radius: 4px; padding: 2px 7px; letter-spacing: 0.14em;
+        cursor: pointer; color: rgba(255,255,255,0.5); transition: all 0.2s;
+        white-space: nowrap;
+    }
+    .cc-code-over:hover { background: rgba(255,255,255,0.17); color: rgba(255,255,255,0.88); }
+    /* Action bar */
+    .cc-actions {
+        display: flex; gap: 7px; padding: 9px 14px;
+        border-top: 1px solid #f0f0f0; align-items: center; background: #fff;
+    }
+    .cc-btn {
+        font-family: 'Goldman', monospace; font-size: 0.67rem; letter-spacing: 0.04em;
+        border-radius: 7px; padding: 8px 14px; border: 1px solid transparent;
+        cursor: pointer; text-decoration: none; display: inline-flex;
+        align-items: center; gap: 5px; white-space: nowrap; transition: all 0.15s;
+    }
+    .cc-market { background: #f8fafc; border-color: #e2e8f0; color: #64748b; flex: 1; justify-content: center; }
+    .cc-market:not(.pending):hover { background: #f1f5f9; border-color: #cbd5e1; }
+    .cc-market.pending { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+    .cc-market.pending:hover { background: #fef3c7; border-color: #f59e0b; }
+    .cc-badge {
+        display: inline-flex; align-items: center; justify-content: center;
+        background: #f59e0b; color: #fff; border-radius: 99px;
+        width: 18px; height: 18px; font-size: 0.6rem; font-family: 'Goldman', monospace;
+    }
+    .cc-stats { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; flex: 1.5; justify-content: center; }
+    .cc-stats:hover { background: #dbeafe; border-color: #93c5fd; }
+    .cc-edit { background: #f8fafc; border-color: #e2e8f0; color: #94a3b8; width: 38px; padding: 8px; justify-content: center; }
+    .cc-edit:hover { border-color: #94a3b8; color: #475569; background: #f1f5f9; }
+    .cc-remind { background: #f0fdf4; border-color: #bbf7d0; color: #16a34a; width: 38px; padding: 8px; justify-content: center; }
+    .cc-remind:hover { background: #dcfce7; border-color: #86efac; }
+    .cc-flash-remind { font-family: 'Goldman', monospace; font-size: 0.62rem; color: #16a34a; padding: 0 14px 10px; letter-spacing: 0.04em; }
     .add-child-btn {
         width: 100%; background: #fff; border: 1px dashed #d0d0d0; border-radius: 10px;
         font-family: 'Goldman', monospace; font-size: 0.75rem; color: #aaa;
@@ -151,17 +236,6 @@
         padding: 2px 10px; letter-spacing: 0.14em; cursor: pointer; transition: background 0.2s;
     }
     .child-code-badge:hover { background: #ebebeb; }
-    .child-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-left: auto; }
-    .caction {
-        font-family: 'Goldman', monospace; font-size: 0.62rem; color: #bbb;
-        border: 1px solid #ebebeb; border-radius: 4px; padding: 5px 10px;
-        text-decoration: none; letter-spacing: 0.04em; transition: all 0.2s; white-space: nowrap;
-    }
-    .caction:hover { color: #333; border-color: #aaa; }
-    .caction.primary { color: #4f46e5; border-color: #c7d2fe; background: #eef2ff; }
-    .caction.primary:hover { background: #e0e7ff; border-color: #a5b4fc; }
-    .caction.remind { color: #059669; border-color: #a7f3d0; background: #ecfdf5; }
-    .caction.remind:hover { background: #d1fae5; border-color: #6ee7b7; }
     .remind-modal { position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(4px);z-index:200;display:none;flex-direction:column;align-items:center;justify-content:flex-start;padding:80px 16px 48px;overflow-y:auto; }
     .remind-modal.open { display:flex; }
     .remind-box { background:#fff;border-radius:16px;padding:24px;width:100%;max-width:400px;flex-shrink:0;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:modalIn 0.25s cubic-bezier(0.175,0.885,0.32,1.275); }
@@ -322,50 +396,62 @@
                 $s = $child->childSetting;
                 $todayDone = $child->tests()->whereNotNull('completed_at')->whereDate('completed_at', today())->count();
                 $pendingMarket = \App\Models\MarketPurchase::where('child_id', $child->id)->where('status','pending')->count();
+                $ccAccents = [
+                    ['g1'=>'#1e1b4b','g2'=>'#2e1065','accent'=>'#a5b4fc','ring'=>'#818cf8'],
+                    ['g1'=>'#3d1a00','g2'=>'#5c2d00','accent'=>'#fcd34d','ring'=>'#f59e0b'],
+                    ['g1'=>'#052e16','g2'=>'#064e3b','accent'=>'#6ee7b7','ring'=>'#10b981'],
+                    ['g1'=>'#450a1a','g2'=>'#831843','accent'=>'#fda4af','ring'=>'#f43f5e'],
+                    ['g1'=>'#0c2340','g2'=>'#0e3a5e','accent'=>'#7dd3fc','ring'=>'#0284c7'],
+                ];
+                $cc = $ccAccents[$loop->index % 5];
+                $xpPct = ($s && $s->tests_per_week > 0) ? min(100, round($todayDone / $s->tests_per_week * 100)) : 0;
             @endphp
-            <div class="child-card" style="cursor:default;{{ !$child->is_active ? 'opacity:0.55;' : '' }}">
+            <div class="child-card" style="{{ !$child->is_active ? 'opacity:0.55;' : '' }}">
                 @if(!$child->is_active)
-                <div style="display:flex;align-items:center;gap:6px;background:#fef2f2;border:1px solid #fecaca;border-radius:5px;padding:5px 10px;margin-bottom:8px;font-size:0.68rem;color:#dc2626;">
+                <div class="cc-inactive-warn">
                     <span>⊘</span>
                     <span>გათიშული — <strong>{{ $currentPkg->name }}</strong> გეგმა ამ ბავშვს არ მოიცავს</span>
-                    <button type="button" onclick="document.getElementById('plansModal').classList.add('open')"
-                        style="margin-left:auto;background:none;border:1px solid #fca5a5;color:#dc2626;font-family:'Goldman',monospace;font-size:0.6rem;padding:2px 8px;border-radius:3px;cursor:pointer;white-space:nowrap;">↑ გეგმა</button>
+                    <button type="button" onclick="document.getElementById('plansModal').classList.add('open')">↑ გეგმა</button>
                 </div>
                 @endif
-                {{-- ზედა ხაზი: სახელი · კლასი · დონე · დღეს --}}
-                <div class="child-row-top">
-                    <span class="child-name">{{ $child->name }}</span>
-                    @if($s?->grade)
-                        <span class="ctag set">{{ $s->grade->name }}</span>
-                    @else
-                        <span class="ctag">კლასი —</span>
-                    @endif
-                    @if($s)
-                        <span class="ctag set">დონე {{ $s->difficulty }}</span>
-                        <span class="ctag set">დღეს {{ $todayDone }}/{{ $s->tests_per_week }}</span>
-                    @endif
-                </div>
-                {{-- ქვედა ხაზი: კოდი · ღილაკები --}}
-                <div class="child-row-bottom">
-                    @if($child->child_code)
-                    <span class="child-code-badge" onclick="copyChildCode(this, '{{ $child->child_code }}')"
-                        title="კოდის კოპირება">{{ $child->child_code }}</span>
-                    @endif
-                    <div class="child-actions">
-                        <button type="button"
-                            onclick="openRemind({{ $child->id }}, '{{ addslashes($child->name) }}')"
-                            style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:4px;color:#059669;font-family:'Goldman',monospace;font-size:0.72rem;padding:5px 10px;cursor:pointer;">
-                            &#128276;
-                        </button>
-                        <a href="{{ route('market.index', $child) }}" class="caction" style="{{ $pendingMarket ? 'color:#d97706;border-color:#fde68a;background:#fffbeb;' : '' }}">
-                            🛒@if($pendingMarket) <span style="font-size:0.7rem;font-weight:900;">{{ $pendingMarket }}</span>@endif
-                        </a>
-                        <a href="{{ route('child.stats', $child) }}" class="caction primary">სტატისტიკა</a>
-                        <button type="button" class="caction" onclick="document.getElementById('editChildModal{{ $child->id }}').classList.add('open')">⚙</button>
+                <div class="cc-header" style="background:linear-gradient(135deg,{{ $cc['g1'] }} 0%,{{ $cc['g2'] }} 100%)">
+                    <div class="cc-header-top">
+                        <div class="cc-avatar-wrap" style="border-color:{{ $cc['ring'] }};box-shadow:0 0 16px {{ $cc['ring'] }}55">
+                            <div class="cc-avatar-letter" style="background:{{ $cc['ring'] }}22;color:{{ $cc['accent'] }}">
+                                {{ mb_substr($child->name, 0, 1) }}
+                            </div>
+                        </div>
+                        <div class="cc-header-info">
+                            <div class="cc-player-name">{{ $child->name }}</div>
+                            @if($s?->grade)
+                            <div class="cc-grade-txt">{{ $s->grade->name }}</div>
+                            @endif
+                        </div>
+                        <div class="cc-lvl-badge" style="border-color:{{ $cc['ring'] }}66;color:{{ $cc['accent'] }};background:{{ $cc['ring'] }}22">
+                            LVL {{ $s?->difficulty ?? '—' }}
+                        </div>
+                    </div>
+                    <div class="cc-xp-row">
+                        <div class="cc-xp-label">დღეს</div>
+                        <div class="cc-xp-track">
+                            <div class="cc-xp-fill" style="width:{{ $xpPct }}%;background:{{ $cc['accent'] }}"></div>
+                        </div>
+                        <div class="cc-xp-count" style="color:{{ $cc['accent'] }}">{{ $todayDone }}/{{ $s?->tests_per_week ?? '—' }}</div>
+                        @if($child->child_code)
+                        <span class="cc-code-over" onclick="copyChildCode(this,'{{ $child->child_code }}')" title="კოდის კოპირება">{{ $child->child_code }}</span>
+                        @endif
                     </div>
                 </div>
+                <div class="cc-actions">
+                    <a href="{{ route('market.index', $child) }}" class="cc-btn cc-market {{ $pendingMarket ? 'pending' : '' }}">
+                        🛒@if($pendingMarket) <span class="cc-badge">{{ $pendingMarket }}</span>@endif
+                    </a>
+                    <a href="{{ route('child.stats', $child) }}" class="cc-btn cc-stats">📊 სტატ.</a>
+                    <button type="button" class="cc-btn cc-edit" onclick="document.getElementById('editChildModal{{ $child->id }}').classList.add('open')">⚙</button>
+                    <button type="button" class="cc-btn cc-remind" onclick="openRemind({{ $child->id }},'{{ addslashes($child->name) }}')">🔔</button>
+                </div>
                 @if(session('reminder_sent_' . $child->id))
-                <div style="font-family:'Goldman',monospace;font-size:0.62rem;color:#059669;margin-top:4px;">&#10003; შეხსენება გაიგზავნა</div>
+                <div class="cc-flash-remind">✓ შეხსენება გაიგზავნა</div>
                 @endif
             </div>
             @empty
@@ -381,26 +467,22 @@
         @php
             $es = $child->childSetting;
             $eThemeIds = $child->themes->pluck('id')->toArray();
+            $eTopicIds = $child->topics->pluck('id')->toArray();
+            $eGroupedTopics = $topics->groupBy(fn($t) => $t->grade?->name ?? '—');
         @endphp
         <div id="editChildModal{{ $child->id }}" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
             <div class="mbox">
-                {{-- Header bar — same style as add modal tab bar --}}
-                <div style="display:flex;align-items:center;gap:0;margin-bottom:16px;border-bottom:2px solid #f0f0f0;">
-                    <span style="flex:1;font-family:'Goldman',monospace;font-size:0.72rem;letter-spacing:0.06em;
-                        color:#111;padding:8px 0;border-bottom:2px solid #111;margin-bottom:-2px;text-align:left;">
-                        ✏️ {{ $child->name }}
-                    </span>
-                    <button type="button" class="modal-close" style="margin-bottom:-2px;"
-                        onclick="document.getElementById('editChildModal{{ $child->id }}').classList.remove('open')">✕</button>
-                </div>
-
                 <form method="POST" action="{{ route('child.settings.update', $child) }}">
                     @csrf @method('PUT')
+                    <div class="modal-title">
+                        {{ $child->name }}-ის პარამეტრები
+                        <button type="button" class="modal-close" onclick="document.getElementById('editChildModal{{ $child->id }}').classList.remove('open')">✕</button>
+                    </div>
 
                     <div class="mlbl">სახელი</div>
                     <input type="text" name="name" class="minput" value="{{ $child->name }}" maxlength="50" autocomplete="off">
 
-                    <div class="mlbl">კლასი <span>*</span></div>
+                    <div class="mlbl">კლასი</div>
                     <div class="mrow">
                         @foreach($grades as $grade)
                         <label class="mchip {{ $es?->grade_id == $grade->id ? 'sel' : '' }}"
@@ -409,37 +491,68 @@
                     </div>
                     <input type="hidden" name="grade_id" id="egid{{ $child->id }}" value="{{ $es?->grade_id }}">
 
-                    <div class="mlbl">ტესტი დღეში</div>
+                    <div class="mlbl">სირთულე</div>
                     <div class="mrow">
                         @for($i=1; $i<=5; $i++)
-                        <label class="mchip {{ ($es?->tests_per_week ?? 3) == $i ? 'sel' : '' }}"
+                        <label class="mchip {{ ($es?->difficulty ?? 1) == $i ? 'sel' : '' }}"
+                            onclick="chipSingle(this,'edif{{ $child->id }}','{{ $i }}')">{{ $i }}</label>
+                        @endfor
+                    </div>
+                    <input type="hidden" name="difficulty" id="edif{{ $child->id }}" value="{{ $es?->difficulty ?? 1 }}">
+
+                    <div class="mlbl">ტესტი დღეში</div>
+                    <div class="mrow">
+                        @for($i=1; $i<=7; $i++)
+                        <label class="mchip {{ ($es?->tests_per_week ?? 1) == $i ? 'sel' : '' }}"
                             onclick="chipSingle(this,'etpw{{ $child->id }}','{{ $i }}')">{{ $i }}</label>
                         @endfor
                     </div>
-                    <input type="hidden" name="tests_per_week" id="etpw{{ $child->id }}" value="{{ $es?->tests_per_week ?? 3 }}">
-
-                    <input type="hidden" name="difficulty" value="{{ $es?->difficulty ?? 1 }}">
+                    <input type="hidden" name="tests_per_week" id="etpw{{ $child->id }}" value="{{ $es?->tests_per_week ?? 1 }}">
 
                     @if($themes->count())
-                    <div class="mlbl">თემატიკა <span style="color:#aaa;font-size:0.9em;">(სურვილისამებრ)</span></div>
+                    <div class="mlbl">თემატიკა</div>
                     <div class="mrow">
                         @foreach($themes as $theme)
                         @if($theme->is_active)
                         <label class="mchip {{ in_array($theme->id, $eThemeIds) ? 'sel' : '' }}"
-                            onclick="chipSingle(this,'etheme{{ $child->id }}','{{ $theme->id }}')">{{ $theme->icon }} {{ $theme->name }}</label>
+                            onclick="chipMulti(this,'theme_ids[]','{{ $theme->id }}')">{{ $theme->icon }} {{ $theme->name }}</label>
                         @else
-                        <span class="mchip" style="opacity:0.4;cursor:default;pointer-events:none;">{{ $theme->icon }} {{ $theme->name }}<span style="font-size:0.75em;margin-left:4px;color:#aaa;">მალე</span></span>
+                        <span class="mchip {{ in_array($theme->id, $eThemeIds) ? 'sel' : '' }}"
+                            style="opacity:0.4;cursor:default;pointer-events:none;">{{ $theme->icon }} {{ $theme->name }}<span style="font-size:0.75em;margin-left:4px;">მალე</span></span>
                         @endif
                         @endforeach
                     </div>
-                    <input type="hidden" name="theme_ids[]" id="etheme{{ $child->id }}"
-                        value="{{ count($eThemeIds) ? $eThemeIds[0] : ($defaultThemeId ?? '') }}">
+                    @foreach($themes as $theme)
+                        @if(in_array($theme->id, $eThemeIds))
+                        <input type="hidden" name="theme_ids[]" value="{{ $theme->id }}">
+                        @endif
+                    @endforeach
                     @endif
 
-                    <div style="display:flex;gap:8px;margin-top:4px;">
+                    @if($topics->count())
+                    <div class="mlbl">საყვარელი თემები</div>
+                    @foreach($eGroupedTopics as $gradeName => $gradeTopics)
+                    <div style="font-family:'Goldman',monospace;font-size:0.58rem;color:#bbb;letter-spacing:0.1em;margin-bottom:4px;margin-top:4px;">{{ $gradeName }}</div>
+                    <div class="mrow" style="margin-bottom:8px;">
+                        @foreach($gradeTopics as $topic)
+                        <label class="mchip {{ in_array($topic->id, $eTopicIds) ? 'sel' : '' }}"
+                            onclick="chipMulti(this,'topic_ids[]','{{ $topic->id }}')">{{ $topic->name }}</label>
+                        @endforeach
+                    </div>
+                    @foreach($gradeTopics as $topic)
+                        @if(in_array($topic->id, $eTopicIds))
+                        <input type="hidden" name="topic_ids[]" value="{{ $topic->id }}">
+                        @endif
+                    @endforeach
+                    @endforeach
+                    @endif
+
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
                         <button type="submit" class="msave" style="margin-top:0;">შენახვა</button>
-                        <button type="button" class="msave msave-danger" style="margin-top:0;flex:0 0 auto;width:auto;padding-left:18px;padding-right:18px;"
-                            onclick="confirmDeleteChild({{ $child->id }}, '{{ addslashes($child->name) }}')">წაშლა</button>
+                        <button type="button" class="msave msave-danger" style="margin-top:0;"
+                            onclick="confirmDeleteChild({{ $child->id }}, '{{ addslashes($child->name) }}')">
+                            წაშლა
+                        </button>
                     </div>
                 </form>
 

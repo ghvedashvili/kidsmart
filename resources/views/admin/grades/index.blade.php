@@ -12,8 +12,12 @@
     .btn:hover { border-color: #94a3b8; color: #1e293b; }
     .btn-del { background: none; border: none; color: #cbd5e1; font-size: 0.72rem; cursor: pointer; padding: 0 4px; transition: color 0.2s; }
     .btn-del:hover { color: #ef4444; }
-    .row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.8rem; color: #374151; }
+    .btn-edit { background: none; border: none; color: #cbd5e1; font-size: 0.82rem; cursor: pointer; padding: 0 4px; transition: color 0.2s; line-height:1; }
+    .btn-edit:hover { color: #6366f1; }
+    .row { display: flex; flex-direction: column; padding: 9px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.8rem; color: #374151; }
     .row:last-child { border-bottom: none; }
+    .row-display { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+    .row-edit { display: none; gap: 8px; align-items: center; padding: 4px 0 2px; }
     .msg { font-size: 0.75rem; color: #059669; margin-bottom: 16px; }
     .toggle-btn { display:inline-flex;align-items:center;gap:5px;font-family:'Goldman',monospace;font-size:0.64rem;letter-spacing:0.06em;border-radius:20px;padding:4px 12px;cursor:pointer;border:none;transition:all 0.2s;white-space:nowrap; }
     .toggle-btn.on  { background:#dcfce7;color:#15803d; }
@@ -51,19 +55,33 @@
         <div class="card-label">კლასები · {{ $grades->count() }}</div>
         @forelse($grades as $grade)
         <div class="row">
-            <span style="{{ !$grade->is_active ? 'color:#bbb;' : '' }}">
-                <span style="margin-right:10px;">{{ $grade->number }}</span>{{ $grade->name }}
-            </span>
-            <div style="display:flex;align-items:center;gap:10px;">
-                <form method="POST" action="{{ route('admin.grades.toggle', $grade) }}">
-                    @csrf @method('PATCH')
-                    <button type="submit" class="toggle-btn {{ $grade->is_active ? 'on' : 'off' }}">
-                        {{ $grade->is_active ? '● აქტიური' : '○ გათიშული' }}
-                    </button>
-                </form>
-                <form method="POST" action="{{ route('admin.grades.destroy', $grade) }}">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="btn-del" onclick="return confirm('წაიშალოს?')">✕</button>
+            {{-- Display mode --}}
+            <div class="row-display" id="gd{{ $grade->id }}">
+                <span style="{{ !$grade->is_active ? 'color:#bbb;' : '' }}">
+                    <span style="margin-right:10px;color:#94a3b8;">{{ $grade->number }}</span>{{ $grade->name }}
+                </span>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <form method="POST" action="{{ route('admin.grades.toggle', $grade) }}">
+                        @csrf @method('PATCH')
+                        <button type="submit" class="toggle-btn {{ $grade->is_active ? 'on' : 'off' }}">
+                            {{ $grade->is_active ? '● აქტიური' : '○ გათიშული' }}
+                        </button>
+                    </form>
+                    <button type="button" class="btn-edit" onclick="gradeEdit({{ $grade->id }})" title="ედიტი">✎</button>
+                    <form method="POST" action="{{ route('admin.grades.destroy', $grade) }}">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="btn-del" onclick="return confirm('წაიშალოს?')">✕</button>
+                    </form>
+                </div>
+            </div>
+            {{-- Edit mode --}}
+            <div class="row-edit" id="ge{{ $grade->id }}">
+                <form method="POST" action="{{ route('admin.grades.update', $grade) }}" style="display:flex;gap:8px;align-items:center;width:100%;">
+                    @csrf @method('PUT')
+                    <input type="number" name="number" class="fc" value="{{ $grade->number }}" min="1" max="12" style="width:74px;margin-bottom:0;" required>
+                    <input type="text" name="name" class="fc" value="{{ $grade->name }}" style="flex:1;margin-bottom:0;" required>
+                    <button type="submit" class="btn">შენახვა</button>
+                    <button type="button" class="btn-del" onclick="gradeCancel({{ $grade->id }})">✕</button>
                 </form>
             </div>
         </div>
@@ -72,4 +90,15 @@
         @endforelse
     </div>
 </div>
+<script>
+function gradeEdit(id) {
+    document.getElementById('gd' + id).style.display = 'none';
+    document.getElementById('ge' + id).style.display = 'flex';
+    document.getElementById('ge' + id).querySelector('input[name="name"]').focus();
+}
+function gradeCancel(id) {
+    document.getElementById('gd' + id).style.display = 'flex';
+    document.getElementById('ge' + id).style.display = 'none';
+}
+</script>
 @endsection
