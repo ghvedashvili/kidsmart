@@ -321,6 +321,7 @@
             @php
                 $s = $child->childSetting;
                 $todayDone = $child->tests()->whereNotNull('completed_at')->whereDate('completed_at', today())->count();
+                $pendingMarket = \App\Models\MarketPurchase::where('child_id', $child->id)->where('status','pending')->count();
             @endphp
             <div class="child-card" style="cursor:default;{{ !$child->is_active ? 'opacity:0.55;' : '' }}">
                 @if(!$child->is_active)
@@ -356,6 +357,9 @@
                             style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:4px;color:#059669;font-family:'Goldman',monospace;font-size:0.72rem;padding:5px 10px;cursor:pointer;">
                             &#128276;
                         </button>
+                        <a href="{{ route('market.index', $child) }}" class="caction" style="{{ $pendingMarket ? 'color:#d97706;border-color:#fde68a;background:#fffbeb;' : '' }}">
+                            🛒@if($pendingMarket) <span style="font-size:0.7rem;font-weight:900;">{{ $pendingMarket }}</span>@endif
+                        </a>
                         <a href="{{ route('child.stats', $child) }}" class="caction primary">სტატისტიკა</a>
                         <button type="button" class="caction" onclick="document.getElementById('editChildModal{{ $child->id }}').classList.add('open')">⚙</button>
                     </div>
@@ -594,6 +598,21 @@
             <a href="{{ route('test.start') }}" class="child-cta">
                 ▶ ტესტის დაწყება
             </a>
+        @endif
+
+        {{-- მარკეტი --}}
+        @php $marketCount = \App\Models\MarketItem::where('child_id', auth()->id())->where('is_active', true)->count(); @endphp
+        @if($marketCount)
+        <a href="{{ route('market.child') }}" style="display:flex;align-items:center;justify-content:space-between;width:100%;background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:16px;padding:14px 18px;text-decoration:none;transition:all 0.2s;border:1.5px solid #fde68a;">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:1.5rem;">🛒</span>
+                <div>
+                    <div style="font-family:'Fredoka One',cursive;font-size:0.95rem;color:#92400e;">მარკეტი</div>
+                    <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:0.62rem;color:#b45309;">{{ $marketCount }} პროდუქტი · 💰 {{ $setting?->coins ?? 0 }} მონეტა</div>
+                </div>
+            </div>
+            <span style="color:#d97706;font-size:1rem;">→</span>
+        </a>
         @endif
 
         {{-- ბოლო ტესტი --}}

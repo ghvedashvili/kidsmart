@@ -142,6 +142,22 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
         </div>
     </div>
 
+    <!-- Market rewards -->
+    @if($marketRewards->count())
+    <div class="sec-title" style="color:#d97706;">🛒 მარკეტის ჯილდოები</div>
+    <div class="ach-grid" style="margin-bottom:28px;">
+        @foreach($marketRewards as $reward)
+        <div class="ach-card earned" style="border-color:#fde68a;box-shadow:0 2px 12px rgba(245,158,11,0.15);">
+            <div class="earned-badge" style="background:#f59e0b;">✓</div>
+            <div class="ach-emoji">{{ $reward->item->icon }}</div>
+            <div class="ach-name">{{ $reward->item->title }}</div>
+            <div class="ach-desc" style="color:#f59e0b;">💰 {{ $reward->coins_spent }} მონეტა</div>
+            <div class="ach-date" style="color:#f59e0b;">{{ $reward->updated_at->format('d.m.Y') }}</div>
+        </div>
+        @endforeach
+    </div>
+    @endif
+
     <!-- Stickers -->
     @php $stickers = array_filter($achievements, fn($a) => $a['type'] === 'sticker'); @endphp
     <div class="sec-title">⭐ სტიკერები</div>

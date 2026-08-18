@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ChildAchievement;
+use App\Models\MarketPurchase;
 use App\Services\AchievementService;
 
 class AchievementController extends Controller
@@ -20,11 +21,18 @@ class AchievementController extends Controller
             ->whereNotNull('completed_at')
             ->count();
 
+        $marketRewards = MarketPurchase::where('child_id', $child->id)
+            ->where('status', 'approved')
+            ->with('item')
+            ->latest()
+            ->get();
+
         return view('child.achievements', [
-            'setting'      => $setting,
-            'earned'       => $earned,
-            'achievements' => AchievementService::ACHIEVEMENTS,
-            'totalTests'   => $totalTests,
+            'setting'       => $setting,
+            'earned'        => $earned,
+            'achievements'  => AchievementService::ACHIEVEMENTS,
+            'totalTests'    => $totalTests,
+            'marketRewards' => $marketRewards,
         ]);
     }
 }

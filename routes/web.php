@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\SubscriptionController;
 use App\Http\Controllers\AchievementController;
+use App\Http\Controllers\MarketController;
 use App\Http\Controllers\ChildController;
 use App\Http\Controllers\ChildSettingsController;
 use App\Http\Controllers\TestController;
@@ -89,6 +90,19 @@ Route::middleware(['auth', 'role.permission'])->group(function () {
 
     // მიღწევები
     Route::get('/achievements', [AchievementController::class, 'index'])->name('achievements');
+
+    // მარკეტი — parent manages
+    Route::get('/children/{child}/market',              [MarketController::class, 'index'])->name('market.index');
+    Route::post('/children/{child}/market/items',       [MarketController::class, 'store'])->name('market.store');
+    Route::delete('/market/items/{item}',               [MarketController::class, 'destroy'])->name('market.item.destroy');
+    Route::patch('/market/items/{item}/toggle',         [MarketController::class, 'toggleItem'])->name('market.item.toggle');
+    // მარკეტი — parent approves/cancels
+    Route::patch('/market/purchases/{purchase}/approve', [MarketController::class, 'approve'])->name('market.approve');
+    Route::patch('/market/purchases/{purchase}/cancel',  [MarketController::class, 'cancel'])->name('market.cancel');
+    // მარკეტი — child views
+    Route::get('/market',                                [MarketController::class, 'childIndex'])->name('market.child');
+    // მარკეტი — child buys
+    Route::post('/market/items/{item}/buy',              [MarketController::class, 'buy'])->name('market.buy');
 
     // ტესტი
     Route::get('/test/start',           [TestController::class, 'start'])->name('test.start');
