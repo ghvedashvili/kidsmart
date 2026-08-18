@@ -45,7 +45,7 @@ class ChildSettingsController extends Controller
         $this->authorizeChild($child);
         abort_if($test->child_id !== $child->id, 404);
 
-        $questions = $test->questions()->with([])->get();
+        $questions = $test->questions()->with(['template.topic.videos'])->get();
         $answers   = $test->answers()->get()->keyBy('test_question_id');
 
         return view('parent.child-test', compact('child', 'test', 'questions', 'answers'));

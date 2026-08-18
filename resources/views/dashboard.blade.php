@@ -588,6 +588,20 @@
         </a>
         @endif
 
+        {{-- ტესტების ისტორია --}}
+        @if($lastCompleted)
+        <a href="{{ route('my.tests') }}" style="display:flex;align-items:center;justify-content:space-between;width:100%;background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border-radius:16px;padding:14px 18px;text-decoration:none;border:1.5px solid #bae6fd;">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:1.5rem;">📋</span>
+                <div>
+                    <div style="font-family:'Fredoka One',cursive;font-size:0.95rem;color:#0c4a6e;">ჩემი ტესტები</div>
+                    <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:0.62rem;color:#0284c7;">სწორი და არასწორი პასუხები</div>
+                </div>
+            </div>
+            <span style="color:#0284c7;font-size:1rem;">→</span>
+        </a>
+        @endif
+
         {{-- ვიდეოთეკა --}}
         @php $hasVids = \App\Models\Topic::where('grade_id', $setting?->grade_id)->whereHas('videos')->exists(); @endphp
         @if($hasVids)

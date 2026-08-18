@@ -93,8 +93,9 @@ Route::middleware(['auth', 'role.permission'])->group(function () {
     // მიღწევები
     Route::get('/achievements', [AchievementController::class, 'index'])->name('achievements');
 
-    // ვიდეოთეკა (ბავშვი)
+    // ვიდეოთეკა + ისტორია (ბავშვი)
     Route::get('/videos', [VideoController::class, 'library'])->name('videos.library');
+    Route::get('/my/tests', [VideoController::class, 'myHistory'])->name('my.tests');
     Route::get('/my/tests/{test}', [VideoController::class, 'myTest'])->name('my.test.show');
 
     // მარკეტი — parent manages

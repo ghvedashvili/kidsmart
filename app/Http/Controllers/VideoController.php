@@ -26,6 +26,23 @@ class VideoController extends Controller
         return view('child.videos', compact('topics', 'child'));
     }
 
+    public function myHistory()
+    {
+        $child = auth()->user();
+        $tests = $child->tests()
+            ->with('theme')
+            ->whereNotNull('completed_at')
+            ->latest('completed_at')
+            ->get();
+
+        $totalTests = $tests->count();
+        $avgScore   = $totalTests > 0
+            ? round($tests->avg(fn($t) => $t->correct_count / max($t->total_questions, 1) * 100))
+            : null;
+
+        return view('child.history', compact('child', 'tests', 'totalTests', 'avgScore'));
+    }
+
     public function myTest(Test $test)
     {
         $child = auth()->user();

@@ -124,11 +124,11 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
     position: fixed; bottom: 0; left: 0; right: 0;
     background: white; border-top: 1px solid #e2e8f0;
     padding: 14px 20px;
-    display: flex; gap: 10px; max-width: 640px; margin: 0 auto;
+    display: flex; gap: 8px; max-width: 640px; margin: 0 auto;
 }
-.btn-retry, .btn-home {
+.btn-retry, .btn-home, .btn-hist {
     flex: 1; border-radius: 12px; padding: 13px;
-    font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 800;
+    font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 800;
     cursor: pointer; border: none; transition: all 0.18s;
     text-decoration: none; display: flex; align-items: center; justify-content: center;
 }
@@ -140,6 +140,8 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
 .btn-retry:hover { transform: translateY(-1px); }
 .btn-home { background: #f1f5f9; color: #64748b; }
 .btn-home:hover { background: #e2e8f0; }
+.btn-hist { background: #e0f2fe; color: #0284c7; }
+.btn-hist:hover { background: #bae6fd; }
 </style>
 </head>
 <body>
@@ -225,7 +227,8 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
 <div style="height:80px;"></div>
 <div class="bottom-btns">
     <a href="{{ route('test.start') }}" class="btn-retry">ახალი ტესტი →</a>
-    <a href="{{ route('dashboard') }}" class="btn-home">🏠 მთავარი</a>
+    <a href="{{ route('my.test.show', $test) }}" class="btn-hist">📋 გადახედვა</a>
+    <a href="{{ route('dashboard') }}" class="btn-home">🏠</a>
 </div>
 
 </body>
