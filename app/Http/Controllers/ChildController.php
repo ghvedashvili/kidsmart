@@ -7,7 +7,7 @@ use App\Models\Grade;
 use App\Models\Theme;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Rule;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 
 class ChildController extends Controller
