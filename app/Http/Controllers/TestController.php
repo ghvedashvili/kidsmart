@@ -83,8 +83,22 @@ class TestController extends Controller
         $questions = $test->questions()->get();
 
         foreach ($questions as $q) {
-            $selected  = $answers[$q->id] ?? null;
-            $isCorrect = $selected !== null && $selected === $q->correct_answer;
+            $isPyramid = str_starts_with((string) $q->correct_answer, '{');
+
+            if ($isPyramid) {
+                $solutions   = json_decode($q->correct_answer, true) ?? [];
+                $userCells   = $request->input("pyramid_answers.{$q->id}", []);
+                $allOk       = ! empty($solutions);
+                foreach ($solutions as $pos => $val) {
+                    if ((int) ($userCells[$pos] ?? PHP_INT_MIN) !== $val) { $allOk = false; break; }
+                }
+                $isCorrect = $allOk;
+                $selected  = json_encode($userCells);
+            } else {
+                $selected  = $answers[$q->id] ?? null;
+                $isCorrect = $selected !== null && $selected === $q->correct_answer;
+            }
+
             if ($isCorrect) $correct++;
 
             TestAnswer::create([

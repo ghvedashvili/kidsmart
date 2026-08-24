@@ -91,6 +91,12 @@
     .chip-txt { background:#faf5ff; border:1px solid #e9d5ff; color:#7c3aed; }
     .chip-txt:hover { border-color:#c4b5fd; }
     .chip-txt.sel { background:#7c3aed; color:#fff; border-color:#7c3aed; }
+    .qt-row { display:flex; gap:6px; margin-bottom:14px; }
+    .qt-btn { background:#f8fafc; border:1px solid #e2e8f0; color:#94a3b8; font-family:'Goldman',monospace; font-size:0.7rem; letter-spacing:0.06em; padding:6px 16px; border-radius:4px; cursor:pointer; transition:all 0.15s; }
+    .qt-btn.sel { border-color:#4f46e5; color:#4f46e5; background:#eef2ff; }
+    .pyr-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+    .pyr-inp { background:#f8fafc; border:1px solid #e2e8f0; border-radius:4px; color:#374151; font-family:'Goldman',monospace; font-size:0.78rem; padding:8px 11px; width:100%; outline:none; box-sizing:border-box; }
+    .pyr-inp:focus { border-color:#94a3b8; }
 </style>
 
 <div class="aw">
@@ -108,6 +114,15 @@
             {{-- 1. Context --}}
             <div class="card">
                 <div class="sec-title">① კონტექსტი</div>
+
+                @php $isExistingPyramid = $template?->question_type === 'pyramid'; @endphp
+
+                <div class="lbl">კითხვის ტიპი</div>
+                <div class="qt-row">
+                    <button type="button" class="qt-btn {{ !$isExistingPyramid ? 'sel' : '' }}" onclick="setQType('multiple_choice')">📝 Multiple Choice</button>
+                    <button type="button" class="qt-btn {{ $isExistingPyramid ? 'sel' : '' }}" onclick="setQType('pyramid')">🔺 პირამიდა</button>
+                </div>
+                <input type="hidden" name="question_type" id="qtInput" value="{{ old('question_type', $template?->question_type ?? 'multiple_choice') }}">
 
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px;">
                     <div>
@@ -131,10 +146,10 @@
                         </select>
                         @error('topic_id')<div class="err">{{ $message }}</div>@enderror
                     </div>
-                    <div>
+                    <div id="themeFieldWrap">
                         <div class="lbl">თემატიკა <span style="color:#94a3b8;font-size:0.55rem;">(სურვილისამებრ)</span></div>
                         <select name="theme_id" id="themeSelect" class="fc" style="margin-bottom:0;"
-                            onchange="onThemeChange(this.value)" required>
+                            onchange="onThemeChange(this.value)">
                             <option value="">— თემატიკა —</option>
                             @foreach($themes as $theme)
                             <option value="{{ $theme->id }}" {{ old('theme_id', $template?->theme_id ?? $defaultThemeId) == $theme->id ? 'selected' : '' }}>
@@ -155,8 +170,40 @@
                 </div>
                 <input type="hidden" name="difficulty" id="diffInput"
                     value="{{ old('difficulty', $template?->difficulty ?? 1) }}">
+
+                {{-- Pyramid config (shown only for pyramid type) --}}
+                <div id="pyrFields" style="display:none;margin-top:14px;border-top:1px solid #f1f5f9;padding-top:14px;">
+                    <div class="sec-title" style="margin-bottom:10px;">🔺 პირამიდის პარამეტრები</div>
+                    @php
+                        $pyrCfg = ($template?->question_type === 'pyramid') ? ($template->num_config ?? []) : [];
+                    @endphp
+                    <div class="pyr-grid">
+                        <div>
+                            <div class="lbl">ძირის ზომა</div>
+                            <select class="pyr-inp" id="pyrHeight" onchange="syncPyrConfig()">
+                                <option value="3" {{ ($pyrCfg['height']??3)==3?'selected':'' }}>3 (6 კვანძი)</option>
+                                <option value="4" {{ ($pyrCfg['height']??3)==4?'selected':'' }}>4 (10 კვანძი)</option>
+                                <option value="5" {{ ($pyrCfg['height']??3)==5?'selected':'' }}>5 (15 კვანძი)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="lbl">რიცხვის მაქსიმუმი</div>
+                            <input type="number" class="pyr-inp" id="pyrMax" min="2" max="99"
+                                value="{{ $pyrCfg['max_base'] ?? 9 }}" onchange="syncPyrConfig()">
+                        </div>
+                        <div>
+                            <div class="lbl">ცარიელი უჯრები</div>
+                            <input type="number" class="pyr-inp" id="pyrHide" min="1" max="14"
+                                value="{{ $pyrCfg['hidden_count'] ?? 2 }}" onchange="syncPyrConfig()">
+                        </div>
+                    </div>
+                    <div style="font-size:0.58rem;color:#94a3b8;margin-top:8px;" id="pyrHint">
+                        3-ძირი → 6 კვანძი; 4-ძირი → 10 კვანძი; 5-ძირი → 15 კვანძი
+                    </div>
+                </div>
             </div>
 
+            <div id="mcSections">
             {{-- 3. Template text --}}
             <div class="card">
                 <div class="sec-title">③ კითხვის ტექსტი</div>
@@ -183,7 +230,7 @@
 
                 <textarea name="template_text" id="templateText" class="fc" rows="4"
                     placeholder="@{{PLAYER}}-მ @{{N1}} გოლი გაიტანა პირველ ტაიმში, @{{N2}} — მეორეში. სულ?"
-                    oninput="onTemplateInput()" required>{{ old('template_text', $template?->template_text) }}</textarea>
+                    oninput="onTemplateInput()">{{ old('template_text', $template?->template_text) }}</textarea>
                 @error('template_text')<div class="err">{{ $message }}</div>@enderror
             </div>
 
@@ -281,7 +328,7 @@
                         oninput="previewDebounce()">{{ old('hint_text', $template?->hint_text) }}</textarea>
                 </div>
             </div>
-
+            </div>{{-- /mcSections --}}
 
 <div class="form-actions">
                 <button type="submit" class="btn-save">{{ $template ? '↺ განახლება' : '✓ შენახვა' }}</button>
@@ -452,6 +499,41 @@ function renderTextOptChips(data) {
     var hint2 = document.getElementById('noVarsHint2');
     if (hint2) hint2.style.display = 'none';
 }
+
+// ── Question type toggle
+function setQType(type) {
+    document.getElementById('qtInput').value = type;
+    document.querySelectorAll('.qt-btn').forEach(b => b.classList.remove('sel'));
+    // mark the clicked button
+    document.querySelectorAll('.qt-btn').forEach(b => {
+        if ((type === 'pyramid' && b.textContent.includes('პირამიდა')) ||
+            (type === 'multiple_choice' && b.textContent.includes('Multiple'))) {
+            b.classList.add('sel');
+        }
+    });
+    applyQType(type);
+}
+function applyQType(type) {
+    const isPyr = type === 'pyramid';
+    document.getElementById('pyrFields').style.display      = isPyr ? 'block' : 'none';
+    document.getElementById('themeFieldWrap').style.display = isPyr ? 'none'  : 'block';
+    document.getElementById('mcSections').style.display     = isPyr ? 'none'  : 'block';
+    if (isPyr) syncPyrConfig();
+}
+function syncPyrConfig() {
+    const h    = document.getElementById('pyrHeight').value;
+    const mx   = document.getElementById('pyrMax').value;
+    const hide = document.getElementById('pyrHide').value;
+    document.getElementById('numConfigJson').value = JSON.stringify({
+        height: parseInt(h), max_base: parseInt(mx), hidden_count: parseInt(hide)
+    });
+    if (document.getElementById('qtInput').value === 'pyramid') genPreviewPyramid();
+}
+// init on page load
+(function() {
+    const qt = document.getElementById('qtInput').value;
+    applyQType(qt);
+})();
 
 // ── Difficulty
 function setDiff(n) {
@@ -640,6 +722,7 @@ function renderConds() {
 
 // ── Sync all hidden inputs
 function syncAll() {
+    if (document.getElementById('qtInput').value === 'pyramid') { syncPyrConfig(); return; }
     const ncObj = {};
     ncRows.forEach(r => {
         if (r.name) ncObj[r.name] = { min: +r.min, max: +r.max, step: +r.step || 1 };
@@ -759,7 +842,105 @@ function clearPreview() {
     document.getElementById('prevOpts').innerHTML = '';
 }
 
+function isSolvable(rows, hidden) {
+    const H = rows.length;
+    // known[r][c] = true if determinable
+    const known = rows.map((row, r) => row.map((_, c) => !hidden.has(r + ',' + c)));
+    let changed = true;
+    while (changed) {
+        changed = false;
+        for (let r = 0; r < H; r++) {
+            const rowLen = rows[r].length;
+            for (let c = 0; c < rowLen; c++) {
+                if (known[r][c]) continue;
+                // bottom-up: both children known
+                if (r + 1 < H && known[r+1][c] && known[r+1][c+1]) {
+                    known[r][c] = true; changed = true; continue;
+                }
+                // top-down left child: parent(r-1,c) + right sibling(r,c+1) known
+                if (r > 0 && known[r-1][c] && c + 1 < rowLen && known[r][c+1]) {
+                    known[r][c] = true; changed = true; continue;
+                }
+                // top-down right child: parent(r-1,c-1) + left sibling(r,c-1) known
+                if (r > 0 && c > 0 && known[r-1][c-1] && known[r][c-1]) {
+                    known[r][c] = true; changed = true; continue;
+                }
+            }
+        }
+    }
+    return known.every(row => row.every(v => v));
+}
+
+function buildPyramidData(height, maxBase, hiddenCount) {
+    for (let attempt = 0; attempt < 100; attempt++) {
+        const base = [];
+        for (let i = 0; i < height; i++) base.push(1 + Math.floor(Math.random() * maxBase));
+        const rowsFromBottom = [base];
+        for (let r = 1; r < height; r++) {
+            const prev = rowsFromBottom[r - 1];
+            const row = [];
+            for (let c = 0; c < prev.length - 1; c++) row.push(prev[c] + prev[c + 1]);
+            rowsFromBottom.push(row);
+        }
+        const rows = rowsFromBottom.slice().reverse(); // top → bottom
+        const allCells = [];
+        rows.forEach((row, r) => row.forEach((_, c) => allCells.push([r, c])));
+        for (let i = allCells.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [allCells[i], allCells[j]] = [allCells[j], allCells[i]];
+        }
+        const hidden = new Set(allCells.slice(0, Math.min(hiddenCount, allCells.length)).map(([r,c]) => r+','+c));
+        if (isSolvable(rows, hidden)) return { rows, hidden };
+    }
+    // fallback: no hidden cells
+    const base = [];
+    for (let i = 0; i < height; i++) base.push(1 + Math.floor(Math.random() * maxBase));
+    const rowsFromBottom = [base];
+    for (let r = 1; r < height; r++) {
+        const prev = rowsFromBottom[r - 1];
+        const row = [];
+        for (let c = 0; c < prev.length - 1; c++) row.push(prev[c] + prev[c + 1]);
+        rowsFromBottom.push(row);
+    }
+    return { rows: rowsFromBottom.slice().reverse(), hidden: new Set() };
+}
+
+function genPreviewPyramid() {
+    const h    = parseInt(document.getElementById('pyrHeight').value) || 3;
+    const mx   = parseInt(document.getElementById('pyrMax').value)    || 9;
+    const hide = parseInt(document.getElementById('pyrHide').value)   || 2;
+    const { rows, hidden } = buildPyramidData(h, mx, hide);
+
+    let html = '<div style="display:flex;flex-direction:column;align-items:center;gap:5px;margin-top:4px;">';
+    rows.forEach((row, r) => {
+        html += '<div style="display:flex;gap:5px;">';
+        row.forEach((val, c) => {
+            const pos = r + ',' + c;
+            const isHidden = hidden.has(pos);
+            if (isHidden) {
+                html += `<div style="width:40px;height:40px;border-radius:8px;border:2px dashed #a5b4fc;background:#eef2ff;display:flex;align-items:center;justify-content:center;font-family:'Goldman',monospace;font-size:0.82rem;color:#a5b4fc;">?</div>`;
+            } else {
+                html += `<div style="width:40px;height:40px;border-radius:8px;background:#4f46e5;color:white;display:flex;align-items:center;justify-content:center;font-family:'Goldman',monospace;font-size:0.82rem;font-weight:700;">${val}</div>`;
+            }
+        });
+        html += '</div>';
+    });
+    html += '</div>';
+
+    document.getElementById('prevQ').innerHTML = '🔺 პირამიდა — ' + h + '-ძირი';
+    document.getElementById('prevHint').innerHTML = '';
+    document.getElementById('prevOpts').innerHTML = html;
+    const hiddenActual = hidden.size;
+    document.getElementById('prevFormula').innerHTML =
+        `<span style="color:#4f46e5;">ლურჯი</span> = ცნობილი &nbsp;·&nbsp; <span style="color:#a5b4fc;">?</span> = ცარიელი (${hiddenActual} უჯრა)`;
+    document.getElementById('prevVars').innerHTML = `მაქს. ძირი: ${mx} · ნამდვილი ჯამები · ✓ ამოხსნადი`;
+    document.getElementById('prevWarn').innerHTML = hiddenActual < hide
+        ? `<span style="color:#f87171;">⚠ ${hide} ცარიელი ვერ მოიძებნა — ${hiddenActual} ჩაისვა</span>`
+        : '';
+}
+
 function genPreview() {
+    if (document.getElementById('qtInput').value === 'pyramid') { genPreviewPyramid(); return; }
     const tmpl = document.getElementById('templateText').value;
     if (!tmpl) { clearPreview(); return; }
     const isTxt = document.getElementById('answerTypeInput').value === 'text';
@@ -972,7 +1153,13 @@ document.getElementById('condRows').addEventListener('focusin', function(e) {
     setTimeout(genPreview, 120);
 })();
 
-document.getElementById('mainForm').addEventListener('submit', syncAll);
+document.getElementById('mainForm').addEventListener('submit', function() {
+    if (document.getElementById('qtInput').value === 'pyramid') {
+        syncPyrConfig();
+    } else {
+        syncAll();
+    }
+});
 </script>
 @endverbatim
 @endsection

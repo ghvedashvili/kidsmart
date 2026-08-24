@@ -151,6 +151,30 @@ body {
         <div class="q-badge">⚽ {{ $i + 1 }}</div>
         <div class="check-mark">✓</div>
         <span class="q-icon">{{ $icons[$i % count($icons)] }}</span>
+        @php $isPyrQ = str_starts_with((string)$q->correct_answer, '{'); @endphp
+
+        @if($isPyrQ)
+        @php $pyrRows = json_decode($q->question_text, true) ?? []; @endphp
+        <div class="q-text" style="margin-bottom:16px;">შეავსე ცარიელი უჯრები</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;" id="pyr_{{ $q->id }}">
+            @foreach($pyrRows as $r => $row)
+            <div style="display:flex;gap:6px;">
+                @foreach($row as $c => $val)
+                @if($val === null)
+                <input type="number"
+                    name="pyramid_answers[{{ $q->id }}][{{ $r }},{{ $c }}]"
+                    style="width:52px;height:52px;border-radius:12px;border:2.5px solid #a5b4fc;background:#eef2ff;color:#4f46e5;font-family:'Fredoka One',cursive;font-size:1rem;text-align:center;outline:none;padding:0;"
+                    data-qid="{{ $q->id }}"
+                    onchange="onPyrAnswer({{ $q->id }})">
+                @else
+                <div style="width:52px;height:52px;border-radius:12px;background:#4f46e5;color:white;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:1rem;">{{ $val }}</div>
+                @endif
+                @endforeach
+            </div>
+            @endforeach
+        </div>
+        <input type="hidden" name="answers[{{ $q->id }}]" value="pyramid_submitted">
+        @else
         <div class="q-text">{{ $q->question_text }}</div>
         @if($q->hint_text)<div class="q-hint">{{ $q->hint_text }}</div>@endif
         <div class="opts">
@@ -163,6 +187,7 @@ body {
             </label>
             @endforeach
         </div>
+        @endif
     </div>
     @endforeach
 </div>
@@ -181,6 +206,25 @@ const totalQ = {{ count($questions) }};
 const CACHE_KEY = 'test_{{ $test->id }}';
 let answeredCount = 0;
 const answeredSet = new Set();
+
+function onPyrAnswer(qid) {
+    const inputs = document.querySelectorAll(`input[data-qid="${qid}"]`);
+    const allFilled = Array.from(inputs).every(inp => inp.value.trim() !== '');
+    if (!allFilled) return;
+    // find card index via card id — pyramid cards have no radio so track separately
+    const pyrCards = document.querySelectorAll('.q-card');
+    pyrCards.forEach((card, i) => {
+        if (card.querySelector(`[data-qid="${qid}"]`) && !answeredSet.has(i)) {
+            answeredSet.add(i);
+            answeredCount++;
+            card.classList.add('answered');
+            const pct = Math.round(answeredCount / totalQ * 100);
+            document.getElementById('progFill').style.width  = pct + '%';
+            document.getElementById('progBall').style.left   = pct === 0 ? '0' : 'calc(' + pct + '% - 5px)';
+            if (answeredCount === totalQ) document.getElementById('submitBtn').classList.add('vis');
+        }
+    });
+}
 
 function onAnswer(i, qid, val) {
     const cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');

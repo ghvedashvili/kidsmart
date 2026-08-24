@@ -178,14 +178,17 @@ class QuestionTemplateController extends Controller
 
     private function validated(Request $request): array
     {
+        $isPyramid = $request->input('question_type') === 'pyramid';
+
         $raw = $request->validate([
             'topic_id'        => 'required|exists:topics,id',
-            'theme_id'        => 'required|exists:themes,id',
+            'theme_id'        => 'nullable|exists:themes,id',
             'difficulty'      => 'required|integer|min:1|max:5',
-            'answer_type'     => 'required|in:numeric,text',
-            'template_text'   => 'required|string',
+            'question_type'   => 'required|in:multiple_choice,pyramid',
+            'answer_type'     => $isPyramid ? 'nullable' : 'required|in:numeric,text',
+            'template_text'   => $isPyramid ? 'nullable|string' : 'required|string',
             'hint_text'       => 'nullable|string',
-            'correct_formula' => 'required|string|max:200',
+            'correct_formula' => $isPyramid ? 'nullable|string' : 'required|string|max:200',
             'num_config'      => 'required|string',
             'distractors'     => 'nullable|string',
             'conditions'      => 'nullable|string',
@@ -196,6 +199,25 @@ class QuestionTemplateController extends Controller
             throw \Illuminate\Validation\ValidationException::withMessages([
                 'num_config' => 'JSON ფორმატი არასწორია',
             ]);
+        }
+
+        if ($isPyramid) {
+            $pyrHeight = max(3, (int) ($numConfig['height']       ?? 3));
+            $pyrMax    = max(2, (int) ($numConfig['max_base']     ?? 9));
+            $pyrHide   = max(1, (int) ($numConfig['hidden_count'] ?? 2));
+            return [
+                'topic_id'        => $raw['topic_id'],
+                'theme_id'        => null,
+                'difficulty'      => $raw['difficulty'],
+                'question_type'   => 'pyramid',
+                'answer_type'     => 'numeric',
+                'template_text'   => "პირამიდა {$pyrHeight}-ძირი · {$pyrHide} ცარიელი",
+                'hint_text'       => null,
+                'correct_formula' => '',
+                'num_config'      => ['height' => $pyrHeight, 'max_base' => $pyrMax, 'hidden_count' => $pyrHide],
+                'distractors'     => null,
+                'conditions'      => null,
+            ];
         }
 
         $distractors = null;
@@ -213,6 +235,7 @@ class QuestionTemplateController extends Controller
             'topic_id'        => $raw['topic_id'],
             'theme_id'        => $raw['theme_id'] ?? null,
             'difficulty'      => $raw['difficulty'],
+            'question_type'   => 'multiple_choice',
             'answer_type'     => $raw['answer_type'],
             'template_text'   => $raw['template_text'],
             'hint_text'       => $raw['hint_text'] ?? null,

@@ -109,8 +109,30 @@
         @if($selectedTheme)<span class="theme-tag">🎨 {{ $selectedTheme->name }} · </span>@endif{{ $questions->count() }} კითხვა
     </div>
     @foreach($questions as $i => $q)
+    @php $isPyr = ($q['type'] ?? null) === 'pyramid' || is_null($q['options'] ?? null) && str_starts_with((string)($q['correct_answer'] ?? ''), '{'); @endphp
     <div class="q-card">
         <div class="q-num">{{ $i + 1 }}<span class="q-topic">{{ $q['topic_name'] }}</span></div>
+        @if($isPyr)
+        @php
+            $pyrRows  = json_decode($q['question_text'], true) ?? [];
+            $pyrSols  = json_decode($q['correct_answer'], true) ?? [];
+        @endphp
+        <div class="q-text" style="margin-bottom:12px;">🔺 მათემატიკური პირამიდა</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
+            @foreach($pyrRows as $r => $row)
+            <div style="display:flex;gap:5px;">
+                @foreach($row as $c => $val)
+                @php $pos = "$r,$c"; $sol = $pyrSols[$pos] ?? null; @endphp
+                @if($val === null)
+                <div style="width:44px;height:44px;border-radius:10px;border:2px dashed #a5b4fc;background:#eef2ff;display:flex;align-items:center;justify-content:center;font-size:0.85rem;color:#4f46e5;font-weight:700;">{{ $sol }}</div>
+                @else
+                <div style="width:44px;height:44px;border-radius:10px;background:#4f46e5;color:white;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;">{{ $val }}</div>
+                @endif
+                @endforeach
+            </div>
+            @endforeach
+        </div>
+        @else
         <div class="q-text">{{ $q['question_text'] }}</div>
         <div class="opts">
             @foreach($q['options'] as $opt)
@@ -121,6 +143,7 @@
         </div>
         @if(!empty($q['hint_text']))
         <div class="hint">{{ $q['hint_text'] }}</div>
+        @endif
         @endif
     </div>
     @endforeach

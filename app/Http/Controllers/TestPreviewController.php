@@ -60,16 +60,22 @@ class TestPreviewController extends Controller
             if ($templates->isEmpty()) {
                 $error = 'ამ პარამეტრებისთვის კითხვები ჯერ არ დამატებულა';
             } else {
-                $selectedTheme = $themeId
-                    ? Theme::find($themeId)
-                    : Theme::find($templates->pluck('theme_id')->filter()->first());
+                $mcTemplates = $templates->filter(fn($t) => !$t->isPyramid());
 
-                if (!$selectedTheme) {
-                    $error = 'თემა ვერ მოიძებნა — გთხოვთ თემატიკა აირჩიოთ';
-                } else {
+                if ($mcTemplates->isNotEmpty()) {
+                    $selectedTheme = $themeId
+                        ? Theme::find($themeId)
+                        : Theme::find($mcTemplates->pluck('theme_id')->filter()->first());
+
+                    if (!$selectedTheme) {
+                        $error = 'თემა ვერ მოიძებნა — გთხოვთ თემატიკა აირჩიოთ';
+                    }
+                }
+
+                if (!$error) {
                     $questions = $templates->shuffle()->map(fn($t) => array_merge(
                         ['topic_name' => $t->topic->name],
-                        $t->generate($selectedTheme)
+                        $t->isPyramid() ? $t->generatePyramid() : $t->generate($selectedTheme)
                     ))->values();
                 }
             }

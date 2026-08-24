@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class QuestionTemplate extends Model
 {
-    protected $fillable = ['topic_id', 'theme_id', 'difficulty', 'answer_type', 'template_text', 'hint_text', 'correct_formula', 'num_config', 'distractors', 'conditions'];
+    protected $fillable = ['topic_id', 'theme_id', 'difficulty', 'answer_type', 'question_type', 'template_text', 'hint_text', 'correct_formula', 'num_config', 'distractors', 'conditions'];
 
     protected $casts = ['num_config' => 'array', 'distractors' => 'array', 'conditions' => 'array'];
 
@@ -51,11 +51,37 @@ class QuestionTemplate extends Model
         return $this->belongsTo(\App\Models\Theme::class);
     }
 
-    public function generate(Theme $theme): array
+    public function isPyramid(): bool
     {
+        return $this->question_type === 'pyramid';
+    }
+
+    public function generate(?Theme $theme = null): array
+    {
+        if ($this->isPyramid()) return $this->generatePyramid();
         return $this->answer_type === 'text'
             ? $this->generateText($theme)
             : $this->generateNumeric($theme);
+    }
+
+    public function generatePyramid(): array
+    {
+        $cfg         = $this->num_config ?? [];
+        $height      = max(3, (int) ($cfg['height']       ?? 3));
+        $maxBase     = max(2, (int) ($cfg['max_base']     ?? 9));
+        $hiddenCount = max(1, (int) ($cfg['hidden_count'] ?? 2));
+
+        $result = \App\Services\PyramidService::build($height, $maxBase, $hiddenCount);
+
+        return [
+            'type'           => 'pyramid',
+            'rows'           => $result['rows'],
+            'solutions'      => $result['solutions'],
+            'question_text'  => json_encode($result['rows']),
+            'correct_answer' => json_encode($result['solutions']),
+            'hint_text'      => null,
+            'options'        => null,
+        ];
     }
 
     private function generateText(Theme $theme): array

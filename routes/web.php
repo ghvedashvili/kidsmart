@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\SubscriptionController;
 use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\MarketController;
+use App\Http\Controllers\PracticeController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\ChildController;
 use App\Http\Controllers\ChildSettingsController;
@@ -92,6 +93,12 @@ Route::middleware(['auth', 'role.permission'])->group(function () {
 
     // მიღწევები
     Route::get('/achievements', [AchievementController::class, 'index'])->name('achievements');
+
+    // სავარჯიშოები (ბავშვი)
+    Route::get('/practice',                              [PracticeController::class, 'topics'])->name('practice.topics');
+    Route::get('/practice/{slug}',                       [PracticeController::class, 'show'])->name('practice.show');
+    Route::get('/practice/{slug}/question',              [PracticeController::class, 'question'])->name('practice.question');
+    Route::post('/practice/{slug}/answer',               [PracticeController::class, 'answer'])->name('practice.answer');
 
     // ვიდეოთეკა + ისტორია (ბავშვი)
     Route::get('/videos', [VideoController::class, 'library'])->name('videos.library');

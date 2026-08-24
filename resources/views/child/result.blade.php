@@ -196,8 +196,9 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
 
     @foreach($questions as $i => $q)
     @php
-        $ans = $answers[$q->id] ?? null;
-        $status = $ans === null ? 'skipped' : ($ans->is_correct ? 'correct' : 'wrong');
+        $ans       = $answers[$q->id] ?? null;
+        $isPyrQ    = str_starts_with((string)$q->correct_answer, '{');
+        $status    = $ans === null ? 'skipped' : ($ans->is_correct ? 'correct' : 'wrong');
     @endphp
     <div class="q-review {{ $status }}">
         <div class="q-header">
@@ -209,6 +210,39 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
             </span>
             <span style="font-size:0.68rem;color:#94a3b8;font-weight:700;">{{ $i+1 }}</span>
         </div>
+        @if($isPyrQ)
+        @php
+            $pyrRows   = json_decode($q->question_text, true) ?? [];
+            $solutions = json_decode($q->correct_answer, true) ?? [];
+            $userCells = $ans ? (json_decode($ans->selected_answer, true) ?? []) : [];
+        @endphp
+        <div class="q-text-r" style="margin-bottom:10px;">🔺 პირამიდა</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+            @foreach($pyrRows as $r => $row)
+            <div style="display:flex;gap:4px;">
+                @foreach($row as $c => $val)
+                @php
+                    $pos      = "$r,$c";
+                    $hidden   = $val === null;
+                    $sol      = $solutions[$pos] ?? null;
+                    $userVal  = $userCells[$pos] ?? null;
+                    $cellOk   = $hidden && $sol !== null && (int)($userVal ?? -1) === $sol;
+                    $cellWrong = $hidden && $sol !== null && !$cellOk;
+                    $bg = $hidden
+                        ? ($status === 'correct' || $cellOk ? '#dcfce7' : '#fee2e2')
+                        : '#4f46e5';
+                    $color = $hidden
+                        ? ($cellOk ? '#15803d' : '#dc2626')
+                        : 'white';
+                @endphp
+                <div style="width:40px;height:40px;border-radius:10px;background:{{ $bg }};color:{{ $color }};display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-weight:900;font-size:0.85rem;">
+                    {{ $hidden ? $sol : $val }}
+                </div>
+                @endforeach
+            </div>
+            @endforeach
+        </div>
+        @else
         <div class="q-text-r">{{ $q->question_text }}</div>
         <div class="ans-row">
             @if($status === 'correct')
@@ -220,6 +254,7 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
                 <span class="ans-note">პასუხი არ გასცემია · სწორი: <strong>{{ $q->correct_answer }}</strong></span>
             @endif
         </div>
+        @endif
     </div>
     @endforeach
 </div>

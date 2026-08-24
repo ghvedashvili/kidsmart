@@ -119,13 +119,66 @@
     @php $icons = ['⚽','🏆','🥅','🧤','🎽','🏟️','⭐','🥇','🎯','🏅','🔥','💪']; @endphp
     @foreach($questions as $i => $q)
     @php
-        $answer   = $answers->get($q->id);
-        $selected = $answer?->selected_answer;
-        $correct  = $q->correct_answer;
+        $answer    = $answers->get($q->id);
+        $selected  = $answer?->selected_answer;
+        $correct   = $q->correct_answer;
+        $isPyrQ    = str_starts_with((string) $correct, '{');
     @endphp
     <div class="q-card">
         <div class="q-badge">⚽ {{ $i + 1 }}</div>
         <span class="q-icon">{{ $icons[$i % count($icons)] }}</span>
+
+        @if($isPyrQ)
+        @php
+            $pyrRows   = json_decode($q->question_text, true) ?? [];
+            $solutions = json_decode($correct, true) ?? [];
+            $userCells = $selected ? (json_decode($selected, true) ?? []) : [];
+            $pyrOk     = $answer?->is_correct;
+        @endphp
+        <div class="q-text" style="margin-bottom:12px;">🔺 მათემატიკური პირამიდა</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:5px;margin-bottom:12px;">
+            @foreach($pyrRows as $r => $row)
+            <div style="display:flex;gap:5px;">
+                @foreach($row as $c => $val)
+                @php
+                    $pos    = "$r,$c";
+                    $sol    = $solutions[$pos] ?? null;
+                    $uv     = ($sol !== null && isset($userCells[$pos])) ? $userCells[$pos] : null;
+                    $cellOk = $sol !== null && (int)($uv ?? PHP_INT_MIN) === $sol;
+                @endphp
+                @if($val !== null)
+                {{-- visible cell --}}
+                <div style="width:44px;height:44px;border-radius:10px;background:#4f46e5;color:white;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;">{{ $val }}</div>
+                @elseif($cellOk)
+                {{-- hidden, correct --}}
+                <div style="width:44px;height:44px;border-radius:10px;background:#16a34a;color:white;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;">{{ $sol }}</div>
+                @elseif($uv !== null)
+                {{-- hidden, wrong: show user/correct stacked --}}
+                <div style="width:54px;min-height:44px;border-radius:10px;background:#fee2e2;border:2px solid #ef4444;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px 3px;gap:1px;">
+                    <span style="color:#ef4444;font-size:0.78rem;font-weight:800;line-height:1;">{{ $uv }}</span>
+                    <span style="color:#94a3b8;font-size:0.6rem;line-height:1;">/</span>
+                    <span style="color:#16a34a;font-size:0.78rem;font-weight:800;line-height:1;">{{ $sol }}</span>
+                </div>
+                @else
+                {{-- hidden, not answered --}}
+                <div style="width:44px;height:44px;border-radius:10px;border:2px dashed #fca5a5;background:#fff1f2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;">
+                    <span style="color:#94a3b8;font-size:0.62rem;line-height:1;">—</span>
+                    <span style="color:#16a34a;font-size:0.72rem;font-weight:800;line-height:1;">{{ $sol }}</span>
+                </div>
+                @endif
+                @endforeach
+            </div>
+            @endforeach
+        </div>
+        @if($pyrOk)
+        <div style="color:#16a34a;font-size:0.8rem;font-weight:700;">✅ სწორი</div>
+        @elseif($selected !== null)
+        <div style="color:#ef4444;font-size:0.8rem;font-weight:700;">❌ არასწორი — წითელი = შეცდომა</div>
+        @else
+        <div class="no-ans">⚠️ პასუხი არ გაუცია</div>
+        @endif
+
+        @else
         <div class="q-text">{{ $q->question_text }}</div>
         @if($q->hint_text)<div class="q-hint">{{ $q->hint_text }}</div>@endif
         <div class="opts">
@@ -156,6 +209,7 @@
         </div>
         @if($selected === null)
         <div class="no-ans">⚠️ პასუხი არ გაუცია</div>
+        @endif
         @endif
 
         @if(!empty($isChild) && $selected !== $correct)

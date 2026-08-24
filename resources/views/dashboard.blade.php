@@ -588,6 +588,18 @@
         </a>
         @endif
 
+        {{-- სავარჯიშოები --}}
+        <a href="{{ route('practice.topics') }}" style="display:flex;align-items:center;justify-content:space-between;width:100%;background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:16px;padding:14px 18px;text-decoration:none;">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:1.5rem;">🎯</span>
+                <div>
+                    <div style="font-family:'Fredoka One',cursive;font-size:0.95rem;color:white;">სავარჯიშოები</div>
+                    <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:0.62rem;color:rgba(255,255,255,0.65);">თემები + მათემატიკური პირამიდა</div>
+                </div>
+            </div>
+            <span style="color:rgba(255,255,255,0.6);font-size:1rem;">→</span>
+        </a>
+
         {{-- ტესტების ისტორია --}}
         @if($lastCompleted)
         <a href="{{ route('my.tests') }}" style="display:flex;align-items:center;justify-content:space-between;width:100%;background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border-radius:16px;padding:14px 18px;text-decoration:none;border:1.5px solid #bae6fd;">
