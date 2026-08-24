@@ -32,11 +32,6 @@
     .lp-4 { background:#fce7f3; color:#db2777; }
     .lp-5 { background:#ede9fe; color:#7c3aed; }
 
-    .pyramid-card { background:linear-gradient(135deg,#4f46e5,#7c3aed); }
-    .pyramid-card .card-name { color:white; }
-    .pyramid-card .card-sub { color:rgba(255,255,255,0.65); }
-    .pyramid-card .card-arrow { color:rgba(255,255,255,0.5); }
-
     .empty { text-align:center; padding:40px 20px; }
     .empty-icon { font-size:2.5rem; margin-bottom:10px; }
     .empty-txt { font-family:'Fredoka One',cursive; font-size:1rem; color:#94a3b8; }
@@ -48,30 +43,10 @@
     </div>
 
     <div class="page-title">🎯 სავარჯიშოები</div>
-    <div class="page-sub">აირჩიე თემა ან ივარჯიშე პირამიდაზე</div>
-
-    {{-- Pyramid --}}
-    @php $pyrSess = $sessions->get('pyramid'); @endphp
-    <div class="section-lbl">პირამიდა</div>
-    <a href="{{ route('practice.show', 'pyramid') }}" class="card pyramid-card">
-        <div class="card-left">
-            <div class="card-icon">🔺</div>
-            <div>
-                <div class="card-name">მათემატიკური პირამიდა</div>
-                <div class="card-sub">
-                    {{ $pyrSess ? 'დონე ' . $pyrSess->level . ' · ' . $pyrSess->total_correct . '/' . $pyrSess->total_answered . ' სწორი' : 'ახალი სავარჯიშო' }}
-                </div>
-            </div>
-        </div>
-        @if($pyrSess)
-        <span class="level-pill lp-{{ $pyrSess->level }}">L{{ $pyrSess->level }}</span>
-        @else
-        <span class="card-arrow">›</span>
-        @endif
-    </a>
+    <div class="page-sub">აირჩიე თემა და ივარჯიშე</div>
 
     {{-- Topics --}}
-    <div class="section-lbl" style="margin-top:20px;">თემები</div>
+    <div class="section-lbl">თემები</div>
     @forelse($topics as $topic)
     @php $sess = $sessions->get($topic->id); @endphp
     <a href="{{ route('practice.show', $topic->id) }}" class="card">

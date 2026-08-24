@@ -157,9 +157,10 @@ let currentQ = null;
 // ── Load question ────────────────────────────────────────────────────────
 async function loadQuestion() {
     showSpinner();
-    document.getElementById('feedback').style.display = 'none';
-    document.getElementById('nextBtn').style.display  = 'none';
-    document.getElementById('checkBtn').style.display = 'none';
+    document.getElementById('feedback').style.display  = 'none';
+    document.getElementById('nextBtn').style.display   = 'none';
+    document.getElementById('checkBtn').style.display  = 'none';
+    document.getElementById('checkBtn').disabled       = false;
 
     try {
         const r = await fetch(`/practice/${SLUG}/question`);
