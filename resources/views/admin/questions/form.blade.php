@@ -97,6 +97,9 @@
     .pyr-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
     .pyr-inp { background:#f8fafc; border:1px solid #e2e8f0; border-radius:4px; color:#374151; font-family:'Goldman',monospace; font-size:0.78rem; padding:8px 11px; width:100%; outline:none; box-sizing:border-box; }
     .pyr-inp:focus { border-color:#94a3b8; }
+    .code-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:10px; }
+    .op-check { display:flex; gap:12px; margin-bottom:6px; align-items:center; }
+    .op-check label { font-family:'Goldman',monospace; font-size:0.72rem; color:#374151; display:flex; align-items:center; gap:5px; cursor:pointer; }
 </style>
 
 <div class="aw">
@@ -115,14 +118,20 @@
             <div class="card">
                 <div class="sec-title">① კონტექსტი</div>
 
-                @php $isExistingPyramid = $template?->question_type === 'pyramid'; @endphp
+                @php
+                    $existingQType = old('question_type', $template?->question_type ?? 'multiple_choice');
+                    $isExistingPyramid = $existingQType === 'pyramid';
+                    $isExistingCode    = $existingQType === 'code';
+                    $codeCfg = ($existingQType === 'code') ? ($template->num_config ?? []) : [];
+                @endphp
 
                 <div class="lbl">კითხვის ტიპი</div>
                 <div class="qt-row">
-                    <button type="button" class="qt-btn {{ !$isExistingPyramid ? 'sel' : '' }}" onclick="setQType('multiple_choice')">📝 Multiple Choice</button>
+                    <button type="button" class="qt-btn {{ !$isExistingPyramid && !$isExistingCode ? 'sel' : '' }}" onclick="setQType('multiple_choice')">📝 Multiple Choice</button>
                     <button type="button" class="qt-btn {{ $isExistingPyramid ? 'sel' : '' }}" onclick="setQType('pyramid')">🔺 პირამიდა</button>
+                    <button type="button" class="qt-btn {{ $isExistingCode ? 'sel' : '' }}" onclick="setQType('code')">🕵️ კოდი</button>
                 </div>
-                <input type="hidden" name="question_type" id="qtInput" value="{{ old('question_type', $template?->question_type ?? 'multiple_choice') }}">
+                <input type="hidden" name="question_type" id="qtInput" value="{{ $existingQType }}">
 
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px;">
                     <div>
@@ -200,7 +209,66 @@
                     <div style="font-size:0.58rem;color:#94a3b8;margin-top:8px;" id="pyrHint">
                         3-ძირი → 6 კვანძი; 4-ძირი → 10 კვანძი; 5-ძირი → 15 კვანძი
                     </div>
-                </div>
+                </div>{{-- /pyrFields --}}
+
+                {{-- Code config — separate from pyrFields so visibility is independent --}}
+                <div id="codeFields" style="display:none;margin-top:14px;border-top:1px solid #f1f5f9;padding-top:14px;">
+                    <div class="sec-title" style="margin-bottom:10px;">🕵️ კოდის პარამეტრები</div>
+
+                    {{-- Row 1: symbol count + min + max --}}
+                    <div class="code-grid">
+                        <div>
+                            <div class="lbl">ცვლადები</div>
+                            <select class="pyr-inp" id="codeSymCount" onchange="syncCodeConfig()">
+                                @foreach([2,3,4,5] as $n)
+                                <option value="{{ $n }}" {{ ($codeCfg['symbol_count']??3)==$n?'selected':'' }}>{{ $n }} ცვლადი</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <div class="lbl">min მნიშვნელობა</div>
+                            <input type="number" class="pyr-inp" id="codeMinVal" min="1" max="50"
+                                value="{{ $codeCfg['min_val'] ?? 1 }}" onchange="syncCodeConfig()">
+                        </div>
+                        <div>
+                            <div class="lbl">max მნიშვნელობა</div>
+                            <input type="number" class="pyr-inp" id="codeMaxVal" min="2" max="100"
+                                value="{{ $codeCfg['max_val'] ?? 9 }}" onchange="syncCodeConfig()">
+                        </div>
+                    </div>
+
+                    {{-- Row 2: operators --}}
+                    <div class="lbl" style="margin-top:10px;">ოპერაციები</div>
+                    <div class="op-check">
+                        <label><input type="checkbox" id="codeOpPlus"  onchange="syncCodeConfig()"
+                            {{ in_array('+', $codeCfg['operators'] ?? ['+']) ? 'checked' : '' }}> +</label>
+                        <label><input type="checkbox" id="codeOpMinus" onchange="syncCodeConfig()"
+                            {{ in_array('-', $codeCfg['operators'] ?? []) ? 'checked' : '' }}> −</label>
+                        <label><input type="checkbox" id="codeOpMul"   onchange="syncCodeConfig()"
+                            {{ in_array('×', $codeCfg['operators'] ?? []) ? 'checked' : '' }}> ×</label>
+                        <label><input type="checkbox" id="codeOpDiv"   onchange="syncCodeConfig()"
+                            {{ in_array('÷', $codeCfg['operators'] ?? []) ? 'checked' : '' }}> ÷</label>
+                    </div>
+
+                    {{-- Row 3: vars per equation + unique values --}}
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+                        <div>
+                            <div class="lbl">ცვლადები განტოლებაში</div>
+                            <select class="pyr-inp" id="codeVarsPerEq" onchange="syncCodeConfig()">
+                                <option value="2" {{ ($codeCfg['vars_per_eq']??2)==2?'selected':'' }}>2-ცვლადიანი (A+B=?)</option>
+                                <option value="3" {{ ($codeCfg['vars_per_eq']??2)==3?'selected':'' }}>3-ცვლადიანი (A+B+B=?)</option>
+                            </select>
+                        </div>
+                        <div style="display:flex;align-items:flex-end;padding-bottom:4px;">
+                            <label style="display:flex;align-items:center;gap:7px;font-size:0.78rem;font-weight:700;color:#374151;cursor:pointer;">
+                                <input type="checkbox" id="codeUniqueVals" onchange="syncCodeConfig()"
+                                    {{ !empty($codeCfg['unique_values']) ? 'checked' : '' }}
+                                    style="width:16px;height:16px;cursor:pointer;">
+                                მნიშვნელობები განსხვავებული
+                            </label>
+                        </div>
+                    </div>
+                </div>{{-- /codeFields --}}
             </div>
 
             <div id="mcSections">
@@ -503,22 +571,26 @@ function renderTextOptChips(data) {
 // ── Question type toggle
 function setQType(type) {
     document.getElementById('qtInput').value = type;
-    document.querySelectorAll('.qt-btn').forEach(b => b.classList.remove('sel'));
-    // mark the clicked button
     document.querySelectorAll('.qt-btn').forEach(b => {
-        if ((type === 'pyramid' && b.textContent.includes('პირამიდა')) ||
-            (type === 'multiple_choice' && b.textContent.includes('Multiple'))) {
+        b.classList.remove('sel');
+        if ((type === 'pyramid'         && b.textContent.includes('პირამიდა')) ||
+            (type === 'multiple_choice' && b.textContent.includes('Multiple'))  ||
+            (type === 'code'            && b.textContent.includes('კოდი'))) {
             b.classList.add('sel');
         }
     });
     applyQType(type);
 }
 function applyQType(type) {
-    const isPyr = type === 'pyramid';
-    document.getElementById('pyrFields').style.display      = isPyr ? 'block' : 'none';
-    document.getElementById('themeFieldWrap').style.display = isPyr ? 'none'  : 'block';
-    document.getElementById('mcSections').style.display     = isPyr ? 'none'  : 'block';
-    if (isPyr) syncPyrConfig();
+    const isPyr  = type === 'pyramid';
+    const isCode = type === 'code';
+    const isMC   = !isPyr && !isCode;
+    document.getElementById('pyrFields').style.display      = isPyr  ? 'block' : 'none';
+    document.getElementById('codeFields').style.display     = isCode ? 'block' : 'none';
+    document.getElementById('themeFieldWrap').style.display = isMC   ? 'block' : 'none';
+    document.getElementById('mcSections').style.display     = isMC   ? 'block' : 'none';
+    if (isPyr)  { syncPyrConfig();  return; }
+    if (isCode) { syncCodeConfig(); return; }
 }
 function syncPyrConfig() {
     const h    = document.getElementById('pyrHeight').value;
@@ -528,6 +600,27 @@ function syncPyrConfig() {
         height: parseInt(h), max_base: parseInt(mx), hidden_count: parseInt(hide)
     });
     if (document.getElementById('qtInput').value === 'pyramid') genPreviewPyramid();
+}
+function syncCodeConfig() {
+    const count      = parseInt(document.getElementById('codeSymCount').value)   || 3;
+    const minV       = parseInt(document.getElementById('codeMinVal').value)      || 1;
+    const maxV       = parseInt(document.getElementById('codeMaxVal').value)      || 9;
+    const varsPerEq  = parseInt(document.getElementById('codeVarsPerEq').value)   || 2;
+    const uniqueVals = document.getElementById('codeUniqueVals').checked;
+    const ops = [];
+    if (document.getElementById('codeOpPlus').checked)  ops.push('+');
+    if (document.getElementById('codeOpMinus').checked) ops.push('-');
+    if (document.getElementById('codeOpMul').checked)   ops.push('×');
+    if (document.getElementById('codeOpDiv').checked)   ops.push('÷');
+    document.getElementById('numConfigJson').value = JSON.stringify({
+        symbol_count:  count,
+        min_val:       minV,
+        max_val:       maxV,
+        operators:     ops.length ? ops : ['+'],
+        vars_per_eq:   varsPerEq,
+        unique_values: uniqueVals,
+    });
+    if (document.getElementById('qtInput').value === 'code') genPreviewCode();
 }
 // init on page load
 (function() {
@@ -722,7 +815,9 @@ function renderConds() {
 
 // ── Sync all hidden inputs
 function syncAll() {
-    if (document.getElementById('qtInput').value === 'pyramid') { syncPyrConfig(); return; }
+    const _qt = document.getElementById('qtInput').value;
+    if (_qt === 'pyramid') { syncPyrConfig(); return; }
+    if (_qt === 'code')    { syncCodeConfig(); return; }
     const ncObj = {};
     ncRows.forEach(r => {
         if (r.name) ncObj[r.name] = { min: +r.min, max: +r.max, step: +r.step || 1 };
@@ -939,8 +1034,118 @@ function genPreviewPyramid() {
         : '';
 }
 
+function genPreviewCode() {
+    const count      = parseInt(document.getElementById('codeSymCount').value)   || 3;
+    const minV       = parseInt(document.getElementById('codeMinVal').value)      || 1;
+    const maxV       = parseInt(document.getElementById('codeMaxVal').value)      || 9;
+    const varsPerEq  = parseInt(document.getElementById('codeVarsPerEq').value)   || 2;
+    const uniqueVals = document.getElementById('codeUniqueVals').checked;
+    const ops = [];
+    if (document.getElementById('codeOpPlus').checked)  ops.push('+');
+    if (document.getElementById('codeOpMinus').checked) ops.push('−');
+    if (document.getElementById('codeOpMul').checked)   ops.push('×');
+    if (document.getElementById('codeOpDiv').checked)   ops.push('÷');
+    if (!ops.length) ops.push('+');
+
+    const allEmoji = ['🍎','🍌','🍓','🍊','🍇','🍐','🍍','🍒','🍉','🍋','🍑','🥝','⭐','🌙','💎','🔥','🌊','🎵','🐶','🐱','🐻','🦊','🐼','🌸','🌈','🎯','🏆','🚀','🎸','🦋'];
+    const shuffled = [...allEmoji].sort(() => Math.random() - 0.5);
+    const symbols  = shuffled.slice(0, count);
+
+    // Generate values (unique if needed)
+    let values;
+    if (uniqueVals && (maxV - minV + 1) >= count) {
+        const pool = Array.from({length: maxV - minV + 1}, (_, i) => minV + i)
+            .sort(() => Math.random() - 0.5);
+        values = pool.slice(0, count);
+    } else {
+        values = symbols.map(() => minV + Math.floor(Math.random() * (maxV - minV + 1)));
+    }
+
+    // Anchor equation (always +, uses only S0)
+    const equations = [];
+    if (varsPerEq === 3) {
+        equations.push(`${symbols[0]} + ${symbols[0]} + ${symbols[0]} = ${3 * values[0]}`);
+    } else {
+        equations.push(`${symbols[0]} + ${symbols[0]} = ${2 * values[0]}`);
+    }
+
+    // Chain equations
+    for (let i = 1; i < count; i++) {
+        let op = ops[Math.floor(Math.random() * ops.length)];
+        let eq;
+        if (varsPerEq === 3) {
+            // Pattern: S(i-1) op S(i) op S(i) = result
+            if (op === '+') {
+                eq = `${symbols[i-1]} + ${symbols[i]} + ${symbols[i]} = ${values[i-1] + 2*values[i]}`;
+            } else if (op === '−') {
+                if (values[i-1] > 2 * values[i]) {
+                    eq = `${symbols[i-1]} − ${symbols[i]} − ${symbols[i]} = ${values[i-1] - 2*values[i]}`;
+                } else {
+                    eq = `${symbols[i-1]} + ${symbols[i]} + ${symbols[i]} = ${values[i-1] + 2*values[i]}`;
+                }
+            } else if (op === '×') {
+                eq = `${symbols[i-1]} × ${symbols[i]} × ${symbols[i]} = ${values[i-1] * values[i] * values[i]}`;
+            } else {
+                eq = `${symbols[i-1]} + ${symbols[i]} + ${symbols[i]} = ${values[i-1] + 2*values[i]}`;
+            }
+        } else {
+            // Pattern: S(i-1) op S(i) = result
+            if (op === '+') {
+                eq = `${symbols[i-1]} + ${symbols[i]} = ${values[i-1] + values[i]}`;
+            } else if (op === '−') {
+                if (values[i-1] >= values[i]) {
+                    eq = `${symbols[i-1]} − ${symbols[i]} = ${values[i-1] - values[i]}`;
+                } else {
+                    eq = `${symbols[i]} − ${symbols[i-1]} = ${values[i] - values[i-1]}`;
+                }
+            } else if (op === '×') {
+                eq = `${symbols[i-1]} × ${symbols[i]} = ${values[i-1] * values[i]}`;
+            } else if (op === '÷') {
+                // Find divisor of values[i-1] for values[i]
+                let divisors = [];
+                for (let d = minV; d <= maxV; d++) { if (values[i-1] % d === 0) divisors.push(d); }
+                if (divisors.length) {
+                    values[i] = divisors[Math.floor(Math.random() * divisors.length)];
+                    eq = `${symbols[i-1]} ÷ ${symbols[i]} = ${values[i-1] / values[i]}`;
+                } else {
+                    eq = `${symbols[i-1]} + ${symbols[i]} = ${values[i-1] + values[i]}`;
+                }
+            } else {
+                eq = `${symbols[i-1]} + ${symbols[i]} = ${values[i-1] + values[i]}`;
+            }
+        }
+        equations.push(eq);
+    }
+
+    const target = [...symbols].reverse();
+    const answers = target.map((_, pos) => values[count - 1 - pos]);
+
+    document.getElementById('prevQ').innerHTML = '🕵️ კოდის გაშიფვრა';
+    document.getElementById('prevHint').innerHTML = '';
+    document.getElementById('prevWarn').innerHTML = '';
+
+    let eqHtml = '<div style="background:#fff8e7;border-radius:6px;padding:10px 12px;margin-bottom:10px;border:1.5px dashed #ffe194;">';
+    equations.forEach(eq => { eqHtml += `<div style="font-size:1.05rem;font-weight:700;color:#374151;margin:4px 0;">${eq}</div>`; });
+    eqHtml += '</div>';
+
+    let targetHtml = '<div style="font-size:0.6rem;color:#94a3b8;margin-bottom:5px;letter-spacing:0.1em;">სამიზნე კოდი:</div>';
+    targetHtml += '<div style="display:flex;gap:6px;justify-content:center;margin-bottom:10px;">';
+    target.forEach(sym => { targetHtml += `<div style="width:40px;height:40px;border-radius:8px;background:#4f46e5;color:white;display:flex;align-items:center;justify-content:center;font-size:1.3rem;">${sym}</div>`; });
+    targetHtml += '</div>';
+
+    let ansHtml = '<div style="display:flex;gap:6px;justify-content:center;">';
+    answers.forEach(v => { ansHtml += `<div style="width:40px;height:40px;border-radius:8px;background:#f0fdf4;border:1.5px solid #86efac;color:#15803d;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;">${v}</div>`; });
+    ansHtml += '</div>';
+
+    document.getElementById('prevOpts').innerHTML = eqHtml + targetHtml + ansHtml;
+    document.getElementById('prevFormula').innerHTML = `სიმბოლო მნიშვნელობები: ${symbols.map((s,i)=>`${s}=${values[i]}`).join(' · ')}`;
+    document.getElementById('prevVars').innerHTML = '';
+}
+
 function genPreview() {
-    if (document.getElementById('qtInput').value === 'pyramid') { genPreviewPyramid(); return; }
+    const qt = document.getElementById('qtInput').value;
+    if (qt === 'pyramid') { genPreviewPyramid(); return; }
+    if (qt === 'code')    { genPreviewCode();    return; }
     const tmpl = document.getElementById('templateText').value;
     if (!tmpl) { clearPreview(); return; }
     const isTxt = document.getElementById('answerTypeInput').value === 'text';
@@ -1154,11 +1359,10 @@ document.getElementById('condRows').addEventListener('focusin', function(e) {
 })();
 
 document.getElementById('mainForm').addEventListener('submit', function() {
-    if (document.getElementById('qtInput').value === 'pyramid') {
-        syncPyrConfig();
-    } else {
-        syncAll();
-    }
+    const _qt = document.getElementById('qtInput').value;
+    if (_qt === 'pyramid') { syncPyrConfig(); }
+    else if (_qt === 'code') { syncCodeConfig(); }
+    else { syncAll(); }
 });
 </script>
 @endverbatim

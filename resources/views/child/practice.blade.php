@@ -95,6 +95,17 @@
     .lu-sub { font-family:'Nunito',sans-serif; font-weight:800; font-size:0.9rem; color:rgba(255,255,255,0.7); margin-bottom:28px; }
     .lu-btn { padding:14px 36px; background:white; border:none; border-radius:18px; font-family:'Fredoka One',cursive; font-size:1.05rem; color:#4f46e5; cursor:pointer; }
 
+    /* ── Code question ── */
+    .code-eq-box { background:#fff8e7;border-radius:12px;padding:12px 14px;margin-bottom:14px;border:1.5px dashed #ffe194; }
+    .code-eq { font-family:'Fredoka One',cursive; font-size:1rem; color:#374151; margin:3px 0; }
+    .code-target-row { display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:10px; }
+    .code-sym-box { width:52px;height:52px;border-radius:12px;background:#4f46e5;color:white;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0; }
+    .code-inp-row { display:flex;gap:8px;justify-content:center;flex-wrap:wrap; }
+    .code-inp { width:52px;height:52px;border-radius:12px;border:2.5px solid #a5b4fc;background:#eef2ff;color:#4f46e5;font-family:'Fredoka One',cursive;font-size:1.1rem;text-align:center;outline:none;padding:0;transition:border-color 0.2s,background 0.2s; }
+    .code-inp:focus { border-color:#4f46e5;background:#e0e7ff; }
+    .code-inp.correct-inp { border-color:#86efac !important;background:#dcfce7 !important;color:#15803d !important; }
+    .code-inp.wrong-inp   { border-color:#fca5a5 !important;background:#fee2e2 !important;color:#dc2626 !important; }
+
     /* ── Spinner ── */
     .spinner { display:none; text-align:center; padding:40px; font-family:'Fredoka One',cursive; color:#94a3b8; font-size:1rem; }
     .spinner.show { display:block; }
@@ -135,10 +146,19 @@
             <div class="q-text" style="margin-bottom:18px;">შეავსე ცარიელი უჯრები</div>
             <div class="pyramid" id="pyramid"></div>
         </div>
+
+        {{-- Code question --}}
+        <div id="codeArea" style="display:none;">
+            <div class="q-text" style="margin-bottom:14px;">🕵️ გაშიფრე კოდი</div>
+            <div class="code-eq-box" id="codeEqs"></div>
+            <div style="font-size:0.6rem;color:#94a3b8;text-align:center;margin-bottom:6px;letter-spacing:0.08em;">სამიზნე კოდი</div>
+            <div class="code-target-row" id="codeSyms"></div>
+            <div class="code-inp-row" id="codeInps"></div>
+        </div>
     </div>
 
     <div class="feedback" id="feedback"></div>
-    <button class="check-btn" id="checkBtn" style="display:none;" onclick="checkPyramid()">შემოწმება ✨</button>
+    <button class="check-btn" id="checkBtn" style="display:none;" onclick="checkAnswer()">შემოწმება ✨</button>
     <button class="next-btn" id="nextBtn" onclick="loadQuestion()">შემდეგი კითხვა →</button>
 </div>
 
@@ -178,9 +198,12 @@ function renderQuestion(q) {
     document.getElementById('spinner').classList.remove('show');
     document.getElementById('qCard').style.display = 'block';
 
+    document.getElementById('mcArea').style.display   = 'none';
+    document.getElementById('pyrArea').style.display  = 'none';
+    document.getElementById('codeArea').style.display = 'none';
+
     if (q.type === 'mc') {
         document.getElementById('mcArea').style.display  = 'block';
-        document.getElementById('pyrArea').style.display = 'none';
         document.getElementById('qLabel').textContent = 'კითხვა';
         document.getElementById('qText').textContent  = q.question;
 
@@ -197,11 +220,15 @@ function renderQuestion(q) {
             btn.onclick       = () => pickMC(opt, btn);
             grid.appendChild(btn);
         });
-    } else {
-        document.getElementById('mcArea').style.display  = 'none';
+    } else if (q.type === 'pyramid') {
         document.getElementById('pyrArea').style.display = 'block';
         document.getElementById('qLabel').textContent    = 'პირამიდა';
         renderPyramid(q.rows);
+        document.getElementById('checkBtn').style.display = 'block';
+    } else if (q.type === 'code') {
+        document.getElementById('codeArea').style.display = 'block';
+        document.getElementById('qLabel').textContent     = '🕵️ კოდი';
+        renderCode(q);
         document.getElementById('checkBtn').style.display = 'block';
     }
 }
@@ -249,6 +276,47 @@ function renderPyramid(rows) {
     });
 }
 
+// ── Code render ──────────────────────────────────────────────────────────
+function renderCode(q) {
+    const eqBox = document.getElementById('codeEqs');
+    eqBox.innerHTML = '';
+    (q.equations || []).forEach(eq => {
+        const d = document.createElement('div');
+        d.className   = 'code-eq';
+        d.textContent = eq;
+        eqBox.appendChild(d);
+    });
+
+    const symRow = document.getElementById('codeSyms');
+    symRow.innerHTML = '';
+    (q.target || []).forEach(sym => {
+        const d = document.createElement('div');
+        d.className   = 'code-sym-box';
+        d.textContent = sym;
+        symRow.appendChild(d);
+    });
+
+    const inpRow = document.getElementById('codeInps');
+    inpRow.innerHTML = '';
+    (q.target || []).forEach((_, pos) => {
+        const inp = document.createElement('input');
+        inp.type         = 'number';
+        inp.className    = 'code-inp';
+        inp.placeholder  = '?';
+        inp.dataset.pos  = pos;
+        inpRow.appendChild(inp);
+    });
+}
+
+// ── Unified check dispatch ────────────────────────────────────────────────
+function checkAnswer() {
+    if (currentQ && currentQ.type === 'code') {
+        checkCode();
+    } else {
+        checkPyramid();
+    }
+}
+
 // ── Pyramid check ────────────────────────────────────────────────────────
 async function checkPyramid() {
     const hidden = document.querySelectorAll('.pyr-cell.hidden');
@@ -268,6 +336,30 @@ async function checkPyramid() {
             if (cell) {
                 cell.classList.add(res.correct ? 'correct-cell' : 'wrong-cell');
                 if (!res.correct) cell.querySelector('input').value = res.value;
+            }
+        });
+    }
+
+    showFeedback(data);
+    document.getElementById('checkBtn').style.display = 'none';
+}
+
+// ── Code check ───────────────────────────────────────────────────────────
+async function checkCode() {
+    const inps = document.querySelectorAll('.code-inp');
+    const code_answers = {};
+    inps.forEach(inp => { code_answers[inp.dataset.pos] = inp.value; });
+
+    document.getElementById('checkBtn').disabled = true;
+    const r    = await postAnswer({ code_answers });
+    const data = await r.json();
+
+    if (data.results) {
+        Object.entries(data.results).forEach(([pos, res]) => {
+            const inp = document.querySelector(`.code-inp[data-pos="${pos}"]`);
+            if (inp) {
+                inp.classList.add(res.correct ? 'correct-inp' : 'wrong-inp');
+                if (!res.correct) inp.value = res.value;
             }
         });
     }

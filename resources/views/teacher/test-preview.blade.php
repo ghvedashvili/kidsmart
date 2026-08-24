@@ -109,10 +109,16 @@
         @if($selectedTheme)<span class="theme-tag">🎨 {{ $selectedTheme->name }} · </span>@endif{{ $questions->count() }} კითხვა
     </div>
     @foreach($questions as $i => $q)
-    @php $isPyr = ($q['type'] ?? null) === 'pyramid' || is_null($q['options'] ?? null) && str_starts_with((string)($q['correct_answer'] ?? ''), '{'); @endphp
+    @php
+        $qType = $q['question_type'] ?? 'multiple_choice';
+        if ($qType === 'multiple_choice' && str_starts_with((string)($q['correct_answer'] ?? ''), '{')) {
+            $caKeys = array_keys(json_decode($q['correct_answer'], true) ?? []);
+            $qType  = (count($caKeys) && str_contains((string)($caKeys[0] ?? ''), ',')) ? 'pyramid' : 'code';
+        }
+    @endphp
     <div class="q-card">
         <div class="q-num">{{ $i + 1 }}<span class="q-topic">{{ $q['topic_name'] }}</span></div>
-        @if($isPyr)
+        @if($qType === 'pyramid')
         @php
             $pyrRows  = json_decode($q['question_text'], true) ?? [];
             $pyrSols  = json_decode($q['correct_answer'], true) ?? [];
@@ -129,6 +135,27 @@
                 <div style="width:44px;height:44px;border-radius:10px;background:#4f46e5;color:white;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;">{{ $val }}</div>
                 @endif
                 @endforeach
+            </div>
+            @endforeach
+        </div>
+        @elseif($qType === 'code')
+        @php
+            $codeQ   = json_decode($q['question_text'], true) ?? [];
+            $codeAns = json_decode($q['correct_answer'], true) ?? [];
+        @endphp
+        <div class="q-text" style="margin-bottom:10px;">🕵️ კოდის გაშიფვრა</div>
+        <div style="background:#fff8e7;border-radius:8px;padding:8px 12px;margin-bottom:10px;border:1.5px dashed #ffe194;font-size:0.82rem;font-weight:700;color:#374151;">
+            @foreach($codeQ['equations'] ?? [] as $eq)
+            <div>{{ $eq }}</div>
+            @endforeach
+        </div>
+        <div style="font-size:0.6rem;color:#94a3b8;margin-bottom:6px;letter-spacing:0.08em;">სამიზნე კოდი</div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:4px;">
+            @foreach($codeQ['target'] ?? [] as $pos => $sym)
+            @php $cv = $codeAns[$pos] ?? '?'; @endphp
+            <div style="text-align:center;">
+                <div style="width:40px;height:40px;border-radius:8px;background:#4f46e5;color:white;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:3px;">{{ $sym }}</div>
+                <div style="font-size:0.78rem;font-weight:800;color:#15803d;">{{ $cv }}</div>
             </div>
             @endforeach
         </div>

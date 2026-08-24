@@ -119,16 +119,20 @@
     @php $icons = ['⚽','🏆','🥅','🧤','🎽','🏟️','⭐','🥇','🎯','🏅','🔥','💪']; @endphp
     @foreach($questions as $i => $q)
     @php
-        $answer    = $answers->get($q->id);
-        $selected  = $answer?->selected_answer;
-        $correct   = $q->correct_answer;
-        $isPyrQ    = str_starts_with((string) $correct, '{');
+        $answer   = $answers->get($q->id);
+        $selected = $answer?->selected_answer;
+        $correct  = $q->correct_answer;
+        $qType = $q->question_type ?? 'multiple_choice';
+        if ($qType === 'multiple_choice' && str_starts_with((string)$correct, '{')) {
+            $caKeys = array_keys(json_decode($correct, true) ?? []);
+            $qType  = (count($caKeys) && str_contains((string)($caKeys[0] ?? ''), ',')) ? 'pyramid' : 'code';
+        }
     @endphp
     <div class="q-card">
         <div class="q-badge">⚽ {{ $i + 1 }}</div>
         <span class="q-icon">{{ $icons[$i % count($icons)] }}</span>
 
-        @if($isPyrQ)
+        @if($qType === 'pyramid')
         @php
             $pyrRows   = json_decode($q->question_text, true) ?? [];
             $solutions = json_decode($correct, true) ?? [];
@@ -147,20 +151,16 @@
                     $cellOk = $sol !== null && (int)($uv ?? PHP_INT_MIN) === $sol;
                 @endphp
                 @if($val !== null)
-                {{-- visible cell --}}
                 <div style="width:44px;height:44px;border-radius:10px;background:#4f46e5;color:white;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;">{{ $val }}</div>
                 @elseif($cellOk)
-                {{-- hidden, correct --}}
                 <div style="width:44px;height:44px;border-radius:10px;background:#16a34a;color:white;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;">{{ $sol }}</div>
                 @elseif($uv !== null)
-                {{-- hidden, wrong: show user/correct stacked --}}
                 <div style="width:54px;min-height:44px;border-radius:10px;background:#fee2e2;border:2px solid #ef4444;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px 3px;gap:1px;">
                     <span style="color:#ef4444;font-size:0.78rem;font-weight:800;line-height:1;">{{ $uv }}</span>
                     <span style="color:#94a3b8;font-size:0.6rem;line-height:1;">/</span>
                     <span style="color:#16a34a;font-size:0.78rem;font-weight:800;line-height:1;">{{ $sol }}</span>
                 </div>
                 @else
-                {{-- hidden, not answered --}}
                 <div style="width:44px;height:44px;border-radius:10px;border:2px dashed #fca5a5;background:#fff1f2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;">
                     <span style="color:#94a3b8;font-size:0.62rem;line-height:1;">—</span>
                     <span style="color:#16a34a;font-size:0.72rem;font-weight:800;line-height:1;">{{ $sol }}</span>
@@ -174,6 +174,55 @@
         <div style="color:#16a34a;font-size:0.8rem;font-weight:700;">✅ სწორი</div>
         @elseif($selected !== null)
         <div style="color:#ef4444;font-size:0.8rem;font-weight:700;">❌ არასწორი — წითელი = შეცდომა</div>
+        @else
+        <div class="no-ans">⚠️ პასუხი არ გაუცია</div>
+        @endif
+
+        @elseif($qType === 'code')
+        @php
+            $codeQ    = json_decode($q->question_text, true) ?? [];
+            $codeAns  = json_decode($correct, true) ?? [];
+            $userInps = $selected ? (json_decode($selected, true) ?? []) : [];
+            $codeOk   = $answer?->is_correct;
+        @endphp
+        <div class="q-text" style="margin-bottom:10px;">🕵️ კოდის გაშიფვრა</div>
+        <div style="background:#fff8e7;border-radius:8px;padding:8px 12px;margin-bottom:10px;border:1.5px dashed #ffe194;font-size:0.88rem;font-weight:700;color:#374151;">
+            @foreach($codeQ['equations'] ?? [] as $eq)
+            <div>{{ $eq }}</div>
+            @endforeach
+        </div>
+        <div style="font-size:0.6rem;color:#94a3b8;margin-bottom:6px;letter-spacing:0.08em;">სამიზნე კოდი</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+            @foreach($codeQ['target'] ?? [] as $pos => $sym)
+            @php
+                $cv   = $codeAns[$pos] ?? null;
+                $uv   = $userInps[$pos] ?? null;
+                $ok   = $cv !== null && (int)($uv ?? PHP_INT_MIN) === (int)$cv;
+            @endphp
+            <div style="text-align:center;">
+                <div style="width:44px;height:44px;border-radius:8px;background:#4f46e5;color:white;display:flex;align-items:center;justify-content:center;font-size:1.25rem;margin-bottom:3px;">{{ $sym }}</div>
+                @if($selected !== null)
+                    @if($ok)
+                    <div style="font-size:0.78rem;font-weight:900;color:#16a34a;">{{ $cv }}</div>
+                    @elseif($uv !== null)
+                    <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
+                        <span style="color:#ef4444;font-size:0.75rem;font-weight:800;line-height:1.2;">{{ $uv }}</span>
+                        <span style="color:#94a3b8;font-size:0.55rem;line-height:1;">/</span>
+                        <span style="color:#16a34a;font-size:0.75rem;font-weight:800;line-height:1.2;">{{ $cv }}</span>
+                    </div>
+                    @else
+                    <div style="color:#f59e0b;font-size:0.75rem;font-weight:800;">— / {{ $cv }}</div>
+                    @endif
+                @else
+                <div style="font-size:0.72rem;color:#16a34a;font-weight:800;">{{ $cv }}</div>
+                @endif
+            </div>
+            @endforeach
+        </div>
+        @if($codeOk)
+        <div style="color:#16a34a;font-size:0.8rem;font-weight:700;">✅ სწორი</div>
+        @elseif($selected !== null)
+        <div style="color:#ef4444;font-size:0.8rem;font-weight:700;">❌ არასწორი</div>
         @else
         <div class="no-ans">⚠️ პასუხი არ გაუცია</div>
         @endif

@@ -132,6 +132,13 @@ body {
 @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
 .warn { font-family: 'Nunito', sans-serif; font-size: 0.8rem; color: #e74c3c; font-weight: 800; text-align: center; margin-top: 10px; display: none; }
+
+.code-eq-box { background:#fff8e7;border-radius:10px;padding:10px 14px;margin-bottom:12px;border:1.5px dashed #ffe194; }
+.code-eq { font-size:clamp(0.9rem,3.5vw,1.05rem);font-weight:700;color:#374151;margin:3px 0; }
+.code-target-row { display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:8px; }
+.code-sym-box { width:48px;height:48px;border-radius:10px;background:#4f46e5;color:white;display:flex;align-items:center;justify-content:center;font-size:1.35rem;flex-shrink:0; }
+.code-inp-row { display:flex;gap:8px;justify-content:center;flex-wrap:wrap; }
+.code-inp { width:48px;height:48px;border-radius:10px;border:2.5px solid #a5b4fc;background:#eef2ff;color:#4f46e5;font-family:'Fredoka One',cursive;font-size:1.1rem;text-align:center;outline:none;padding:0; }
 </style>
 
 <form method="POST" action="{{ route('test.submit', $test) }}" id="testForm">
@@ -151,9 +158,16 @@ body {
         <div class="q-badge">⚽ {{ $i + 1 }}</div>
         <div class="check-mark">✓</div>
         <span class="q-icon">{{ $icons[$i % count($icons)] }}</span>
-        @php $isPyrQ = str_starts_with((string)$q->correct_answer, '{'); @endphp
+        @php
+            $qType = $q->question_type ?? 'multiple_choice';
+            if ($qType === 'multiple_choice' && str_starts_with((string)$q->correct_answer, '{')) {
+                // Pyramid keys look like "0,1" (row,col); code keys are plain integers "0","1"
+                $caKeys = array_keys(json_decode($q->correct_answer, true) ?? []);
+                $qType  = (count($caKeys) && str_contains((string)($caKeys[0] ?? ''), ',')) ? 'pyramid' : 'code';
+            }
+        @endphp
 
-        @if($isPyrQ)
+        @if($qType === 'pyramid')
         @php $pyrRows = json_decode($q->question_text, true) ?? []; @endphp
         <div class="q-text" style="margin-bottom:16px;">შეავსე ცარიელი უჯრები</div>
         <div style="display:flex;flex-direction:column;align-items:center;gap:6px;" id="pyr_{{ $q->id }}">
@@ -174,11 +188,37 @@ body {
             @endforeach
         </div>
         <input type="hidden" name="answers[{{ $q->id }}]" value="pyramid_submitted">
+
+        @elseif($qType === 'code')
+        @php $codeQ = json_decode($q->question_text, true) ?? []; @endphp
+        <div class="q-text" style="margin-bottom:12px;">🕵️ გაშიფრე კოდი</div>
+        <div class="code-eq-box">
+            @foreach($codeQ['equations'] ?? [] as $eq)
+            <div class="code-eq">{{ $eq }}</div>
+            @endforeach
+        </div>
+        <div style="font-size:0.65rem;color:#94a3b8;text-align:center;margin-bottom:6px;letter-spacing:0.08em;">სამიზნე კოდი</div>
+        <div class="code-target-row">
+            @foreach($codeQ['target'] ?? [] as $sym)
+            <div class="code-sym-box">{{ $sym }}</div>
+            @endforeach
+        </div>
+        <div class="code-inp-row">
+            @foreach($codeQ['target'] ?? [] as $pos => $sym)
+            <input type="number" class="code-inp"
+                name="code_answers[{{ $q->id }}][{{ $pos }}]"
+                placeholder="?"
+                data-qid="{{ $q->id }}"
+                onchange="onCodeAnswer({{ $q->id }}, {{ $i }})">
+            @endforeach
+        </div>
+        <input type="hidden" name="answers[{{ $q->id }}]" value="code_submitted">
+
         @else
         <div class="q-text">{{ $q->question_text }}</div>
         @if($q->hint_text)<div class="q-hint">{{ $q->hint_text }}</div>@endif
         <div class="opts">
-            @foreach($q->options as $opt)
+            @foreach($q->options ?? [] as $opt)
             <label class="opt-lbl">
                 <input type="radio" name="answers[{{ $q->id }}]" value="{{ $opt }}"
                     data-qid="{{ $q->id }}" data-idx="{{ $i }}"
@@ -224,6 +264,21 @@ function onPyrAnswer(qid) {
             if (answeredCount === totalQ) document.getElementById('submitBtn').classList.add('vis');
         }
     });
+}
+
+function onCodeAnswer(qid, cardIdx) {
+    const inputs = document.querySelectorAll(`.code-inp[data-qid="${qid}"]`);
+    const allFilled = Array.from(inputs).every(inp => inp.value.trim() !== '');
+    if (!allFilled) return;
+    if (!answeredSet.has(cardIdx)) {
+        answeredSet.add(cardIdx);
+        answeredCount++;
+        document.getElementById('card-' + cardIdx).classList.add('answered');
+        const pct = Math.round(answeredCount / totalQ * 100);
+        document.getElementById('progFill').style.width  = pct + '%';
+        document.getElementById('progBall').style.left   = pct === 0 ? '0' : 'calc(' + pct + '% - 5px)';
+        if (answeredCount === totalQ) document.getElementById('submitBtn').classList.add('vis');
+    }
 }
 
 function onAnswer(i, qid, val) {

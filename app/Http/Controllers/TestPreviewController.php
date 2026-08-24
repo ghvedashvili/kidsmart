@@ -60,7 +60,7 @@ class TestPreviewController extends Controller
             if ($templates->isEmpty()) {
                 $error = 'ამ პარამეტრებისთვის კითხვები ჯერ არ დამატებულა';
             } else {
-                $mcTemplates = $templates->filter(fn($t) => !$t->isPyramid());
+                $mcTemplates = $templates->filter(fn($t) => !$t->isPyramid() && !$t->isCode());
 
                 if ($mcTemplates->isNotEmpty()) {
                     $selectedTheme = $themeId
@@ -73,10 +73,16 @@ class TestPreviewController extends Controller
                 }
 
                 if (!$error) {
-                    $questions = $templates->shuffle()->map(fn($t) => array_merge(
-                        ['topic_name' => $t->topic->name],
-                        $t->isPyramid() ? $t->generatePyramid() : $t->generate($selectedTheme)
-                    ))->values();
+                    $questions = $templates->shuffle()->map(function($t) use ($selectedTheme) {
+                        if ($t->isPyramid()) {
+                            $data = $t->generatePyramid();
+                        } elseif ($t->isCode()) {
+                            $data = $t->generateCode();
+                        } else {
+                            $data = $t->generate($selectedTheme);
+                        }
+                        return array_merge(['topic_name' => $t->topic->name, 'question_type' => $t->question_type], $data);
+                    })->values();
                 }
             }
         }

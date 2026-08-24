@@ -24,9 +24,9 @@ class TestGeneratorService
             ->whereHas('topic', fn($q) => $q->where('grade_id', $setting->grade_id))
             ->when(! empty($topicIds), fn($q) => $q->whereIn('topic_id', $topicIds));
 
-        // Pyramid templates are theme-independent — always included if present
-        $pyramidTemplates = $baseQuery()
-            ->where('question_type', 'pyramid')
+        // Pyramid and code templates are theme-independent — always included
+        $specialTemplates = $baseQuery()
+            ->whereIn('question_type', ['pyramid', 'code'])
             ->with('topic')
             ->get();
 
@@ -49,7 +49,7 @@ class TestGeneratorService
             }
         }
 
-        $pool = $mcTemplates->merge($pyramidTemplates)->shuffle();
+        $pool = $mcTemplates->merge($specialTemplates)->shuffle();
 
         if ($pool->isEmpty()) {
             return ['error' => 'ამ პარამეტრებისთვის კითხვები ჯერ არ დამატებულა'];
@@ -63,12 +63,11 @@ class TestGeneratorService
         ]);
 
         foreach ($pool as $i => $template) {
-            $generated = $template->isPyramid()
-                ? $template->generatePyramid()
-                : $template->generate($theme);
+            $generated = $template->generate($theme);
             TestQuestion::create([
                 'test_id'        => $test->id,
                 'template_id'    => $template->id,
+                'question_type'  => $template->question_type ?? 'multiple_choice',
                 'question_text'  => $generated['question_text'],
                 'hint_text'      => $generated['hint_text'] ?? null,
                 'options'        => $generated['options'],

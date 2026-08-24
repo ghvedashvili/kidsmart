@@ -51,17 +51,29 @@ class QuestionTemplate extends Model
         return $this->belongsTo(\App\Models\Theme::class);
     }
 
-    public function isPyramid(): bool
-    {
-        return $this->question_type === 'pyramid';
-    }
+    public function isPyramid(): bool { return $this->question_type === 'pyramid'; }
+    public function isCode(): bool    { return $this->question_type === 'code'; }
 
     public function generate(?Theme $theme = null): array
     {
         if ($this->isPyramid()) return $this->generatePyramid();
+        if ($this->isCode())    return $this->generateCode();
         return $this->answer_type === 'text'
             ? $this->generateText($theme)
             : $this->generateNumeric($theme);
+    }
+
+    public function generateCode(): array
+    {
+        $cfg = $this->num_config ?? [];
+        return \App\Services\CodeService::build(
+            (int)  ($cfg['symbol_count']  ?? 3),
+            (int)  ($cfg['min_val']       ?? 1),
+            (int)  ($cfg['max_val']       ?? 9),
+            (array)($cfg['operators']     ?? ['+']),
+            (int)  ($cfg['vars_per_eq']   ?? 2),
+            (bool) ($cfg['unique_values'] ?? false)
+        );
     }
 
     public function generatePyramid(): array

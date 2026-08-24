@@ -83,17 +83,22 @@ class TestController extends Controller
         $questions = $test->questions()->get();
 
         foreach ($questions as $q) {
-            $isPyramid = str_starts_with((string) $q->correct_answer, '{');
+            $qType = $q->question_type ?? 'multiple_choice';
 
-            if ($isPyramid) {
-                $solutions   = json_decode($q->correct_answer, true) ?? [];
-                $userCells   = $request->input("pyramid_answers.{$q->id}", []);
-                $allOk       = ! empty($solutions);
+            if ($qType === 'pyramid') {
+                $solutions = json_decode($q->correct_answer, true) ?? [];
+                $userCells = $request->input("pyramid_answers.{$q->id}", []);
+                $allOk     = ! empty($solutions);
                 foreach ($solutions as $pos => $val) {
                     if ((int) ($userCells[$pos] ?? PHP_INT_MIN) !== $val) { $allOk = false; break; }
                 }
                 $isCorrect = $allOk;
                 $selected  = json_encode($userCells);
+            } elseif ($qType === 'code') {
+                $userInputs = $request->input("code_answers.{$q->id}", []);
+                $result     = \App\Services\CodeService::check($q->correct_answer, $userInputs);
+                $isCorrect  = $result['ok'];
+                $selected   = json_encode($userInputs);
             } else {
                 $selected  = $answers[$q->id] ?? null;
                 $isCorrect = $selected !== null && $selected === $q->correct_answer;

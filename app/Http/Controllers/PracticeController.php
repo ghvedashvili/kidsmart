@@ -82,6 +82,20 @@ class PracticeController extends Controller
             return response()->json(['type' => 'pyramid', 'key' => $key, 'rows' => $data['rows'], 'height' => count($data['rows'])]);
         }
 
+        if ($template->isCode()) {
+            $key  = "pq_{$child->id}_{$topic->id}_" . uniqid();
+            $data = $template->generateCode();
+            $q    = json_decode($data['question_text'], true);
+            cache()->put($key, json_decode($data['correct_answer'], true), now()->addMinutes(20));
+            return response()->json([
+                'type'      => 'code',
+                'key'       => $key,
+                'symbols'   => $q['symbols'],
+                'equations' => $q['equations'],
+                'target'    => $q['target'],
+            ]);
+        }
+
         $theme     = $template->theme ?? Theme::first();
         $generated = $template->generate($theme);
 
@@ -114,13 +128,18 @@ class PracticeController extends Controller
         if (isset($cached['type']) && $cached['type'] === 'mc') {
             $isCorrect = (string) $request->input('answer') === (string) $cached['correct'];
             $feedback  = ['correct_answer' => $cached['correct']];
+        } elseif ($request->has('code_answers')) {
+            // code: cached = [pos => value]
+            $result    = \App\Services\CodeService::check(json_encode($cached), $request->input('code_answers', []));
+            $isCorrect = $result['ok'];
+            $feedback  = ['results' => $result['results']];
         } else {
             // pyramid: cached = ['r,c' => value, ...]
             $userAnswers = $request->input('answers', []);
             $results     = [];
             $allOk       = true;
             foreach ($cached as $pos => $val) {
-                $ok          = intval($userAnswers[$pos] ?? PHP_INT_MIN) === $val;
+                $ok            = intval($userAnswers[$pos] ?? PHP_INT_MIN) === $val;
                 $results[$pos] = ['correct' => $ok, 'value' => $val];
                 if (! $ok) $allOk = false;
             }

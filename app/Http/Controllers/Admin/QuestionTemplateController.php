@@ -178,17 +178,20 @@ class QuestionTemplateController extends Controller
 
     private function validated(Request $request): array
     {
-        $isPyramid = $request->input('question_type') === 'pyramid';
+        $qType     = $request->input('question_type');
+        $isPyramid = $qType === 'pyramid';
+        $isCode    = $qType === 'code';
+        $isSpecial = $isPyramid || $isCode;
 
         $raw = $request->validate([
             'topic_id'        => 'required|exists:topics,id',
             'theme_id'        => 'nullable|exists:themes,id',
             'difficulty'      => 'required|integer|min:1|max:5',
-            'question_type'   => 'required|in:multiple_choice,pyramid',
-            'answer_type'     => $isPyramid ? 'nullable' : 'required|in:numeric,text',
-            'template_text'   => $isPyramid ? 'nullable|string' : 'required|string',
+            'question_type'   => 'required|in:multiple_choice,pyramid,code',
+            'answer_type'     => $isSpecial ? 'nullable' : 'required|in:numeric,text',
+            'template_text'   => $isSpecial ? 'nullable|string' : 'required|string',
             'hint_text'       => 'nullable|string',
-            'correct_formula' => $isPyramid ? 'nullable|string' : 'required|string|max:200',
+            'correct_formula' => $isSpecial ? 'nullable|string' : 'required|string|max:200',
             'num_config'      => 'required|string',
             'distractors'     => 'nullable|string',
             'conditions'      => 'nullable|string',
@@ -215,6 +218,44 @@ class QuestionTemplateController extends Controller
                 'hint_text'       => null,
                 'correct_formula' => '',
                 'num_config'      => ['height' => $pyrHeight, 'max_base' => $pyrMax, 'hidden_count' => $pyrHide],
+                'distractors'     => null,
+                'conditions'      => null,
+            ];
+        }
+
+        if ($isCode) {
+            $symCount    = max(2, min(5,  (int)  ($numConfig['symbol_count']  ?? 3)));
+            $minVal      = max(1,          (int)  ($numConfig['min_val']       ?? 1));
+            $maxVal      = max($minVal + 1,(int)  ($numConfig['max_val']       ?? 9));
+            $ops         = (array) ($numConfig['operators'] ?? ['+']);
+            if (empty($ops)) $ops = ['+'];
+            $varsPerEq   = in_array((int)($numConfig['vars_per_eq'] ?? 2), [2, 3]) ? (int)($numConfig['vars_per_eq'] ?? 2) : 2;
+            $uniqueVals  = !empty($numConfig['unique_values']);
+            $opsStr      = implode('', $ops);
+            $descParts   = [
+                "კოდი {$symCount} სიმ",
+                "{$minVal}-{$maxVal}",
+                $opsStr,
+                "{$varsPerEq}-ცვ",
+                $uniqueVals ? 'განსხ' : 'გამეორ',
+            ];
+            return [
+                'topic_id'        => $raw['topic_id'],
+                'theme_id'        => null,
+                'difficulty'      => $raw['difficulty'],
+                'question_type'   => 'code',
+                'answer_type'     => 'numeric',
+                'template_text'   => implode(' · ', $descParts),
+                'hint_text'       => null,
+                'correct_formula' => '',
+                'num_config'      => [
+                    'symbol_count'  => $symCount,
+                    'min_val'       => $minVal,
+                    'max_val'       => $maxVal,
+                    'operators'     => $ops,
+                    'vars_per_eq'   => $varsPerEq,
+                    'unique_values' => $uniqueVals,
+                ],
                 'distractors'     => null,
                 'conditions'      => null,
             ];

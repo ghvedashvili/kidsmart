@@ -196,9 +196,13 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
 
     @foreach($questions as $i => $q)
     @php
-        $ans       = $answers[$q->id] ?? null;
-        $isPyrQ    = str_starts_with((string)$q->correct_answer, '{');
-        $status    = $ans === null ? 'skipped' : ($ans->is_correct ? 'correct' : 'wrong');
+        $ans    = $answers[$q->id] ?? null;
+        $qType  = $q->question_type ?? 'multiple_choice';
+        if ($qType === 'multiple_choice' && str_starts_with((string)$q->correct_answer, '{')) {
+            $caKeys = array_keys(json_decode($q->correct_answer, true) ?? []);
+            $qType  = (count($caKeys) && str_contains((string)($caKeys[0] ?? ''), ',')) ? 'pyramid' : 'code';
+        }
+        $status = $ans === null ? 'skipped' : ($ans->is_correct ? 'correct' : 'wrong');
     @endphp
     <div class="q-review {{ $status }}">
         <div class="q-header">
@@ -210,7 +214,7 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
             </span>
             <span style="font-size:0.68rem;color:#94a3b8;font-weight:700;">{{ $i+1 }}</span>
         </div>
-        @if($isPyrQ)
+        @if($qType === 'pyramid')
         @php
             $pyrRows   = json_decode($q->question_text, true) ?? [];
             $solutions = json_decode($q->correct_answer, true) ?? [];
@@ -227,18 +231,46 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
                     $sol      = $solutions[$pos] ?? null;
                     $userVal  = $userCells[$pos] ?? null;
                     $cellOk   = $hidden && $sol !== null && (int)($userVal ?? -1) === $sol;
-                    $cellWrong = $hidden && $sol !== null && !$cellOk;
-                    $bg = $hidden
-                        ? ($status === 'correct' || $cellOk ? '#dcfce7' : '#fee2e2')
-                        : '#4f46e5';
-                    $color = $hidden
-                        ? ($cellOk ? '#15803d' : '#dc2626')
-                        : 'white';
+                    $bg = $hidden ? ($cellOk ? '#dcfce7' : '#fee2e2') : '#4f46e5';
+                    $color = $hidden ? ($cellOk ? '#15803d' : '#dc2626') : 'white';
                 @endphp
                 <div style="width:40px;height:40px;border-radius:10px;background:{{ $bg }};color:{{ $color }};display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-weight:900;font-size:0.85rem;">
                     {{ $hidden ? $sol : $val }}
                 </div>
                 @endforeach
+            </div>
+            @endforeach
+        </div>
+        @elseif($qType === 'code')
+        @php
+            $codeQ    = json_decode($q->question_text, true) ?? [];
+            $correct  = json_decode($q->correct_answer, true) ?? [];
+            $userInps = $ans ? (json_decode($ans->selected_answer, true) ?? []) : [];
+        @endphp
+        <div class="q-text-r" style="margin-bottom:8px;">🕵️ კოდის გაშიფვრა</div>
+        <div style="background:#fff8e7;border-radius:8px;padding:8px 12px;margin-bottom:10px;border:1.5px dashed #ffe194;font-size:0.85rem;font-weight:700;color:#374151;">
+            @foreach($codeQ['equations'] ?? [] as $eq)
+            <div>{{ $eq }}</div>
+            @endforeach
+        </div>
+        <div style="font-size:0.6rem;color:#94a3b8;margin-bottom:4px;letter-spacing:0.08em;">სამიზნე კოდი</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
+            @foreach($codeQ['target'] ?? [] as $pos => $sym)
+            @php
+                $cv   = $correct[$pos] ?? null;
+                $uv   = $userInps[$pos] ?? null;
+                $ok   = $cv !== null && (int)($uv ?? PHP_INT_MIN) === (int)$cv;
+            @endphp
+            <div style="text-align:center;">
+                <div style="width:40px;height:40px;border-radius:8px;background:#4f46e5;color:white;display:flex;align-items:center;justify-content:center;font-size:1.25rem;margin-bottom:3px;">{{ $sym }}</div>
+                @if($ans)
+                <div style="font-size:0.75rem;font-weight:900;color:{{ $ok ? '#15803d' : '#dc2626' }};">
+                    @if(!$ok && $uv !== null)<span style="color:#dc2626;">{{ $uv }}</span><span style="color:#94a3b8;">/</span>@endif
+                    <span style="color:#15803d;">{{ $cv }}</span>
+                </div>
+                @else
+                <div style="font-size:0.75rem;color:#94a3b8;">?</div>
+                @endif
             </div>
             @endforeach
         </div>
