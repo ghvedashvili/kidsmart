@@ -400,6 +400,9 @@
                             <span class="chip chip-op" onclick="insertFormula('%')">%</span>
                             <span class="chip chip-op" onclick="insertFormula('(')">(</span>
                             <span class="chip chip-op" onclick="insertFormula(')')">)</span>
+                            <span class="chip chip-op" onclick="insertFormulaFn('round')" title="უახლოეს მთელამდე">round()</span>
+                            <span class="chip chip-op" onclick="insertFormulaFn('floor')" title="ქვედა მთელამდე">floor()</span>
+                            <span class="chip chip-op" onclick="insertFormulaFn('ceil')" title="ზედა მთელამდე">ceil()</span>
                         </div>
                         <input type="text" id="correctFormula" class="fc"
                             placeholder="N1+N2"
@@ -883,6 +886,18 @@ function toggleTextOpt(el) {
     syncAll(); previewDebounce();
 }
 
+// ── Insert function at cursor — places cursor inside parens
+function insertFormulaFn(name) {
+    const inp = document.getElementById('correctFormula');
+    const s = inp.selectionStart, e = inp.selectionEnd;
+    const ins = name + '()';
+    inp.value = inp.value.slice(0, s) + ins + inp.value.slice(e);
+    // cursor inside the parens
+    inp.selectionStart = inp.selectionEnd = s + ins.length - 1;
+    inp.focus();
+    previewDebounce();
+}
+
 // ── Insert at cursor (formula)
 function insertFormula(sym) {
     const inp = document.getElementById('correctFormula');
@@ -959,7 +974,7 @@ let conditions = [];
 let condIdSeq  = 1; // integer counter — avoids float ID precision bugs
 let condFocus  = null; // { id, field } — which input is focused for chip insertion
 const OP_LABELS = {'>':'> მეტია','<':'< ნაკლებია','>=':'≥ მეტი/ტოლი','<=':'≤ ნაკ/ტოლი','!=':'≠ არ ტოლდება','%0':'÷ იყოფა'};
-const OP_SYMS   = ['+','-','*','/','(', ')'];
+const OP_SYMS   = ['+','-','*','/','%','(', ')'];
 
 function addCond(left = '', op = '>', right = '', silent = false) {
     const names = ncRows.filter(r => r.name).map(r => r.name);
@@ -1017,7 +1032,7 @@ function renderConds() {
         const opOpts = Object.entries(OP_LABELS).map(([v,l]) =>
             `<option value="${v}" ${cond.op===v?'selected':''}>${l}</option>`).join('');
         div.innerHTML = `
-            <input id="cond-${cond.id}-left" class="nc-inp" placeholder="N1 ან N2+N3" value="${cond.left}"
+            <input id="cond-${cond.id}-left" class="nc-inp" placeholder="N1 ან N1%10" value="${cond.left}"
                 data-ci="${cond.id}" data-cf="left">
             <select class="cond-sel cond-op" data-ci="${cond.id}" data-cf="op">${opOpts}</select>
             <input id="cond-${cond.id}-right" class="nc-inp" placeholder="N2 ან N2+N3 ან 5" value="${cond.right}"
@@ -1091,7 +1106,7 @@ function syncAll() {
 function evalExpr(expr, numVars) {
     let e = String(expr);
     Object.entries(numVars).forEach(([k, v]) => { e = e.replaceAll(k, String(v)); });
-    e = e.replace(/[^0-9+\-*/()\s]/g, '');
+    e = e.replace(/[^0-9+\-*/()\s%]/g, '');
     try { const r = Function('return (' + e + ')')(); return Number.isFinite(r) ? Math.floor(r) : 0; }
     catch(_) { return 0; }
 }
@@ -1450,10 +1465,13 @@ function genPreviewNumeric(tmpl) {
 
     let f = formula;
     Object.entries(numVars).forEach(([k,v]) => { f = f.replaceAll(k, String(v)); });
-    f = f.replace(/[^0-9+\-*/()\s%.]/g, '');
+    // allow digits, basic ops, parens, space, % . and known math functions
+    f = f.replace(/[^0-9a-z+\-*/()\s%.]/gi, '');
     let correct = null;
     try {
-        const raw = Function('return (' + f + ')')();
+        // expose PHP-compatible aliases so round()/floor()/ceil() work as in PHP eval
+        const round = Math.round, floor = Math.floor, ceil = Math.ceil, abs = Math.abs;
+        const raw = Function('round','floor','ceil','abs', 'return (' + f + ')')(round, floor, ceil, abs);
         if (Number.isFinite(raw) && raw > 0) correct = Math.floor(raw);
     } catch(e) {}
 

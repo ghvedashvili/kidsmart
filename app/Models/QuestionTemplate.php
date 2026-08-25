@@ -17,7 +17,7 @@ class QuestionTemplate extends Model
         foreach ($vars as $k => $v) {
             $e = str_replace($k, (string) $v, $e);
         }
-        $e = preg_replace('/[^0-9+\-*\/()\s]/', '', $e);
+        $e = preg_replace('/[^0-9+\-*\/()\s%]/', '', $e);
         $result = @eval("return (int)({$e});");
         return ($result === false || !is_numeric($result)) ? 0 : (int) $result;
     }
