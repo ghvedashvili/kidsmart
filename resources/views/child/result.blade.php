@@ -350,7 +350,7 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
             @endforeach
         </div>
         @else
-        <div class="q-text-r">{{ $q->question_text }}</div>
+        <div class="q-text-r">{!! nl2br(e($q->question_text)) !!}</div>
         <div class="ans-row">
             @if($status === 'correct')
                 <span class="ans-correct">✓ {{ $ans->selected_answer }}</span>

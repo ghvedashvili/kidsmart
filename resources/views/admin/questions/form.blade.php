@@ -1367,6 +1367,12 @@ function genPreview() {
     isTxt ? genPreviewText(tmpl) : genPreviewNumeric(tmpl);
 }
 
+function escHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML.replace(/\n/g, '<br>');
+}
+
 function genPreviewText(tmpl) {
     const themeMap = pickThemeVars();
     const { numVars } = pickNumVars();
@@ -1375,7 +1381,7 @@ function genPreviewText(tmpl) {
     let text = tmpl;
     Object.entries(allVars).forEach(([k,v]) => { text = text.replaceAll(OB+k+CB, v); });
     text = text.replace(/\{\{\w+\}\}/g, '?');
-    document.getElementById('prevQ').textContent = text;
+    document.getElementById('prevQ').innerHTML = escHtml(text);
     document.getElementById('prevHint').textContent = '';
     document.getElementById('prevWarn').innerHTML = '';
 
@@ -1422,7 +1428,7 @@ function genPreviewNumeric(tmpl) {
     Object.entries({...themeMap, ...numVars}).forEach(([k,v]) => { hint = hint.replaceAll(OB+k+CB, v); });
     hint = hint.replace(/\{\{\w+\}\}/g, '?');
 
-    document.getElementById('prevQ').textContent = text;
+    document.getElementById('prevQ').innerHTML = escHtml(text);
     document.getElementById('prevHint').textContent = hint || '';
     document.getElementById('prevWarn').innerHTML = condOk ? '' : '<span>⚠ პირობები ვერ შეხვდა 40 მცდელობაში</span>';
 

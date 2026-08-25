@@ -275,7 +275,7 @@ body {
         <input type="hidden" name="answers[{{ $q->id }}]" value="crossword_submitted">
 
         @else
-        <div class="q-text">{{ $q->question_text }}</div>
+        <div class="q-text">{!! nl2br(e($q->question_text)) !!}</div>
         @if($q->hint_text)<div class="q-hint">{{ $q->hint_text }}</div>@endif
         <div class="opts">
             @foreach($q->options ?? [] as $opt)

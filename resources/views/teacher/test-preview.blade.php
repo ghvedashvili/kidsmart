@@ -228,7 +228,7 @@
             @endforeach
         </div>
         @else
-        <div class="q-text">{{ $q['question_text'] }}</div>
+        <div class="q-text">{!! nl2br(e($q['question_text'])) !!}</div>
         <div class="opts">
             @foreach($q['options'] as $opt)
             <span class="opt {{ $opt === $q['correct_answer'] ? 'correct' : '' }}">
