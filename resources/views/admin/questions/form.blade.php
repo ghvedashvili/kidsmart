@@ -358,6 +358,10 @@
                     </div>
                     <div id="ncRows"></div>
                     <button type="button" class="nc-add" onclick="addNcRow()">+ ცვლადის დამატება</button>
+                    <label style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:0.75rem;font-weight:700;color:#374151;cursor:pointer;">
+                        <input type="checkbox" id="uniqueNumVars" onchange="syncAll();previewDebounce();">
+                        ყველა ცვლადი განსხვავებული
+                    </label>
                     <input type="hidden" name="num_config" id="numConfigJson">
                     @error('num_config')<div class="err">{{ $message }}</div>@enderror
 
@@ -1036,6 +1040,8 @@ function syncAll() {
     ncRows.forEach(r => {
         if (r.name) ncObj[r.name] = { min: +r.min, max: +r.max, step: +r.step || 1 };
     });
+    const _uq = document.getElementById('uniqueNumVars');
+    if (_uq && _uq.checked) ncObj['_unique'] = true;
     document.getElementById('numConfigJson').value = JSON.stringify(ncObj);
 
     const names = Object.keys(ncObj);
@@ -1133,14 +1139,17 @@ function pickThemeVars() {
 }
 function pickNumVars() {
     const confRows = ncRows.filter(r => r.name);
+    const unique = document.getElementById('uniqueNumVars')?.checked ?? false;
     let numVars = {}, condOk = false;
-    for (let attempt = 0; attempt < 40; attempt++) {
+    for (let attempt = 0; attempt < 200; attempt++) {
         numVars = {};
         confRows.forEach(r => {
             const step = Math.max(1, r.step || 1);
             const steps = Math.floor((r.max - r.min) / step);
             numVars[r.name] = r.min + Math.floor(Math.random() * (steps + 1)) * step;
         });
+        const vals = Object.values(numVars);
+        if (unique && new Set(vals).size !== vals.length) continue;
         if (evalConditions(numVars)) { condOk = true; break; }
     }
     return { numVars, condOk };
@@ -1564,7 +1573,12 @@ document.getElementById('condRows').addEventListener('focusin', function(e) {
 
     const numCfg = _KS.numConfig;
     if (numCfg && typeof numCfg === 'object' && Object.keys(numCfg).length) {
+        if (numCfg['_unique']) {
+            const cb = document.getElementById('uniqueNumVars');
+            if (cb) cb.checked = true;
+        }
         Object.entries(numCfg).forEach(([name, conf]) => {
+            if (typeof conf !== 'object' || conf === null) return;
             addNcRow(name, conf.min ?? 1, conf.max ?? 9, conf.step ?? 1);
         });
     } else if (!isTxtInit) {

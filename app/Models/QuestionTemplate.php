@@ -162,19 +162,22 @@ class QuestionTemplate extends Model
 
     private function generateNumeric(Theme $theme): array
     {
-        $numConf = $this->num_config ?? [];
+        $numConf    = $this->num_config ?? [];
+        $uniqueVars = (bool) ($numConf['_unique'] ?? false);
         $baseFormula = preg_replace('/\{\{(\w+)\}\}/', '$1', $this->correct_formula);
 
         $conditions = $this->conditions ?? [];
         $numVars = [];
         $correct = 0;
-        for ($attempt = 0; $attempt < 40; $attempt++) {
+        for ($attempt = 0; $attempt < 200; $attempt++) {
             $numVars = [];
             foreach ($numConf as $key => $conf) {
+                if (! is_array($conf)) continue;
                 $step = max(1, (int) ($conf['step'] ?? 1));
                 $steps = (int) (($conf['max'] - $conf['min']) / $step);
                 $numVars[$key] = $conf['min'] + rand(0, $steps) * $step;
             }
+            if ($uniqueVars && count(array_unique($numVars)) !== count($numVars)) continue;
             $f = $baseFormula;
             foreach ($numVars as $k => $v) {
                 $f = str_replace($k, (string) $v, $f);
