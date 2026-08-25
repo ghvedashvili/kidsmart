@@ -28,12 +28,14 @@ class QuestionTemplate extends Model
             $l = $this->evalExpr((string) ($c['left']  ?? '0'), $vars);
             $r = $this->evalExpr((string) ($c['right'] ?? '0'), $vars);
             $ok = match($c['op'] ?? '') {
-                '>'  => $l > $r,
-                '<'  => $l < $r,
-                '>=' => $l >= $r,
-                '<=' => $l <= $r,
-                '!=' => $l !== $r,
-                '%0' => $r !== 0 && $l % $r === 0,
+                '>'   => $l > $r,
+                '<'   => $l < $r,
+                '>='  => $l >= $r,
+                '<='  => $l <= $r,
+                '=='  => $l === $r,
+                '!='  => $l !== $r,
+                '%0'  => $r !== 0 && $l % $r === 0,
+                '!%0' => $r !== 0 && $l % $r !== 0,
                 default => true,
             };
             if (!$ok) return false;

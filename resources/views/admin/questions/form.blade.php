@@ -973,7 +973,7 @@ function updNc(id, field, val) {
 let conditions = [];
 let condIdSeq  = 1; // integer counter — avoids float ID precision bugs
 let condFocus  = null; // { id, field } — which input is focused for chip insertion
-const OP_LABELS = {'>':'> მეტია','<':'< ნაკლებია','>=':'≥ მეტი/ტოლი','<=':'≤ ნაკ/ტოლი','!=':'≠ არ ტოლდება','%0':'÷ იყოფა'};
+const OP_LABELS = {'>':'> მეტია','<':'< ნაკლებია','>=':'≥ მეტი/ტოლი','<=':'≤ ნაკ/ტოლი','==':'= ტოლია','!=':'≠ არ ტოლდება','%0':'÷ იყოფა','!%0':'÷ არ იყოფა'};
 const OP_SYMS   = ['+','-','*','/','%','(', ')'];
 
 function addCond(left = '', op = '>', right = '', silent = false) {
@@ -1115,13 +1115,15 @@ function evalConditions(numVars) {
         const l = evalExpr(c.left  ?? '0', numVars);
         const r = evalExpr(c.right ?? '0', numVars);
         switch (c.op) {
-            case '>':  return l > r;
-            case '<':  return l < r;
-            case '>=': return l >= r;
-            case '<=': return l <= r;
-            case '!=': return l !== r;
-            case '%0': return r !== 0 && l % r === 0;
-            default:   return true;
+            case '>':   return l > r;
+            case '<':   return l < r;
+            case '>=':  return l >= r;
+            case '<=':  return l <= r;
+            case '==':  return l === r;
+            case '!=':  return l !== r;
+            case '%0':  return r !== 0 && l % r === 0;
+            case '!%0': return r !== 0 && l % r !== 0;
+            default:    return true;
         }
     });
 }
