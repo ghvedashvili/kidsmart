@@ -99,6 +99,11 @@ class TestController extends Controller
                 $result     = \App\Services\CodeService::check($q->correct_answer, $userInputs);
                 $isCorrect  = $result['ok'];
                 $selected   = json_encode($userInputs);
+            } elseif ($qType === 'crossword') {
+                $userInputs = $request->input("crossword_answers.{$q->id}", []);
+                $result     = \App\Services\CrosswordService::check($q->correct_answer, $userInputs);
+                $isCorrect  = $result['ok'];
+                $selected   = json_encode($userInputs);
             } else {
                 $selected  = $answers[$q->id] ?? null;
                 $isCorrect = $selected !== null && $selected === $q->correct_answer;

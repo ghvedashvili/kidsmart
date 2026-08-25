@@ -60,7 +60,7 @@ class TestPreviewController extends Controller
             if ($templates->isEmpty()) {
                 $error = 'ამ პარამეტრებისთვის კითხვები ჯერ არ დამატებულა';
             } else {
-                $mcTemplates = $templates->filter(fn($t) => !$t->isPyramid() && !$t->isCode());
+                $mcTemplates = $templates->filter(fn($t) => !$t->isPyramid() && !$t->isCode() && !$t->isCrossword());
 
                 if ($mcTemplates->isNotEmpty()) {
                     $selectedTheme = $themeId
@@ -78,6 +78,8 @@ class TestPreviewController extends Controller
                             $data = $t->generatePyramid();
                         } elseif ($t->isCode()) {
                             $data = $t->generateCode();
+                        } elseif ($t->isCrossword()) {
+                            $data = $t->generateCrossword();
                         } else {
                             $data = $t->generate($selectedTheme);
                         }

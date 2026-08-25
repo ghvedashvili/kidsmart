@@ -51,16 +51,33 @@ class QuestionTemplate extends Model
         return $this->belongsTo(\App\Models\Theme::class);
     }
 
-    public function isPyramid(): bool { return $this->question_type === 'pyramid'; }
-    public function isCode(): bool    { return $this->question_type === 'code'; }
+    public function isPyramid(): bool    { return $this->question_type === 'pyramid'; }
+    public function isCode(): bool       { return $this->question_type === 'code'; }
+    public function isCrossword(): bool  { return $this->question_type === 'crossword'; }
 
     public function generate(?Theme $theme = null): array
     {
-        if ($this->isPyramid()) return $this->generatePyramid();
-        if ($this->isCode())    return $this->generateCode();
+        if ($this->isPyramid())   return $this->generatePyramid();
+        if ($this->isCode())      return $this->generateCode();
+        if ($this->isCrossword()) return $this->generateCrossword();
         return $this->answer_type === 'text'
             ? $this->generateText($theme)
             : $this->generateNumeric($theme);
+    }
+
+    public function generateCrossword(): array
+    {
+        $cfg  = $this->num_config ?? [];
+        $rows = in_array((int)($cfg['rows'] ?? 2), [2, 3]) ? (int)$cfg['rows'] : 2;
+        $cols = in_array((int)($cfg['cols'] ?? 2), [2, 3]) ? (int)$cfg['cols'] : 2;
+        return \App\Services\CrosswordService::build(
+            (int)  ($cfg['min_val']      ?? 1),
+            (int)  ($cfg['max_val']      ?? 10),
+            (array)($cfg['operators']    ?? ['+']),
+            $rows,
+            $cols,
+            (int)  ($cfg['revealed_count'] ?? 0)
+        );
     }
 
     public function generateCode(): array

@@ -139,6 +139,12 @@ body {
 .code-sym-box { width:48px;height:48px;border-radius:10px;background:#4f46e5;color:white;display:flex;align-items:center;justify-content:center;font-size:1.35rem;flex-shrink:0; }
 .code-inp-row { display:flex;gap:8px;justify-content:center;flex-wrap:wrap; }
 .code-inp { width:48px;height:48px;border-radius:10px;border:2.5px solid #a5b4fc;background:#eef2ff;color:#4f46e5;font-family:'Fredoka One',cursive;font-size:1.1rem;text-align:center;outline:none;padding:0; }
+.cw-grid { display:grid;gap:5px;align-items:center;justify-items:center;margin:0 auto 8px;max-width:max-content; }
+.cw-inp { width:100%;height:100%;border:2.5px solid #a5b4fc;border-radius:12px;background:#eef2ff;color:#4f46e5;font-family:'Fredoka One',cursive;font-size:1.1rem;text-align:center;outline:none;padding:0; }
+.cw-given { width:52px;height:52px;border-radius:12px;background:#d1fae5;border:2.5px solid #6ee7b7;color:#065f46;font-family:'Fredoka One',cursive;font-size:1.1rem;display:flex;align-items:center;justify-content:center;font-weight:700; }
+.cw-op { font-family:'Fredoka One',cursive;font-size:1.1rem;color:#64748b;text-align:center; }
+.cw-eq { font-family:'Fredoka One',cursive;font-size:1rem;color:#94a3b8;text-align:center; }
+.cw-res { width:100%;height:100%;border-radius:10px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:1rem;color:#374151;font-weight:700; }
 </style>
 
 <form method="POST" action="{{ route('test.submit', $test) }}" id="testForm">
@@ -161,9 +167,13 @@ body {
         @php
             $qType = $q->question_type ?? 'multiple_choice';
             if ($qType === 'multiple_choice' && str_starts_with((string)$q->correct_answer, '{')) {
-                // Pyramid keys look like "0,1" (row,col); code keys are plain integers "0","1"
                 $caKeys = array_keys(json_decode($q->correct_answer, true) ?? []);
-                $qType  = (count($caKeys) && str_contains((string)($caKeys[0] ?? ''), ',')) ? 'pyramid' : 'code';
+                if (count($caKeys) && str_contains((string)($caKeys[0] ?? ''), ',')) {
+                    $qType = 'pyramid';
+                } else {
+                    $qtJson = json_decode($q->question_text ?? '', true) ?? [];
+                    $qType  = ($qtJson['type'] ?? '') === 'crossword' ? 'crossword' : 'code';
+                }
             }
         @endphp
 
@@ -213,6 +223,56 @@ body {
             @endforeach
         </div>
         <input type="hidden" name="answers[{{ $q->id }}]" value="code_submitted">
+
+        @elseif($qType === 'crossword')
+        @php
+            $cwQ = json_decode($q->question_text, true) ?? [];
+            // Normalize old 2×2 format
+            if (!isset($cwQ['row_ops'])) {
+                $cwQ = ['type'=>'crossword','rows'=>2,'cols'=>2,
+                    'row_ops'=>[$cwQ['op_r0']??'+',$cwQ['op_r1']??'+'],
+                    'col_ops'=>[$cwQ['op_c0']??'+',$cwQ['op_c1']??'+'],
+                    'row_results'=>[$cwQ['res_r0']??0,$cwQ['res_r1']??0],
+                    'col_results'=>[$cwQ['res_c0']??0,$cwQ['res_c1']??0],
+                ];
+            }
+            $cwR = (int)($cwQ['rows']??2); $cwC = (int)($cwQ['cols']??2);
+            $cwRowOps = $cwQ['row_ops'] ?? array_fill(0,$cwR,'+');
+            $cwColOps = $cwQ['col_ops'] ?? array_fill(0,$cwC,'+');
+            $cwRowRes = $cwQ['row_results'] ?? [];
+            $cwColRes = $cwQ['col_results'] ?? [];
+            $cwTpl = []; for($ccc=0;$ccc<$cwC;$ccc++){$cwTpl[]='52px';if($ccc<$cwC-1)$cwTpl[]='24px';} $cwTpl[]='20px';$cwTpl[]='46px';
+            $cwRTpl= []; for($rrr=0;$rrr<$cwR;$rrr++){$cwRTpl[]='52px';if($rrr<$cwR-1)$cwRTpl[]='24px';} $cwRTpl[]='20px';$cwRTpl[]='46px';
+            $cwRevealed = $cwQ['revealed'] ?? [];
+            $cwCorrect  = json_decode($q->correct_answer, true) ?? [];
+        @endphp
+        <div class="q-text" style="margin-bottom:14px;">🧮 შეავსე კროსვორდი</div>
+        <div style="display:grid;grid-template-columns:{{ implode(' ',$cwTpl) }};grid-template-rows:{{ implode(' ',$cwRTpl) }};gap:5px;align-items:center;justify-items:center;margin:0 auto 8px;max-width:max-content;">
+        @for($cwDr=0;$cwDr<=2*$cwR;$cwDr++)
+        @for($cwDc=0;$cwDc<=2*$cwC;$cwDc++)
+        @php
+            $cwIsInp=false;$cwCls='';$cwTxt='';$cwIdx=-1;
+            if($cwDr<=2*$cwR-2){
+                if($cwDr%2===0){
+                    $cwr=intdiv($cwDr,2);
+                    if($cwDc<=2*$cwC-2){if($cwDc%2===0){$cwIdx=$cwr*$cwC+intdiv($cwDc,2);$cwIsInp=true;}else{$cwCls='cw-op';$cwTxt=$cwRowOps[$cwr]??'+';}}
+                    elseif($cwDc===2*$cwC-1){$cwCls='cw-eq';$cwTxt='=';}
+                    else{$cwCls='cw-res';$cwTxt=$cwRowRes[$cwr]??'?';}
+                }elseif($cwDc<=2*$cwC-2&&$cwDc%2===0){$cwCls='cw-op';$cwTxt=$cwColOps[intdiv($cwDc,2)]??'+';}
+            }elseif($cwDr===2*$cwR-1&&$cwDc<=2*$cwC-2&&$cwDc%2===0){$cwCls='cw-eq';$cwTxt='=';}
+            elseif($cwDr===2*$cwR&&$cwDc<=2*$cwC-2&&$cwDc%2===0){$cwCls='cw-res';$cwTxt=$cwColRes[intdiv($cwDc,2)]??'?';}
+        @endphp
+        @if($cwIsInp && in_array($cwIdx, $cwRevealed))
+        <div class="cw-given">{{ $cwCorrect[$cwIdx] ?? '?' }}</div>
+        <input type="hidden" name="crossword_answers[{{ $q->id }}][{{ $cwIdx }}]" value="{{ $cwCorrect[$cwIdx] ?? '' }}">
+        @elseif($cwIsInp)<input type="number" class="cw-inp" name="crossword_answers[{{ $q->id }}][{{ $cwIdx }}]" placeholder="?" data-qid="{{ $q->id }}" onchange="onCrosswordAnswer({{ $q->id }}, {{ $i }})">
+        @elseif($cwCls)<div class="{{ $cwCls }}">{{ $cwTxt }}</div>
+        @else<div></div>
+        @endif
+        @endfor
+        @endfor
+        </div>
+        <input type="hidden" name="answers[{{ $q->id }}]" value="crossword_submitted">
 
         @else
         <div class="q-text">{{ $q->question_text }}</div>
@@ -268,6 +328,21 @@ function onPyrAnswer(qid) {
 
 function onCodeAnswer(qid, cardIdx) {
     const inputs = document.querySelectorAll(`.code-inp[data-qid="${qid}"]`);
+    const allFilled = Array.from(inputs).every(inp => inp.value.trim() !== '');
+    if (!allFilled) return;
+    if (!answeredSet.has(cardIdx)) {
+        answeredSet.add(cardIdx);
+        answeredCount++;
+        document.getElementById('card-' + cardIdx).classList.add('answered');
+        const pct = Math.round(answeredCount / totalQ * 100);
+        document.getElementById('progFill').style.width  = pct + '%';
+        document.getElementById('progBall').style.left   = pct === 0 ? '0' : 'calc(' + pct + '% - 5px)';
+        if (answeredCount === totalQ) document.getElementById('submitBtn').classList.add('vis');
+    }
+}
+
+function onCrosswordAnswer(qid, cardIdx) {
+    const inputs = document.querySelectorAll(`.cw-inp[data-qid="${qid}"]`);
     const allFilled = Array.from(inputs).every(inp => inp.value.trim() !== '');
     if (!allFilled) return;
     if (!answeredSet.has(cardIdx)) {

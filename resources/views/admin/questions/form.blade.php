@@ -119,17 +119,20 @@
                 <div class="sec-title">① კონტექსტი</div>
 
                 @php
-                    $existingQType = old('question_type', $template?->question_type ?? 'multiple_choice');
-                    $isExistingPyramid = $existingQType === 'pyramid';
-                    $isExistingCode    = $existingQType === 'code';
+                    $existingQType      = old('question_type', $template?->question_type ?? 'multiple_choice');
+                    $isExistingPyramid  = $existingQType === 'pyramid';
+                    $isExistingCode     = $existingQType === 'code';
+                    $isExistingCw       = $existingQType === 'crossword';
                     $codeCfg = ($existingQType === 'code') ? ($template->num_config ?? []) : [];
+                    $cwCfg   = ($existingQType === 'crossword') ? ($template->num_config ?? []) : [];
                 @endphp
 
                 <div class="lbl">კითხვის ტიპი</div>
                 <div class="qt-row">
-                    <button type="button" class="qt-btn {{ !$isExistingPyramid && !$isExistingCode ? 'sel' : '' }}" onclick="setQType('multiple_choice')">📝 Multiple Choice</button>
+                    <button type="button" class="qt-btn {{ !$isExistingPyramid && !$isExistingCode && !$isExistingCw ? 'sel' : '' }}" onclick="setQType('multiple_choice')">📝 Multiple Choice</button>
                     <button type="button" class="qt-btn {{ $isExistingPyramid ? 'sel' : '' }}" onclick="setQType('pyramid')">🔺 პირამიდა</button>
                     <button type="button" class="qt-btn {{ $isExistingCode ? 'sel' : '' }}" onclick="setQType('code')">🕵️ კოდი</button>
+                    <button type="button" class="qt-btn {{ $isExistingCw ? 'sel' : '' }}" onclick="setQType('crossword')">🧮 კროსვორდი</button>
                 </div>
                 <input type="hidden" name="question_type" id="qtInput" value="{{ $existingQType }}">
 
@@ -269,6 +272,49 @@
                         </div>
                     </div>
                 </div>{{-- /codeFields --}}
+
+                {{-- Crossword config --}}
+                <div id="cwFields" style="display:none;margin-top:14px;border-top:1px solid #f1f5f9;padding-top:14px;">
+                    <div class="sec-title" style="margin-bottom:10px;">🧮 კროსვორდის პარამეტრები</div>
+                    <div class="lbl">ბადის ზომა</div>
+                    <div class="op-check" style="margin-bottom:10px;">
+                        @php $cwRows=$cwCfg['rows']??2; $cwCols=$cwCfg['cols']??2; @endphp
+                        <label><input type="radio" name="_cwGrid" id="cwGrid22" value="22" onchange="syncCwConfig()" {{ ($cwRows==2&&$cwCols==2)?'checked':'' }}> 2×2</label>
+                        <label><input type="radio" name="_cwGrid" id="cwGrid23" value="23" onchange="syncCwConfig()" {{ ($cwRows==2&&$cwCols==3)?'checked':'' }}> 2×3</label>
+                        <label><input type="radio" name="_cwGrid" id="cwGrid32" value="32" onchange="syncCwConfig()" {{ ($cwRows==3&&$cwCols==2)?'checked':'' }}> 3×2</label>
+                        <label><input type="radio" name="_cwGrid" id="cwGrid33" value="33" onchange="syncCwConfig()" {{ ($cwRows==3&&$cwCols==3)?'checked':'' }}> 3×3</label>
+                    </div>
+                    <div class="code-grid">
+                        <div>
+                            <div class="lbl">min მნიშვნელობა</div>
+                            <input type="number" class="pyr-inp" id="cwMinVal" min="1" max="50"
+                                value="{{ $cwCfg['min_val'] ?? 1 }}" onchange="syncCwConfig()">
+                        </div>
+                        <div>
+                            <div class="lbl">max მნიშვნელობა</div>
+                            <input type="number" class="pyr-inp" id="cwMaxVal" min="2" max="100"
+                                value="{{ $cwCfg['max_val'] ?? 10 }}" onchange="syncCwConfig()">
+                        </div>
+                    </div>
+                    <div class="lbl" style="margin-top:10px;">ოპერაციები</div>
+                    <div class="op-check">
+                        <label><input type="checkbox" id="cwOpPlus"  onchange="syncCwConfig()"
+                            {{ in_array('+', $cwCfg['operators'] ?? ['+']) ? 'checked' : '' }}> +</label>
+                        <label><input type="checkbox" id="cwOpMinus" onchange="syncCwConfig()"
+                            {{ in_array('-', $cwCfg['operators'] ?? []) ? 'checked' : '' }}> −</label>
+                        <label><input type="checkbox" id="cwOpMul"   onchange="syncCwConfig()"
+                            {{ in_array('×', $cwCfg['operators'] ?? []) ? 'checked' : '' }}> ×</label>
+                        <label><input type="checkbox" id="cwOpDiv"   onchange="syncCwConfig()"
+                            {{ in_array('÷', $cwCfg['operators'] ?? []) ? 'checked' : '' }}> ÷</label>
+                    </div>
+                    <div style="margin-top:12px;">
+                        <div class="lbl">წინასწარ გახსნილი უჯრები <span id="cwRevHint" style="color:#94a3b8;font-size:0.7rem;font-weight:600;"></span></div>
+                        <input type="number" class="pyr-inp" id="cwRevealedCount" min="0" max="8"
+                            value="{{ $cwCfg['revealed_count'] ?? 0 }}" onchange="syncCwConfig()"
+                            style="width:80px;">
+                        <span style="font-size:0.7rem;color:#64748b;margin-left:8px;">0 = ყველა ცარიელი</span>
+                    </div>
+                </div>{{-- /cwFields --}}
             </div>
 
             <div id="mcSections">
@@ -573,24 +619,28 @@ function setQType(type) {
     document.getElementById('qtInput').value = type;
     document.querySelectorAll('.qt-btn').forEach(b => {
         b.classList.remove('sel');
-        if ((type === 'pyramid'         && b.textContent.includes('პირამიდა')) ||
-            (type === 'multiple_choice' && b.textContent.includes('Multiple'))  ||
-            (type === 'code'            && b.textContent.includes('კოდი'))) {
+        if ((type === 'pyramid'         && b.textContent.includes('პირამიდა'))   ||
+            (type === 'multiple_choice' && b.textContent.includes('Multiple'))    ||
+            (type === 'code'            && b.textContent.includes('კოდი'))        ||
+            (type === 'crossword'       && b.textContent.includes('კროსვორდი'))) {
             b.classList.add('sel');
         }
     });
     applyQType(type);
 }
 function applyQType(type) {
-    const isPyr  = type === 'pyramid';
+    const isPyr = type === 'pyramid';
     const isCode = type === 'code';
-    const isMC   = !isPyr && !isCode;
+    const isCw  = type === 'crossword';
+    const isMC  = !isPyr && !isCode && !isCw;
     document.getElementById('pyrFields').style.display      = isPyr  ? 'block' : 'none';
     document.getElementById('codeFields').style.display     = isCode ? 'block' : 'none';
+    document.getElementById('cwFields').style.display       = isCw   ? 'block' : 'none';
     document.getElementById('themeFieldWrap').style.display = isMC   ? 'block' : 'none';
     document.getElementById('mcSections').style.display     = isMC   ? 'block' : 'none';
     if (isPyr)  { syncPyrConfig();  return; }
     if (isCode) { syncCodeConfig(); return; }
+    if (isCw)   { syncCwConfig();   return; }
 }
 function syncPyrConfig() {
     const h    = document.getElementById('pyrHeight').value;
@@ -622,6 +672,169 @@ function syncCodeConfig() {
     });
     if (document.getElementById('qtInput').value === 'code') genPreviewCode();
 }
+function syncCwConfig() {
+    const minV = parseInt(document.getElementById('cwMinVal').value)  || 1;
+    const maxV = parseInt(document.getElementById('cwMaxVal').value)  || 10;
+    const ops  = [];
+    if (document.getElementById('cwOpPlus').checked)  ops.push('+');
+    if (document.getElementById('cwOpMinus').checked) ops.push('-');
+    if (document.getElementById('cwOpMul').checked)   ops.push('×');
+    if (document.getElementById('cwOpDiv').checked)   ops.push('÷');
+    const gridVal = document.querySelector('input[name="_cwGrid"]:checked')?.value || '22';
+    const rows = parseInt(gridVal[0]) || 2;
+    const cols = parseInt(gridVal[1]) || 2;
+    // Max that doesn't fully reveal any row or column
+    const maxAllowed = Math.min(rows * (cols - 1), (rows - 1) * cols);
+    const revealed_count = Math.max(0, Math.min(maxAllowed, parseInt(document.getElementById('cwRevealedCount').value)||0));
+    const minRec = (rows-1)*(cols-1);
+    const hint = document.getElementById('cwRevHint');
+    if (hint) hint.textContent = `(მინ. ${minRec} რეკ., მაქს. ${maxAllowed})`;
+    document.getElementById('numConfigJson').value = JSON.stringify({
+        min_val: minV, max_val: maxV, operators: ops.length ? ops : ['+'], rows, cols, revealed_count,
+    });
+    if (document.getElementById('qtInput').value === 'crossword') genPreviewCw();
+}
+
+function genPreviewCw() {
+    const minV = parseInt(document.getElementById('cwMinVal').value)  || 1;
+    const maxV = parseInt(document.getElementById('cwMaxVal').value)  || 10;
+    const ops  = [];
+    if (document.getElementById('cwOpPlus').checked)  ops.push('+');
+    if (document.getElementById('cwOpMinus').checked) ops.push('-');
+    if (document.getElementById('cwOpMul').checked)   ops.push('×');
+    if (document.getElementById('cwOpDiv').checked)   ops.push('÷');
+    if (!ops.length) ops.push('+');
+    const gridVal = document.querySelector('input[name="_cwGrid"]:checked')?.value || '22';
+    const R = parseInt(gridVal[0]) || 2;
+    const C = parseInt(gridVal[1]) || 2;
+
+    function cwCalcChain(vals, op) {
+        if (vals.length > 2 && (op === '÷' || op === '/')) return null;
+        let r = vals[0];
+        for (let i = 1; i < vals.length; i++) {
+            const v = vals[i];
+            if (op === '+') r += v;
+            else if (op === '-') { if (r <= v) return null; r -= v; }
+            else if (op === '×' || op === '*') r *= v;
+            else if (op === '÷' || op === '/') { if (v === 0 || r % v !== 0) return null; r = r / v; }
+        }
+        return r > 0 ? r : null;
+    }
+
+    let cells, rowOps, colOps, rowResults, colResults, valid;
+    for (let attempt = 0; attempt < 300; attempt++) {
+        cells = Array.from({length: R*C}, () => minV + Math.floor(Math.random()*(maxV-minV+1)));
+        rowOps = Array.from({length: R}, () => ops[Math.floor(Math.random()*ops.length)]);
+        colOps = Array.from({length: C}, () => ops[Math.floor(Math.random()*ops.length)]);
+        rowResults = []; colResults = []; valid = true;
+        for (let r = 0; r < R && valid; r++) {
+            const rc = cells.slice(r*C, r*C+C);
+            const res = cwCalcChain(rc, rowOps[r]);
+            if (!res) { valid=false; break; }
+            rowResults[r] = res;
+        }
+        if (!valid) continue;
+        for (let c = 0; c < C && valid; c++) {
+            const cc = Array.from({length: R}, (_,r) => cells[r*C+c]);
+            const res = cwCalcChain(cc, colOps[c]);
+            if (!res) { valid=false; break; }
+            colResults[c] = res;
+        }
+        if (valid) break;
+    }
+    if (!valid) { rowOps=Array(R).fill('+');colOps=Array(C).fill('+');
+        rowResults=[];colResults=[];
+        for(let r=0;r<R;r++){let s=0;for(let c=0;c<C;c++)s+=cells[r*C+c];rowResults[r]=s;}
+        for(let c=0;c<C;c++){let s=0;for(let r=0;r<R;r++)s+=cells[r*C+c];colResults[c]=s;}
+    }
+
+    const maxAllowed = Math.min(R * (C - 1), (R - 1) * C);
+    const revCount = Math.max(0, Math.min(maxAllowed, parseInt(document.getElementById('cwRevealedCount').value)||0));
+
+    function noFullLine(revSet) {
+        for (let r = 0; r < R; r++) {
+            let full = true;
+            for (let c2 = 0; c2 < C; c2++) { if (!revSet.has(r*C+c2)) { full=false; break; } }
+            if (full) return false;
+        }
+        for (let c2 = 0; c2 < C; c2++) {
+            let full = true;
+            for (let r = 0; r < R; r++) { if (!revSet.has(r*C+c2)) { full=false; break; } }
+            if (full) return false;
+        }
+        return true;
+    }
+
+    let revealedSet = new Set();
+    if (revCount > 0) {
+        const allPos = Array.from({length:R*C},(_,i)=>i);
+        outer: for (let cnt = revCount; cnt >= 1; cnt--) {
+            for (let attempt = 0; attempt < 200; attempt++) {
+                const sh = [...allPos].sort(() => Math.random() - 0.5);
+                const trial = new Set(sh.slice(0, cnt));
+                if (noFullLine(trial)) { revealedSet = trial; break outer; }
+            }
+        }
+    }
+
+    const SZ=40, OP=20, EQ=20, RES=40;
+    const cellSt = `width:${SZ}px;height:${SZ}px;border-radius:8px;`;
+    const cellHidden = `<div style="${cellSt}border:2px dashed #a5b4fc;background:#eef2ff;display:flex;align-items:center;justify-content:center;font-size:0.75rem;color:#4f46e5;font-weight:700;">?</div>`;
+    const cellGiven = v => `<div style="${cellSt}background:#d1fae5;border:2px solid #6ee7b7;display:flex;align-items:center;justify-content:center;font-size:0.85rem;color:#065f46;font-weight:700;">${v}</div>`;
+    const cellRes   = v => `<div style="${cellSt}background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-size:0.85rem;color:#374151;font-weight:700;">${v}</div>`;
+    const opEl  = v => `<div style="width:${OP}px;text-align:center;font-size:0.9rem;color:#64748b;">${v}</div>`;
+    const eqEl  = `<div style="width:${EQ}px;text-align:center;font-size:0.8rem;color:#94a3b8;">=</div>`;
+    const resEl = v => `<div style="width:${RES}px;height:${SZ}px;background:#e2e8f0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;color:#374151;font-weight:700;">${v}</div>`;
+    const emp   = `<div></div>`;
+
+    // Build CSS grid columns: C cells + (C-1) ops + eq + result
+    const colParts = [];
+    for(let c=0;c<C;c++){colParts.push(SZ+'px');if(c<C-1)colParts.push(OP+'px');}
+    colParts.push(EQ+'px',RES+'px');
+    const rowParts = [];
+    for(let r=0;r<R;r++){rowParts.push(SZ+'px');if(r<R-1)rowParts.push(OP+'px');}
+    rowParts.push(EQ+'px',RES+'px');
+
+    const items = [];
+    for (let dr=0; dr<=2*R; dr++) {
+        for (let dc=0; dc<=2*C; dc++) {
+            let html = emp;
+            if (dr <= 2*R-2) {
+                if (dr%2===0) {
+                    const r=dr/2;
+                    if (dc<=2*C-2) {
+                        if(dc%2===0){
+                            const cellIdx = r*C + dc/2;
+                            const cellHtml = revealedSet.has(cellIdx) ? cellGiven(cells[cellIdx]) : cellHidden;
+                            html=`<div style="display:flex;align-items:center;justify-content:center;">${cellHtml}</div>`;
+                        } else html=`<div style="display:flex;align-items:center;justify-content:center;">${opEl(rowOps[r])}</div>`;
+                    } else if(dc===2*C-1) {
+                        html=`<div style="display:flex;align-items:center;justify-content:center;">${eqEl}</div>`;
+                    } else {
+                        html=`<div style="display:flex;align-items:center;justify-content:center;">${resEl(rowResults[r])}</div>`;
+                    }
+                } else {
+                    if(dc<=2*C-2&&dc%2===0){const c2=dc/2;html=`<div style="display:flex;align-items:center;justify-content:center;">${opEl(colOps[c2])}</div>`;}
+                }
+            } else if(dr===2*R-1) {
+                if(dc<=2*C-2&&dc%2===0) html=`<div style="display:flex;align-items:center;justify-content:center;">${eqEl}</div>`;
+            } else {
+                if(dc<=2*C-2&&dc%2===0){const c2=dc/2;html=`<div style="display:flex;align-items:center;justify-content:center;">${resEl(colResults[c2])}</div>`;}
+            }
+            items.push(html);
+        }
+    }
+
+    document.getElementById('prevQ').innerHTML = '🧮 კროსვორდი';
+    document.getElementById('prevHint').innerHTML = '';
+    document.getElementById('prevWarn').innerHTML = '';
+    document.getElementById('prevOpts').innerHTML =
+        `<div style="display:grid;grid-template-columns:${colParts.join(' ')};grid-template-rows:${rowParts.join(' ')};gap:4px;align-items:center;justify-items:center;margin:10px auto;max-width:max-content;">${items.join('')}</div>`;
+    document.getElementById('prevFormula').innerHTML =
+        `${R}×${C} · ხაზები:[${rowOps.join(',')}] სვეტები:[${colOps.join(',')}]`;
+    document.getElementById('prevVars').innerHTML = '';
+}
+
 // init on page load
 (function() {
     const qt = document.getElementById('qtInput').value;
@@ -816,8 +1029,9 @@ function renderConds() {
 // ── Sync all hidden inputs
 function syncAll() {
     const _qt = document.getElementById('qtInput').value;
-    if (_qt === 'pyramid') { syncPyrConfig(); return; }
-    if (_qt === 'code')    { syncCodeConfig(); return; }
+    if (_qt === 'pyramid')   { syncPyrConfig();  return; }
+    if (_qt === 'code')      { syncCodeConfig();  return; }
+    if (_qt === 'crossword') { syncCwConfig();    return; }
     const ncObj = {};
     ncRows.forEach(r => {
         if (r.name) ncObj[r.name] = { min: +r.min, max: +r.max, step: +r.step || 1 };
@@ -1144,8 +1358,9 @@ function genPreviewCode() {
 
 function genPreview() {
     const qt = document.getElementById('qtInput').value;
-    if (qt === 'pyramid') { genPreviewPyramid(); return; }
-    if (qt === 'code')    { genPreviewCode();    return; }
+    if (qt === 'pyramid')   { genPreviewPyramid(); return; }
+    if (qt === 'code')      { genPreviewCode();     return; }
+    if (qt === 'crossword') { genPreviewCw();       return; }
     const tmpl = document.getElementById('templateText').value;
     if (!tmpl) { clearPreview(); return; }
     const isTxt = document.getElementById('answerTypeInput').value === 'text';

@@ -178,16 +178,17 @@ class QuestionTemplateController extends Controller
 
     private function validated(Request $request): array
     {
-        $qType     = $request->input('question_type');
-        $isPyramid = $qType === 'pyramid';
-        $isCode    = $qType === 'code';
-        $isSpecial = $isPyramid || $isCode;
+        $qType       = $request->input('question_type');
+        $isPyramid   = $qType === 'pyramid';
+        $isCode      = $qType === 'code';
+        $isCrossword = $qType === 'crossword';
+        $isSpecial   = $isPyramid || $isCode || $isCrossword;
 
         $raw = $request->validate([
             'topic_id'        => 'required|exists:topics,id',
             'theme_id'        => 'nullable|exists:themes,id',
             'difficulty'      => 'required|integer|min:1|max:5',
-            'question_type'   => 'required|in:multiple_choice,pyramid,code',
+            'question_type'   => 'required|in:multiple_choice,pyramid,code,crossword',
             'answer_type'     => $isSpecial ? 'nullable' : 'required|in:numeric,text',
             'template_text'   => $isSpecial ? 'nullable|string' : 'required|string',
             'hint_text'       => 'nullable|string',
@@ -218,6 +219,30 @@ class QuestionTemplateController extends Controller
                 'hint_text'       => null,
                 'correct_formula' => '',
                 'num_config'      => ['height' => $pyrHeight, 'max_base' => $pyrMax, 'hidden_count' => $pyrHide],
+                'distractors'     => null,
+                'conditions'      => null,
+            ];
+        }
+
+        if ($isCrossword) {
+            $minVal  = max(1,           (int) ($numConfig['min_val']   ?? 1));
+            $maxVal  = max($minVal + 1, (int) ($numConfig['max_val']   ?? 10));
+            $ops     = (array) ($numConfig['operators'] ?? ['+']);
+            if (empty($ops)) $ops = ['+'];
+            $rows          = in_array((int)($numConfig['rows'] ?? 2), [2,3]) ? (int)$numConfig['rows'] : 2;
+            $cols          = in_array((int)($numConfig['cols'] ?? 2), [2,3]) ? (int)$numConfig['cols'] : 2;
+            $revealedCount = max(0, min($rows * $cols - 1, (int)($numConfig['revealed_count'] ?? 0)));
+            $opsStr  = implode('', $ops);
+            return [
+                'topic_id'        => $raw['topic_id'],
+                'theme_id'        => null,
+                'difficulty'      => $raw['difficulty'],
+                'question_type'   => 'crossword',
+                'answer_type'     => 'numeric',
+                'template_text'   => "კროსვორდი {$rows}×{$cols} {$minVal}-{$maxVal} {$opsStr}" . ($revealedCount ? " ({$revealedCount}✓)" : ''),
+                'hint_text'       => null,
+                'correct_formula' => '',
+                'num_config'      => ['min_val' => $minVal, 'max_val' => $maxVal, 'operators' => $ops, 'rows' => $rows, 'cols' => $cols, 'revealed_count' => $revealedCount],
                 'distractors'     => null,
                 'conditions'      => null,
             ];

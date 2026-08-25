@@ -96,6 +96,31 @@ class PracticeController extends Controller
             ]);
         }
 
+        if ($template->isCrossword()) {
+            $key         = "pq_{$child->id}_{$topic->id}_" . uniqid();
+            $data        = $template->generateCrossword();
+            $q           = json_decode($data['question_text'], true);
+            $correctArr  = json_decode($data['correct_answer'], true) ?? [];
+            cache()->put($key, $correctArr, now()->addMinutes(20));
+            $revealed     = $q['revealed'] ?? [];
+            $revealedVals = [];
+            foreach ($revealed as $pos) {
+                $revealedVals[(string)$pos] = $correctArr[(string)$pos] ?? null;
+            }
+            return response()->json([
+                'type'           => 'crossword',
+                'key'            => $key,
+                'rows'           => $q['rows'] ?? 2,
+                'cols'           => $q['cols'] ?? 2,
+                'row_ops'        => $q['row_ops'] ?? ['+', '+'],
+                'col_ops'        => $q['col_ops'] ?? ['+', '+'],
+                'row_results'    => $q['row_results'] ?? [],
+                'col_results'    => $q['col_results'] ?? [],
+                'revealed'       => $revealed,
+                'revealed_values'=> $revealedVals,
+            ]);
+        }
+
         $theme     = $template->theme ?? Theme::first();
         $generated = $template->generate($theme);
 
@@ -131,6 +156,11 @@ class PracticeController extends Controller
         } elseif ($request->has('code_answers')) {
             // code: cached = [pos => value]
             $result    = \App\Services\CodeService::check(json_encode($cached), $request->input('code_answers', []));
+            $isCorrect = $result['ok'];
+            $feedback  = ['results' => $result['results']];
+        } elseif ($request->has('crossword_answers')) {
+            // crossword: cached = ['0'=>a, '1'=>b, '2'=>c, '3'=>d]
+            $result    = \App\Services\CrosswordService::check(json_encode($cached), $request->input('crossword_answers', []));
             $isCorrect = $result['ok'];
             $feedback  = ['results' => $result['results']];
         } else {

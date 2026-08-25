@@ -106,6 +106,17 @@
     .code-inp.correct-inp { border-color:#86efac !important;background:#dcfce7 !important;color:#15803d !important; }
     .code-inp.wrong-inp   { border-color:#fca5a5 !important;background:#fee2e2 !important;color:#dc2626 !important; }
 
+    /* ── Crossword ── */
+    .cw-grid { display:grid;gap:4px;align-items:center;justify-items:center;margin:0 auto; }
+    .cw-inp { width:100%;height:100%;border:2.5px solid #a5b4fc;border-radius:12px;background:#eef2ff;color:#4f46e5;font-family:'Fredoka One',cursive;font-size:1rem;text-align:center;outline:none;padding:0;transition:border-color 0.2s,background 0.2s; }
+    .cw-inp:focus { border-color:#4f46e5;background:#e0e7ff; }
+    .cw-inp.correct-inp { border-color:#86efac !important;background:#dcfce7 !important;color:#15803d !important; }
+    .cw-inp.wrong-inp   { border-color:#fca5a5 !important;background:#fee2e2 !important;color:#dc2626 !important; }
+    .cw-given { width:52px;height:52px;border-radius:12px;background:#d1fae5;border:2.5px solid #6ee7b7;color:#065f46;font-family:'Fredoka One',cursive;font-size:1rem;display:flex;align-items:center;justify-content:center;font-weight:700; }
+    .cw-op  { font-family:'Fredoka One',cursive;font-size:1rem;color:#64748b;text-align:center; }
+    .cw-eq  { font-family:'Fredoka One',cursive;font-size:0.85rem;color:#94a3b8;text-align:center; }
+    .cw-res { width:100%;height:100%;border-radius:10px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:0.95rem;color:#374151;font-weight:700; }
+
     /* ── Spinner ── */
     .spinner { display:none; text-align:center; padding:40px; font-family:'Fredoka One',cursive; color:#94a3b8; font-size:1rem; }
     .spinner.show { display:block; }
@@ -155,6 +166,13 @@
             <div class="code-target-row" id="codeSyms"></div>
             <div class="code-inp-row" id="codeInps"></div>
         </div>
+
+        {{-- Crossword question --}}
+        <div id="cwArea" style="display:none;">
+            <div class="q-text" style="margin-bottom:16px;">🧮 შეავსე კროსვორდი</div>
+            <div id="cwGrid" style="display:grid;gap:4px;align-items:center;justify-items:center;margin:0 auto;max-width:max-content;">
+            </div>
+        </div>
     </div>
 
     <div class="feedback" id="feedback"></div>
@@ -201,6 +219,7 @@ function renderQuestion(q) {
     document.getElementById('mcArea').style.display   = 'none';
     document.getElementById('pyrArea').style.display  = 'none';
     document.getElementById('codeArea').style.display = 'none';
+    document.getElementById('cwArea').style.display   = 'none';
 
     if (q.type === 'mc') {
         document.getElementById('mcArea').style.display  = 'block';
@@ -229,6 +248,11 @@ function renderQuestion(q) {
         document.getElementById('codeArea').style.display = 'block';
         document.getElementById('qLabel').textContent     = '🕵️ კოდი';
         renderCode(q);
+        document.getElementById('checkBtn').style.display = 'block';
+    } else if (q.type === 'crossword') {
+        document.getElementById('cwArea').style.display   = 'block';
+        document.getElementById('qLabel').textContent     = '🧮 კროსვორდი';
+        renderCrossword(q);
         document.getElementById('checkBtn').style.display = 'block';
     }
 }
@@ -308,10 +332,65 @@ function renderCode(q) {
     });
 }
 
+// ── Crossword render ──────────────────────────────────────────────────────
+function renderCrossword(q) {
+    const R = q.rows || 2, C = q.cols || 2;
+    const rowOps = q.row_ops || Array(R).fill('+');
+    const colOps = q.col_ops || Array(C).fill('+');
+    const rowResults = q.row_results || [];
+    const colResults = q.col_results || [];
+
+    const SZ=52, OP=24, EQ=20, RES=46;
+    const colParts=[]; for(let c=0;c<C;c++){colParts.push(SZ+'px');if(c<C-1)colParts.push(OP+'px');} colParts.push(EQ+'px',RES+'px');
+    const rowParts=[]; for(let r=0;r<R;r++){rowParts.push(SZ+'px');if(r<R-1)rowParts.push(OP+'px');} rowParts.push(EQ+'px',RES+'px');
+
+    const grid = document.getElementById('cwGrid');
+    grid.style.gridTemplateColumns = colParts.join(' ');
+    grid.style.gridTemplateRows = rowParts.join(' ');
+    grid.innerHTML = '';
+
+    const revealedSet = new Set((q.revealed || []).map(Number));
+    const revealedVals = q.revealed_values || {};
+
+    for (let dr=0; dr<=2*R; dr++) {
+        for (let dc=0; dc<=2*C; dc++) {
+            let el = document.createElement('div');
+            if (dr <= 2*R-2) {
+                if (dr%2===0) {
+                    const r=dr/2;
+                    if (dc<=2*C-2) {
+                        if (dc%2===0) {
+                            const pos = r*C + dc/2;
+                            if (revealedSet.has(pos)) {
+                                el.className = 'cw-given';
+                                el.textContent = revealedVals[pos] ?? '';
+                            } else {
+                                el = document.createElement('input');
+                                el.type='number'; el.className='cw-inp'; el.placeholder='?';
+                                el.dataset.pos = pos;
+                            }
+                        } else { el.className='cw-op'; el.textContent=rowOps[r]||'+'; }
+                    } else if(dc===2*C-1) { el.className='cw-eq'; el.textContent='='; }
+                    else { el.className='cw-res'; el.textContent=rowResults[r]??'?'; }
+                } else {
+                    if(dc<=2*C-2&&dc%2===0){el.className='cw-op';el.textContent=colOps[dc/2]||'+';}
+                }
+            } else if(dr===2*R-1) {
+                if(dc<=2*C-2&&dc%2===0){el.className='cw-eq';el.textContent='=';}
+            } else {
+                if(dc<=2*C-2&&dc%2===0){el.className='cw-res';el.textContent=colResults[dc/2]??'?';}
+            }
+            grid.appendChild(el);
+        }
+    }
+}
+
 // ── Unified check dispatch ────────────────────────────────────────────────
 function checkAnswer() {
     if (currentQ && currentQ.type === 'code') {
         checkCode();
+    } else if (currentQ && currentQ.type === 'crossword') {
+        checkCrossword();
     } else {
         checkPyramid();
     }
@@ -357,6 +436,37 @@ async function checkCode() {
     if (data.results) {
         Object.entries(data.results).forEach(([pos, res]) => {
             const inp = document.querySelector(`.code-inp[data-pos="${pos}"]`);
+            if (inp) {
+                inp.classList.add(res.correct ? 'correct-inp' : 'wrong-inp');
+                if (!res.correct) inp.value = res.value;
+            }
+        });
+    }
+
+    showFeedback(data);
+    document.getElementById('checkBtn').style.display = 'none';
+}
+
+// ── Crossword check ───────────────────────────────────────────────────────
+async function checkCrossword() {
+    const crossword_answers = {};
+    // Include pre-revealed values
+    if (currentQ && currentQ.revealed_values) {
+        Object.entries(currentQ.revealed_values).forEach(([pos, val]) => {
+            crossword_answers[pos] = val;
+        });
+    }
+    document.querySelectorAll('#cwGrid .cw-inp').forEach(inp => {
+        crossword_answers[inp.dataset.pos] = inp.value;
+    });
+
+    document.getElementById('checkBtn').disabled = true;
+    const r    = await postAnswer({ crossword_answers });
+    const data = await r.json();
+
+    if (data.results) {
+        Object.entries(data.results).forEach(([pos, res]) => {
+            const inp = document.querySelector(`#cwGrid .cw-inp[data-pos="${pos}"]`);
             if (inp) {
                 inp.classList.add(res.correct ? 'correct-inp' : 'wrong-inp');
                 if (!res.correct) inp.value = res.value;
