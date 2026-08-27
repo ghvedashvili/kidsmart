@@ -6,145 +6,155 @@
 
 @section('content')
 <style>
-:root {
-    --green: #1a7a3c;
-    --lg:    #25a352;
-    --yellow: #f9c913;
-    --orange: #ff6b2b;
-    --sky:   #e8f7ff;
-    --dark:  #0d2818;
-}
-
 body {
     font-family: 'Nunito', sans-serif !important;
-    background: var(--sky) !important;
+    background: #EBF6FF !important;
     background-image:
-        radial-gradient(circle at 20% 50%, rgba(37,163,82,0.08) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(249,201,19,0.10) 0%, transparent 40%) !important;
+        radial-gradient(circle at 10% 30%, rgba(14,165,233,0.08) 0%, transparent 50%),
+        radial-gradient(circle at 90% 70%, rgba(139,92,246,0.07) 0%, transparent 45%) !important;
     padding-bottom: 60px !important;
 }
-
-/* Sticky header sits below the fixed nav (56 px) */
 .hdr {
-    background: linear-gradient(135deg, var(--green), #0f5c2a);
-    padding: 10px 20px;
+    background: linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%);
+    padding: 12px 20px;
     position: sticky;
     top: 56px;
     z-index: 50;
-    box-shadow: 0 2px 12px rgba(10,60,25,0.3);
+    box-shadow: 0 4px 20px rgba(14,165,233,0.35);
     overflow: visible;
 }
 .prog-bar-wrap {
     position: relative;
-    background: rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.28);
     border-radius: 99px;
-    height: 3px;
+    height: 7px;
     margin: 8px 0;
     overflow: visible;
 }
 .prog-bar-fill {
     height: 100%;
-    background: var(--yellow);
+    background: #FCD34D;
     border-radius: 99px;
     transition: width 0.35s ease;
     width: 0%;
+    box-shadow: 0 0 8px rgba(252,211,77,0.7);
 }
 .prog-ball {
     position: absolute;
     top: 50%;
     left: 0;
     transform: translateY(-50%);
-    width: 11px; height: 11px;
+    width: 18px; height: 18px;
     border-radius: 50%;
-    background: var(--yellow);
-    box-shadow: 0 0 0 3px rgba(255,255,255,0.4);
+    background: #FCD34D;
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.55);
     transition: left 0.35s ease;
     pointer-events: none;
     z-index: 2;
 }
-
 .wrap { max-width: 640px; margin: 0 auto; padding: 24px 16px 20px; }
 
+/* ── Vibrant question cards ── */
 .q-card {
-    background: white; border-radius: 20px; padding: 28px 20px 20px;
-    box-shadow: 0 6px 24px rgba(26,122,60,0.12);
-    border-top: 6px solid var(--green); position: relative;
-    margin-bottom: 20px; transition: box-shadow 0.2s;
+    border-radius: 28px;
+    padding: 28px 20px 22px;
+    position: relative;
+    margin-bottom: 20px;
+    transition: transform 0.18s, box-shadow 0.18s;
+    border: none;
 }
-.q-card:nth-child(3n+2) { border-top-color: var(--yellow); }
-.q-card:nth-child(3n+3) { border-top-color: var(--orange); }
-.q-card.answered { box-shadow: 0 6px 24px rgba(26,122,60,0.22); }
+.q-card:nth-child(6n+1) { background: linear-gradient(140deg, #FF7347 0%, #E8470D 100%); box-shadow: 0 10px 36px rgba(232,71,13,0.30); }
+.q-card:nth-child(6n+2) { background: linear-gradient(140deg, #00C4DC 0%, #0094AB 100%); box-shadow: 0 10px 36px rgba(0,148,171,0.30); }
+.q-card:nth-child(6n+3) { background: linear-gradient(140deg, #8B5CF6 0%, #6D28D9 100%); box-shadow: 0 10px 36px rgba(109,40,217,0.30); }
+.q-card:nth-child(6n+4) { background: linear-gradient(140deg, #FBC02D 0%, #E65100 100%); box-shadow: 0 10px 36px rgba(230,81,0,0.30); }
+.q-card:nth-child(6n+5) { background: linear-gradient(140deg, #22C55E 0%, #15803D 100%); box-shadow: 0 10px 36px rgba(21,128,61,0.30); }
+.q-card:nth-child(6n)   { background: linear-gradient(140deg, #EC4899 0%, #BE185D 100%); box-shadow: 0 10px 36px rgba(190,24,93,0.30); }
+.q-card:hover { transform: translateY(-3px); }
+.q-card.answered { transform: none; }
 
 .q-badge {
     position: absolute; top: -14px; left: 18px;
-    background: var(--green); color: white;
+    background: rgba(255,255,255,0.28);
+    backdrop-filter: blur(8px);
+    color: white;
     font-family: 'Fredoka One', cursive; font-size: 0.9rem;
-    padding: 3px 14px; border-radius: 99px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    padding: 4px 16px; border-radius: 99px;
+    border: 1.5px solid rgba(255,255,255,0.45);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
 }
-.q-card:nth-child(3n+2) .q-badge { background: #c89800; }
-.q-card:nth-child(3n+3) .q-badge { background: var(--orange); }
+.q-icon { font-size: 2rem; margin-bottom: 10px; display: block; }
+.q-text { font-size: clamp(0.95rem, 3.2vw, 1.1rem); font-weight: 800; color: white; line-height: 1.7; margin-bottom: 6px; }
+.q-hint { font-size: 0.78rem; color: rgba(255,255,255,0.78); font-style: italic; margin-bottom: 14px; line-height: 1.5; }
 
-.q-icon { font-size: 1.8rem; margin-bottom: 8px; display: block; }
-.q-text { font-size: clamp(0.95rem, 3.2vw, 1.08rem); font-weight: 800; color: var(--dark); line-height: 1.7; margin-bottom: 6px; }
-.q-hint { font-size: 0.78rem; color: #64748b; font-style: italic; margin-bottom: 14px; line-height: 1.5; }
-
+/* ── White pill options ── */
 .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .opt-lbl { position: relative; cursor: pointer; display: block; }
 .opt-lbl input { position: absolute; opacity: 0; width: 0; height: 0; }
 .opt-btn {
-    display: flex; align-items: center; justify-content: center; gap: 7px;
-    background: #f0faf4; border: 2.5px solid #c5e8d0; border-radius: 14px;
-    padding: 13px 10px; font-family: 'Fredoka One', cursive;
-    font-size: clamp(1rem, 4vw, 1.15rem); color: #3a7a50; text-align: center;
-    transition: all 0.15s; min-height: 56px; user-select: none;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.22);
+    border: 2px solid rgba(255,255,255,0.48);
+    border-radius: 16px;
+    padding: 13px 10px;
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1rem, 4vw, 1.15rem);
+    color: white;
+    text-align: center;
+    transition: all 0.15s;
+    min-height: 56px;
+    user-select: none;
+    backdrop-filter: blur(4px);
 }
-.q-card:nth-child(3n+2) .opt-btn { background: #fffbea; border-color: #f0d960; color: #7a6000; }
-.q-card:nth-child(3n+3) .opt-btn { background: #fff5f0; border-color: #ffc4a0; color: #7a3010; }
-.opt-lbl:hover .opt-btn { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.opt-lbl:hover .opt-btn {
+    background: rgba(255,255,255,0.38);
+    transform: translateY(-2px);
+}
 .opt-lbl input:checked + .opt-btn {
-    border-color: var(--green); background: var(--green); color: white;
-    box-shadow: 0 4px 16px rgba(26,122,60,0.35); transform: translateY(-2px);
+    background: white;
+    color: #1a1a2e;
+    border-color: white;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+    transform: translateY(-2px);
 }
-.q-card:nth-child(3n+2) .opt-lbl input:checked + .opt-btn { border-color: #c89800; background: #c89800; }
-.q-card:nth-child(3n+3) .opt-lbl input:checked + .opt-btn { border-color: var(--orange); background: var(--orange); }
 
 .check-mark {
-    width: 28px; height: 28px; border-radius: 50%;
-    background: var(--green); color: white; font-size: 0.9rem;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: white; color: #22C55E; font-size: 1rem; font-weight: 900;
     display: none; align-items: center; justify-content: center;
-    position: absolute; top: -10px; right: -10px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    position: absolute; top: -12px; right: -12px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.20);
 }
 .q-card.answered .check-mark { display: flex; }
-.q-card:nth-child(3n+2).answered .check-mark { background: #c89800; }
-.q-card:nth-child(3n+3).answered .check-mark { background: var(--orange); }
 
+/* ── Submit button ── */
 .submit-wrap { max-width: 640px; margin: 0 auto; padding: 0 16px 40px; }
 .submit-btn {
-    width: 100%; background: linear-gradient(135deg, var(--green), #0f5c2a);
-    border: none; border-radius: 18px; color: white;
-    font-family: 'Fredoka One', cursive; font-size: 1.2rem; letter-spacing: 0.04em;
-    padding: 18px; cursor: pointer; transition: all 0.2s;
-    box-shadow: 0 6px 24px rgba(26,122,60,0.4); display: none;
+    width: 100%;
+    background: linear-gradient(135deg, #0EA5E9 0%, #0369A1 100%);
+    border: none; border-radius: 20px; color: white;
+    font-family: 'Fredoka One', cursive; font-size: 1.25rem;
+    padding: 20px; cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 8px 28px rgba(14,165,233,0.45); display: none;
+    letter-spacing: 0.03em;
 }
 .submit-btn.vis { display: block; animation: popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275); }
-.submit-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 32px rgba(26,122,60,0.5); }
+.submit-btn:hover { transform: translateY(-3px); box-shadow: 0 14px 36px rgba(14,165,233,0.55); }
 @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
 .warn { font-family: 'Nunito', sans-serif; font-size: 0.8rem; color: #e74c3c; font-weight: 800; text-align: center; margin-top: 10px; display: none; }
 
-.code-eq-box { background:#fff8e7;border-radius:10px;padding:10px 14px;margin-bottom:12px;border:1.5px dashed #ffe194; }
-.code-eq { font-size:clamp(0.9rem,3.5vw,1.05rem);font-weight:700;color:#374151;margin:3px 0; }
-.code-target-row { display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:8px; }
-.code-sym-box { width:48px;height:48px;border-radius:10px;background:#4f46e5;color:white;display:flex;align-items:center;justify-content:center;font-size:1.35rem;flex-shrink:0; }
-.code-inp-row { display:flex;gap:8px;justify-content:center;flex-wrap:wrap; }
-.code-inp { width:48px;height:48px;border-radius:10px;border:2.5px solid #a5b4fc;background:#eef2ff;color:#4f46e5;font-family:'Fredoka One',cursive;font-size:1.1rem;text-align:center;outline:none;padding:0; }
-.cw-grid { display:grid;gap:5px;align-items:center;justify-items:center;margin:0 auto 8px;max-width:max-content; }
-.cw-inp { width:100%;height:100%;border:2.5px solid #a5b4fc;border-radius:12px;background:#eef2ff;color:#4f46e5;font-family:'Fredoka One',cursive;font-size:1.1rem;text-align:center;outline:none;padding:0; }
-.cw-given { width:52px;height:52px;border-radius:12px;background:#d1fae5;border:2.5px solid #6ee7b7;color:#065f46;font-family:'Fredoka One',cursive;font-size:1.1rem;display:flex;align-items:center;justify-content:center;font-weight:700; }
-.cw-op { font-family:'Fredoka One',cursive;font-size:1.1rem;color:#64748b;text-align:center; }
-.cw-eq { font-family:'Fredoka One',cursive;font-size:1rem;color:#94a3b8;text-align:center; }
-.cw-res { width:100%;height:100%;border-radius:10px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:1rem;color:#374151;font-weight:700; }
+/* ── Code / Crossword inside colored cards ── */
+.code-eq-box { background: rgba(255,255,255,0.20); border-radius: 12px; padding: 12px 16px; margin-bottom: 12px; border: 1.5px solid rgba(255,255,255,0.32); }
+.code-eq { font-size: clamp(0.9rem,3.5vw,1.05rem); font-weight: 700; color: white; margin: 3px 0; }
+.code-target-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 8px; }
+.code-sym-box { width: 48px; height: 48px; border-radius: 10px; background: rgba(0,0,0,0.22); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; flex-shrink: 0; }
+.code-inp-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.code-inp { width: 48px; height: 48px; border-radius: 10px; border: 2.5px solid rgba(255,255,255,0.55); background: rgba(255,255,255,0.92); color: #333; font-family: 'Fredoka One',cursive; font-size: 1.1rem; text-align: center; outline: none; padding: 0; }
+.cw-grid { display: grid; gap: 5px; align-items: center; justify-items: center; margin: 0 auto 8px; max-width: max-content; }
+.cw-inp { width: 100%; height: 100%; border: 2.5px solid rgba(255,255,255,0.55); border-radius: 12px; background: rgba(255,255,255,0.92); color: #333; font-family: 'Fredoka One',cursive; font-size: 1.1rem; text-align: center; outline: none; padding: 0; }
+.cw-given { width: 52px; height: 52px; border-radius: 12px; background: rgba(255,255,255,0.32); border: 2.5px solid rgba(255,255,255,0.55); color: white; font-family: 'Fredoka One',cursive; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+.cw-op { font-family: 'Fredoka One',cursive; font-size: 1.1rem; color: rgba(255,255,255,0.82); text-align: center; }
+.cw-eq { font-family: 'Fredoka One',cursive; font-size: 1rem; color: rgba(255,255,255,0.72); text-align: center; }
+.cw-res { width: 100%; height: 100%; border-radius: 10px; background: rgba(255,255,255,0.22); display: flex; align-items: center; justify-content: center; font-family: 'Fredoka One',cursive; font-size: 1rem; color: white; font-weight: 700; }
 </style>
 
 <form method="POST" action="{{ route('test.submit', $test) }}" id="testForm">
