@@ -74,6 +74,7 @@
 .child-bottom-nav a.cbn-practice.cbn-act { color: #2563eb; }
 .child-bottom-nav a.cbn-tests.cbn-act { color: #0891b2; }
 .child-bottom-nav a.cbn-ach.cbn-act { color: #4f46e5; }
+.child-bottom-nav a.cbn-games.cbn-act { color: #16a34a; }
 .child-bottom-nav a .cbn-icon { font-size: 1.25rem; }
 @media (max-width: 640px) {
     .child-bottom-nav { display: flex; }
@@ -138,6 +139,7 @@
             <a class="nav-link-item{{ request()->routeIs('practice.*') ? ' nav-act' : '' }}" href="{{ route('practice.topics') }}" style="font-size:0.78rem;"><i class="bi bi-bullseye"></i> სავარჯიშოები</a>
             <a class="nav-link-item{{ request()->routeIs('my.tests') ? ' nav-act' : '' }}" href="{{ route('my.tests') }}" style="font-size:0.78rem;"><i class="bi bi-clipboard-check"></i> ჩემი ტესტები</a>
             <a class="nav-link-item{{ request()->routeIs('achievements') ? ' nav-act' : '' }}" href="{{ route('achievements') }}" style="font-size:0.78rem;"><i class="bi bi-trophy"></i> მიღწევები</a>
+            <a class="nav-link-item{{ request()->routeIs('games.*') ? ' nav-act' : '' }}" href="{{ route('games.index') }}" style="font-size:0.78rem;"><i class="bi bi-controller"></i> თამაშები</a>
             @endif
             @if($__hasAdm)
             @if($__canAdm('admin.panel'))
@@ -202,6 +204,7 @@
     <a href="{{ route('practice.topics') }}" class="cbn-practice {{ request()->routeIs('practice.*') ? 'cbn-act' : '' }}"><span class="cbn-icon">🎯</span>სავარჯიშოები</a>
     <a href="{{ route('my.tests') }}" class="cbn-tests {{ request()->routeIs('my.tests') ? 'cbn-act' : '' }}"><span class="cbn-icon">📋</span>ტესტები</a>
     <a href="{{ route('achievements') }}" class="cbn-ach {{ request()->routeIs('achievements') ? 'cbn-act' : '' }}"><span class="cbn-icon">🏆</span>მიღწევები</a>
+    <a href="{{ route('games.index') }}" class="cbn-games {{ request()->routeIs('games.*') ? 'cbn-act' : '' }}"><span class="cbn-icon">🎮</span>თამაშები</a>
 </nav>
 @endif
 @endauth

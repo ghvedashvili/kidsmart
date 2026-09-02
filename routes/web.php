@@ -19,6 +19,7 @@ use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\MarketController;
 use App\Http\Controllers\PracticeController;
 use App\Http\Controllers\VideoController;
+use App\Http\Controllers\GameController;
 use App\Http\Controllers\ChildController;
 use App\Http\Controllers\ChildSettingsController;
 use App\Http\Controllers\TestController;
@@ -105,6 +106,11 @@ Route::middleware(['auth', 'role.permission'])->group(function () {
     Route::get('/videos', [VideoController::class, 'library'])->name('videos.library');
     Route::get('/my/tests', [VideoController::class, 'myHistory'])->name('my.tests');
     Route::get('/my/tests/{test}', [VideoController::class, 'myTest'])->name('my.test.show');
+
+    // თამაშები (ბავშვი)
+    Route::get('/games', [GameController::class, 'index'])->name('games.index');
+    Route::get('/games/rock-paper-scissors', [GameController::class, 'rps'])->name('games.rps');
+    Route::post('/games/rock-paper-scissors/round', [GameController::class, 'round'])->name('games.rps.round');
 
     // მარკეტი — parent manages
     Route::get('/children/{child}/market',              [MarketController::class, 'index'])->name('market.index');
