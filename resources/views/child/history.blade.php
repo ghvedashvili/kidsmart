@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('navTitle', '📋 ჩემი ტესტები')
 @push('head')
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
 @endpush
@@ -7,12 +8,23 @@
     body { background: #f0f9ff !important; }
     .wrap { max-width: 520px; margin: 0 auto; padding: 28px 16px 80px; }
 
-    .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
-    .back { font-family:'Nunito',sans-serif; font-size:0.82rem; font-weight:800; color:#0284c7; text-decoration:none; padding:6px 16px; background:white; border-radius:99px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+    .back { display:inline-flex; align-items:center; gap:6px; margin:16px 0 24px; font-family:'Nunito',sans-serif; font-size:0.82rem; font-weight:800; color:#0891b2; text-decoration:none; padding:8px 16px; background:white; border-radius:99px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
     .back:hover { box-shadow:0 4px 12px rgba(0,0,0,0.12); }
 
-    .page-title { font-family:'Fredoka One',cursive; font-size:1.6rem; color:#0c4a6e; margin-bottom:4px; }
-    .page-sub { font-family:'Nunito',sans-serif; font-weight:800; font-size:0.78rem; color:#94a3b8; margin-bottom:24px; }
+    .child-cta {
+        display: flex; align-items: center; justify-content: center; gap: 12px;
+        width: 100%; padding: 20px; margin-bottom: 20px; box-sizing: border-box;
+        color: white; font-family: 'Fredoka One', cursive;
+        font-size: 1.1rem; letter-spacing: 0.03em;
+        text-decoration: none; border-radius: 20px;
+        transition: all 0.2s;
+    }
+    .child-cta:hover { transform: translateY(-2px); color: white; }
+    .child-cta.resume {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        box-shadow: 0 6px 24px rgba(245,158,11,0.35);
+    }
+    .child-cta.resume:hover { box-shadow: 0 10px 32px rgba(245,158,11,0.45); }
 
     .stats-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:28px; }
     .stat-card { background:white; border-radius:16px; padding:16px; text-align:center; box-shadow:0 4px 14px rgba(0,0,0,0.06); }
@@ -42,12 +54,13 @@
 </style>
 
 <div class="wrap">
-    <div class="topbar">
-        <a href="{{ route('dashboard') }}" class="back">← მთავარი</a>
-    </div>
+    <a href="{{ route('dashboard') }}" class="back">← მთავარი</a>
 
-    <div class="page-title">📋 ჩემი ტესტები</div>
-    <div class="page-sub">ყველა შესრულებული ტესტი</div>
+    @if($activeTest)
+    <a href="{{ route('test.show', $activeTest) }}" class="child-cta resume">
+        📝 გააგრძელე ტესტი →
+    </a>
+    @endif
 
     @if($totalTests > 0)
     <div class="stats-row">

@@ -25,6 +25,16 @@
         overflow-x: hidden;
         padding: 40px 24px 60px;
         gap: 20px;
+        --primary: #6c5ce7;
+        --primary-light: #a29bfe;
+        --primary-soft: #eeebff;
+        --accent-yellow: #fdcb6e;
+        --accent-pink: #ff7675;
+        --accent-green: #55efc4;
+        --accent-blue: #74b9ff;
+        --radius-lg: 24px;
+        --radius-md: 16px;
+        --radius-sm: 12px;
     }
     .dash-hero::before {
         content: '';
@@ -50,21 +60,33 @@
         max-width: 480px;
         text-align: center;
     }
-    .dash-greeting {
-        font-family: 'Goldman', monospace;
-        font-size: clamp(1rem, 4vw, 1.4rem);
-        color: #111;
-        letter-spacing: 0.06em;
+    /* ── hero banners ── */
+    .parent-hero-banner {
+        width: 100%; box-sizing: border-box; border-radius: var(--radius-lg); padding: 22px 24px;
+        display: flex; align-items: center; justify-content: space-between; gap: 16px; text-align: left;
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        box-shadow: 0 10px 24px rgba(108,92,231,0.25);
     }
+    .parent-hero-text h2 { font-family: 'Goldman', monospace; font-size: 1.05rem; color: #fff; margin: 0 0 4px; letter-spacing: 0.02em; }
+    .parent-hero-text p { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.72rem; color: rgba(255,255,255,0.85); margin: 0; }
+    .parent-hero-avatar { font-size: 2.6rem; flex-shrink: 0; filter: drop-shadow(0 6px 6px rgba(0,0,0,0.15)); }
 
-    /* ── header row: greeting ── */
-    .dash-header {
-        display: flex; flex-direction: column; width: 100%; text-align: left;
+    .plan-pill {
+        display: inline-flex; align-items: center; gap: 7px; background: var(--primary-soft);
+        border: none; border-radius: 100px; padding: 7px 16px; font-family: 'Goldman', monospace;
+        font-size: 0.68rem; color: var(--primary); cursor: pointer; letter-spacing: 0.04em; transition: background 0.2s;
     }
-    .dash-header-sub {
-        font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.68rem;
-        color: #aaa; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px;
+    .plan-pill:hover { background: #e2ddff; }
+
+    .child-hero-banner {
+        width: 100%; box-sizing: border-box; border-radius: var(--radius-lg); padding: 22px 20px;
+        display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left;
+        background: linear-gradient(135deg, var(--primary-light), var(--accent-blue));
+        box-shadow: 0 10px 24px rgba(108,92,231,0.25);
     }
+    .child-hero-text h2 { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: #2d2d3a; margin: 0 0 4px; }
+    .child-hero-text p { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.78rem; color: #4b4b63; margin: 0; }
+    .child-hero-avatar { font-size: 3.2rem; line-height: 1; flex-shrink: 0; filter: drop-shadow(0 6px 6px rgba(0,0,0,0.15)); }
 
     .children-section { width: 100%; }
     .section-label {
@@ -72,34 +94,34 @@
         letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 12px; text-align: left;
     }
     .add-card {
-        background: #fafafa; border: 2px dashed #d8d8d8; border-radius: 16px;
+        background: var(--primary-soft); border: 2px dashed #c9c0f7; border-radius: var(--radius-lg);
         display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
         width: 100%; min-height: 140px; padding: 20px 10px; cursor: pointer;
-        font-family: inherit; color: #aaa; transition: all 0.2s;
+        font-family: inherit; color: var(--primary); transition: all 0.2s;
     }
-    .add-card:hover { border-color: #aaa; background: #f5f5f5; color: #666; }
+    .add-card:hover { border-color: var(--primary-light); background: #e2ddff; }
     .add-card-plus {
-        width: 38px; height: 38px; border-radius: 50%; border: 2px dashed #d0d0d0;
+        width: 38px; height: 38px; border-radius: 50%; border: 2px dashed var(--primary-light);
         display: flex; align-items: center; justify-content: center;
-        font-size: 1.3rem; line-height: 1; color: #bbb; transition: all 0.2s;
+        font-size: 1.3rem; line-height: 1; color: var(--primary); transition: all 0.2s;
     }
-    .add-card:hover .add-card-plus { border-color: #999; color: #666; }
+    .add-card:hover .add-card-plus { border-color: var(--primary); }
     .add-card-label { font-family: 'Goldman', monospace; font-size: 0.62rem; letter-spacing: 0.04em; text-align: center; }
 
     /* ── child card (parent view) — colored side panel + main info panel ── */
     .children-grid { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; }
     .child-card {
-        background: #fff; border-radius: 16px; overflow: hidden;
+        background: #fff; border-radius: var(--radius-lg); overflow: hidden;
         display: flex; align-items: stretch; height: 100%;
         box-shadow: 0 4px 16px rgba(0,0,0,0.06); border: 1px solid #f0f0f0;
     }
     .cc-side {
         width: 78px; flex-shrink: 0;
         display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
-        padding: 12px 6px; background: linear-gradient(160deg,#7c8cf8,#a78bfa);
+        padding: 12px 6px; background: linear-gradient(160deg, var(--primary), var(--primary-light));
     }
-    .children-grid .child-card:nth-child(3n+2) .cc-side { background: linear-gradient(160deg,#f97b7b,#fca5a5); }
-    .children-grid .child-card:nth-child(3n+3) .cc-side { background: linear-gradient(160deg,#2fae74,#86e0b3); }
+    .children-grid .child-card:nth-child(3n+2) .cc-side { background: linear-gradient(160deg, var(--accent-pink), #fca5a5); }
+    .children-grid .child-card:nth-child(3n+3) .cc-side { background: linear-gradient(160deg, #2fae74, var(--accent-green)); }
     .cc-side-name {
         font-family: 'Goldman', monospace; font-size: 0.72rem; color: #fff; text-align: center;
         letter-spacing: 0.02em; line-height: 1.25; max-width: 100%;
@@ -122,8 +144,8 @@
     .cc-top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; }
     .cc-tags { display: flex; gap: 4px; flex-wrap: wrap; min-width: 0; }
     .cc-tag {
-        font-family: 'Goldman', monospace; font-size: 0.55rem; color: #666;
-        background: #f5f5f5; border: 1px solid #ebebeb; border-radius: 100px;
+        font-family: 'Goldman', monospace; font-size: 0.55rem; color: var(--primary);
+        background: var(--primary-soft); border: none; border-radius: 100px;
         padding: 3px 8px; white-space: nowrap;
     }
     .cc-mini-actions { display: flex; gap: 4px; flex-shrink: 0; }
@@ -141,7 +163,7 @@
 
     .cc-stats-row { display: flex; gap: 6px; }
     .cc-stat {
-        flex: 1; min-width: 0; text-align: center; background: #fafafa; border-radius: 10px;
+        flex: 1; min-width: 0; text-align: center; background: var(--primary-soft); border-radius: var(--radius-sm);
         padding: 8px 4px; display: flex; flex-direction: column; align-items: center; gap: 2px;
     }
     .cc-stat-icon { font-size: 0.9rem; line-height: 1; }
@@ -151,10 +173,10 @@
     .cc-tiles-row { display: flex; gap: 6px; margin-top: auto; }
     .cc-tile {
         flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-        background: #fafafa; border-radius: 12px; padding: 10px 6px; position: relative;
+        background: var(--primary-soft); border-radius: var(--radius-sm); padding: 10px 6px; position: relative;
         text-decoration: none; transition: background 0.2s;
     }
-    .cc-tile:hover { background: #f2f2f2; }
+    .cc-tile:hover { background: #e2ddff; }
     .cc-tile-icon { font-size: 1.1rem; }
     .cc-tile-label { font-family: 'Goldman', monospace; font-size: 0.58rem; color: #555; letter-spacing: 0.02em; }
     .cc-tile-badge {
@@ -166,31 +188,69 @@
     /* ── quick-link tiles (admin/staff nav) ── */
     .nav-tile-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; }
     .nav-tile {
-        background: #fff; border: 1px solid #e8e8e8; border-radius: 12px;
+        background: #fff; border: 1px solid #eee; border-radius: var(--radius-md);
         padding: 16px 10px; display: flex; flex-direction: column; align-items: center; gap: 6px;
         text-decoration: none; transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
     }
-    .nav-tile:hover { border-color: #bbb; box-shadow: 0 4px 14px rgba(0,0,0,0.06); transform: translateY(-2px); }
-    .nav-tile-icon { font-size: 1.4rem; }
+    .nav-tile:hover { border-color: var(--primary-light); box-shadow: 0 4px 14px rgba(108,92,231,0.12); transform: translateY(-2px); }
+    .nav-tile-icon {
+        font-size: 1.2rem; width: 40px; height: 40px; border-radius: var(--radius-sm);
+        background: var(--primary-soft); display: flex; align-items: center; justify-content: center;
+    }
     .nav-tile-label { font-family: 'Goldman', monospace; font-size: 0.62rem; color: #555; letter-spacing: 0.02em; text-align: center; }
 
-    /* ── child feature cards ── */
-    .feature-grid { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; }
-    .feature-card {
-        display: flex; align-items: center; gap: 12px; width: 100%;
-        background: #fff; border: 1.5px solid #f0f0f0; border-radius: 16px;
-        padding: 12px 16px; text-decoration: none; box-sizing: border-box;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.04); transition: transform 0.15s, box-shadow 0.2s;
+    /* ── child categories grid ── */
+    .cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; }
+    .cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; text-decoration: none; }
+    .cat-icon {
+        width: 56px; height: 56px; border-radius: var(--radius-sm);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.5rem; box-shadow: 0 6px 15px rgba(0,0,0,0.07); transition: transform 0.2s;
     }
-    .feature-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
-    .feature-icon-tile {
-        width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
-        display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
+    .cat-item:hover .cat-icon { transform: translateY(-4px); }
+    .cat-label { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.62rem; color: #333; text-align: center; line-height: 1.2; }
+
+    /* ── daily goal widget ── */
+    .goal-card {
+        width: 100%; box-sizing: border-box; border-radius: var(--radius-md); padding: 16px 18px;
+        background: linear-gradient(135deg, #8c7ae6, #7158e2); color: #fff;
+        display: flex; align-items: center; justify-content: space-between; gap: 14px; text-align: left;
     }
-    .feature-text { flex: 1; min-width: 0; text-align: left; }
-    .feature-title { font-family: 'Fredoka One', cursive; font-size: 0.9rem; }
-    .feature-sub { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.6rem; letter-spacing: 0.02em; margin-top: 2px; }
-    .feature-arrow { flex-shrink: 0; font-size: 1rem; }
+    .goal-info h4 { font-family: 'Fredoka One', cursive; font-size: 0.92rem; margin: 0 0 3px; }
+    .goal-info p { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.68rem; opacity: 0.85; margin: 0 0 10px; }
+    .goal-bar-bg { background: rgba(255,255,255,0.25); height: 8px; border-radius: 4px; width: 100%; max-width: 180px; overflow: hidden; }
+    .goal-bar-fill { background: var(--accent-green); height: 100%; border-radius: 4px; transition: width 0.4s; }
+    .goal-star { font-size: 2.4rem; flex-shrink: 0; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2)); }
+
+    /* ── badges preview ── */
+    .badges-section { width: 100%; text-align: left; }
+    .badges-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .badges-header h3 { font-family: 'Fredoka One', cursive; font-size: 0.95rem; color: #2d2d3a; margin: 0; }
+    .badges-header a { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.68rem; color: var(--primary); text-decoration: none; }
+    .badges-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .badge-card { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .badge-icon {
+        width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        font-size: 1.4rem; background: var(--primary-soft); box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+    }
+    .badge-card span { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.55rem; color: #444; text-align: center; line-height: 1.2; }
+    .badges-empty {
+        font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.72rem; color: #bbb; text-align: center;
+        padding: 16px; border: 1.5px dashed #eee; border-radius: var(--radius-md); width: 100%; box-sizing: border-box;
+    }
+
+    /* ── weekly challenge card ── */
+    .challenge-card {
+        width: 100%; box-sizing: border-box; background: #e8fae3; border: 1.5px solid #c3f0b8;
+        border-radius: var(--radius-md); padding: 16px; display: flex; align-items: center; gap: 14px; text-align: left;
+    }
+    .challenge-icon { font-size: 2.2rem; flex-shrink: 0; }
+    .challenge-info { flex: 1; min-width: 0; }
+    .challenge-info h4 { font-family: 'Fredoka One', cursive; font-size: 0.82rem; color: #1a7a3c; margin: 0 0 6px; }
+    .challenge-progress-track { height: 6px; background: #d4f4c8; border-radius: 4px; overflow: hidden; margin-bottom: 4px; }
+    .challenge-progress-fill { height: 100%; background: #00b894; border-radius: 4px; transition: width 0.4s; }
+    .challenge-count { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.65rem; color: #5a8f6a; text-align: right; }
+    .challenge-gift { font-size: 1.8rem; flex-shrink: 0; }
 
     /* Modal */
     .modal-overlay {
@@ -284,18 +344,11 @@
     .flash { font-family: 'Goldman', monospace; font-size: 0.72rem; color: #2ecc71; letter-spacing: 0.06em; }
     .flash-err { font-family: 'Goldman', monospace; font-size: 0.72rem; color: #e74c3c; letter-spacing: 0.06em; }
     /* ── child view ── */
-    .child-hello {
-        font-family: 'Fredoka One', cursive;
-        font-size: clamp(1.9rem, 8vw, 2.6rem);
-        color: #1a7a3c;
-        line-height: 1.1;
-        margin-top: 4px;
-    }
     .child-stats-row {
         display: flex; gap: 10px; width: 100%;
     }
     .cstat {
-        flex: 1; background: white; border-radius: 16px;
+        flex: 1; background: white; border-radius: var(--radius-md);
         padding: 14px 8px; text-align: center;
         box-shadow: 0 2px 12px rgba(0,0,0,0.06);
         text-decoration: none; transition: transform 0.15s;
@@ -314,21 +367,21 @@
     .child-cta {
         display: flex; align-items: center; justify-content: center; gap: 12px;
         width: 100%; padding: 22px 20px;
-        background: linear-gradient(135deg, #1a7a3c, #0f5c2a);
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
         color: white; font-family: 'Fredoka One', cursive;
         font-size: 1.25rem; letter-spacing: 0.03em;
-        text-decoration: none; border-radius: 20px;
-        box-shadow: 0 6px 24px rgba(26,122,60,0.35);
+        text-decoration: none; border-radius: var(--radius-lg);
+        box-shadow: 0 6px 24px rgba(108,92,231,0.35);
         transition: all 0.2s;
     }
-    .child-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(26,122,60,0.45); color: white; }
+    .child-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(108,92,231,0.45); color: white; }
     .child-cta.resume {
         background: linear-gradient(135deg, #f59e0b, #d97706);
         box-shadow: 0 6px 24px rgba(245,158,11,0.35);
     }
     .child-cta.resume:hover { box-shadow: 0 10px 32px rgba(245,158,11,0.45); }
     .child-done-card {
-        background: white; border-radius: 18px; padding: 28px 20px;
+        background: white; border-radius: var(--radius-lg); padding: 28px 20px;
         text-align: center; width: 100%;
         box-shadow: 0 4px 16px rgba(0,0,0,0.06);
         border: 1.5px solid #f0f0f0;
@@ -337,7 +390,7 @@
     .child-done-title { font-family: 'Fredoka One', cursive; font-size: 1.4rem; color: #1a7a3c; margin-bottom: 4px; }
     .child-done-sub { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.8rem; color: #aaa; }
     .child-waiting-card {
-        background: white; border-radius: 18px; padding: 28px 20px;
+        background: white; border-radius: var(--radius-lg); padding: 28px 20px;
         text-align: center; width: 100%;
         box-shadow: 0 4px 16px rgba(0,0,0,0.06);
         border: 1.5px solid #f0f0f0;
@@ -363,12 +416,14 @@
         .dash-inner { max-width: 700px; }
         .children-grid { grid-template-columns: repeat(3, 1fr); }
         .nav-tile-grid { grid-template-columns: repeat(4, 1fr); }
-        .feature-grid { grid-template-columns: repeat(2, 1fr); }
     }
     @media (min-width: 1040px) {
         .dash-inner { max-width: 960px; }
         .children-grid { grid-template-columns: repeat(4, 1fr); }
         .nav-tile-grid { grid-template-columns: repeat(6, 1fr); }
+    }
+    @media (max-width: 640px) {
+        .cat-grid { display: none; }
     }
 </style>
 
@@ -386,9 +441,12 @@
         @endif
 
         @if(auth()->user()->role !== 'child')
-        <div class="dash-header">
-            <div class="dash-header-sub">გამარჯობა</div>
-            <div class="dash-greeting" style="text-align:left;">{{ auth()->user()->name }}</div>
+        <div class="parent-hero-banner">
+            <div class="parent-hero-text">
+                <h2>გამარჯობა, {{ auth()->user()->name }}! 👋</h2>
+                <p>აკონტროლე შენი ოჯახის პროგრესი ერთი ადგილიდან</p>
+            </div>
+            <div class="parent-hero-avatar">👨‍👩‍👧</div>
         </div>
         @endif
 
@@ -401,15 +459,13 @@
         @endphp
 
         {{-- Plan badge --}}
-        <button type="button" onclick="document.getElementById('plansModal').classList.add('open')"
-            style="display:inline-flex;align-items:center;gap:7px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:6px 14px;font-family:'Goldman',monospace;font-size:0.68rem;color:#374151;cursor:pointer;letter-spacing:0.04em;transition:all 0.2s;"
-            onmouseover="this.style.borderColor='#94a3b8'" onmouseout="this.style.borderColor='#e2e8f0'">
+        <button type="button" class="plan-pill" onclick="document.getElementById('plansModal').classList.add('open')">
             <span style="width:8px;height:8px;border-radius:50%;background:{{ $currentPkg->is_free ? '#10b981' : '#3b82f6' }};display:inline-block;"></span>
             {{ $currentPkg->name }}
             @if($activeSub?->expires_at)
-                <span style="color:#94a3b8;font-size:0.6rem;">· {{ $activeSub->expires_at->format('d.m.Y') }}-მდე</span>
+                <span style="opacity:0.6;font-size:0.6rem;">· {{ $activeSub->expires_at->format('d.m.Y') }}-მდე</span>
             @endif
-            <span style="color:#94a3b8;font-size:0.65rem;">↑ გეგმა</span>
+            <span style="opacity:0.7;font-size:0.65rem;">↑ გეგმა</span>
         </button>
 
         @if(session('child_added'))
@@ -673,25 +729,56 @@
             $achCount      = auth()->user()->achievements()->count();
         @endphp
 
-        <div class="dash-header">
-            <div class="child-hello" style="margin-top:0;">{{ auth()->user()->name }} 👋</div>
+        <div class="child-hero-banner">
+            <div class="child-hero-text">
+                <h2>გამარჯობა, {{ auth()->user()->name }}! 👋</h2>
+                <p>მზად ხარ დღეს ახალი რამის სასწავლად?</p>
+            </div>
+            <div class="child-hero-avatar">{{ auth()->user()->avatar === 'boy' ? '👦' : (auth()->user()->avatar === 'girl' ? '👧' : '🧒') }}</div>
         </div>
 
-        {{-- სტატუს ბარათები --}}
-        <div class="child-stats-row">
-            <div class="cstat">
-                <div class="cstat-val">💰 {{ $coins }}</div>
-                <div class="cstat-lbl">მონეტები</div>
-            </div>
-            <div class="cstat">
-                <div class="cstat-val">{{ $todayCount }}<sub>/{{ $required }}</sub></div>
-                <div class="cstat-lbl">დღეს</div>
-            </div>
-            <a href="{{ route('achievements') }}" class="cstat">
-                <div class="cstat-val">🏆 {{ $achCount }}</div>
-                <div class="cstat-lbl">მიღწევები</div>
+        {{-- კატეგორიები --}}
+        @php
+            $marketCount = \App\Models\MarketItem::where('child_id', auth()->id())->where('is_active', true)->count();
+            $hasVids = \App\Models\Topic::where('grade_id', $setting?->grade_id)->whereHas('videos')->exists();
+        @endphp
+        <div class="cat-grid">
+            @if($marketCount)
+            <a href="{{ route('market.child') }}" class="cat-item">
+                <span class="cat-icon" style="background: var(--accent-yellow); color:#92400e;">🛒</span>
+                <span class="cat-label">მარკეტი</span>
             </a>
+            @endif
+            <a href="{{ route('practice.topics') }}" class="cat-item">
+                <span class="cat-icon" style="background: var(--primary-soft); color: var(--primary);">🎯</span>
+                <span class="cat-label">სავარჯიშოები</span>
+            </a>
+            @if($lastCompleted)
+            <a href="{{ route('my.tests') }}" class="cat-item">
+                <span class="cat-icon" style="background:#e0f2fe; color:#0284c7;">📋</span>
+                <span class="cat-label">ჩემი ტესტები</span>
+            </a>
+            @endif
+            @if($hasVids)
+            <a href="{{ route('videos.library') }}" class="cat-item">
+                <span class="cat-icon" style="background:#ede9fe; color:#7c3aed;">📹</span>
+                <span class="cat-label">ვიდეოთეკა</span>
+            </a>
+            @endif
         </div>
+
+        {{-- დღიური მიზანი --}}
+        @if($required > 0)
+        @php $goalPct = min(100, round($todayCount / $required * 100)); @endphp
+        <div class="goal-card">
+            <div class="goal-info">
+                <h4>დღიური მიზანი</h4>
+                <p>{{ $todayCount }}/{{ $required }} ტესტი დღეს — ასე განაგრძე!</p>
+                <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:{{ $goalPct }}%"></div></div>
+            </div>
+            <div class="goal-star">⭐</div>
+        </div>
+        @endif
 
         {{-- მთავარი მოქმედება --}}
         @if($activeTest)
@@ -715,53 +802,71 @@
             </a>
         @endif
 
+        {{-- სტატუს ბარათები --}}
+        <div class="child-stats-row">
+            <div class="cstat">
+                <div class="cstat-val">💰 {{ $coins }}</div>
+                <div class="cstat-lbl">მონეტები</div>
+            </div>
+            <div class="cstat">
+                <div class="cstat-val">{{ $todayCount }}<sub>/{{ $required }}</sub></div>
+                <div class="cstat-lbl">დღეს</div>
+            </div>
+            <a href="{{ route('achievements') }}" class="cstat">
+                <div class="cstat-val">🏆 {{ $achCount }}</div>
+                <div class="cstat-lbl">მიღწევები</div>
+            </a>
+        </div>
+
+        {{-- ბოლოს მიღებული მედლები --}}
         @php
-            $marketCount = \App\Models\MarketItem::where('child_id', auth()->id())->where('is_active', true)->count();
-            $hasVids = \App\Models\Topic::where('grade_id', $setting?->grade_id)->whereHas('videos')->exists();
+            $recentBadges = auth()->user()->achievements()
+                ->latest('earned_at')
+                ->take(4)
+                ->get()
+                ->map(fn($ca) => array_merge(
+                    ['slug' => $ca->slug, 'earned_at' => $ca->earned_at],
+                    \App\Services\AchievementService::ACHIEVEMENTS[$ca->slug] ?? []
+                ));
         @endphp
-        <div class="feature-grid">
-            @if($marketCount)
-            <a href="{{ route('market.child') }}" class="feature-card">
-                <span class="feature-icon-tile" style="background:linear-gradient(135deg,#fef3c7,#fde68a);">🛒</span>
-                <div class="feature-text">
-                    <div class="feature-title" style="color:#92400e;">მარკეტი</div>
-                    <div class="feature-sub" style="color:#b45309;">{{ $marketCount }} პროდუქტი · 💰 {{ $setting?->coins ?? 0 }} მონეტა</div>
+        <div class="badges-section">
+            <div class="badges-header">
+                <h3>🏆 ჩემი მედლები</h3>
+                <a href="{{ route('achievements') }}">ყველას ნახვა</a>
+            </div>
+            @if($recentBadges->count())
+            <div class="badges-group">
+                @foreach($recentBadges as $b)
+                <div class="badge-card">
+                    <div class="badge-icon">{{ $b['emoji'] ?? '🏅' }}</div>
+                    <span>{{ $b['name'] ?? '' }}</span>
                 </div>
-                <span class="feature-arrow" style="color:#d97706;">→</span>
-            </a>
-            @endif
-
-            <a href="{{ route('practice.topics') }}" class="feature-card">
-                <span class="feature-icon-tile" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);">🎯</span>
-                <div class="feature-text">
-                    <div class="feature-title" style="color:#111;">სავარჯიშოები</div>
-                    <div class="feature-sub" style="color:#888;">თემები + მათემატიკური პირამიდა</div>
-                </div>
-                <span class="feature-arrow" style="color:#7c3aed;">→</span>
-            </a>
-
-            @if($lastCompleted)
-            <a href="{{ route('my.tests') }}" class="feature-card">
-                <span class="feature-icon-tile" style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);">📋</span>
-                <div class="feature-text">
-                    <div class="feature-title" style="color:#0c4a6e;">ჩემი ტესტები</div>
-                    <div class="feature-sub" style="color:#0284c7;">სწორი და არასწორი პასუხები</div>
-                </div>
-                <span class="feature-arrow" style="color:#0284c7;">→</span>
-            </a>
-            @endif
-
-            @if($hasVids)
-            <a href="{{ route('videos.library') }}" class="feature-card">
-                <span class="feature-icon-tile" style="background:linear-gradient(135deg,#ede9fe,#ddd6fe);">📹</span>
-                <div class="feature-text">
-                    <div class="feature-title" style="color:#5b21b6;">ვიდეოთეკა</div>
-                    <div class="feature-sub" style="color:#7c3aed;">ახსნა-განმარტებითი ვიდეოები</div>
-                </div>
-                <span class="feature-arrow" style="color:#7c3aed;">→</span>
-            </a>
+                @endforeach
+            </div>
+            @else
+            <div class="badges-empty">ჯერ არცერთი მედალი არ გაქვს — გააგრძელე ვარჯიში! 💪</div>
             @endif
         </div>
+
+        {{-- ყოველკვირეული გამოწვევა --}}
+        @php
+            $weekStart  = \Carbon\Carbon::now()->startOfWeek();
+            $weekEnd    = \Carbon\Carbon::now()->endOfWeek();
+            $weekDone   = auth()->user()->tests()->whereNotNull('completed_at')->whereBetween('completed_at', [$weekStart, $weekEnd])->count();
+            $weekTarget = $required > 0 ? $required * 7 : 0;
+        @endphp
+        @if($weekTarget > 0)
+        @php $weekPct = min(100, round($weekDone / $weekTarget * 100)); @endphp
+        <div class="challenge-card">
+            <div class="challenge-icon">🐸</div>
+            <div class="challenge-info">
+                <h4>ყოველკვირეული გამოწვევა</h4>
+                <div class="challenge-progress-track"><div class="challenge-progress-fill" style="width:{{ $weekPct }}%"></div></div>
+                <div class="challenge-count">{{ $weekDone }} / {{ $weekTarget }}</div>
+            </div>
+            <div class="challenge-gift">🎁</div>
+        </div>
+        @endif
 
         {{-- ბოლო ტესტი --}}
         @if($lastCompleted)

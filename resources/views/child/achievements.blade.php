@@ -1,49 +1,35 @@
-<!DOCTYPE html>
-<html lang="ka">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
-<title>ჩემი მიღწევები</title>
+@extends('layouts.app')
+@section('navTitle', '🏆 ჩემი მიღწევები')
+@push('head')
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+@endpush
+@section('content')
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh; }
+body { font-family: 'Nunito', sans-serif; background: #f1f5f9 !important; }
 
-/* Header */
-.hero {
-    background: linear-gradient(135deg, #7c3aed, #4f46e5);
-    color: white;
-    padding: 36px 20px 28px;
-    text-align: center;
-}
-.hero-name { font-size: 0.8rem; font-weight: 700; opacity: 0.7; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
-.hero-title { font-size: 1.6rem; font-weight: 900; margin-bottom: 18px; }
-
-.stats-row {
-    display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;
-}
-.stat-box {
-    background: rgba(255,255,255,0.15);
-    border-radius: 14px;
-    padding: 12px 22px;
-    text-align: center;
-    backdrop-filter: blur(4px);
-    min-width: 90px;
-}
-.stat-val { font-size: 1.7rem; font-weight: 900; line-height: 1; }
-.stat-lbl { font-size: 0.68rem; font-weight: 700; opacity: 0.75; margin-top: 3px; }
-
-/* Back button */
 .back-btn {
     display: inline-flex; align-items: center; gap: 6px;
-    margin: 18px 20px 0;
+    margin: 16px 0 0 20px;
     font-family: 'Nunito', sans-serif;
-    font-size: 0.8rem; font-weight: 700;
-    color: #6366f1; text-decoration: none;
-    background: white; border-radius: 10px;
+    font-size: 0.82rem; font-weight: 800;
+    color: #4f46e5; text-decoration: none;
+    background: white; border-radius: 99px;
     padding: 8px 16px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
+
+.stats-row {
+    display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;
+    margin: 12px 20px 0;
+}
+.stat-box {
+    background: white; border-radius: 14px;
+    padding: 12px 20px; text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    min-width: 80px;
+}
+.stat-val { font-size: 1.4rem; font-weight: 900; line-height: 1; color: #1e293b; }
+.stat-lbl { font-size: 0.62rem; font-weight: 700; color: #94a3b8; margin-top: 4px; }
 
 /* Section */
 .section { padding: 20px 16px 0; max-width: 600px; margin: 0 auto; }
@@ -101,33 +87,23 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
 
 .bottom-pad { height: 40px; }
 </style>
-</head>
-<body>
-
-<div class="hero">
-    <div class="hero-name">{{ auth()->user()->name }}</div>
-    <div class="hero-title">🏆 ჩემი მიღწევები</div>
-    <div class="stats-row">
-        <div class="stat-box">
-            <div class="stat-val">💰{{ $setting?->coins ?? 0 }}</div>
-            <div class="stat-lbl">მონეტა</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-val">{{ $totalTests }}</div>
-            <div class="stat-lbl">ტესტი</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-val">{{ $earned->count() }}/{{ count($achievements) }}</div>
-            <div class="stat-lbl">მიღწეული</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-val">⚡{{ $setting?->difficulty ?? 1 }}</div>
-            <div class="stat-lbl">სირთულე</div>
-        </div>
-    </div>
-</div>
 
 <a href="{{ route('dashboard') }}" class="back-btn">← დაბრუნება</a>
+
+<div class="stats-row">
+    <div class="stat-box">
+        <div class="stat-val">💰{{ $setting?->coins ?? 0 }}</div>
+        <div class="stat-lbl">მონეტა</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-val">{{ $totalTests }}</div>
+        <div class="stat-lbl">ტესტი</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-val">{{ $earned->count() }}/{{ count($achievements) }}</div>
+        <div class="stat-lbl">მიღწეული</div>
+    </div>
+</div>
 
 <div class="section">
     <!-- Progress -->
@@ -182,5 +158,4 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
 </div>
 
 <div class="bottom-pad"></div>
-</body>
-</html>
+@endsection

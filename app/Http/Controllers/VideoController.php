@@ -40,7 +40,9 @@ class VideoController extends Controller
             ? round($tests->avg(fn($t) => $t->correct_count / max($t->total_questions, 1) * 100))
             : null;
 
-        return view('child.history', compact('child', 'tests', 'totalTests', 'avgScore'));
+        $activeTest = $child->tests()->whereNull('completed_at')->latest()->first();
+
+        return view('child.history', compact('child', 'tests', 'totalTests', 'avgScore', 'activeTest'));
     }
 
     public function myTest(Test $test)

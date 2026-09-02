@@ -1,22 +1,14 @@
-<!DOCTYPE html>
-<html lang="ka">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
-<title>ჩემი მარკეტი</title>
+@extends('layouts.app')
+@section('navTitle', '🛒 მარკეტი')
+@push('head')
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+@endpush
+@section('content')
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh; }
-.hero {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-    color: white; padding: 32px 20px 24px; text-align: center;
-}
-.hero-name  { font-size: 0.78rem; font-weight: 800; opacity: 0.75; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
-.hero-title { font-size: 1.6rem; font-weight: 900; margin-bottom: 14px; }
-.hero-coins { display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,0.2); border-radius:12px; padding:8px 20px; font-size:1.1rem; font-weight:900; backdrop-filter:blur(4px); }
+body { font-family: 'Nunito', sans-serif; background: #f1f5f9 !important; }
 
-.back-btn { display:inline-flex; align-items:center; gap:6px; margin:16px 20px 0; font-family:'Nunito',sans-serif; font-size:0.8rem; font-weight:700; color:#d97706; text-decoration:none; background:white; border-radius:10px; padding:8px 16px; box-shadow:0 1px 4px rgba(0,0,0,0.08); }
+.back-btn { display:inline-flex; align-items:center; gap:6px; margin:16px 0 0 20px; font-family:'Nunito',sans-serif; font-size:0.82rem; font-weight:800; color:#d97706; text-decoration:none; background:white; border-radius:99px; padding:8px 16px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+.coin-pill { display:inline-flex; align-items:center; gap:6px; margin:10px 0 0 20px; background:#fef9c3; border:1px solid #fde68a; border-radius:99px; padding:8px 16px; font-family:'Fredoka One',cursive; font-size:0.85rem; color:#92400e; }
 
 .section { padding:16px 14px 0; max-width:560px; margin:0 auto; }
 .sec-title { font-size:0.68rem; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; color:#64748b; margin-bottom:10px; padding-left:2px; }
@@ -67,18 +59,11 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
 .reward-date  { font-size:0.6rem; font-weight:700; color:#94a3b8; margin-top:2px; }
 .reward-coins { font-size:0.62rem; font-weight:800; color:#f59e0b; }
 
-.bottom-pad { height:50px; }
+.bottom-pad { height:40px; }
 </style>
-</head>
-<body>
-
-<div class="hero">
-    <div class="hero-name">{{ auth()->user()->name }}</div>
-    <div class="hero-title">🛒 მარკეტი</div>
-    <div class="hero-coins">💰 {{ $coins }} მონეტა</div>
-</div>
 
 <a href="{{ route('dashboard') }}" class="back-btn">← დაბრუნება</a>
+<div class="coin-pill">💰 {{ $coins }} მონეტა</div>
 
 <div class="section" style="padding-top:20px;">
 
@@ -146,5 +131,4 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
 @endif
 
 <div class="bottom-pad"></div>
-</body>
-</html>
+@endsection

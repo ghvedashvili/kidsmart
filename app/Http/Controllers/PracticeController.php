@@ -29,7 +29,13 @@ class PracticeController extends Controller
             ->get()
             ->keyBy(fn($s) => $s->session_type === 'pyramid' ? 'pyramid' : $s->topic_id);
 
-        return view('child.practice-topics', compact('topics', 'sessions'));
+        $videoTopics = Topic::where('grade_id', $gradeId)
+            ->with(['videos' => fn($q) => $q->orderBy('order')])
+            ->whereHas('videos')
+            ->orderBy('name')
+            ->get();
+
+        return view('child.practice-topics', compact('topics', 'sessions', 'videoTopics'));
     }
 
     // ── Practice shell page ─────────────────────────────────────────────────

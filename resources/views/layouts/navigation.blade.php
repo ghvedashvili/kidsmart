@@ -57,6 +57,29 @@
     .nav-right { margin-left: auto; }
 }
 
+/* ── child bottom nav (mobile only) — persists across every page ── */
+.child-bottom-nav {
+    display: none;
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 500;
+    background: #fff; padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+    justify-content: space-around; align-items: center;
+}
+.child-bottom-nav a {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    text-decoration: none; color: #aaa; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.58rem;
+}
+.child-bottom-nav a.cbn-act { color: #6c5ce7; }
+.child-bottom-nav a.cbn-market.cbn-act { color: #d97706; }
+.child-bottom-nav a.cbn-practice.cbn-act { color: #2563eb; }
+.child-bottom-nav a.cbn-tests.cbn-act { color: #0891b2; }
+.child-bottom-nav a.cbn-ach.cbn-act { color: #4f46e5; }
+.child-bottom-nav a .cbn-icon { font-size: 1.25rem; }
+@media (max-width: 640px) {
+    .child-bottom-nav { display: flex; }
+    body:has(.child-bottom-nav) { padding-bottom: 82px; }
+}
+
 
 /* Mobile menu */
 #mobileMenuBtn { display: none; }
@@ -86,6 +109,9 @@
             <a class="navbar-brand mb-0" href="{{ url('/') }}">
                 <img src="/img/logo.png" alt="KidSmart" style="height:55px;width:auto;">
             </a>
+            @hasSection('navTitle')
+            <span style="font-family:'Goldman',monospace;font-size:0.8rem;color:#fff;margin-left:10px;letter-spacing:0.03em;white-space:nowrap;">@yield('navTitle')</span>
+            @endif
         </div>
         @auth
         @php
@@ -110,6 +136,12 @@
             @auth
             <a class="nav-link-item{{ request()->routeIs('dashboard') ? ' nav-act' : '' }}"
                href="{{ route('dashboard') }}" style="font-size:0.78rem;"><i class="bi bi-house"></i></a>
+            @if($__u->role === 'child')
+            <a class="nav-link-item{{ request()->routeIs('market.child') ? ' nav-act' : '' }}" href="{{ route('market.child') }}" style="font-size:0.78rem;" title="მარკეტი"><i class="bi bi-cart3"></i></a>
+            <a class="nav-link-item{{ request()->routeIs('practice.*') ? ' nav-act' : '' }}" href="{{ route('practice.topics') }}" style="font-size:0.78rem;" title="სავარჯიშოები"><i class="bi bi-bullseye"></i></a>
+            <a class="nav-link-item{{ request()->routeIs('my.tests') ? ' nav-act' : '' }}" href="{{ route('my.tests') }}" style="font-size:0.78rem;" title="ჩემი ტესტები"><i class="bi bi-clipboard-check"></i></a>
+            <a class="nav-link-item{{ request()->routeIs('achievements') ? ' nav-act' : '' }}" href="{{ route('achievements') }}" style="font-size:0.78rem;" title="მიღწევები"><i class="bi bi-trophy"></i></a>
+            @endif
             @if($__hasAdm)
             @if($__canAdm('admin.panel'))
             <a class="nav-link-item{{ request()->routeIs('admin.panel') ? ' nav-act' : '' }}" href="{{ route('admin.panel') }}" style="font-size:0.74rem;">⚡</a>
@@ -164,6 +196,18 @@
         </div>
     </div>
 </nav>
+
+@auth
+@if(auth()->user()->role === 'child')
+<nav class="child-bottom-nav">
+    <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'cbn-act' : '' }}"><span class="cbn-icon">🏠</span>მთავარი</a>
+    <a href="{{ route('market.child') }}" class="cbn-market {{ request()->routeIs('market.child') ? 'cbn-act' : '' }}"><span class="cbn-icon">🛒</span>მარკეტი</a>
+    <a href="{{ route('practice.topics') }}" class="cbn-practice {{ request()->routeIs('practice.*') ? 'cbn-act' : '' }}"><span class="cbn-icon">🎯</span>სავარჯიშოები</a>
+    <a href="{{ route('my.tests') }}" class="cbn-tests {{ request()->routeIs('my.tests') ? 'cbn-act' : '' }}"><span class="cbn-icon">📋</span>ტესტები</a>
+    <a href="{{ route('achievements') }}" class="cbn-ach {{ request()->routeIs('achievements') ? 'cbn-act' : '' }}"><span class="cbn-icon">🏆</span>მიღწევები</a>
+</nav>
+@endif
+@endauth
 
 <div id="mobileNav">
     @guest

@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('navTitle', '📹 ვიდეოთეკა')
 @push('head')
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
 @endpush
@@ -6,11 +7,8 @@
 <style>
     body { background: #f0f9ff !important; }
     .wrap { max-width: 640px; margin: 0 auto; padding: 28px 16px 80px; }
-    .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
-    .back { font-family:'Nunito',sans-serif; font-size:0.82rem; font-weight:800; color:#0284c7; text-decoration:none; padding:6px 16px; background:white; border-radius:99px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+    .back { display:inline-flex; align-items:center; gap:6px; margin:16px 0 24px; font-family:'Nunito',sans-serif; font-size:0.82rem; font-weight:800; color:#db2777; text-decoration:none; padding:8px 16px; background:white; border-radius:99px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
     .back:hover { box-shadow:0 4px 12px rgba(0,0,0,0.12); }
-    .page-title { font-family:'Fredoka One',cursive; font-size:1.6rem; color:#0c4a6e; margin-bottom:6px; }
-    .page-sub { font-family:'Nunito',sans-serif; font-weight:800; font-size:0.8rem; color:#94a3b8; margin-bottom:28px; }
 
     .topic-card { background:white; border-radius:18px; margin-bottom:14px; overflow:hidden; box-shadow:0 4px 16px rgba(0,0,0,0.07); }
     .topic-header {
@@ -38,12 +36,7 @@
 </style>
 
 <div class="wrap">
-    <div class="topbar">
-        <a href="{{ route('dashboard') }}" class="back">← მთავარი</a>
-    </div>
-
-    <div class="page-title">📹 ვიდეოთეკა</div>
-    <div class="page-sub">{{ $child->childSetting?->grade?->name ?? '' }} · ახსნა-განმარტებითი ვიდეოები</div>
+    <a href="{{ route('dashboard') }}" class="back">← მთავარი</a>
 
     @if($topics->isEmpty())
     <div class="empty-state">
