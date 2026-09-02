@@ -343,6 +343,19 @@
     .flash { font-family: 'Goldman', monospace; font-size: 0.72rem; color: #2ecc71; letter-spacing: 0.06em; }
     .flash-err { font-family: 'Goldman', monospace; font-size: 0.72rem; color: #e74c3c; letter-spacing: 0.06em; }
     /* ── child view ── */
+    .games-card {
+        display: flex; align-items: center; gap: 14px; width: 100%; box-sizing: border-box;
+        background: linear-gradient(135deg, #22c55e, #16a34a); border-radius: var(--radius-lg);
+        padding: 16px 18px; text-decoration: none; color: #fff; text-align: left;
+        box-shadow: 0 8px 20px rgba(22,163,74,0.3); transition: transform 0.15s;
+    }
+    .games-card:hover { transform: translateY(-2px); color: #fff; }
+    .games-card-icon { font-size: 2.2rem; flex-shrink: 0; }
+    .games-card-text { flex: 1; min-width: 0; }
+    .games-card-title { font-family: 'Fredoka One', cursive; font-size: 1rem; margin-bottom: 2px; }
+    .games-card-sub { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.7rem; opacity: 0.9; }
+    .games-card-arrow { font-size: 1.1rem; flex-shrink: 0; opacity: 0.85; }
+
     .child-stats-row {
         display: flex; gap: 10px; width: 100%;
     }
@@ -785,6 +798,16 @@
                 <div class="cstat-lbl">მიღწევები</div>
             </a>
         </div>
+
+        {{-- თამაშები --}}
+        <a href="{{ route('games.index') }}" class="games-card">
+            <span class="games-card-icon">🎮</span>
+            <div class="games-card-text">
+                <div class="games-card-title">თამაშები</div>
+                <div class="games-card-sub">ითამაშე Kidsmart-თან და აჯობე!</div>
+            </div>
+            <span class="games-card-arrow">→</span>
+        </a>
 
         {{-- ბოლოს მიღებული მედლები --}}
         @php

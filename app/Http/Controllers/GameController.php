@@ -15,6 +15,11 @@ class GameController extends Controller
             'icon'  => '✊',
             'route' => 'games.rps',
         ],
+        'wolves_and_hare' => [
+            'name'  => 'ბაჭია და მგლები',
+            'icon'  => '🐰',
+            'route' => 'games.wolves-hare',
+        ],
     ];
 
     // ── Games hub ────────────────────────────────────────────────────────────
@@ -99,6 +104,67 @@ class GameController extends Controller
             'final_player_score'   => $finalPlayer,
             'final_computer_score' => $finalComputer,
             'global'               => [
+                'total_wins'   => $global->total_wins,
+                'total_losses' => $global->total_losses,
+            ],
+        ]);
+    }
+
+    // ── ბაჭია და მგლები (Wolves & Hare) ─────────────────────────────────────
+    public function wolvesHare()
+    {
+        $child = auth()->user();
+        abort_if($child->role !== 'child', 403);
+
+        $session = GameSession::forChild($child->id, 'wolves_and_hare');
+        $global  = GameGlobalStat::forGame('wolves_and_hare');
+
+        return view('child.games.wolves-hare', compact('session', 'global'));
+    }
+
+    public function wolvesHareState(Request $request): JsonResponse
+    {
+        $child = auth()->user();
+        abort_if($child->role !== 'child', 403);
+
+        $data = $request->validate([
+            'state' => 'required|array',
+        ]);
+
+        $session = GameSession::forChild($child->id, 'wolves_and_hare');
+        $session->state = $data['state'];
+        $session->save();
+
+        return response()->json(['ok' => true]);
+    }
+
+    public function wolvesHareFinish(Request $request): JsonResponse
+    {
+        $child = auth()->user();
+        abort_if($child->role !== 'child', 403);
+
+        $data = $request->validate([
+            'result' => 'required|in:win,lose',
+        ]);
+
+        $session = GameSession::forChild($child->id, 'wolves_and_hare');
+        $global  = GameGlobalStat::forGame('wolves_and_hare');
+
+        if ($data['result'] === 'win') {
+            $session->wins++;
+            $global->increment('total_wins');
+        } else {
+            $session->losses++;
+            $global->increment('total_losses');
+        }
+        $session->state = null;
+        $session->save();
+        $global->refresh();
+
+        return response()->json([
+            'wins'   => $session->wins,
+            'losses' => $session->losses,
+            'global' => [
                 'total_wins'   => $global->total_wins,
                 'total_losses' => $global->total_losses,
             ],

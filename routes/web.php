@@ -112,6 +112,10 @@ Route::middleware(['auth', 'role.permission'])->group(function () {
     Route::get('/games/rock-paper-scissors', [GameController::class, 'rps'])->name('games.rps');
     Route::post('/games/rock-paper-scissors/round', [GameController::class, 'round'])->name('games.rps.round');
 
+    Route::get('/games/wolves-hare', [GameController::class, 'wolvesHare'])->name('games.wolves-hare');
+    Route::post('/games/wolves-hare/state', [GameController::class, 'wolvesHareState'])->name('games.wolves-hare.state');
+    Route::post('/games/wolves-hare/finish', [GameController::class, 'wolvesHareFinish'])->name('games.wolves-hare.finish');
+
     // მარკეტი — parent manages
     Route::get('/children/{child}/market',              [MarketController::class, 'index'])->name('market.index');
     Route::post('/children/{child}/market/items',       [MarketController::class, 'store'])->name('market.store');

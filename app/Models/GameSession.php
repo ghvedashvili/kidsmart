@@ -8,7 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class GameSession extends Model
 {
     protected $fillable = [
-        'child_id', 'game', 'player_score', 'computer_score', 'wins', 'losses',
+        'child_id', 'game', 'player_score', 'computer_score', 'wins', 'losses', 'state',
+    ];
+
+    protected $casts = [
+        'state' => 'array',
     ];
 
     public function child(): BelongsTo
