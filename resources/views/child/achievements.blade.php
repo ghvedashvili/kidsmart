@@ -6,8 +6,8 @@
 <style>
 body { font-family: 'Nunito', sans-serif; background: transparent !important; }
 .wrap { max-width: 520px; margin: 0 auto; padding: 28px 16px 80px; }
-@media (min-width: 760px)  { .wrap { max-width: 700px; } }
-@media (min-width: 1040px) { .wrap { max-width: 960px; } }
+@media (min-width: 760px)  { .wrap { max-width: 700px; } .ach-grid { grid-template-columns: repeat(5, 1fr); } }
+@media (min-width: 1040px) { .wrap { max-width: 960px; } .ach-grid { grid-template-columns: repeat(6, 1fr); } }
 
 .back-btn {
     display: inline-flex; align-items: center; gap: 6px;
@@ -43,9 +43,8 @@ body { font-family: 'Nunito', sans-serif; background: transparent !important; }
 /* Achievement grid */
 .ach-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 130px));
-    justify-content: center;
-    gap: 10px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
     margin-bottom: 28px;
 }
 

@@ -730,8 +730,8 @@
 
         <div class="child-hero-banner">
             <div class="child-hero-text">
-                <h2>გამარჯობა, {{ auth()->user()->name }}! 👋</h2>
-                <p>მზად ხარ დღეს ახალი რამის სასწავლად?</p>
+                <h2>👋, {{ auth()->user()->name }}! </h2>
+                <p>მზად ხარ დღეს ჩემპიონო?</p>
             </div>
             <div class="child-hero-avatar">{{ auth()->user()->avatar === 'boy' ? '👦' : (auth()->user()->avatar === 'girl' ? '👧' : '🧒') }}</div>
         </div>
