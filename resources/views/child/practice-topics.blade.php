@@ -8,6 +8,19 @@
     .wrap { max-width: 520px; margin: 0 auto; padding: 28px 16px 80px; }
     .back { display:inline-flex; align-items:center; gap:6px; margin:16px 0 24px; font-family:'Nunito',sans-serif; font-size:0.82rem; font-weight:800; color:#2563eb; text-decoration:none; padding:8px 16px; background:white; border-radius:99px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
 
+    .page-hero {
+        width: 100%; box-sizing: border-box; border-radius: 20px; padding: 26px 20px;
+        min-height: 140px; display: flex; flex-direction: column; justify-content: center;
+        position: relative; overflow: hidden; margin-bottom: 20px;
+        background-image:
+            linear-gradient(90deg, rgba(239,246,255,0.94) 0%, rgba(239,246,255,0.78) 45%, rgba(239,246,255,0.08) 68%),
+            url('/img/practice-hero.jpg');
+        background-size: cover; background-position: right center; background-repeat: no-repeat;
+        box-shadow: 0 8px 20px rgba(37,99,235,0.18);
+    }
+    .page-hero-title { font-family:'Fredoka One',cursive; font-size:1.15rem; color:#1e40af; margin-bottom:4px; }
+    .page-hero-sub { font-family:'Nunito',sans-serif; font-weight:800; font-size:0.75rem; color:#2563eb; }
+
     /* Collapsible top-level cards */
     .collapse-card { background:white; border-radius:18px; margin-bottom:14px; overflow:hidden; box-shadow:0 4px 14px rgba(0,0,0,0.06); }
     .collapse-header { display:flex; align-items:center; justify-content:space-between; padding:16px 18px; cursor:pointer; user-select:none; transition:background 0.15s; }
@@ -59,6 +72,11 @@
 
 <div class="wrap">
     <a href="{{ route('dashboard') }}" class="back">← მთავარი</a>
+
+    <div class="page-hero">
+        <div class="page-hero-title">🎯 სავარჯიშოები</div>
+        <div class="page-hero-sub">აირჩიე თემა და ივარჯიშე დღეს!</div>
+    </div>
 
     {{-- სავარჯიშოები თემების მიხედვით --}}
     <div class="collapse-card" id="secPractice">

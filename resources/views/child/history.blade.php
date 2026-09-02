@@ -10,6 +10,19 @@
     .back { display:inline-flex; align-items:center; gap:6px; margin:16px 0 24px; font-family:'Nunito',sans-serif; font-size:0.82rem; font-weight:800; color:#0891b2; text-decoration:none; padding:8px 16px; background:white; border-radius:99px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
     .back:hover { box-shadow:0 4px 12px rgba(0,0,0,0.12); }
 
+    .page-hero {
+        width: 100%; box-sizing: border-box; border-radius: 20px; padding: 26px 20px;
+        min-height: 140px; display: flex; flex-direction: column; justify-content: center;
+        position: relative; overflow: hidden; margin-bottom: 20px;
+        background-image:
+            linear-gradient(90deg, rgba(236,254,255,0.94) 0%, rgba(236,254,255,0.78) 45%, rgba(236,254,255,0.08) 68%),
+            url('/img/tests-hero.jpg');
+        background-size: cover; background-position: right center; background-repeat: no-repeat;
+        box-shadow: 0 8px 20px rgba(8,145,178,0.18);
+    }
+    .page-hero-title { font-family:'Fredoka One',cursive; font-size:1.15rem; color:#0e7490; margin-bottom:4px; }
+    .page-hero-sub { font-family:'Nunito',sans-serif; font-weight:800; font-size:0.75rem; color:#0891b2; }
+
     .child-cta {
         display: flex; align-items: center; justify-content: center; gap: 12px;
         width: 100%; padding: 20px; margin-bottom: 20px; box-sizing: border-box;
@@ -54,6 +67,11 @@
 
 <div class="wrap">
     <a href="{{ route('dashboard') }}" class="back">← მთავარი</a>
+
+    <div class="page-hero">
+        <div class="page-hero-title">📋 ჩემი ტესტები</div>
+        <div class="page-hero-sub">ყველა შესრულებული ტესტი ერთ ადგილას</div>
+    </div>
 
     @if($activeTest)
     <a href="{{ route('test.show', $activeTest) }}" class="child-cta resume">

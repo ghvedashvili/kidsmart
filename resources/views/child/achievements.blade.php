@@ -19,6 +19,19 @@ body { font-family: 'Nunito', sans-serif; background: transparent !important; }
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
+.page-hero {
+    width: 100%; box-sizing: border-box; border-radius: 20px; padding: 26px 20px;
+    min-height: 140px; display: flex; flex-direction: column; justify-content: center;
+    position: relative; overflow: hidden; margin: 16px 0 0;
+    background-image:
+        linear-gradient(90deg, rgba(245,243,255,0.94) 0%, rgba(245,243,255,0.78) 45%, rgba(245,243,255,0.08) 68%),
+        url('/img/achievements-hero.jpg');
+    background-size: cover; background-position: right center; background-repeat: no-repeat;
+    box-shadow: 0 8px 20px rgba(79,70,229,0.18);
+}
+.page-hero-title { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.1rem; color: #4c1d95; margin-bottom: 4px; }
+.page-hero-sub { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.75rem; color: #6d28d9; }
+
 .stats-row {
     display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;
     margin: 12px 0 0;
@@ -89,6 +102,11 @@ body { font-family: 'Nunito', sans-serif; background: transparent !important; }
 
 <div class="wrap">
 <a href="{{ route('dashboard') }}" class="back-btn">← დაბრუნება</a>
+
+<div class="page-hero">
+    <div class="page-hero-title">🏆 ჩემი მედლები</div>
+    <div class="page-hero-sub">{{ $earned->count() }}/{{ count($achievements) }} მედალი მოგებული — გააგრძელე!</div>
+</div>
 
 <div class="stats-row">
     <div class="stat-box">

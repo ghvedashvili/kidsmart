@@ -193,21 +193,23 @@
     .mission-card {
         width: 100%; box-sizing: border-box; border-radius: var(--radius-lg); padding: 30px 20px;
         min-height: 200px; display: flex; flex-direction: column; justify-content: center;
-        position: relative; overflow: hidden; background-size: cover; background-position: center;
-        background: linear-gradient(135deg, var(--primary-light), var(--accent-blue));
-        text-align: left; box-shadow: 0 10px 24px rgba(108,92,231,0.22);
+        position: relative; overflow: hidden;
+        background-image:
+            linear-gradient(90deg, rgba(255,247,237,0.94) 0%, rgba(255,247,237,0.8) 38%, rgba(255,247,237,0.05) 62%),
+            url('/img/mission-hero.jpg');
+        background-size: cover;
+        background-position: right center;
+        background-repeat: no-repeat;
+        text-align: left; box-shadow: 0 10px 24px rgba(217,150,60,0.25);
     }
-    .mission-card.resume { background: linear-gradient(135deg, #f59e0b, #d97706); }
     .mission-badge {
-        display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.4);
+        display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.85);
         color: #2d2d3a; font-family: 'Goldman', monospace; font-size: 0.6rem; letter-spacing: 0.04em;
         border-radius: 100px; padding: 5px 12px; margin-bottom: 12px; align-self: flex-start;
     }
-    .mission-card.resume .mission-badge { color: #fff; background: rgba(255,255,255,0.25); }
+    .mission-card.resume .mission-badge { color: #b45309; background: rgba(255,255,255,0.9); }
     .mission-title { font-family: 'Fredoka One', cursive; font-size: 1.2rem; color: #1a1a2e; margin-bottom: 6px; line-height: 1.25; }
-    .mission-card.resume .mission-title { color: #fff; }
     .mission-sub { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.78rem; color: #4b4b63; margin-bottom: 14px; }
-    .mission-card.resume .mission-sub { color: rgba(255,255,255,0.9); }
     .mission-cta {
         display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box;
         background: #1a1a2e; color: #fff; font-family: 'Fredoka One', cursive; font-size: 1rem;
@@ -219,13 +221,33 @@
     .stat-grid-4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; }
     @media (min-width: 520px) { .stat-grid-4 { grid-template-columns: repeat(4, 1fr); } }
     .stat-card-4 {
-        background: #fff; border-radius: var(--radius-md); padding: 14px; text-align: left;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.05); border: 1.5px solid #f5f5f5; text-decoration: none; color: inherit;
-        display: flex; flex-direction: column; gap: 8px;
+        background: #fff; border-radius: var(--radius-md); padding: 0; text-align: left;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.08); border: 1.5px solid #f5f5f5; text-decoration: none; color: inherit;
+        display: flex; position: relative; overflow: hidden; min-height: 118px;
     }
-    .stat-card-4-head { display: flex; align-items: center; gap: 5px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.58rem; color: #999; text-transform: uppercase; letter-spacing: 0.02em; }
-    .stat-card-4-val { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: #1a1a2e; }
-    .stat-card-4-link { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.58rem; color: var(--primary); }
+    .stat-card-4-photo { position: absolute; inset: 0; background-size: cover; background-position: center; background-repeat: no-repeat; }
+    .stat-card-4-photo::after {
+        content: ''; position: absolute; inset: 0;
+        background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.05) 40%, rgba(255,255,255,0.85) 100%);
+    }
+    .stat-card-4-body { position: relative; z-index: 1; padding: 12px; display: flex; flex-direction: column; gap: 8px; width: 100%; box-sizing: border-box; }
+    .stat-card-4-head {
+        display: inline-flex; align-self: flex-start; align-items: center; gap: 5px;
+        font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.58rem; color: #555;
+        text-transform: uppercase; letter-spacing: 0.02em;
+        background: rgba(255,255,255,0.88); border-radius: 99px; padding: 4px 9px;
+    }
+    .stat-card-4-val { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: #1a1a2e; margin-top: auto; text-shadow: 0 1px 8px rgba(255,255,255,0.9), 0 1px 2px rgba(255,255,255,0.9); }
+    .stat-card-4-link {
+        display: inline-flex; align-self: flex-start;
+        font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.58rem; color: var(--primary);
+        background: rgba(255,255,255,0.88); border-radius: 99px; padding: 3px 9px;
+    }
+
+    .stat-card-4-photo.sc-practice { background-image: url('/img/practice-hero.jpg'); }
+    .stat-card-4-photo.sc-ach      { background-image: url('/img/achievements-hero.jpg'); }
+    .stat-card-4-photo.sc-tests    { background-image: url('/img/tests-hero.jpg'); }
+    .stat-card-4-photo.sc-market   { background-image: url('/img/market-hero.jpg'); }
 
 
     /* Modal */
@@ -322,15 +344,22 @@
     /* ── child view ── */
     .games-card {
         display: flex; align-items: center; gap: 14px; width: 100%; box-sizing: border-box;
-        background: linear-gradient(135deg, #22c55e, #16a34a); border-radius: var(--radius-lg);
-        padding: 16px 18px; text-decoration: none; color: #fff; text-align: left;
-        box-shadow: 0 8px 20px rgba(22,163,74,0.3); transition: transform 0.15s;
+        min-height: 110px; position: relative; overflow: hidden;
+        background-image:
+            linear-gradient(90deg, rgba(240,253,244,0.94) 0%, rgba(240,253,244,0.78) 45%, rgba(240,253,244,0.08) 68%),
+            url('/img/games-hero.jpg');
+        background-size: cover;
+        background-position: right center;
+        background-repeat: no-repeat;
+        border-radius: var(--radius-lg);
+        padding: 16px 18px; text-decoration: none; color: #14532d; text-align: left;
+        box-shadow: 0 8px 20px rgba(22,163,74,0.2); transition: transform 0.15s;
     }
-    .games-card:hover { transform: translateY(-2px); color: #fff; }
+    .games-card:hover { transform: translateY(-2px); color: #14532d; }
     .games-card-icon { font-size: 2.2rem; flex-shrink: 0; }
     .games-card-text { flex: 1; min-width: 0; }
-    .games-card-title { font-family: 'Fredoka One', cursive; font-size: 1rem; margin-bottom: 2px; }
-    .games-card-sub { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.7rem; opacity: 0.9; }
+    .games-card-title { font-family: 'Fredoka One', cursive; font-size: 1rem; margin-bottom: 2px; color: #14532d; }
+    .games-card-sub { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.7rem; color: #166534; opacity: 0.85; }
     .games-card-arrow { font-size: 1.1rem; flex-shrink: 0; opacity: 0.85; }
 
 
@@ -693,24 +722,36 @@
         {{-- სტატისტიკის ბარათები --}}
         <div class="stat-grid-4">
             <a href="{{ route('practice.topics') }}" class="stat-card-4">
-                <div class="stat-card-4-head">🎯 სავარჯიშოები</div>
-                <div class="stat-card-4-val">{{ $practiceTopicsCount }}</div>
-                <div class="stat-card-4-link">თემა · დაწყება →</div>
+                <div class="stat-card-4-photo sc-practice"></div>
+                <div class="stat-card-4-body">
+                    <div class="stat-card-4-head">🎯 სავარჯიშოები</div>
+                    <div class="stat-card-4-val">{{ $practiceTopicsCount }}</div>
+                    <div class="stat-card-4-link">თემა · დაწყება →</div>
+                </div>
             </a>
             <a href="{{ route('achievements') }}" class="stat-card-4">
-                <div class="stat-card-4-head">🏆 ჩემი მედლები</div>
-                <div class="stat-card-4-val">{{ $achCount }}</div>
-                <div class="stat-card-4-link">ყველას ნახვა →</div>
+                <div class="stat-card-4-photo sc-ach"></div>
+                <div class="stat-card-4-body">
+                    <div class="stat-card-4-head">🏆 ჩემი მედლები</div>
+                    <div class="stat-card-4-val">{{ $achCount }}</div>
+                    <div class="stat-card-4-link">ყველას ნახვა →</div>
+                </div>
             </a>
             <a href="{{ route('my.tests') }}" class="stat-card-4">
-                <div class="stat-card-4-head">📋 ჩემი ტესტები</div>
-                <div class="stat-card-4-val">{{ $totalTestsCount }}</div>
-                <div class="stat-card-4-link">ისტორია →</div>
+                <div class="stat-card-4-photo sc-tests"></div>
+                <div class="stat-card-4-body">
+                    <div class="stat-card-4-head">📋 ჩემი ტესტები</div>
+                    <div class="stat-card-4-val">{{ $totalTestsCount }}</div>
+                    <div class="stat-card-4-link">ისტორია →</div>
+                </div>
             </a>
             <a href="{{ route('market.child') }}" class="stat-card-4">
-                <div class="stat-card-4-head">🛒 მარკეტი</div>
-                <div class="stat-card-4-val">💰 {{ $coins }}</div>
-                <div class="stat-card-4-link">ნახვა →</div>
+                <div class="stat-card-4-photo sc-market"></div>
+                <div class="stat-card-4-body">
+                    <div class="stat-card-4-head">🛒 მარკეტი</div>
+                    <div class="stat-card-4-val">💰 {{ $coins }}</div>
+                    <div class="stat-card-4-link">ნახვა →</div>
+                </div>
             </a>
         </div>
 

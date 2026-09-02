@@ -9,8 +9,20 @@ body { font-family: 'Nunito', sans-serif; background: transparent !important; }
 @media (min-width: 760px)  { .wrap { max-width: 700px; } .item-grid, .reward-grid { grid-template-columns: repeat(5, 1fr); } }
 @media (min-width: 1040px) { .wrap { max-width: 960px; } .item-grid, .reward-grid { grid-template-columns: repeat(6, 1fr); } }
 
-.back-btn { display:inline-flex; align-items:center; gap:6px; margin:0 0 0; font-family:'Nunito',sans-serif; font-size:0.82rem; font-weight:800; color:#d97706; text-decoration:none; background:white; border-radius:99px; padding:8px 16px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
-.coin-pill { display:inline-flex; align-items:center; gap:6px; margin:10px 0 0; background:#fef9c3; border:1px solid #fde68a; border-radius:99px; padding:8px 16px; font-family:'Fredoka One',cursive; font-size:0.85rem; color:#92400e; }
+.back-btn { display:inline-flex; align-items:center; gap:6px; margin:0 0 16px; font-family:'Nunito',sans-serif; font-size:0.82rem; font-weight:800; color:#d97706; text-decoration:none; background:white; border-radius:99px; padding:8px 16px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+
+.page-hero {
+    width: 100%; box-sizing: border-box; border-radius: 20px; padding: 26px 20px;
+    min-height: 140px; display: flex; flex-direction: column; justify-content: center;
+    position: relative; overflow: hidden; margin-bottom: 20px;
+    background-image:
+        linear-gradient(90deg, rgba(255,251,235,0.94) 0%, rgba(255,251,235,0.78) 45%, rgba(255,251,235,0.08) 68%),
+        url('/img/market-hero.jpg');
+    background-size: cover; background-position: right center; background-repeat: no-repeat;
+    box-shadow: 0 8px 20px rgba(217,119,6,0.18);
+}
+.page-hero-title { font-family:'Fredoka One',cursive; font-size:1.15rem; color:#92400e; margin-bottom:4px; }
+.page-hero-sub { font-family:'Nunito',sans-serif; font-weight:800; font-size:0.75rem; color:#b45309; }
 
 .section { padding:16px 0 0; }
 .sec-title { font-size:0.68rem; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; color:#64748b; margin-bottom:10px; padding-left:2px; }
@@ -70,7 +82,11 @@ body { font-family: 'Nunito', sans-serif; background: transparent !important; }
 
 <div class="wrap">
 <a href="{{ route('dashboard') }}" class="back-btn">← დაბრუნება</a>
-<div class="coin-pill">💰 {{ $coins }} მონეტა</div>
+
+<div class="page-hero">
+    <div class="page-hero-title">🛒 მარკეტი</div>
+    <div class="page-hero-sub">💰 {{ $coins }} მონეტა — აირჩიე შენი ჯილდო!</div>
+</div>
 
 <div class="section" style="padding-top:20px;">
 
