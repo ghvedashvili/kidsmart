@@ -69,6 +69,19 @@ class ChildSettingsController extends Controller
         ));
     }
 
+    public function updateAvatar(Request $request, User $child)
+    {
+        $this->authorizeChild($child);
+
+        $data = $request->validate([
+            'avatar' => 'required|in:boy,girl',
+        ]);
+
+        $child->update(['avatar' => $data['avatar']]);
+
+        return redirect()->route('dashboard');
+    }
+
     public function destroy(User $child)
     {
         $parent = auth()->user();

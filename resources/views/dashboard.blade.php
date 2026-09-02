@@ -57,36 +57,140 @@
         letter-spacing: 0.06em;
     }
 
-
+    /* ── header row: greeting ── */
+    .dash-header {
+        display: flex; flex-direction: column; width: 100%; text-align: left;
+    }
+    .dash-header-sub {
+        font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.68rem;
+        color: #aaa; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px;
+    }
 
     .children-section { width: 100%; }
     .section-label {
         font-family: 'Goldman', monospace; font-size: 0.62rem; color: #bbb;
         letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 12px; text-align: left;
     }
+    .add-card {
+        background: #fafafa; border: 2px dashed #d8d8d8; border-radius: 16px;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+        width: 100%; min-height: 140px; padding: 20px 10px; cursor: pointer;
+        font-family: inherit; color: #aaa; transition: all 0.2s;
+    }
+    .add-card:hover { border-color: #aaa; background: #f5f5f5; color: #666; }
+    .add-card-plus {
+        width: 38px; height: 38px; border-radius: 50%; border: 2px dashed #d0d0d0;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.3rem; line-height: 1; color: #bbb; transition: all 0.2s;
+    }
+    .add-card:hover .add-card-plus { border-color: #999; color: #666; }
+    .add-card-label { font-family: 'Goldman', monospace; font-size: 0.62rem; letter-spacing: 0.04em; text-align: center; }
+
+    /* ── child card (parent view) — colored side panel + main info panel ── */
+    .children-grid { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; }
     .child-card {
-        background: #fff; border: 1px solid #e8e8e8; border-radius: 10px;
-        padding: 14px 16px; margin-bottom: 10px;
-        display: flex; flex-direction: column; gap: 10px;
-        text-decoration: none; transition: border-color 0.2s, box-shadow 0.2s;
+        background: #fff; border-radius: 16px; overflow: hidden;
+        display: flex; align-items: stretch; height: 100%;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06); border: 1px solid #f0f0f0;
     }
-    .child-card:hover { border-color: #bbb; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
-    .child-row-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .child-name { font-family: 'Goldman', monospace; font-size: 0.88rem; color: #111; letter-spacing: 0.04em; }
-    .child-row-bottom { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .ctag {
-        font-family: 'Goldman', monospace; font-size: 0.6rem; color: #aaa;
-        border: 1px solid #ebebeb; border-radius: 3px; padding: 2px 7px; letter-spacing: 0.04em; white-space: nowrap;
+    .cc-side {
+        width: 78px; flex-shrink: 0;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+        padding: 12px 6px; background: linear-gradient(160deg,#7c8cf8,#a78bfa);
     }
-    .ctag.set { color: #555; border-color: #ccc; }
-    .child-arrow { color: #ccc; font-size: 0.9rem; }
-    .add-child-btn {
-        width: 100%; background: #fff; border: 1px dashed #d0d0d0; border-radius: 10px;
-        font-family: 'Goldman', monospace; font-size: 0.75rem; color: #aaa;
-        padding: 13px; cursor: pointer; letter-spacing: 0.06em;
-        transition: all 0.2s; margin-bottom: 12px;
+    .children-grid .child-card:nth-child(3n+2) .cc-side { background: linear-gradient(160deg,#f97b7b,#fca5a5); }
+    .children-grid .child-card:nth-child(3n+3) .cc-side { background: linear-gradient(160deg,#2fae74,#86e0b3); }
+    .cc-side-name {
+        font-family: 'Goldman', monospace; font-size: 0.72rem; color: #fff; text-align: center;
+        letter-spacing: 0.02em; line-height: 1.25; max-width: 100%;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
     }
-    .add-child-btn:hover { border-color: #999; color: #555; background: #fafafa; }
+    .cc-avatar-picker {
+        width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; position: relative;
+        background: rgba(255,255,255,0.22); border: 2px dashed rgba(255,255,255,0.6);
+        color: #fff; font-size: 1.3rem; display: flex; align-items: center; justify-content: center;
+        cursor: pointer; transition: background 0.2s;
+    }
+    .cc-avatar-picker:hover { background: rgba(255,255,255,0.32); }
+    .cc-avatar-picker-edit {
+        position: absolute; bottom: -2px; right: -2px; width: 16px; height: 16px; border-radius: 50%;
+        background: #fff; color: #666; font-size: 0.5rem; display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    }
+
+    .cc-main { flex: 1; min-width: 0; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+    .cc-top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; }
+    .cc-tags { display: flex; gap: 4px; flex-wrap: wrap; min-width: 0; }
+    .cc-tag {
+        font-family: 'Goldman', monospace; font-size: 0.55rem; color: #666;
+        background: #f5f5f5; border: 1px solid #ebebeb; border-radius: 100px;
+        padding: 3px 8px; white-space: nowrap;
+    }
+    .cc-mini-actions { display: flex; gap: 4px; flex-shrink: 0; }
+    .cc-mini-btn {
+        width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        font-size: 0.66rem; border: none; cursor: pointer; text-decoration: none;
+    }
+    .cc-mini-btn.remind { background: #ecfdf5; color: #059669; }
+    .cc-mini-btn.edit { background: #f5f5f5; color: #888; }
+    .cc-code {
+        font-family: 'Goldman', monospace; font-size: 0.58rem; color: #bbb;
+        letter-spacing: 0.1em; cursor: pointer; white-space: nowrap;
+    }
+    .cc-code:hover { color: #888; }
+
+    .cc-stats-row { display: flex; gap: 6px; }
+    .cc-stat {
+        flex: 1; min-width: 0; text-align: center; background: #fafafa; border-radius: 10px;
+        padding: 8px 4px; display: flex; flex-direction: column; align-items: center; gap: 2px;
+    }
+    .cc-stat-icon { font-size: 0.9rem; line-height: 1; }
+    .cc-stat-val { font-family: 'Goldman', monospace; font-size: 0.7rem; color: #111; }
+    .cc-stat-lbl { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.46rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.02em; }
+
+    .cc-tiles-row { display: flex; gap: 6px; margin-top: auto; }
+    .cc-tile {
+        flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+        background: #fafafa; border-radius: 12px; padding: 10px 6px; position: relative;
+        text-decoration: none; transition: background 0.2s;
+    }
+    .cc-tile:hover { background: #f2f2f2; }
+    .cc-tile-icon { font-size: 1.1rem; }
+    .cc-tile-label { font-family: 'Goldman', monospace; font-size: 0.58rem; color: #555; letter-spacing: 0.02em; }
+    .cc-tile-badge {
+        position: absolute; top: 6px; right: 8px; background: #dc2626; color: #fff;
+        font-family: 'Goldman', monospace; font-size: 0.5rem; font-weight: 700;
+        border-radius: 100px; padding: 1px 5px; min-width: 14px; text-align: center;
+    }
+
+    /* ── quick-link tiles (admin/staff nav) ── */
+    .nav-tile-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; }
+    .nav-tile {
+        background: #fff; border: 1px solid #e8e8e8; border-radius: 12px;
+        padding: 16px 10px; display: flex; flex-direction: column; align-items: center; gap: 6px;
+        text-decoration: none; transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+    }
+    .nav-tile:hover { border-color: #bbb; box-shadow: 0 4px 14px rgba(0,0,0,0.06); transform: translateY(-2px); }
+    .nav-tile-icon { font-size: 1.4rem; }
+    .nav-tile-label { font-family: 'Goldman', monospace; font-size: 0.62rem; color: #555; letter-spacing: 0.02em; text-align: center; }
+
+    /* ── child feature cards ── */
+    .feature-grid { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; }
+    .feature-card {
+        display: flex; align-items: center; gap: 12px; width: 100%;
+        background: #fff; border: 1.5px solid #f0f0f0; border-radius: 16px;
+        padding: 12px 16px; text-decoration: none; box-sizing: border-box;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.04); transition: transform 0.15s, box-shadow 0.2s;
+    }
+    .feature-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+    .feature-icon-tile {
+        width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
+    }
+    .feature-text { flex: 1; min-width: 0; text-align: left; }
+    .feature-title { font-family: 'Fredoka One', cursive; font-size: 0.9rem; }
+    .feature-sub { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.6rem; letter-spacing: 0.02em; margin-top: 2px; }
+    .feature-arrow { flex-shrink: 0; font-size: 1rem; }
 
     /* Modal */
     .modal-overlay {
@@ -144,14 +248,6 @@
     }
     .msave-danger:hover { border-color: #e74c3c; color: #e74c3c; background: transparent; }
     .merr { font-family: 'Goldman', monospace; font-size: 0.65rem; color: #e74c3c; margin-top: -12px; margin-bottom: 10px; }
-    .child-code-badge {
-        display: inline-block;
-        font-family: 'Goldman', monospace; font-size: 0.75rem; color: #111;
-        background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 4px;
-        padding: 2px 10px; letter-spacing: 0.14em; cursor: pointer; transition: background 0.2s;
-    }
-    .child-code-badge:hover { background: #ebebeb; }
-    .child-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-left: auto; }
     .caction {
         font-family: 'Goldman', monospace; font-size: 0.62rem; color: #bbb;
         border: 1px solid #ebebeb; border-radius: 4px; padding: 5px 10px;
@@ -261,6 +357,19 @@
     .clt-score { font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: #111; }
     .clt-pct { font-size: 0.85rem; color: #1a7a3c; margin-left: 6px; }
     .clt-time { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.65rem; color: #ccc; flex-shrink: 0; }
+
+    /* ── responsive widths + multi-column grids on desktop (kept last so it wins the cascade) ── */
+    @media (min-width: 760px) {
+        .dash-inner { max-width: 700px; }
+        .children-grid { grid-template-columns: repeat(3, 1fr); }
+        .nav-tile-grid { grid-template-columns: repeat(4, 1fr); }
+        .feature-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (min-width: 1040px) {
+        .dash-inner { max-width: 960px; }
+        .children-grid { grid-template-columns: repeat(4, 1fr); }
+        .nav-tile-grid { grid-template-columns: repeat(6, 1fr); }
+    }
 </style>
 
 <div class="dash-hero">
@@ -277,7 +386,10 @@
         @endif
 
         @if(auth()->user()->role !== 'child')
-        <div class="dash-greeting">გამარჯობა, {{ auth()->user()->name }}</div>
+        <div class="dash-header">
+            <div class="dash-header-sub">გამარჯობა</div>
+            <div class="dash-greeting" style="text-align:left;">{{ auth()->user()->name }}</div>
+        </div>
         @endif
 
         {{-- მშობლის ხედი --}}
@@ -308,65 +420,78 @@
             <div class="section-label">შვილები · {{ $children->count() }}</div>
 
             @php $atChildLimit = $currentPkg->max_children > 0 && $children->count() >= $currentPkg->max_children; @endphp
-            <button type="button" class="add-child-btn"
-                onclick="document.getElementById('{{ $atChildLimit ? 'plansModal' : 'addChildModal' }}').classList.add('open')"
-                @if($atChildLimit) title="{{ $currentPkg->name }} პლანი მხოლოდ {{ $currentPkg->max_children }} ბავშვს იძლევა" @endif>
-                @if($atChildLimit)
-                    ↑ გეგმის განახლება
-                @else
-                    + შვილის დამატება
-                @endif
-            </button>
+            <div class="children-grid">
             @forelse($children as $child)
             @php
                 $s = $child->childSetting;
                 $todayDone = $child->tests()->whereNotNull('completed_at')->whereDate('completed_at', today())->count();
                 $pendingMarket = \App\Models\MarketPurchase::where('child_id', $child->id)->where('status','pending')->count();
             @endphp
-            <div class="child-card" style="cursor:default;{{ !$child->is_active ? 'opacity:0.55;' : '' }}">
-                @if(!$child->is_active)
-                <div style="display:flex;align-items:center;gap:6px;background:#fef2f2;border:1px solid #fecaca;border-radius:5px;padding:5px 10px;margin-bottom:8px;font-size:0.68rem;color:#dc2626;">
-                    <span>⊘</span>
-                    <span>გათიშული — <strong>{{ $currentPkg->name }}</strong> გეგმა ამ ბავშვს არ მოიცავს</span>
-                    <button type="button" onclick="document.getElementById('plansModal').classList.add('open')"
-                        style="margin-left:auto;background:none;border:1px solid #fca5a5;color:#dc2626;font-family:'Goldman',monospace;font-size:0.6rem;padding:2px 8px;border-radius:3px;cursor:pointer;white-space:nowrap;">↑ გეგმა</button>
+            <div class="child-card" style="{{ !$child->is_active ? 'opacity:0.55;' : '' }}">
+                <div class="cc-side">
+                    <div class="cc-side-name">{{ $child->name }}</div>
+                    <button type="button" class="cc-avatar-picker" title="პროფილის არჩევა"
+                        onclick="document.getElementById('avatarModal{{ $child->id }}').classList.add('open')">
+                        {{ $child->avatar === 'boy' ? '👦' : ($child->avatar === 'girl' ? '👧' : '👤') }}
+                        <span class="cc-avatar-picker-edit">✎</span>
+                    </button>
                 </div>
-                @endif
-                {{-- ზედა ხაზი: სახელი · კლასი · დონე · დღეს --}}
-                <div class="child-row-top">
-                    <span class="child-name">{{ $child->name }}</span>
-                    @if($s?->grade)
-                        <span class="ctag set">{{ $s->grade->name }}</span>
-                    @else
-                        <span class="ctag">კლასი —</span>
+                <div class="cc-main">
+                    @if(!$child->is_active)
+                    <div style="display:flex;align-items:center;gap:6px;background:#fef2f2;border:1px solid #fecaca;border-radius:5px;padding:5px 8px;font-size:0.6rem;color:#dc2626;">
+                        <span>⊘</span>
+                        <span>გათიშული</span>
+                        <button type="button" onclick="document.getElementById('plansModal').classList.add('open')"
+                            style="margin-left:auto;background:none;border:1px solid #fca5a5;color:#dc2626;font-family:'Goldman',monospace;font-size:0.56rem;padding:2px 7px;border-radius:3px;cursor:pointer;white-space:nowrap;">↑ გეგმა</button>
+                    </div>
                     @endif
-                    @if($s)
-                        <span class="ctag set">დონე {{ $s->difficulty }}</span>
-                        <span class="ctag set">დღეს {{ $todayDone }}/{{ $s->tests_per_week }}</span>
-                    @endif
-                </div>
-                {{-- ქვედა ხაზი: კოდი · ღილაკები --}}
-                <div class="child-row-bottom">
+                    <div class="cc-top-row">
+                        <div class="cc-tags">
+                            <span class="cc-tag">{{ $s?->grade?->name ?? 'კლასი —' }}</span>
+                            @if($s)
+                            <span class="cc-tag">დონე {{ $s->difficulty }}</span>
+                            @endif
+                        </div>
+                        <div class="cc-mini-actions">
+                            <button type="button" class="cc-mini-btn remind" title="შეხსენება"
+                                onclick="openRemind({{ $child->id }}, '{{ addslashes($child->name) }}')">🔔</button>
+                            <button type="button" class="cc-mini-btn edit" title="რედაქტირება"
+                                onclick="document.getElementById('editChildModal{{ $child->id }}').classList.add('open')">⚙</button>
+                        </div>
+                    </div>
                     @if($child->child_code)
-                    <span class="child-code-badge" onclick="copyChildCode(this, '{{ $child->child_code }}')"
+                    <span class="cc-code" onclick="copyChildCode(this, '{{ $child->child_code }}')"
                         title="კოდის კოპირება">{{ $child->child_code }}</span>
                     @endif
-                    <div class="child-actions">
-                        <button type="button"
-                            onclick="openRemind({{ $child->id }}, '{{ addslashes($child->name) }}')"
-                            style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:4px;color:#059669;font-family:'Goldman',monospace;font-size:0.72rem;padding:5px 10px;cursor:pointer;">
-                            &#128276;
-                        </button>
-                        <a href="{{ route('market.index', $child) }}" class="caction" style="{{ $pendingMarket ? 'color:#d97706;border-color:#fde68a;background:#fffbeb;' : '' }}">
-                            🛒@if($pendingMarket) <span style="font-size:0.7rem;font-weight:900;">{{ $pendingMarket }}</span>@endif
-                        </a>
-                        <a href="{{ route('child.stats', $child) }}" class="caction primary">სტატისტიკა</a>
-                        <button type="button" class="caction" onclick="document.getElementById('editChildModal{{ $child->id }}').classList.add('open')">⚙</button>
+                    @if($s)
+                    <div class="cc-stats-row">
+                        <div class="cc-stat">
+                            <span class="cc-stat-icon">📅</span>
+                            <span class="cc-stat-val">{{ $todayDone }}/{{ $s->tests_per_week }}</span>
+                            <span class="cc-stat-lbl">დღეს</span>
+                        </div>
+                        <div class="cc-stat">
+                            <span class="cc-stat-icon">💰</span>
+                            <span class="cc-stat-val">{{ $s->coins ?? 0 }}</span>
+                            <span class="cc-stat-lbl">მონეტა</span>
+                        </div>
                     </div>
+                    @endif
+                    <div class="cc-tiles-row">
+                        <a href="{{ route('market.index', $child) }}" class="cc-tile">
+                            <span class="cc-tile-icon">🛒</span>
+                            <span class="cc-tile-label">მარკეტი</span>
+                            @if($pendingMarket)<span class="cc-tile-badge">{{ $pendingMarket }}</span>@endif
+                        </a>
+                        <a href="{{ route('child.stats', $child) }}" class="cc-tile">
+                            <span class="cc-tile-icon">📊</span>
+                            <span class="cc-tile-label">სტატისტიკა</span>
+                        </a>
+                    </div>
+                    @if(session('reminder_sent_' . $child->id))
+                    <div style="font-family:'Goldman',monospace;font-size:0.6rem;color:#059669;">&#10003; შეხსენება გაიგზავნა</div>
+                    @endif
                 </div>
-                @if(session('reminder_sent_' . $child->id))
-                <div style="font-family:'Goldman',monospace;font-size:0.62rem;color:#059669;margin-top:4px;">&#10003; შეხსენება გაიგზავნა</div>
-                @endif
             </div>
             @empty
             <div class="no-children">
@@ -374,6 +499,19 @@
                 <span style="font-size:0.62rem;color:#ccc;margin-top:4px;display:block;">კოდი გაუზიარე შვილს</span>
             </div>
             @endforelse
+            <button type="button" class="add-card"
+                onclick="document.getElementById('{{ $atChildLimit ? 'plansModal' : 'addChildModal' }}').classList.add('open')"
+                @if($atChildLimit) title="{{ $currentPkg->name }} პლანი მხოლოდ {{ $currentPkg->max_children }} ბავშვს იძლევა" @endif>
+                <span class="add-card-plus">+</span>
+                <span class="add-card-label">
+                    @if($atChildLimit)
+                        ↑ გეგმის განახლება
+                    @else
+                        შვილის დამატება
+                    @endif
+                </span>
+            </button>
+            </div>
         </div>
 
         {{-- Edit modals (one per child) --}}
@@ -449,6 +587,22 @@
                 </form>
             </div>
         </div>
+
+        <div id="avatarModal{{ $child->id }}" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+            <div class="mbox" style="max-width:320px;">
+                <div class="modal-title">
+                    პროფილის არჩევა
+                    <button type="button" class="modal-close"
+                        onclick="document.getElementById('avatarModal{{ $child->id }}').classList.remove('open')">✕</button>
+                </div>
+                <form method="POST" action="{{ route('child.avatar.update', $child) }}"
+                    style="display:flex;gap:14px;justify-content:center;padding:8px 0 4px;">
+                    @csrf @method('PUT')
+                    <button type="submit" name="avatar" value="boy" style="background:{{ $child->avatar === 'boy' ? '#eef2ff' : '#fafafa' }};border:2px solid {{ $child->avatar === 'boy' ? '#818cf8' : '#eee' }};border-radius:14px;padding:18px 20px;font-size:2.2rem;cursor:pointer;transition:all 0.15s;">👦</button>
+                    <button type="submit" name="avatar" value="girl" style="background:{{ $child->avatar === 'girl' ? '#fdf2f8' : '#fafafa' }};border:2px solid {{ $child->avatar === 'girl' ? '#f9a8d4' : '#eee' }};border-radius:14px;padding:18px 20px;font-size:2.2rem;cursor:pointer;transition:all 0.15s;">👧</button>
+                </form>
+            </div>
+        </div>
         @endforeach
 
         @endif
@@ -468,22 +622,16 @@
 
         {{-- ადმინის ხედი --}}
         @if(auth()->user()->role === 'admin')
-        <div class="children-section">
-            <a href="{{ route('test.preview') }}" class="child-card" style="color:inherit;">
-                <div class="child-row-top">
-                    <span style="font-size:1.1rem;line-height:1;">🧪</span>
-                    <span class="child-name">ტესტის გადახედვა</span>
-                    <span style="margin-left:auto;color:#ccc;font-size:0.8rem;">→</span>
-                </div>
+        <div class="section-label">გვერდები · {{ count($_adminMap) + 1 }}</div>
+        <div class="nav-tile-grid">
+            <a href="{{ route('test.preview') }}" class="nav-tile">
+                <span class="nav-tile-icon">🧪</span>
+                <span class="nav-tile-label">ტესტის გადახედვა</span>
             </a>
-            <div class="section-label" style="margin-top:8px;">ადმინის გვერდები · {{ count($_adminMap) }}</div>
             @foreach($_adminMap as $info)
-            <a href="{{ route($info['route']) }}" class="child-card" style="color:inherit;">
-                <div class="child-row-top">
-                    <span style="font-size:1.1rem;line-height:1;">{{ $info['icon'] }}</span>
-                    <span class="child-name">{{ $info['name'] }}</span>
-                    <span style="margin-left:auto;color:#ccc;font-size:0.8rem;">→</span>
-                </div>
+            <a href="{{ route($info['route']) }}" class="nav-tile">
+                <span class="nav-tile-icon">{{ $info['icon'] }}</span>
+                <span class="nav-tile-label">{{ $info['name'] }}</span>
             </a>
             @endforeach
         </div>
@@ -495,28 +643,20 @@
             $_myPerms    = \App\Models\RolePermission::allowedPages(auth()->user()->role) ?? [];
             $_myAdmPages = array_filter($_myPerms, fn($p) => str_starts_with($p, 'admin.'));
         @endphp
-        <div class="children-section">
-            <a href="{{ route('test.preview') }}" class="child-card" style="color:inherit;">
-                <div class="child-row-top">
-                    <span style="font-size:1.1rem;line-height:1;">🧪</span>
-                    <span class="child-name">ტესტის გადახედვა</span>
-                    <span style="margin-left:auto;color:#ccc;font-size:0.8rem;">→</span>
-                </div>
+        <div class="section-label">გვერდები</div>
+        <div class="nav-tile-grid">
+            <a href="{{ route('test.preview') }}" class="nav-tile">
+                <span class="nav-tile-icon">🧪</span>
+                <span class="nav-tile-label">ტესტის გადახედვა</span>
             </a>
-            @if(!empty($_myAdmPages))
-            <div class="section-label" style="margin-top:8px;">ადმინის გვერდები · {{ count($_myAdmPages) }}</div>
             @foreach($_adminMap as $key => $info)
             @if(in_array($key, $_myAdmPages))
-            <a href="{{ route($info['route']) }}" class="child-card" style="color:inherit;">
-                <div class="child-row-top">
-                    <span style="font-size:1.1rem;line-height:1;">{{ $info['icon'] }}</span>
-                    <span class="child-name">{{ $info['name'] }}</span>
-                    <span style="margin-left:auto;color:#ccc;font-size:0.8rem;">→</span>
-                </div>
+            <a href="{{ route($info['route']) }}" class="nav-tile">
+                <span class="nav-tile-icon">{{ $info['icon'] }}</span>
+                <span class="nav-tile-label">{{ $info['name'] }}</span>
             </a>
             @endif
             @endforeach
-            @endif
         </div>
         @endif
 
@@ -533,7 +673,9 @@
             $achCount      = auth()->user()->achievements()->count();
         @endphp
 
-        <div class="child-hello">{{ auth()->user()->name }} 👋</div>
+        <div class="dash-header">
+            <div class="child-hello" style="margin-top:0;">{{ auth()->user()->name }} 👋</div>
+        </div>
 
         {{-- სტატუს ბარათები --}}
         <div class="child-stats-row">
@@ -573,61 +715,53 @@
             </a>
         @endif
 
-        {{-- მარკეტი --}}
-        @php $marketCount = \App\Models\MarketItem::where('child_id', auth()->id())->where('is_active', true)->count(); @endphp
-        @if($marketCount)
-        <a href="{{ route('market.child') }}" style="display:flex;align-items:center;justify-content:space-between;width:100%;background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:16px;padding:14px 18px;text-decoration:none;transition:all 0.2s;border:1.5px solid #fde68a;">
-            <div style="display:flex;align-items:center;gap:10px;">
-                <span style="font-size:1.5rem;">🛒</span>
-                <div>
-                    <div style="font-family:'Fredoka One',cursive;font-size:0.95rem;color:#92400e;">მარკეტი</div>
-                    <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:0.62rem;color:#b45309;">{{ $marketCount }} პროდუქტი · 💰 {{ $setting?->coins ?? 0 }} მონეტა</div>
+        @php
+            $marketCount = \App\Models\MarketItem::where('child_id', auth()->id())->where('is_active', true)->count();
+            $hasVids = \App\Models\Topic::where('grade_id', $setting?->grade_id)->whereHas('videos')->exists();
+        @endphp
+        <div class="feature-grid">
+            @if($marketCount)
+            <a href="{{ route('market.child') }}" class="feature-card">
+                <span class="feature-icon-tile" style="background:linear-gradient(135deg,#fef3c7,#fde68a);">🛒</span>
+                <div class="feature-text">
+                    <div class="feature-title" style="color:#92400e;">მარკეტი</div>
+                    <div class="feature-sub" style="color:#b45309;">{{ $marketCount }} პროდუქტი · 💰 {{ $setting?->coins ?? 0 }} მონეტა</div>
                 </div>
-            </div>
-            <span style="color:#d97706;font-size:1rem;">→</span>
-        </a>
-        @endif
+                <span class="feature-arrow" style="color:#d97706;">→</span>
+            </a>
+            @endif
 
-        {{-- სავარჯიშოები --}}
-        <a href="{{ route('practice.topics') }}" style="display:flex;align-items:center;justify-content:space-between;width:100%;background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:16px;padding:14px 18px;text-decoration:none;">
-            <div style="display:flex;align-items:center;gap:10px;">
-                <span style="font-size:1.5rem;">🎯</span>
-                <div>
-                    <div style="font-family:'Fredoka One',cursive;font-size:0.95rem;color:white;">სავარჯიშოები</div>
-                    <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:0.62rem;color:rgba(255,255,255,0.65);">თემები + მათემატიკური პირამიდა</div>
+            <a href="{{ route('practice.topics') }}" class="feature-card">
+                <span class="feature-icon-tile" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);">🎯</span>
+                <div class="feature-text">
+                    <div class="feature-title" style="color:#111;">სავარჯიშოები</div>
+                    <div class="feature-sub" style="color:#888;">თემები + მათემატიკური პირამიდა</div>
                 </div>
-            </div>
-            <span style="color:rgba(255,255,255,0.6);font-size:1rem;">→</span>
-        </a>
+                <span class="feature-arrow" style="color:#7c3aed;">→</span>
+            </a>
 
-        {{-- ტესტების ისტორია --}}
-        @if($lastCompleted)
-        <a href="{{ route('my.tests') }}" style="display:flex;align-items:center;justify-content:space-between;width:100%;background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border-radius:16px;padding:14px 18px;text-decoration:none;border:1.5px solid #bae6fd;">
-            <div style="display:flex;align-items:center;gap:10px;">
-                <span style="font-size:1.5rem;">📋</span>
-                <div>
-                    <div style="font-family:'Fredoka One',cursive;font-size:0.95rem;color:#0c4a6e;">ჩემი ტესტები</div>
-                    <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:0.62rem;color:#0284c7;">სწორი და არასწორი პასუხები</div>
+            @if($lastCompleted)
+            <a href="{{ route('my.tests') }}" class="feature-card">
+                <span class="feature-icon-tile" style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);">📋</span>
+                <div class="feature-text">
+                    <div class="feature-title" style="color:#0c4a6e;">ჩემი ტესტები</div>
+                    <div class="feature-sub" style="color:#0284c7;">სწორი და არასწორი პასუხები</div>
                 </div>
-            </div>
-            <span style="color:#0284c7;font-size:1rem;">→</span>
-        </a>
-        @endif
+                <span class="feature-arrow" style="color:#0284c7;">→</span>
+            </a>
+            @endif
 
-        {{-- ვიდეოთეკა --}}
-        @php $hasVids = \App\Models\Topic::where('grade_id', $setting?->grade_id)->whereHas('videos')->exists(); @endphp
-        @if($hasVids)
-        <a href="{{ route('videos.library') }}" style="display:flex;align-items:center;justify-content:space-between;width:100%;background:linear-gradient(135deg,#ede9fe,#ddd6fe);border-radius:16px;padding:14px 18px;text-decoration:none;border:1.5px solid #ddd6fe;">
-            <div style="display:flex;align-items:center;gap:10px;">
-                <span style="font-size:1.5rem;">📹</span>
-                <div>
-                    <div style="font-family:'Fredoka One',cursive;font-size:0.95rem;color:#5b21b6;">ვიდეოთეკა</div>
-                    <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:0.62rem;color:#7c3aed;">ახსნა-განმარტებითი ვიდეოები</div>
+            @if($hasVids)
+            <a href="{{ route('videos.library') }}" class="feature-card">
+                <span class="feature-icon-tile" style="background:linear-gradient(135deg,#ede9fe,#ddd6fe);">📹</span>
+                <div class="feature-text">
+                    <div class="feature-title" style="color:#5b21b6;">ვიდეოთეკა</div>
+                    <div class="feature-sub" style="color:#7c3aed;">ახსნა-განმარტებითი ვიდეოები</div>
                 </div>
-            </div>
-            <span style="color:#7c3aed;font-size:1rem;">→</span>
-        </a>
-        @endif
+                <span class="feature-arrow" style="color:#7c3aed;">→</span>
+            </a>
+            @endif
+        </div>
 
         {{-- ბოლო ტესტი --}}
         @if($lastCompleted)
