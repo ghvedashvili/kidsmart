@@ -14,6 +14,8 @@
     .btn-ok:hover { background:#d1fae5; }
     .btn-del { background:none; border:none; color:#cbd5e1; font-size:0.72rem; cursor:pointer; padding:0 4px; transition:color 0.2s; }
     .btn-del:hover { color:#ef4444; }
+    .back-btn { display:inline-flex; align-items:center; gap:6px; margin-bottom:20px; font-family:'Goldman',monospace; font-size:0.72rem; font-weight:700; color:#374151; text-decoration:none; background:#fff; border:1px solid #e2e8f0; border-radius:99px; padding:8px 16px; box-shadow:0 2px 8px rgba(0,0,0,0.06); transition:all 0.2s; }
+    .back-btn:hover { border-color:#94a3b8; color:#1e293b; }
     .msg   { font-size:0.72rem; color:#059669; margin-bottom:12px; }
 
     .item-row { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid #f1f5f9; }
@@ -76,7 +78,7 @@
 </style>
 
 <div class="aw">
-    <a href="javascript:history.back()" style="font-family:'Goldman',monospace;font-size:0.72rem;color:#999;letter-spacing:0.06em;text-decoration:none;display:inline-block;margin-bottom:20px;">← back</a>
+    <a href="{{ route('dashboard') }}" class="back-btn">← მთავარი</a>
 
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
         <span style="font-size:1.6rem;">🛒</span>

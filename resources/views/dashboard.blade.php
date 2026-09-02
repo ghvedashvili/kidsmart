@@ -66,16 +66,16 @@
         background: linear-gradient(135deg, var(--primary), var(--primary-light));
         box-shadow: 0 10px 24px rgba(108,92,231,0.25);
     }
-    .parent-hero-text h2 { font-family: 'Goldman', monospace; font-size: 1.05rem; color: #fff; margin: 0 0 4px; letter-spacing: 0.02em; }
-    .parent-hero-text p { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.72rem; color: rgba(255,255,255,0.85); margin: 0; }
-    .parent-hero-avatar { font-size: 2.6rem; flex-shrink: 0; filter: drop-shadow(0 6px 6px rgba(0,0,0,0.15)); }
+    .parent-hero-text h2 { font-family: 'Goldman', monospace; font-size: 1.05rem; color: #fff; margin: 0 0 10px; letter-spacing: 0.02em; }
+    .parent-hero-avatar { font-size: 2.6rem; line-height: 1; flex-shrink: 0; filter: drop-shadow(0 6px 6px rgba(0,0,0,0.15)); }
 
     .plan-pill {
-        display: inline-flex; align-items: center; gap: 7px; background: var(--primary-soft);
-        border: none; border-radius: 100px; padding: 7px 16px; font-family: 'Goldman', monospace;
-        font-size: 0.68rem; color: var(--primary); cursor: pointer; letter-spacing: 0.04em; transition: background 0.2s;
+        display: inline-flex; align-items: center; gap: 7px;
+        background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 100px; padding: 6px 14px; font-family: 'Goldman', monospace;
+        font-size: 0.66rem; color: #fff; cursor: pointer; letter-spacing: 0.03em; transition: background 0.2s;
     }
-    .plan-pill:hover { background: #e2ddff; }
+    .plan-pill:hover { background: rgba(255,255,255,0.28); }
 
     .child-hero-banner {
         width: 100%; box-sizing: border-box; border-radius: var(--radius-lg); padding: 22px 20px;
@@ -429,12 +429,11 @@
     /* ── responsive widths + multi-column grids on desktop (kept last so it wins the cascade) ── */
     @media (min-width: 760px) {
         .dash-inner { max-width: 700px; }
-        .children-grid { grid-template-columns: repeat(3, 1fr); }
+        .children-grid { grid-template-columns: repeat(2, 1fr); }
         .nav-tile-grid { grid-template-columns: repeat(4, 1fr); }
     }
     @media (min-width: 1040px) {
         .dash-inner { max-width: 960px; }
-        .children-grid { grid-template-columns: repeat(4, 1fr); }
         .nav-tile-grid { grid-template-columns: repeat(6, 1fr); }
     }
 </style>
@@ -453,10 +452,25 @@
         @endif
 
         @if(auth()->user()->role !== 'child')
+        @php
+            if (in_array(auth()->user()->role, ['parent', 'admin'])) {
+                $currentPkg = auth()->user()->currentPackage();
+                $activeSub  = auth()->user()->activeSubscription();
+            }
+        @endphp
         <div class="parent-hero-banner">
             <div class="parent-hero-text">
                 <h2>გამარჯობა, {{ auth()->user()->name }}! 👋</h2>
-                <p>აკონტროლე შენი ოჯახის პროგრესი ერთი ადგილიდან</p>
+                @if(in_array(auth()->user()->role, ['parent', 'admin']))
+                <button type="button" class="plan-pill" onclick="document.getElementById('plansModal').classList.add('open')">
+                    <span style="width:8px;height:8px;border-radius:50%;background:{{ $currentPkg->is_free ? '#10b981' : '#93c5fd' }};display:inline-block;"></span>
+                    {{ $currentPkg->name }}
+                    @if($activeSub?->expires_at)
+                        <span style="opacity:0.7;font-size:0.6rem;">· {{ $activeSub->expires_at->format('d.m.Y') }}-მდე</span>
+                    @endif
+                    <span style="opacity:0.8;font-size:0.62rem;">↑ გეგმა</span>
+                </button>
+                @endif
             </div>
             <div class="parent-hero-avatar">👨‍👩‍👧</div>
         </div>
@@ -466,19 +480,7 @@
         @if(in_array(auth()->user()->role, ['parent', 'admin']))
         @php
             $children = auth()->user()->children()->with(['childSetting.grade','themes','topics'])->withTimestamps()->orderByPivot('created_at','asc')->get();
-            $currentPkg = auth()->user()->currentPackage();
-            $activeSub  = auth()->user()->activeSubscription();
         @endphp
-
-        {{-- Plan badge --}}
-        <button type="button" class="plan-pill" onclick="document.getElementById('plansModal').classList.add('open')">
-            <span style="width:8px;height:8px;border-radius:50%;background:{{ $currentPkg->is_free ? '#10b981' : '#3b82f6' }};display:inline-block;"></span>
-            {{ $currentPkg->name }}
-            @if($activeSub?->expires_at)
-                <span style="opacity:0.6;font-size:0.6rem;">· {{ $activeSub->expires_at->format('d.m.Y') }}-მდე</span>
-            @endif
-            <span style="opacity:0.7;font-size:0.65rem;">↑ გეგმა</span>
-        </button>
 
         @if(session('child_added'))
         <div class="flash">{{ session('child_added') }}</div>

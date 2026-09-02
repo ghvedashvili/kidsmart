@@ -8,8 +8,8 @@
         font-family: 'Goldman', monospace;
     }
     .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
-    .back { font-size: 0.68rem; color: #bbb; letter-spacing: 0.08em; text-decoration: none; transition: color 0.2s; }
-    .back:hover { color: #555; }
+    .back { display:inline-flex; align-items:center; gap:6px; font-size: 0.72rem; font-weight: 700; color: #374151; text-decoration: none; background:#fff; border:1px solid #e8e8e8; border-radius:99px; padding:8px 16px; box-shadow:0 2px 8px rgba(0,0,0,0.06); transition: all 0.2s; }
+    .back:hover { border-color:#bbb; color: #111; }
     .settings-link { font-size: 0.68rem; color: #bbb; letter-spacing: 0.08em; text-decoration: none; transition: color 0.2s; }
     .settings-link:hover { color: #555; }
 
