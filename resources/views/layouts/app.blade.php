@@ -83,8 +83,9 @@
     html {
         background-color: #fdf8f0;
         background-image:
-            repeating-linear-gradient(transparent, transparent 31px, rgba(173,200,222,0.55) 31px, rgba(173,200,222,0.55) 32px),
-            repeating-linear-gradient(90deg, transparent, transparent 31px, rgba(173,200,222,0.55) 31px, rgba(173,200,222,0.55) 32px);
+            linear-gradient(rgba(173,200,222,0.55) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(173,200,222,0.55) 1px, transparent 1px);
+        background-size: 32px 32px;
         overscroll-behavior: none;
         scroll-behavior: smooth;
     }

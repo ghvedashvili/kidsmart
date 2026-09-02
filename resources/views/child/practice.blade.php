@@ -4,7 +4,7 @@
 @endpush
 @section('content')
 <style>
-    body { background: #f0f9ff !important; }
+    body { background: transparent !important; }
     .wrap { max-width: 520px; margin: 0 auto; padding: 0 0 80px; }
 
     /* ── Header ── */

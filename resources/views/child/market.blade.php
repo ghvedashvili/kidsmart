@@ -1,11 +1,10 @@
 @extends('layouts.app')
-@section('navTitle', '🛒 მარკეტი')
 @push('head')
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
 @endpush
 @section('content')
 <style>
-body { font-family: 'Nunito', sans-serif; background: #f1f5f9 !important; }
+body { font-family: 'Nunito', sans-serif; background: transparent !important; }
 
 .back-btn { display:inline-flex; align-items:center; gap:6px; margin:16px 0 0 20px; font-family:'Nunito',sans-serif; font-size:0.82rem; font-weight:800; color:#d97706; text-decoration:none; background:white; border-radius:99px; padding:8px 16px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
 .coin-pill { display:inline-flex; align-items:center; gap:6px; margin:10px 0 0 20px; background:#fef9c3; border:1px solid #fde68a; border-radius:99px; padding:8px 16px; font-family:'Fredoka One',cursive; font-size:0.85rem; color:#92400e; }

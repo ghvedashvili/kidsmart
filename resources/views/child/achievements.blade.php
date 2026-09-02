@@ -1,11 +1,10 @@
 @extends('layouts.app')
-@section('navTitle', '🏆 ჩემი მიღწევები')
 @push('head')
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
 @endpush
 @section('content')
 <style>
-body { font-family: 'Nunito', sans-serif; background: #f1f5f9 !important; }
+body { font-family: 'Nunito', sans-serif; background: transparent !important; }
 
 .back-btn {
     display: inline-flex; align-items: center; gap: 6px;

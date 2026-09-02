@@ -109,9 +109,6 @@
             <a class="navbar-brand mb-0" href="{{ url('/') }}">
                 <img src="/img/logo.png" alt="KidSmart" style="height:55px;width:auto;">
             </a>
-            @hasSection('navTitle')
-            <span style="font-family:'Goldman',monospace;font-size:0.8rem;color:#fff;margin-left:10px;letter-spacing:0.03em;white-space:nowrap;">@yield('navTitle')</span>
-            @endif
         </div>
         @auth
         @php
@@ -135,12 +132,12 @@
             @endguest
             @auth
             <a class="nav-link-item{{ request()->routeIs('dashboard') ? ' nav-act' : '' }}"
-               href="{{ route('dashboard') }}" style="font-size:0.78rem;"><i class="bi bi-house"></i></a>
+               href="{{ route('dashboard') }}" style="font-size:0.78rem;"><i class="bi bi-house"></i>მთავარი</a>
             @if($__u->role === 'child')
-            <a class="nav-link-item{{ request()->routeIs('market.child') ? ' nav-act' : '' }}" href="{{ route('market.child') }}" style="font-size:0.78rem;" title="მარკეტი"><i class="bi bi-cart3"></i></a>
-            <a class="nav-link-item{{ request()->routeIs('practice.*') ? ' nav-act' : '' }}" href="{{ route('practice.topics') }}" style="font-size:0.78rem;" title="სავარჯიშოები"><i class="bi bi-bullseye"></i></a>
-            <a class="nav-link-item{{ request()->routeIs('my.tests') ? ' nav-act' : '' }}" href="{{ route('my.tests') }}" style="font-size:0.78rem;" title="ჩემი ტესტები"><i class="bi bi-clipboard-check"></i></a>
-            <a class="nav-link-item{{ request()->routeIs('achievements') ? ' nav-act' : '' }}" href="{{ route('achievements') }}" style="font-size:0.78rem;" title="მიღწევები"><i class="bi bi-trophy"></i></a>
+            <a class="nav-link-item{{ request()->routeIs('market.child') ? ' nav-act' : '' }}" href="{{ route('market.child') }}" style="font-size:0.78rem;"><i class="bi bi-cart3"></i> მარკეტი</a>
+            <a class="nav-link-item{{ request()->routeIs('practice.*') ? ' nav-act' : '' }}" href="{{ route('practice.topics') }}" style="font-size:0.78rem;"><i class="bi bi-bullseye"></i> სავარჯიშოები</a>
+            <a class="nav-link-item{{ request()->routeIs('my.tests') ? ' nav-act' : '' }}" href="{{ route('my.tests') }}" style="font-size:0.78rem;"><i class="bi bi-clipboard-check"></i> ჩემი ტესტები</a>
+            <a class="nav-link-item{{ request()->routeIs('achievements') ? ' nav-act' : '' }}" href="{{ route('achievements') }}" style="font-size:0.78rem;"><i class="bi bi-trophy"></i> მიღწევები</a>
             @endif
             @if($__hasAdm)
             @if($__canAdm('admin.panel'))
@@ -173,13 +170,13 @@
         <div class="nav-right">
             @auth
             <div class="desktop-only" style="display:flex;align-items:center;gap:4px;">
-                <button id="notif-btn-desktop" onclick="toggleNotifications()" title="შეტყობინებები"
-                    class="nav-link-item">
-                    <i id="notif-icon-desktop" class="bi bi-bell"></i>
+                <button id="notif-btn-desktop" onclick="window._notifToast=true;toggleNotifications()"
+                    class="nav-link-item" style="font-size:0.78rem;">
+                    <i id="notif-icon-desktop" class="bi bi-bell"></i> შეტყობინებები
                 </button>
                 <form method="POST" action="{{ route('logout') }}" style="margin:0;">
                     @csrf
-                    <button type="submit" class="nav-link-item" style="font-size:0.8rem;">↩</button>
+                    <button type="submit" class="nav-link-item" style="font-size:0.78rem;">↩ გასვლა</button>
                 </form>
             </div>
             @endauth

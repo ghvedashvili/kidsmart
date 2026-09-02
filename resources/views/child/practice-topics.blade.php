@@ -1,11 +1,10 @@
 @extends('layouts.app')
-@section('navTitle', '🎯 სავარჯიშოები')
 @push('head')
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
 @endpush
 @section('content')
 <style>
-    body { background: #f0f9ff !important; }
+    body { background: transparent !important; }
     .wrap { max-width: 520px; margin: 0 auto; padding: 28px 16px 80px; }
     .back { display:inline-flex; align-items:center; gap:6px; margin:16px 0 24px; font-family:'Nunito',sans-serif; font-size:0.82rem; font-weight:800; color:#2563eb; text-decoration:none; padding:8px 16px; background:white; border-radius:99px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
 
