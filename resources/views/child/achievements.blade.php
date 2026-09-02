@@ -5,10 +5,12 @@
 @section('content')
 <style>
 body { font-family: 'Nunito', sans-serif; background: transparent !important; }
+.wrap { max-width: 520px; margin: 0 auto; padding: 28px 16px 80px; }
+@media (min-width: 760px)  { .wrap { max-width: 700px; } }
+@media (min-width: 1040px) { .wrap { max-width: 960px; } }
 
 .back-btn {
     display: inline-flex; align-items: center; gap: 6px;
-    margin: 16px 0 0 20px;
     font-family: 'Nunito', sans-serif;
     font-size: 0.82rem; font-weight: 800;
     color: #4f46e5; text-decoration: none;
@@ -19,7 +21,7 @@ body { font-family: 'Nunito', sans-serif; background: transparent !important; }
 
 .stats-row {
     display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;
-    margin: 12px 20px 0;
+    margin: 12px 0 0;
 }
 .stat-box {
     background: white; border-radius: 14px;
@@ -31,7 +33,7 @@ body { font-family: 'Nunito', sans-serif; background: transparent !important; }
 .stat-lbl { font-size: 0.62rem; font-weight: 700; color: #94a3b8; margin-top: 4px; }
 
 /* Section */
-.section { padding: 20px 16px 0; max-width: 600px; margin: 0 auto; }
+.section { padding: 20px 0 0; }
 .sec-title {
     font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em;
     text-transform: uppercase; color: #64748b;
@@ -41,7 +43,8 @@ body { font-family: 'Nunito', sans-serif; background: transparent !important; }
 /* Achievement grid */
 .ach-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(130px, 130px));
+    justify-content: center;
     gap: 10px;
     margin-bottom: 28px;
 }
@@ -83,10 +86,9 @@ body { font-family: 'Nunito', sans-serif; background: transparent !important; }
 .progress-info { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.72rem; font-weight: 700; color: #64748b; }
 .progress-bar { height: 8px; background: #e2e8f0; border-radius: 99px; overflow: hidden; }
 .progress-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #8b5cf6); border-radius: 99px; transition: width 0.6s ease; }
-
-.bottom-pad { height: 40px; }
 </style>
 
+<div class="wrap">
 <a href="{{ route('dashboard') }}" class="back-btn">← დაბრუნება</a>
 
 <div class="stats-row">
@@ -155,6 +157,5 @@ body { font-family: 'Nunito', sans-serif; background: transparent !important; }
     </div>
 
 </div>
-
-<div class="bottom-pad"></div>
+</div>
 @endsection

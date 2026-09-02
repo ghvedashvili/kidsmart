@@ -5,7 +5,7 @@
 @section('content')
 <style>
     body { background: transparent !important; }
-    .wrap { max-width: 640px; margin: 0 auto; padding: 28px 16px 80px; }
+    .wrap { max-width: 520px; margin: 0 auto; padding: 28px 16px 80px; }
     .back { display:inline-flex; align-items:center; gap:6px; margin:16px 0 24px; font-family:'Nunito',sans-serif; font-size:0.82rem; font-weight:800; color:#db2777; text-decoration:none; padding:8px 16px; background:white; border-radius:99px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
     .back:hover { box-shadow:0 4px 12px rgba(0,0,0,0.12); }
 

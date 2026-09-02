@@ -16,13 +16,12 @@
         min-height: 100dvh;
     }
     .dash-hero {
-        min-height: 100dvh;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: flex-start;
         position: relative;
-        overflow-x: hidden;
+        overflow: hidden;
         padding: 40px 24px 60px;
         gap: 20px;
         --primary: #6c5ce7;
@@ -199,58 +198,58 @@
     }
     .nav-tile-label { font-family: 'Goldman', monospace; font-size: 0.62rem; color: #555; letter-spacing: 0.02em; text-align: center; }
 
-    /* ── child categories grid ── */
-    .cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; }
-    .cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; text-decoration: none; }
-    .cat-icon {
-        width: 56px; height: 56px; border-radius: var(--radius-sm);
-        display: flex; align-items: center; justify-content: center;
-        font-size: 1.5rem; box-shadow: 0 6px 15px rgba(0,0,0,0.07); transition: transform 0.2s;
-    }
-    .cat-item:hover .cat-icon { transform: translateY(-4px); }
-    .cat-label { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.62rem; color: #333; text-align: center; line-height: 1.2; }
 
-    /* ── daily goal widget ── */
-    .goal-card {
-        width: 100%; box-sizing: border-box; border-radius: var(--radius-md); padding: 16px 18px;
-        background: linear-gradient(135deg, #8c7ae6, #7158e2); color: #fff;
-        display: flex; align-items: center; justify-content: space-between; gap: 14px; text-align: left;
+    /* ── badges preview — same card language as .summary-card ── */
+    .badges-section {
+        width: 100%; box-sizing: border-box; background: #fff; border-radius: var(--radius-lg);
+        padding: 18px 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); border: 1.5px solid #f0f0f0;
+        text-align: left;
     }
-    .goal-info h4 { font-family: 'Fredoka One', cursive; font-size: 0.92rem; margin: 0 0 3px; }
-    .goal-info p { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.68rem; opacity: 0.85; margin: 0 0 10px; }
-    .goal-bar-bg { background: rgba(255,255,255,0.25); height: 8px; border-radius: 4px; width: 100%; max-width: 180px; overflow: hidden; }
-    .goal-bar-fill { background: var(--accent-green); height: 100%; border-radius: 4px; transition: width 0.4s; }
-    .goal-star { font-size: 2.4rem; flex-shrink: 0; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2)); }
-
-    /* ── badges preview ── */
-    .badges-section { width: 100%; text-align: left; }
-    .badges-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .badges-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
     .badges-header h3 { font-family: 'Fredoka One', cursive; font-size: 0.95rem; color: #2d2d3a; margin: 0; }
     .badges-header a { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.68rem; color: var(--primary); text-decoration: none; }
     .badges-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
     .badge-card { display: flex; flex-direction: column; align-items: center; gap: 5px; }
     .badge-icon {
         width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-        font-size: 1.4rem; background: var(--primary-soft); box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+        font-size: 1.4rem; background: var(--primary-soft);
     }
     .badge-card span { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.55rem; color: #444; text-align: center; line-height: 1.2; }
     .badges-empty {
         font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.72rem; color: #bbb; text-align: center;
-        padding: 16px; border: 1.5px dashed #eee; border-radius: var(--radius-md); width: 100%; box-sizing: border-box;
+        padding: 10px 0 2px;
     }
 
-    /* ── weekly challenge card ── */
-    .challenge-card {
-        width: 100%; box-sizing: border-box; background: #e8fae3; border: 1.5px solid #c3f0b8;
-        border-radius: var(--radius-md); padding: 16px; display: flex; align-items: center; gap: 14px; text-align: left;
+    /* ── weekly summary card ── */
+    .summary-card {
+        width: 100%; box-sizing: border-box; background: #fff; border-radius: var(--radius-lg);
+        padding: 18px 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); border: 1.5px solid #f0f0f0;
+        text-align: left;
     }
-    .challenge-icon { font-size: 2.2rem; flex-shrink: 0; }
-    .challenge-info { flex: 1; min-width: 0; }
-    .challenge-info h4 { font-family: 'Fredoka One', cursive; font-size: 0.82rem; color: #1a7a3c; margin: 0 0 6px; }
-    .challenge-progress-track { height: 6px; background: #d4f4c8; border-radius: 4px; overflow: hidden; margin-bottom: 4px; }
-    .challenge-progress-fill { height: 100%; background: #00b894; border-radius: 4px; transition: width 0.4s; }
-    .challenge-count { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.65rem; color: #5a8f6a; text-align: right; }
-    .challenge-gift { font-size: 1.8rem; flex-shrink: 0; }
+    .summary-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
+    .summary-streak { display: flex; align-items: center; gap: 8px; }
+    .summary-streak-flame { font-size: 1.7rem; line-height: 1; }
+    .summary-streak-num { font-family: 'Fredoka One', cursive; font-size: 1.05rem; color: #111; line-height: 1.2; }
+    .summary-streak-lbl { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.58rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; }
+    .summary-week-pill {
+        background: var(--primary-soft); color: var(--primary); font-family: 'Goldman', monospace;
+        font-size: 0.64rem; padding: 6px 12px; border-radius: 100px; letter-spacing: 0.02em; white-space: nowrap; flex-shrink: 0;
+    }
+    .summary-days { display: flex; justify-content: space-between; gap: 4px; margin-bottom: 14px; }
+    .summary-day { display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; }
+    .summary-day-dot {
+        width: 30px; height: 30px; border-radius: 50%; background: #f5f5f5;
+        display: flex; align-items: center; justify-content: center; font-size: 0.85rem;
+        border: 2px solid transparent; box-sizing: border-box;
+    }
+    .summary-day.done .summary-day-dot { background: linear-gradient(135deg, var(--accent-yellow), #f59e0b); }
+    .summary-day.today .summary-day-dot { border-color: var(--primary); }
+    .summary-day-lbl { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.55rem; color: #bbb; }
+    .summary-day.today .summary-day-lbl { color: var(--primary); }
+    .summary-bottom { display: flex; gap: 10px; padding-top: 12px; border-top: 1px solid #f5f5f5; }
+    .summary-stat { flex: 1; text-align: center; }
+    .summary-stat-val { font-family: 'Fredoka One', cursive; font-size: 1.05rem; color: #111; display: block; }
+    .summary-stat-lbl { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.56rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.04em; }
 
     /* Modal */
     .modal-overlay {
@@ -365,12 +364,10 @@
         font-size: 0.62rem; color: #bbb; text-transform: uppercase; letter-spacing: 0.08em;
     }
     .child-cta {
-        display: flex; align-items: center; justify-content: center; gap: 12px;
-        width: 100%; padding: 22px 20px;
+        display: flex; flex-direction: column; gap: 12px;
+        width: 100%; box-sizing: border-box; padding: 18px 20px;
         background: linear-gradient(135deg, var(--primary), var(--primary-light));
-        color: white; font-family: 'Fredoka One', cursive;
-        font-size: 1.25rem; letter-spacing: 0.03em;
-        text-decoration: none; border-radius: var(--radius-lg);
+        color: white; text-decoration: none; border-radius: var(--radius-lg);
         box-shadow: 0 6px 24px rgba(108,92,231,0.35);
         transition: all 0.2s;
     }
@@ -380,6 +377,11 @@
         box-shadow: 0 6px 24px rgba(245,158,11,0.35);
     }
     .child-cta.resume:hover { box-shadow: 0 10px 32px rgba(245,158,11,0.45); }
+    .child-cta-main { display: flex; align-items: center; gap: 12px; }
+    .child-cta-icon { font-size: 1.6rem; flex-shrink: 0; line-height: 1; }
+    .child-cta-text { flex: 1; min-width: 0; text-align: left; }
+    .child-cta-title { font-family: 'Fredoka One', cursive; font-size: 1.1rem; letter-spacing: 0.02em; line-height: 1.2; }
+    .child-cta-arrow { font-size: 1.2rem; flex-shrink: 0; opacity: 0.85; }
     .child-done-card {
         background: white; border-radius: var(--radius-lg); padding: 28px 20px;
         text-align: center; width: 100%;
@@ -421,9 +423,6 @@
         .dash-inner { max-width: 960px; }
         .children-grid { grid-template-columns: repeat(4, 1fr); }
         .nav-tile-grid { grid-template-columns: repeat(6, 1fr); }
-    }
-    @media (max-width: 640px) {
-        .cat-grid { display: none; }
     }
 </style>
 
@@ -737,53 +736,16 @@
             <div class="child-hero-avatar">{{ auth()->user()->avatar === 'boy' ? '👦' : (auth()->user()->avatar === 'girl' ? '👧' : '🧒') }}</div>
         </div>
 
-        {{-- კატეგორიები --}}
-        @php
-            $marketCount = \App\Models\MarketItem::where('child_id', auth()->id())->where('is_active', true)->count();
-            $hasVids = \App\Models\Topic::where('grade_id', $setting?->grade_id)->whereHas('videos')->exists();
-        @endphp
-        <div class="cat-grid">
-            @if($marketCount)
-            <a href="{{ route('market.child') }}" class="cat-item">
-                <span class="cat-icon" style="background: var(--accent-yellow); color:#92400e;">🛒</span>
-                <span class="cat-label">მარკეტი</span>
-            </a>
-            @endif
-            <a href="{{ route('practice.topics') }}" class="cat-item">
-                <span class="cat-icon" style="background: var(--primary-soft); color: var(--primary);">🎯</span>
-                <span class="cat-label">სავარჯიშოები</span>
-            </a>
-            @if($lastCompleted)
-            <a href="{{ route('my.tests') }}" class="cat-item">
-                <span class="cat-icon" style="background:#e0f2fe; color:#0284c7;">📋</span>
-                <span class="cat-label">ჩემი ტესტები</span>
-            </a>
-            @endif
-            @if($hasVids)
-            <a href="{{ route('videos.library') }}" class="cat-item">
-                <span class="cat-icon" style="background:#ede9fe; color:#7c3aed;">📹</span>
-                <span class="cat-label">ვიდეოთეკა</span>
-            </a>
-            @endif
-        </div>
-
-        {{-- დღიური მიზანი --}}
-        @if($required > 0)
-        @php $goalPct = min(100, round($todayCount / $required * 100)); @endphp
-        <div class="goal-card">
-            <div class="goal-info">
-                <h4>დღიური მიზანი</h4>
-                <p>{{ $todayCount }}/{{ $required }} ტესტი დღეს — ასე განაგრძე!</p>
-                <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:{{ $goalPct }}%"></div></div>
-            </div>
-            <div class="goal-star">⭐</div>
-        </div>
-        @endif
-
         {{-- მთავარი მოქმედება --}}
         @if($activeTest)
             <a href="{{ route('test.show', $activeTest) }}" class="child-cta resume">
-                📝 გააგრძელე ტესტი →
+                <div class="child-cta-main">
+                    <span class="child-cta-icon">📝</span>
+                    <div class="child-cta-text">
+                        <div class="child-cta-title">გააგრძელე ტესტი</div>
+                    </div>
+                    <span class="child-cta-arrow">→</span>
+                </div>
             </a>
         @elseif(!$setting || !$setting->grade_id)
             <div class="child-waiting-card">
@@ -798,7 +760,13 @@
             </div>
         @else
             <a href="{{ route('test.start') }}" class="child-cta">
-                ▶ ტესტის დაწყება
+                <div class="child-cta-main">
+                    <span class="child-cta-icon">▶</span>
+                    <div class="child-cta-text">
+                        <div class="child-cta-title">ტესტის დაწყება</div>
+                    </div>
+                    <span class="child-cta-arrow">→</span>
+                </div>
             </a>
         @endif
 
@@ -848,23 +816,69 @@
             @endif
         </div>
 
-        {{-- ყოველკვირეული გამოწვევა --}}
+        {{-- შემაჯამებელი — კვირის მიმოხილვა --}}
         @php
             $weekStart  = \Carbon\Carbon::now()->startOfWeek();
             $weekEnd    = \Carbon\Carbon::now()->endOfWeek();
-            $weekDone   = auth()->user()->tests()->whereNotNull('completed_at')->whereBetween('completed_at', [$weekStart, $weekEnd])->count();
+            $weekTests  = auth()->user()->tests()->whereNotNull('completed_at')->whereBetween('completed_at', [$weekStart, $weekEnd])->get();
+            $weekDone   = $weekTests->count();
             $weekTarget = $required > 0 ? $required * 7 : 0;
+            $weekAccuracy = $weekDone > 0
+                ? round($weekTests->avg(fn($t) => $t->total_questions > 0 ? $t->correct_count / $t->total_questions * 100 : 0))
+                : null;
+
+            $doneDates = auth()->user()->tests()->whereNotNull('completed_at')
+                ->pluck('completed_at')->map(fn($d) => $d->format('Y-m-d'))->unique();
+
+            $streak = 0;
+            $cursor = \Carbon\Carbon::today();
+            if (!$doneDates->contains($cursor->format('Y-m-d'))) { $cursor = $cursor->copy()->subDay(); }
+            while ($doneDates->contains($cursor->format('Y-m-d'))) { $streak++; $cursor = $cursor->copy()->subDay(); }
+
+            $dayLabels = ['ორშ', 'სამ', 'ოთხ', 'ხუთ', 'პარ', 'შაბ', 'კვ'];
+            $weekDays = collect(range(0, 6))->map(function ($i) use ($weekStart, $doneDates, $dayLabels) {
+                $d = $weekStart->copy()->addDays($i);
+                return [
+                    'label'   => $dayLabels[$i],
+                    'done'    => $doneDates->contains($d->format('Y-m-d')),
+                    'isToday' => $d->isToday(),
+                ];
+            });
         @endphp
-        @if($weekTarget > 0)
-        @php $weekPct = min(100, round($weekDone / $weekTarget * 100)); @endphp
-        <div class="challenge-card">
-            <div class="challenge-icon">🐸</div>
-            <div class="challenge-info">
-                <h4>ყოველკვირეული გამოწვევა</h4>
-                <div class="challenge-progress-track"><div class="challenge-progress-fill" style="width:{{ $weekPct }}%"></div></div>
-                <div class="challenge-count">{{ $weekDone }} / {{ $weekTarget }}</div>
+        @if($weekTarget > 0 || $streak > 0)
+        <div class="summary-card">
+            <div class="summary-top">
+                <div class="summary-streak">
+                    <span class="summary-streak-flame">🔥</span>
+                    <div>
+                        <div class="summary-streak-num">{{ $streak }} დღე</div>
+                        <div class="summary-streak-lbl">სერია</div>
+                    </div>
+                </div>
+                @if($weekTarget > 0)
+                <div class="summary-week-pill">{{ $weekDone }}/{{ $weekTarget }} ამ კვირაში</div>
+                @endif
             </div>
-            <div class="challenge-gift">🎁</div>
+            <div class="summary-days">
+                @foreach($weekDays as $d)
+                <div class="summary-day {{ $d['done'] ? 'done' : '' }} {{ $d['isToday'] ? 'today' : '' }}">
+                    <div class="summary-day-dot">{{ $d['done'] ? '🔥' : '' }}</div>
+                    <div class="summary-day-lbl">{{ $d['label'] }}</div>
+                </div>
+                @endforeach
+            </div>
+            @if($weekAccuracy !== null)
+            <div class="summary-bottom">
+                <div class="summary-stat">
+                    <span class="summary-stat-val">{{ $weekAccuracy }}%</span>
+                    <span class="summary-stat-lbl">სიზუსტე ამ კვირაში</span>
+                </div>
+                <div class="summary-stat">
+                    <span class="summary-stat-val">{{ $weekDone }}</span>
+                    <span class="summary-stat-lbl">ტესტი ამ კვირაში</span>
+                </div>
+            </div>
+            @endif
         </div>
         @endif
 
