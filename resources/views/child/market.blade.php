@@ -6,8 +6,8 @@
 <style>
 body { font-family: 'Nunito', sans-serif; background: transparent !important; }
 .wrap { max-width: 520px; margin: 0 auto; padding: 28px 16px 80px; }
-@media (min-width: 760px)  { .wrap { max-width: 700px; } }
-@media (min-width: 1040px) { .wrap { max-width: 960px; } }
+@media (min-width: 760px)  { .wrap { max-width: 700px; } .item-grid, .reward-grid { grid-template-columns: repeat(5, 1fr); } }
+@media (min-width: 1040px) { .wrap { max-width: 960px; } .item-grid, .reward-grid { grid-template-columns: repeat(6, 1fr); } }
 
 .back-btn { display:inline-flex; align-items:center; gap:6px; margin:0 0 0; font-family:'Nunito',sans-serif; font-size:0.82rem; font-weight:800; color:#d97706; text-decoration:none; background:white; border-radius:99px; padding:8px 16px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
 .coin-pill { display:inline-flex; align-items:center; gap:6px; margin:10px 0 0; background:#fef9c3; border:1px solid #fde68a; border-radius:99px; padding:8px 16px; font-family:'Fredoka One',cursive; font-size:0.85rem; color:#92400e; }
@@ -20,7 +20,7 @@ body { font-family: 'Nunito', sans-serif; background: transparent !important; }
 .flash-err { background:#fef2f2; border:1px solid #fca5a5; border-radius:10px; padding:10px 14px; font-size:0.8rem; font-weight:700; color:#dc2626; margin-bottom:12px; }
 
 /* Item cubes — same grid language as the achievements page */
-.item-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 140px)); justify-content:center; gap:14px; margin-bottom:28px; }
+.item-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:28px; }
 .item-cube {
     background: white; border-radius: 16px; padding: 16px 12px 14px;
     text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.07);
@@ -50,7 +50,7 @@ body { font-family: 'Nunito', sans-serif; background: transparent !important; }
 }
 
 /* Approved purchases — cube style matching the achievements page's earned cards */
-.reward-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 130px)); justify-content:center; gap:10px; }
+.reward-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; }
 .reward-cube {
     background: white; border-radius: 16px; padding: 16px 10px 14px;
     text-align: center; box-shadow: 0 2px 12px rgba(245,158,11,0.15);

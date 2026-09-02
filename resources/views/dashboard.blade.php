@@ -77,15 +77,6 @@
     }
     .plan-pill:hover { background: rgba(255,255,255,0.28); }
 
-    .child-hero-banner {
-        width: 100%; box-sizing: border-box; border-radius: var(--radius-lg); padding: 22px 20px;
-        display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left;
-        background: linear-gradient(135deg, var(--primary-light), var(--accent-blue));
-        box-shadow: 0 10px 24px rgba(108,92,231,0.25);
-    }
-    .child-hero-text h2 { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: #2d2d3a; margin: 0 0 4px; }
-    .child-hero-text p { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.78rem; color: #4b4b63; margin: 0; }
-    .child-hero-avatar { font-size: 3.2rem; line-height: 1; flex-shrink: 0; filter: drop-shadow(0 6px 6px rgba(0,0,0,0.15)); }
 
     .children-section { width: 100%; }
     .section-label {
@@ -198,58 +189,44 @@
     }
     .nav-tile-label { font-family: 'Goldman', monospace; font-size: 0.62rem; color: #555; letter-spacing: 0.02em; text-align: center; }
 
+    /* ── mission card (today's action, restyled) ── */
+    .mission-card {
+        width: 100%; box-sizing: border-box; border-radius: var(--radius-lg); padding: 30px 20px;
+        min-height: 200px; display: flex; flex-direction: column; justify-content: center;
+        position: relative; overflow: hidden; background-size: cover; background-position: center;
+        background: linear-gradient(135deg, var(--primary-light), var(--accent-blue));
+        text-align: left; box-shadow: 0 10px 24px rgba(108,92,231,0.22);
+    }
+    .mission-card.resume { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .mission-badge {
+        display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.4);
+        color: #2d2d3a; font-family: 'Goldman', monospace; font-size: 0.6rem; letter-spacing: 0.04em;
+        border-radius: 100px; padding: 5px 12px; margin-bottom: 12px; align-self: flex-start;
+    }
+    .mission-card.resume .mission-badge { color: #fff; background: rgba(255,255,255,0.25); }
+    .mission-title { font-family: 'Fredoka One', cursive; font-size: 1.2rem; color: #1a1a2e; margin-bottom: 6px; line-height: 1.25; }
+    .mission-card.resume .mission-title { color: #fff; }
+    .mission-sub { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.78rem; color: #4b4b63; margin-bottom: 14px; }
+    .mission-card.resume .mission-sub { color: rgba(255,255,255,0.9); }
+    .mission-cta {
+        display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box;
+        background: #1a1a2e; color: #fff; font-family: 'Fredoka One', cursive; font-size: 1rem;
+        padding: 14px; border-radius: 16px; text-decoration: none; box-shadow: 0 6px 16px rgba(0,0,0,0.15); transition: transform 0.15s;
+    }
+    .mission-cta:hover { transform: translateY(-2px); color: #fff; }
 
-    /* ── badges preview — same card language as .summary-card ── */
-    .badges-section {
-        width: 100%; box-sizing: border-box; background: #fff; border-radius: var(--radius-lg);
-        padding: 18px 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); border: 1.5px solid #f0f0f0;
-        text-align: left;
+    /* ── 4-card stat grid ── */
+    .stat-grid-4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; }
+    @media (min-width: 520px) { .stat-grid-4 { grid-template-columns: repeat(4, 1fr); } }
+    .stat-card-4 {
+        background: #fff; border-radius: var(--radius-md); padding: 14px; text-align: left;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.05); border: 1.5px solid #f5f5f5; text-decoration: none; color: inherit;
+        display: flex; flex-direction: column; gap: 8px;
     }
-    .badges-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-    .badges-header h3 { font-family: 'Fredoka One', cursive; font-size: 0.95rem; color: #2d2d3a; margin: 0; }
-    .badges-header a { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.68rem; color: var(--primary); text-decoration: none; }
-    .badges-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-    .badge-card { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-    .badge-icon {
-        width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-        font-size: 1.4rem; background: var(--primary-soft);
-    }
-    .badge-card span { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.55rem; color: #444; text-align: center; line-height: 1.2; }
-    .badges-empty {
-        font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.72rem; color: #bbb; text-align: center;
-        padding: 10px 0 2px;
-    }
+    .stat-card-4-head { display: flex; align-items: center; gap: 5px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.58rem; color: #999; text-transform: uppercase; letter-spacing: 0.02em; }
+    .stat-card-4-val { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: #1a1a2e; }
+    .stat-card-4-link { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.58rem; color: var(--primary); }
 
-    /* ── weekly summary card ── */
-    .summary-card {
-        width: 100%; box-sizing: border-box; background: #fff; border-radius: var(--radius-lg);
-        padding: 18px 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); border: 1.5px solid #f0f0f0;
-        text-align: left;
-    }
-    .summary-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
-    .summary-streak { display: flex; align-items: center; gap: 8px; }
-    .summary-streak-flame { font-size: 1.7rem; line-height: 1; }
-    .summary-streak-num { font-family: 'Fredoka One', cursive; font-size: 1.05rem; color: #111; line-height: 1.2; }
-    .summary-streak-lbl { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.58rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; }
-    .summary-week-pill {
-        background: var(--primary-soft); color: var(--primary); font-family: 'Goldman', monospace;
-        font-size: 0.64rem; padding: 6px 12px; border-radius: 100px; letter-spacing: 0.02em; white-space: nowrap; flex-shrink: 0;
-    }
-    .summary-days { display: flex; justify-content: space-between; gap: 4px; margin-bottom: 14px; }
-    .summary-day { display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; }
-    .summary-day-dot {
-        width: 30px; height: 30px; border-radius: 50%; background: #f5f5f5;
-        display: flex; align-items: center; justify-content: center; font-size: 0.85rem;
-        border: 2px solid transparent; box-sizing: border-box;
-    }
-    .summary-day.done .summary-day-dot { background: linear-gradient(135deg, var(--accent-yellow), #f59e0b); }
-    .summary-day.today .summary-day-dot { border-color: var(--primary); }
-    .summary-day-lbl { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.55rem; color: #bbb; }
-    .summary-day.today .summary-day-lbl { color: var(--primary); }
-    .summary-bottom { display: flex; gap: 10px; padding-top: 12px; border-top: 1px solid #f5f5f5; }
-    .summary-stat { flex: 1; text-align: center; }
-    .summary-stat-val { font-family: 'Fredoka One', cursive; font-size: 1.05rem; color: #111; display: block; }
-    .summary-stat-lbl { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.56rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.04em; }
 
     /* Modal */
     .modal-overlay {
@@ -356,75 +333,6 @@
     .games-card-sub { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.7rem; opacity: 0.9; }
     .games-card-arrow { font-size: 1.1rem; flex-shrink: 0; opacity: 0.85; }
 
-    .child-stats-row {
-        display: flex; gap: 10px; width: 100%;
-    }
-    .cstat {
-        flex: 1; background: white; border-radius: var(--radius-md);
-        padding: 14px 8px; text-align: center;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-        text-decoration: none; transition: transform 0.15s;
-        border: 1.5px solid #f0f0f0;
-    }
-    .cstat:hover { transform: translateY(-2px); }
-    .cstat-val {
-        font-family: 'Fredoka One', cursive;
-        font-size: 1.25rem; color: #111; margin-bottom: 2px;
-    }
-    .cstat-val sub { font-size: 0.82rem; color: #bbb; font-family: 'Nunito', sans-serif; }
-    .cstat-lbl {
-        font-family: 'Nunito', sans-serif; font-weight: 800;
-        font-size: 0.62rem; color: #bbb; text-transform: uppercase; letter-spacing: 0.08em;
-    }
-    .child-cta {
-        display: flex; flex-direction: column; gap: 12px;
-        width: 100%; box-sizing: border-box; padding: 18px 20px;
-        background: linear-gradient(135deg, var(--primary), var(--primary-light));
-        color: white; text-decoration: none; border-radius: var(--radius-lg);
-        box-shadow: 0 6px 24px rgba(108,92,231,0.35);
-        transition: all 0.2s;
-    }
-    .child-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(108,92,231,0.45); color: white; }
-    .child-cta.resume {
-        background: linear-gradient(135deg, #f59e0b, #d97706);
-        box-shadow: 0 6px 24px rgba(245,158,11,0.35);
-    }
-    .child-cta.resume:hover { box-shadow: 0 10px 32px rgba(245,158,11,0.45); }
-    .child-cta-main { display: flex; align-items: center; gap: 12px; }
-    .child-cta-icon { font-size: 1.6rem; flex-shrink: 0; line-height: 1; }
-    .child-cta-text { flex: 1; min-width: 0; text-align: left; }
-    .child-cta-title { font-family: 'Fredoka One', cursive; font-size: 1.1rem; letter-spacing: 0.02em; line-height: 1.2; }
-    .child-cta-arrow { font-size: 1.2rem; flex-shrink: 0; opacity: 0.85; }
-    .child-done-card {
-        background: white; border-radius: var(--radius-lg); padding: 28px 20px;
-        text-align: center; width: 100%;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
-        border: 1.5px solid #f0f0f0;
-    }
-    .child-done-icon { font-size: 2.8rem; margin-bottom: 8px; }
-    .child-done-title { font-family: 'Fredoka One', cursive; font-size: 1.4rem; color: #1a7a3c; margin-bottom: 4px; }
-    .child-done-sub { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.8rem; color: #aaa; }
-    .child-waiting-card {
-        background: white; border-radius: var(--radius-lg); padding: 28px 20px;
-        text-align: center; width: 100%;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
-        border: 1.5px solid #f0f0f0;
-    }
-    .child-waiting-icon { font-size: 2.5rem; margin-bottom: 8px; }
-    .child-waiting-txt { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.88rem; color: #888; line-height: 1.6; }
-    .child-last-card {
-        background: white; border-radius: 14px; padding: 14px 18px;
-        width: 100%; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        border: 1.5px solid #f0f0f0;
-        display: flex; align-items: center; gap: 14px;
-    }
-    .clt-bar { width: 3px; height: 36px; border-radius: 99px; background: #e8f5ee; flex-shrink: 0; overflow: hidden; }
-    .clt-bar-fill { width: 100%; background: #1a7a3c; border-radius: 99px; transition: height 0.6s; }
-    .clt-info { flex: 1; }
-    .clt-lbl { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.62rem; color: #bbb; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
-    .clt-score { font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: #111; }
-    .clt-pct { font-size: 0.85rem; color: #1a7a3c; margin-left: 6px; }
-    .clt-time { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.65rem; color: #ccc; flex-shrink: 0; }
 
     /* ── responsive widths + multi-column grids on desktop (kept last so it wins the cascade) ── */
     @media (min-width: 760px) {
@@ -734,70 +642,75 @@
         @if(auth()->user()->role === 'child')
         @php
             $activeTest    = auth()->user()->tests()->whereNull('completed_at')->latest()->first();
-            $lastCompleted = auth()->user()->tests()->whereNotNull('completed_at')->latest()->first();
             $setting       = auth()->user()->childSetting;
             $required      = $setting?->tests_per_week ?? 0;
             $todayCount    = auth()->user()->tests()->whereNotNull('completed_at')->whereDate('completed_at', today())->count();
             $doneToday     = $required > 0 && $todayCount >= $required && !$activeTest;
             $coins         = $setting?->coins ?? 0;
             $achCount      = auth()->user()->achievements()->count();
+            $totalTestsCount = auth()->user()->tests()->whereNotNull('completed_at')->count();
+            $practiceTopicsCount = \App\Models\Topic::where('grade_id', $setting?->grade_id)
+                ->whereHas('questionTemplates')->count();
+
+            $doneDates = auth()->user()->tests()->whereNotNull('completed_at')
+                ->pluck('completed_at')->map(fn($d) => $d->format('Y-m-d'))->unique();
+
+            $streak = 0;
+            $cursor = \Carbon\Carbon::today();
+            if (!$doneDates->contains($cursor->format('Y-m-d'))) { $cursor = $cursor->copy()->subDay(); }
+            while ($doneDates->contains($cursor->format('Y-m-d'))) { $streak++; $cursor = $cursor->copy()->subDay(); }
         @endphp
 
-        <div class="child-hero-banner">
-            <div class="child-hero-text">
-                <h2>👋, {{ auth()->user()->name }}! </h2>
-                <p>მზად ხარ დღეს ჩემპიონო?</p>
-            </div>
-            <div class="child-hero-avatar">{{ auth()->user()->avatar === 'boy' ? '👦' : (auth()->user()->avatar === 'girl' ? '👧' : '🧒') }}</div>
-        </div>
-
-        {{-- მთავარი მოქმედება --}}
+        {{-- დღევანდელი მისია --}}
         @if($activeTest)
-            <a href="{{ route('test.show', $activeTest) }}" class="child-cta resume">
-                <div class="child-cta-main">
-                    <span class="child-cta-icon">📝</span>
-                    <div class="child-cta-text">
-                        <div class="child-cta-title">გააგრძელე ტესტი</div>
-                    </div>
-                    <span class="child-cta-arrow">→</span>
-                </div>
-            </a>
+            <div class="mission-card resume">
+                <div class="mission-badge">🎯 დღევანდელი მისია</div>
+                <div class="mission-title">👋 {{ auth()->user()->name }}, მზად ხარ დღეს ჩემპიონო?</div>
+                <div class="mission-sub">ტესტი დაწყებული გაქვს — დაასრულე და აიღე მონეტები.</div>
+                <a href="{{ route('test.show', $activeTest) }}" class="mission-cta">📝 გააგრძელე მისია →</a>
+            </div>
         @elseif(!$setting || !$setting->grade_id)
-            <div class="child-waiting-card">
-                <div class="child-waiting-icon">⏳</div>
-                <div class="child-waiting-txt">მშობელს ჯერ<br>დავალება არ დაუყენებია</div>
+            <div class="mission-card">
+                <div class="mission-badge">⏳ მოლოდინში</div>
+                <div class="mission-title">👋 {{ auth()->user()->name }}, მზად ხარ დღეს ჩემპიონო?</div>
+                <div class="mission-sub">მშობელს ჯერ დავალება არ დაუყენებია — მალე მიიღებ შენს პირველ მისიას!</div>
             </div>
         @elseif($doneToday)
-            <div class="child-done-card">
-                <div class="child-done-icon">🎉</div>
-                <div class="child-done-title">დღე დასრულდა!</div>
-                <div class="child-done-sub">{{ $todayCount }} ტესტი გააკეთე</div>
+            <div class="mission-card">
+                <div class="mission-badge">🎉 შესრულებულია</div>
+                <div class="mission-title">👋 {{ auth()->user()->name }}, მზად ხარ დღეს ჩემპიონო?</div>
+                <div class="mission-sub">დღევანდელი მისია დასრულდა! {{ $todayCount }} ტესტი გააკეთე დღეს — ყოჩაღ!</div>
             </div>
         @else
-            <a href="{{ route('test.start') }}" class="child-cta">
-                <div class="child-cta-main">
-                    <span class="child-cta-icon">▶</span>
-                    <div class="child-cta-text">
-                        <div class="child-cta-title">ტესტის დაწყება</div>
-                    </div>
-                    <span class="child-cta-arrow">→</span>
-                </div>
-            </a>
+            <div class="mission-card">
+                <div class="mission-badge">🎯 დღევანდელი მისია</div>
+                <div class="mission-title">👋 {{ auth()->user()->name }}, მზად ხარ დღეს ჩემპიონო?</div>
+                <div class="mission-sub">გახსენი ტესტი და მოიგე მონეტები სწორი პასუხებისთვის.</div>
+                <a href="{{ route('test.start') }}" class="mission-cta">🚀 მისიის დაწყება</a>
+            </div>
         @endif
 
-        {{-- სტატუს ბარათები --}}
-        <div class="child-stats-row">
-            <div class="cstat">
-                <div class="cstat-val">💰 {{ $coins }}</div>
-                <div class="cstat-lbl">მონეტები</div>
-            </div>
-            <div class="cstat">
-                <div class="cstat-val">{{ $todayCount }}<sub>/{{ $required }}</sub></div>
-                <div class="cstat-lbl">დღეს</div>
-            </div>
-            <a href="{{ route('achievements') }}" class="cstat">
-                <div class="cstat-val">🏆 {{ $achCount }}</div>
-                <div class="cstat-lbl">მიღწევები</div>
+        {{-- სტატისტიკის ბარათები --}}
+        <div class="stat-grid-4">
+            <a href="{{ route('practice.topics') }}" class="stat-card-4">
+                <div class="stat-card-4-head">🎯 სავარჯიშოები</div>
+                <div class="stat-card-4-val">{{ $practiceTopicsCount }}</div>
+                <div class="stat-card-4-link">თემა · დაწყება →</div>
+            </a>
+            <a href="{{ route('achievements') }}" class="stat-card-4">
+                <div class="stat-card-4-head">🏆 ჩემი მედლები</div>
+                <div class="stat-card-4-val">{{ $achCount }}</div>
+                <div class="stat-card-4-link">ყველას ნახვა →</div>
+            </a>
+            <a href="{{ route('my.tests') }}" class="stat-card-4">
+                <div class="stat-card-4-head">📋 ჩემი ტესტები</div>
+                <div class="stat-card-4-val">{{ $totalTestsCount }}</div>
+                <div class="stat-card-4-link">ისტორია →</div>
+            </a>
+            <a href="{{ route('market.child') }}" class="stat-card-4">
+                <div class="stat-card-4-head">🛒 მარკეტი</div>
+                <div class="stat-card-4-val">💰 {{ $coins }}</div>
+                <div class="stat-card-4-link">ნახვა →</div>
             </a>
         </div>
 
@@ -811,119 +724,6 @@
             <span class="games-card-arrow">→</span>
         </a>
 
-        {{-- ბოლოს მიღებული მედლები --}}
-        @php
-            $recentBadges = auth()->user()->achievements()
-                ->latest('earned_at')
-                ->take(4)
-                ->get()
-                ->map(fn($ca) => array_merge(
-                    ['slug' => $ca->slug, 'earned_at' => $ca->earned_at],
-                    \App\Services\AchievementService::ACHIEVEMENTS[$ca->slug] ?? []
-                ));
-        @endphp
-        <div class="badges-section">
-            <div class="badges-header">
-                <h3>🏆 ჩემი მედლები</h3>
-                <a href="{{ route('achievements') }}">ყველას ნახვა</a>
-            </div>
-            @if($recentBadges->count())
-            <div class="badges-group">
-                @foreach($recentBadges as $b)
-                <div class="badge-card">
-                    <div class="badge-icon">{{ $b['emoji'] ?? '🏅' }}</div>
-                    <span>{{ $b['name'] ?? '' }}</span>
-                </div>
-                @endforeach
-            </div>
-            @else
-            <div class="badges-empty">ჯერ არცერთი მედალი არ გაქვს — გააგრძელე ვარჯიში! 💪</div>
-            @endif
-        </div>
-
-        {{-- შემაჯამებელი — კვირის მიმოხილვა --}}
-        @php
-            $weekStart  = \Carbon\Carbon::now()->startOfWeek();
-            $weekEnd    = \Carbon\Carbon::now()->endOfWeek();
-            $weekTests  = auth()->user()->tests()->whereNotNull('completed_at')->whereBetween('completed_at', [$weekStart, $weekEnd])->get();
-            $weekDone   = $weekTests->count();
-            $weekTarget = $required > 0 ? $required * 7 : 0;
-            $weekAccuracy = $weekDone > 0
-                ? round($weekTests->avg(fn($t) => $t->total_questions > 0 ? $t->correct_count / $t->total_questions * 100 : 0))
-                : null;
-
-            $doneDates = auth()->user()->tests()->whereNotNull('completed_at')
-                ->pluck('completed_at')->map(fn($d) => $d->format('Y-m-d'))->unique();
-
-            $streak = 0;
-            $cursor = \Carbon\Carbon::today();
-            if (!$doneDates->contains($cursor->format('Y-m-d'))) { $cursor = $cursor->copy()->subDay(); }
-            while ($doneDates->contains($cursor->format('Y-m-d'))) { $streak++; $cursor = $cursor->copy()->subDay(); }
-
-            $dayLabels = ['ორშ', 'სამ', 'ოთხ', 'ხუთ', 'პარ', 'შაბ', 'კვ'];
-            $weekDays = collect(range(0, 6))->map(function ($i) use ($weekStart, $doneDates, $dayLabels) {
-                $d = $weekStart->copy()->addDays($i);
-                return [
-                    'label'   => $dayLabels[$i],
-                    'done'    => $doneDates->contains($d->format('Y-m-d')),
-                    'isToday' => $d->isToday(),
-                ];
-            });
-        @endphp
-        @if($weekTarget > 0 || $streak > 0)
-        <div class="summary-card">
-            <div class="summary-top">
-                <div class="summary-streak">
-                    <span class="summary-streak-flame">🔥</span>
-                    <div>
-                        <div class="summary-streak-num">{{ $streak }} დღე</div>
-                        <div class="summary-streak-lbl">სერია</div>
-                    </div>
-                </div>
-                @if($weekTarget > 0)
-                <div class="summary-week-pill">{{ $weekDone }}/{{ $weekTarget }} ამ კვირაში</div>
-                @endif
-            </div>
-            <div class="summary-days">
-                @foreach($weekDays as $d)
-                <div class="summary-day {{ $d['done'] ? 'done' : '' }} {{ $d['isToday'] ? 'today' : '' }}">
-                    <div class="summary-day-dot">{{ $d['done'] ? '🔥' : '' }}</div>
-                    <div class="summary-day-lbl">{{ $d['label'] }}</div>
-                </div>
-                @endforeach
-            </div>
-            @if($weekAccuracy !== null)
-            <div class="summary-bottom">
-                <div class="summary-stat">
-                    <span class="summary-stat-val">{{ $weekAccuracy }}%</span>
-                    <span class="summary-stat-lbl">სიზუსტე ამ კვირაში</span>
-                </div>
-                <div class="summary-stat">
-                    <span class="summary-stat-val">{{ $weekDone }}</span>
-                    <span class="summary-stat-lbl">ტესტი ამ კვირაში</span>
-                </div>
-            </div>
-            @endif
-        </div>
-        @endif
-
-        {{-- ბოლო ტესტი --}}
-        @if($lastCompleted)
-        @php $pct = round($lastCompleted->correct_count / $lastCompleted->total_questions * 100); @endphp
-        <div class="child-last-card">
-            <div class="clt-bar">
-                <div class="clt-bar-fill" style="height:{{ $pct }}%"></div>
-            </div>
-            <div class="clt-info">
-                <div class="clt-lbl">ბოლო ტესტი</div>
-                <div class="clt-score">
-                    {{ $lastCompleted->correct_count }}/{{ $lastCompleted->total_questions }}
-                    <span class="clt-pct">{{ $pct }}%</span>
-                </div>
-            </div>
-            <div class="clt-time">{{ $lastCompleted->completed_at->diffForHumans() }}</div>
-        </div>
-        @endif
 
         @endif
 
