@@ -516,31 +516,26 @@ body {
 </div>
 </div>
 
-{{-- ── Math Detective ── --}}
-<div class="sec" id="detective">
-    <div class="eyebrow reveal">მათემატიკური დეტექტივი</div>
-    <h2 class="sec-h2 reveal">🕵️‍♂️ გახდი მათემატიკური დეტექტივი!</h2>
-    <p class="sec-sub reveal">ეს არ არის უბრალო ტესტები, ეს ნამდვილი გამოძიებაა! ყოველი სწორად ამოხსნილი ამოცანა ბავშვს აახლოებს დიდი საიდუმლოს გახსნასთან. მიეცით თქვენს შვილს შანსი, იგრძნოს თავი ნამდვილ დეტექტივად, სადაც ლოგიკა მისი მთავარი იარაღია.</p>
+{{-- ── KidSmart Games ── --}}
+<div class="sec" id="games">
+    <div class="eyebrow reveal">KidSmart თამაშები</div>
+    <h2 class="sec-h2 reveal">🎮 ისწავლე თამაშით — არა მხოლოდ ტესტებით</h2>
+    <p class="sec-sub reveal">ტესტებს შორის ბავშვი შესვენებას თამაშით იღებს — ეთამაშება პირდაპირ KidSmart-ს, ინახავს პირად რეკორდს და ადარებს თავს ყველა სხვა ბავშვს. სწავლა არ წყდება, უბრალოდ სახალისო ხდება.</p>
     <div class="ac-outer">
-    <div class="detect-grid" id="detectTrack">
+    <div class="detect-grid" id="gamesTrack">
         <div class="detect-card">
-            <div style="font-family:'Fredoka One',cursive;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#aaa;margin-bottom:10px;">🔍 გამოძიება #1</div>
-            <div style="font-family:'Fredoka One',cursive;font-size:1.25rem;color:var(--ink);margin-bottom:14px;">ვინ მოიგო ოქროს ბურთი?</div>
-            <div class="hint-row hint-vis"><span style="min-width:20px;color:var(--green);">1.</span><span>#7 ნომრით თამაშობს</span></div>
-            <div class="hint-row hint-vis"><span style="min-width:20px;color:var(--green);">2.</span><span>ქართველია</span></div>
-            <div class="hint-row hint-lock"><span style="min-width:20px;">3.</span><span>🔒 ჩაიტვირთება ტესტი 3-ის შემდეგ</span></div>
-            <div class="hint-row hint-lock"><span style="min-width:20px;">4.</span><span>🔒 ჩაიტვირთება ტესტი 4-ის შემდეგ</span></div>
-            <div class="hint-row hint-lock"><span style="min-width:20px;">5.</span><span>🔒 ჩაიტვირთება ტესტი 5-ის შემდეგ</span></div>
+            <div style="font-family:'Fredoka One',cursive;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#aaa;margin-bottom:10px;">✊ თამაში #1</div>
+            <div style="font-family:'Fredoka One',cursive;font-size:1.25rem;color:var(--ink);margin-bottom:10px;">ქვა-ქაღალდი-მაკრატელი</div>
+            <p style="font-size:14px;color:var(--muted);line-height:1.7;font-weight:600;margin-bottom:14px;">კლასიკური თამაში KidSmart-ის წინააღმდეგ, საუკეთესო 3-დან. მოიგე და შენი გამარჯვება დაემატება საერთო ტაბლოს.</p>
+            <div class="hint-row hint-vis"><span style="min-width:20px;color:var(--green);">✓</span><span>პირადი W/L რეკორდი</span></div>
+            <div class="hint-row hint-vis"><span style="min-width:20px;color:var(--green);">✓</span><span>გვერდის განახლებისასაც გრძელდება</span></div>
         </div>
         <div class="detect-card">
-            <div style="font-family:'Fredoka One',cursive;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#aaa;margin-bottom:10px;">🔍 გამოძიება #2</div>
-            <div style="font-family:'Fredoka One',cursive;font-size:1.25rem;color:var(--ink);margin-bottom:10px;">რა საიდუმლო შეტყობინება მიიღეს სუპერგმირებმა?</div>
-            <div style="font-family:'Fredoka One',cursive;font-size:1.1rem;color:var(--orange);letter-spacing:.04em;background:#fff5f0;border-left:4px solid var(--orange);padding:10px 14px;border-radius:0 10px 10px 0;margin-bottom:12px;line-height:1.6;">
-                8-15-2-9-20-9-22-9<br>3-9-20-1-4-5-12-9-16-15
-            </div>
-            <div class="hint-row hint-vis"><span style="min-width:20px;color:var(--green);">1.</span><span>A=1, B=2, C=3 ...</span></div>
-            <div class="hint-row hint-lock"><span style="min-width:20px;">2.</span><span>🔒 ჩაიტვირთება ტესტი 2-ის შემდეგ</span></div>
-            <div class="hint-row hint-lock"><span style="min-width:20px;">3.</span><span>🔒 ჩაიტვირთება ტესტი 3-ის შემდეგ</span></div>
+            <div style="font-family:'Fredoka One',cursive;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#aaa;margin-bottom:10px;">🐺 თამაში #2</div>
+            <div style="font-family:'Fredoka One',cursive;font-size:1.25rem;color:var(--ink);margin-bottom:10px;">ბაჭია და მგლები</div>
+            <p style="font-size:14px;color:var(--muted);line-height:1.7;font-weight:600;margin-bottom:14px;">ლოგიკური სამაგიდო თამაში — მართე მგლები და დაიჭირე ბაჭია, სანამ ის კარამდე მიაღწევს. სტრატეგია და წინდახედულობა გადამწყვეტია.</p>
+            <div class="hint-row hint-vis"><span style="min-width:20px;color:var(--green);">✓</span><span>საერთო ტაბლო ყველა ბავშვთან</span></div>
+            <div class="hint-row hint-vis"><span style="min-width:20px;color:var(--green);">✓</span><span>ლოგიკური აზროვნების ვარჯიში</span></div>
         </div>
     </div>
     </div>
@@ -823,7 +818,7 @@ var QDATA = [
 })();
 
 (function() {
-    var tracks = document.querySelectorAll('#qCar, #adaptTrack, #detectTrack, .mkt-track');
+    var tracks = document.querySelectorAll('#qCar, #adaptTrack, #gamesTrack, .mkt-track');
     if (!('IntersectionObserver' in window)) {
         tracks.forEach(function(t) { t.classList.add('track-in'); });
         return;

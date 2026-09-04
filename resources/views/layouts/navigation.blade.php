@@ -166,7 +166,7 @@
             @guest
             <a class="nav-link-item" href="/#questions"    onclick="secScroll(event,'questions')"    style="font-size:0.8rem;">ამოცანები</a>
             <a class="nav-link-item" href="/#adaptive"     onclick="secScroll(event,'adaptive')"     style="font-size:0.8rem;">სწავლება</a>
-            <a class="nav-link-item" href="/#detective"    onclick="secScroll(event,'detective')"    style="font-size:0.8rem;">დეტექტივი</a>
+            <a class="nav-link-item" href="/#games"        onclick="secScroll(event,'games')"        style="font-size:0.8rem;">თამაშები</a>
             <a class="nav-link-item" href="/#market"       onclick="secScroll(event,'market')"       style="font-size:0.8rem;">ჯილდოები</a>
             <a class="nav-link-item" href="/#audience"     onclick="secScroll(event,'audience')"     style="font-size:0.8rem;">აუდიტორია</a>
             <a class="nav-link-item" href="/#parentdash"   onclick="secScroll(event,'parentdash')"   style="font-size:0.8rem;">მშობელი</a>
@@ -254,7 +254,7 @@
     @guest
     <a href="/#questions"    onclick="secScroll(event,'questions');toggleMobileMenu()"><span class="mn-icon">📐</span>ამოცანები</a>
     <a href="/#adaptive"     onclick="secScroll(event,'adaptive');toggleMobileMenu()"><span class="mn-icon">🧠</span>სწავლება</a>
-    <a href="/#detective"    onclick="secScroll(event,'detective');toggleMobileMenu()"><span class="mn-icon">🔍</span>დეტექტივი</a>
+    <a href="/#games"        onclick="secScroll(event,'games');toggleMobileMenu()"><span class="mn-icon">🎮</span>თამაშები</a>
     <a href="/#market"       onclick="secScroll(event,'market');toggleMobileMenu()"><span class="mn-icon">🎁</span>ჯილდოები</a>
     <a href="/#audience"     onclick="secScroll(event,'audience');toggleMobileMenu()"><span class="mn-icon">🎒</span>აუდიტორია</a>
     <a href="/#parentdash"   onclick="secScroll(event,'parentdash');toggleMobileMenu()"><span class="mn-icon">📊</span>მშობლის პანელი</a>
