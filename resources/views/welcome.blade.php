@@ -31,13 +31,16 @@ body {
 
 /* ── Hero ── */
 .hero-mod {
-    min-height: 92vh;
+    min-height: 92dvh;
     background: linear-gradient(150deg, #020917 0%, #081221 42%, #0c1e14 72%, #030e08 100%);
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     text-align: center;
     padding: 100px 24px 88px;
     position: relative; overflow: hidden;
+}
+@media (max-width: 640px) {
+    .hero-mod { min-height: auto; padding: 72px 22px 56px; }
 }
 .hero-mod::before {
     content: '';
@@ -178,7 +181,7 @@ body {
 .dc {
     display: flex; gap: 16px;
     overflow-x: auto; scroll-snap-type: none;
-    padding: 24px 4px 20px; scrollbar-width: none;
+    padding: 24px 24px 20px; scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
     cursor: grab; user-select: none;
 }
@@ -191,7 +194,7 @@ body {
 .car-track { }
 
 .qc {
-    flex: 0 0 296px; scroll-snap-align: start;
+    flex: 0 0 min(296px, 82vw); scroll-snap-align: start;
     background: #fff; border-radius: 20px;
     padding: 28px 18px 18px; position: relative;
     box-shadow: 0 6px 24px rgba(26,122,60,0.12);
@@ -237,13 +240,13 @@ body {
 .adapt-grid, .detect-grid {
     display: flex; gap: 16px;
     overflow-x: auto; scroll-snap-type: none;
-    padding: 8px 4px 20px; scrollbar-width: none;
+    padding: 8px 24px 20px; scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
     cursor: grab; user-select: none;
 }
 .adapt-grid::-webkit-scrollbar, .detect-grid::-webkit-scrollbar { display: none; }
 .adapt-card {
-    flex: 0 0 280px; scroll-snap-align: start;
+    flex: 0 0 min(280px, 82vw); scroll-snap-align: start;
     background: #fff; border-radius: 16px; padding: 24px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.06);
     border-left: 4px solid var(--green);
@@ -253,7 +256,7 @@ body {
 
 /* ── Detective ── */
 .detect-card {
-    flex: 0 0 300px; scroll-snap-align: start;
+    flex: 0 0 min(300px, 84vw); scroll-snap-align: start;
     background: #fff; border-radius: 16px; padding: 24px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.06);
 }
@@ -269,13 +272,13 @@ body {
 .mkt-track {
     display: flex; gap: 16px;
     overflow-x: auto; scroll-snap-type: none;
-    padding: 4px 0 16px; scrollbar-width: none;
+    padding: 4px 20px 16px; scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
     cursor: grab; user-select: none;
 }
 .mkt-track::-webkit-scrollbar { display: none; }
 .mkt-card {
-    flex: 0 0 calc(50% - 23px); scroll-snap-align: start;
+    flex: 0 0 44vw; scroll-snap-align: start;
     background: #fff; border-radius: 16px; padding: 20px 14px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.07); text-align: center;
     transition: transform 0.15s;
