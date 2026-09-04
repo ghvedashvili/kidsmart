@@ -46,6 +46,19 @@
     .pct-lo { background: #fee2e2; color: #dc2626; }
 
     .empty { text-align: center; padding: 40px 20px; color: #ccc; font-size: 0.72rem; letter-spacing: 0.08em; }
+
+    .topic-stat-row {
+        background: #fff; border: 1px solid #e8e8e8; border-radius: 10px;
+        padding: 12px 16px; margin-bottom: 8px;
+    }
+    .topic-stat-name { font-size: 0.8rem; color: #111; letter-spacing: 0.03em; margin-bottom: 8px; }
+    .topic-levels { display: flex; gap: 6px; flex-wrap: wrap; }
+    .level-pct-pill {
+        display: inline-flex; align-items: center; gap: 5px;
+        font-size: 0.66rem; letter-spacing: 0.03em; border-radius: 99px;
+        padding: 4px 10px; font-weight: 700;
+    }
+    .level-pct-pill .lvl { opacity: 0.65; font-weight: 400; }
 </style>
 
 <div class="wrap">
@@ -71,6 +84,22 @@
             <div class="stat-label">დღეს</div>
         </div>
     </div>
+
+    @if($topicStats->count())
+    <div class="section-label">თემების მიხედვით</div>
+    @foreach($topicStats as $topicName => $levels)
+    <div class="topic-stat-row">
+        <div class="topic-stat-name">{{ $topicName }}</div>
+        <div class="topic-levels">
+            @foreach($levels as $lvl)
+            <span class="level-pct-pill {{ $lvl->pct >= 80 ? 'pct-hi' : ($lvl->pct >= 50 ? 'pct-mid' : 'pct-lo') }}">
+                <span class="lvl">დონე {{ $lvl->difficulty }}</span> {{ $lvl->pct }}%
+            </span>
+            @endforeach
+        </div>
+    </div>
+    @endforeach
+    @endif
 
     <div class="section-label">ტესტების ისტორია</div>
 

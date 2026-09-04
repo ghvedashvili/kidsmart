@@ -727,6 +727,7 @@
             'admin.themes'    => ['route' => 'admin.themes.index',      'icon' => '🎨', 'name' => 'თემატიკა'],
             'admin.topics'    => ['route' => 'admin.topics.index',      'icon' => '📚', 'name' => 'თემები'],
             'admin.questions' => ['route' => 'admin.questions.index',   'icon' => '❓',  'name' => 'კითხვები'],
+            'admin.qcounts'   => ['route' => 'admin.question-counts.index', 'icon' => '🔢', 'name' => 'ტესტის ზომა'],
             'admin.users'     => ['route' => 'admin.users.index',       'icon' => '👥', 'name' => 'მომხმარებლები'],
             'admin.perms'     => ['route' => 'admin.permissions.index', 'icon' => '🔐', 'name' => 'ნებართვები'],
             'admin.packages'  => ['route' => 'admin.packages.index',    'icon' => '📦', 'name' => 'პაკეტები'],

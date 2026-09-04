@@ -35,8 +35,30 @@ class ChildSettingsController extends Controller
         $todayCount  = $tests->filter(fn($t) => $t->completed_at->isToday())->count();
         $required    = $child->childSetting?->tests_per_week ?? 0;
 
+        $topicStats = \App\Models\TestAnswer::query()
+            ->join('test_questions', 'test_answers.test_question_id', '=', 'test_questions.id')
+            ->join('tests', 'test_answers.test_id', '=', 'tests.id')
+            ->join('question_templates', 'test_questions.template_id', '=', 'question_templates.id')
+            ->join('topics', 'question_templates.topic_id', '=', 'topics.id')
+            ->where('tests.child_id', $child->id)
+            ->whereNotNull('tests.completed_at')
+            ->selectRaw('topics.id as topic_id, topics.name as topic_name, question_templates.difficulty as difficulty, SUM(test_answers.is_correct) as correct, COUNT(*) as total')
+            ->groupBy('topics.id', 'topics.name', 'question_templates.difficulty')
+            ->orderBy('topics.name')
+            ->orderBy('question_templates.difficulty')
+            ->get()
+            ->map(fn ($r) => (object) [
+                'topic_id'   => $r->topic_id,
+                'topic_name' => $r->topic_name,
+                'difficulty' => $r->difficulty,
+                'correct'    => $r->correct,
+                'total'      => $r->total,
+                'pct'        => $r->total > 0 ? round($r->correct / $r->total * 100) : 0,
+            ])
+            ->groupBy('topic_name');
+
         return view('parent.child-stats', compact(
-            'child', 'tests', 'totalTests', 'avgScore', 'todayCount', 'required'
+            'child', 'tests', 'totalTests', 'avgScore', 'todayCount', 'required', 'topicStats'
         ));
     }
 

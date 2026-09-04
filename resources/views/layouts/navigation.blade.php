@@ -199,6 +199,9 @@
             @if($__canAdm('admin.questions'))
             <a class="nav-link-item{{ request()->routeIs('admin.questions.*') ? ' nav-act' : '' }}" href="{{ route('admin.questions.index') }}" style="font-size:0.74rem;">კითხვები</a>
             @endif
+            @if($__canAdm('admin.qcounts'))
+            <a class="nav-link-item{{ request()->routeIs('admin.question-counts.*') ? ' nav-act' : '' }}" href="{{ route('admin.question-counts.index') }}" style="font-size:0.74rem;">ტესტის ზომა</a>
+            @endif
             @if($__canAdm('admin.users'))
             <a class="nav-link-item{{ request()->routeIs('admin.users.*') ? ' nav-act' : '' }}" href="{{ route('admin.users.index') }}" style="font-size:0.74rem;">მომხ.</a>
             @endif
@@ -286,6 +289,9 @@
     @endif
     @if($__mCan('admin.questions'))
     <a href="{{ route('admin.questions.index') }}" onclick="toggleMobileMenu()"><span class="mn-icon">❓</span>კითხვები</a>
+    @endif
+    @if($__mCan('admin.qcounts'))
+    <a href="{{ route('admin.question-counts.index') }}" onclick="toggleMobileMenu()"><span class="mn-icon">🔢</span>ტესტის ზომა</a>
     @endif
     @if($__mCan('admin.users'))
     <a href="{{ route('admin.users.index') }}" onclick="toggleMobileMenu()"><span class="mn-icon">👥</span>მომხმარებლები</a>

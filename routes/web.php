@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\SubscriptionController;
+use App\Http\Controllers\Admin\TestQuestionCountController;
 use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\MarketController;
 use App\Http\Controllers\PracticeController;
@@ -227,4 +228,9 @@ Route::middleware(['auth', 'admin', 'role.permission'])->group(function () {
     Route::get('/admin/questions/{question}/edit',     [QuestionTemplateController::class, 'edit'])->name('admin.questions.edit');
     Route::put('/admin/questions/{question}',          [QuestionTemplateController::class, 'update'])->name('admin.questions.update');
     Route::delete('/admin/questions/{question}',       [QuestionTemplateController::class, 'destroy'])->name('admin.questions.destroy');
+
+    Route::get('/admin/question-counts',                       [TestQuestionCountController::class, 'index'])->name('admin.question-counts.index');
+    Route::post('/admin/question-counts',                      [TestQuestionCountController::class, 'store'])->name('admin.question-counts.store');
+    Route::put('/admin/question-counts/{testQuestionCount}',   [TestQuestionCountController::class, 'update'])->name('admin.question-counts.update');
+    Route::delete('/admin/question-counts/{testQuestionCount}', [TestQuestionCountController::class, 'destroy'])->name('admin.question-counts.destroy');
 });

@@ -180,6 +180,15 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
             <span style="font-size:0.7rem;opacity:0.85;font-weight:700;">სულ: {{ $achievement_result['total_coins'] }}</span>
         </span>
     </div>
+    @if(($achievement_result['level_change'] ?? null) === 'up')
+    <div style="margin-top:8px;">
+        <span class="coins-pill" style="background:#dcfce7;color:#15803d;">🚀 დონე აიწია! ახლა დონე {{ $achievement_result['difficulty'] }}-ზე ხარ</span>
+    </div>
+    @elseif(($achievement_result['level_change'] ?? null) === 'down')
+    <div style="margin-top:8px;">
+        <span class="coins-pill" style="background:#fef3c7;color:#92400e;">💪 დონე შემცირდა {{ $achievement_result['difficulty'] }}-ზე — ივარჯიშე და დაბრუნდები!</span>
+    </div>
+    @endif
     @if(count($achievement_result['new_achievements']))
     <div class="ach-unlocked">
         @foreach($achievement_result['new_achievements'] as $ach)

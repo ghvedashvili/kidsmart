@@ -38,36 +38,61 @@ class AchievementService
         // 3. Achievements
         $newAchievements = $this->checkAchievements($child, $test, $setting, $pct);
 
+        // 4. Level (difficulty) re-evaluation — every 7 completed tests
+        $levelChange = $this->adjustLevelEvery7Tests($setting, $child);
+
         return [
-            'coins'           => $coins,
-            'total_coins'     => $setting->coins,
-            'new_achievements' => $newAchievements,
-            'difficulty'      => $setting->difficulty,
+            'coins'             => $coins,
+            'total_coins'       => $setting->coins,
+            'new_achievements'  => $newAchievements,
+            'difficulty'        => $setting->difficulty,
+            'level_change'      => $levelChange,
         ];
     }
 
-    private function adjustDifficulty(ChildSetting $setting, float $pct): void
+    /**
+     * Re-evaluates the child's level every 7 completed tests, based on their combined
+     * correct-answer rate across those 7 tests: >85% moves up a level, <60% moves down,
+     * 60–85% (inclusive) stays. Capped between level 1 and 3. The counter resets to 0
+     * after each evaluation so this fires again after the next 7 tests, not on a rolling
+     * window.
+     */
+    private function adjustLevelEvery7Tests(ChildSetting $setting, User $child): ?string
     {
-        $streak = $setting->difficulty_streak;
+        $setting->increment('tests_since_level_review');
+        $setting->refresh();
 
-        if ($pct >= 0.8) {
-            $streak = $streak >= 0 ? $streak + 1 : 1;
-        } elseif ($pct <= 0.4) {
-            $streak = $streak <= 0 ? $streak - 1 : -1;
-        } else {
-            $streak = 0;
+        if ($setting->tests_since_level_review < 7) {
+            return null;
         }
 
-        $diff = $setting->difficulty;
-        if ($streak >= 3) {
-            $diff   = min(5, $diff + 1);
-            $streak = 0;
-        } elseif ($streak <= -3) {
-            $diff   = max(1, $diff - 1);
-            $streak = 0;
+        $recentTests = Test::where('child_id', $child->id)
+            ->whereNotNull('completed_at')
+            ->latest('completed_at')
+            ->take(7)
+            ->get();
+
+        $totalQuestions = $recentTests->sum('total_questions');
+        $totalCorrect   = $recentTests->sum('correct_count');
+        $pct            = $totalQuestions > 0 ? ($totalCorrect / $totalQuestions) * 100 : 0;
+
+        $before = $setting->difficulty;
+        $after  = $before;
+
+        if ($pct > 85) {
+            $after = min(3, $before + 1);
+        } elseif ($pct < 60) {
+            $after = max(1, $before - 1);
         }
 
-        $setting->update(['difficulty' => $diff, 'difficulty_streak' => $streak]);
+        $setting->update([
+            'difficulty'                => $after,
+            'tests_since_level_review'  => 0,
+        ]);
+
+        if ($after > $before) return 'up';
+        if ($after < $before) return 'down';
+        return 'same';
     }
 
     private function checkAchievements(User $child, Test $test, ChildSetting $setting, float $pct): array
