@@ -98,80 +98,85 @@
     .add-card:hover .add-card-plus { border-color: var(--primary); }
     .add-card-label { font-family: 'Goldman', monospace; font-size: 0.62rem; letter-spacing: 0.04em; text-align: center; }
 
-    /* ── child card (parent view) — colored side panel + main info panel ── */
+    /* ── child card (parent view) — modern flowing profile card ── */
     .children-grid { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; }
     .child-card {
-        background: #fff; border-radius: var(--radius-lg); overflow: hidden;
-        display: flex; align-items: stretch; height: 100%;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.06); border: 1px solid #f0f0f0;
+        background: #fff; border-radius: var(--radius-lg);
+        display: flex; flex-direction: column; gap: 14px;
+        padding: 16px 16px 14px;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.055); border: 1px solid #f2f2f5;
+        transition: box-shadow 0.2s;
     }
-    .cc-side {
-        width: 78px; flex-shrink: 0;
-        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
-        padding: 12px 6px; background: linear-gradient(160deg, var(--primary), var(--primary-light));
-    }
-    .children-grid .child-card:nth-child(3n+2) .cc-side { background: linear-gradient(160deg, var(--accent-pink), #fca5a5); }
-    .children-grid .child-card:nth-child(3n+3) .cc-side { background: linear-gradient(160deg, #2fae74, var(--accent-green)); }
-    .cc-side-name {
-        font-family: 'Goldman', monospace; font-size: 0.72rem; color: #fff; text-align: center;
-        letter-spacing: 0.02em; line-height: 1.25; max-width: 100%;
-        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-    }
+    .child-card:hover { box-shadow: 0 8px 26px rgba(0,0,0,0.09); }
+
+    .cc-header { display: flex; align-items: center; gap: 12px; }
     .cc-avatar-picker {
-        width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; position: relative;
-        background: rgba(255,255,255,0.22); border: 2px dashed rgba(255,255,255,0.6);
-        color: #fff; font-size: 1.3rem; display: flex; align-items: center; justify-content: center;
-        cursor: pointer; transition: background 0.2s;
+        width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0; position: relative;
+        background: linear-gradient(160deg, var(--primary), var(--primary-light));
+        border: none; color: #fff; font-size: 1.5rem; display: flex; align-items: center; justify-content: center;
+        cursor: pointer; transition: transform 0.15s; box-shadow: 0 4px 12px rgba(108,92,231,0.32);
     }
-    .cc-avatar-picker:hover { background: rgba(255,255,255,0.32); }
+    .cc-avatar-picker:hover { transform: scale(1.05); }
+    .children-grid .child-card:nth-child(3n+2) .cc-avatar-picker { background: linear-gradient(160deg, var(--accent-pink), #fca5a5); box-shadow: 0 4px 12px rgba(255,118,117,0.32); }
+    .children-grid .child-card:nth-child(3n+3) .cc-avatar-picker { background: linear-gradient(160deg, #2fae74, var(--accent-green)); box-shadow: 0 4px 12px rgba(47,174,116,0.32); }
     .cc-avatar-picker-edit {
         position: absolute; bottom: -2px; right: -2px; width: 16px; height: 16px; border-radius: 50%;
         background: #fff; color: #666; font-size: 0.5rem; display: flex; align-items: center; justify-content: center;
         box-shadow: 0 1px 3px rgba(0,0,0,0.25);
     }
 
-    .cc-main { flex: 1; min-width: 0; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
-    .cc-top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; }
-    .cc-tags { display: flex; gap: 4px; flex-wrap: wrap; min-width: 0; }
-    .cc-tag {
-        font-family: 'Goldman', monospace; font-size: 0.55rem; color: var(--primary);
-        background: var(--primary-soft); border: none; border-radius: 100px;
-        padding: 3px 8px; white-space: nowrap;
+    .cc-header-info { flex: 1; min-width: 0; }
+    .cc-name-row { display: flex; align-items: baseline; gap: 7px; }
+    .cc-name {
+        font-family: 'Goldman', monospace; font-size: 0.84rem; color: #111;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .cc-mini-actions { display: flex; gap: 4px; flex-shrink: 0; }
-    .cc-mini-btn {
-        width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-        font-size: 0.66rem; border: none; cursor: pointer; text-decoration: none;
-    }
-    .cc-mini-btn.remind { background: #ecfdf5; color: #059669; }
-    .cc-mini-btn.edit { background: #f5f5f5; color: #888; }
     .cc-code {
-        font-family: 'Goldman', monospace; font-size: 0.58rem; color: #bbb;
-        letter-spacing: 0.1em; cursor: pointer; white-space: nowrap;
+        font-family: 'Goldman', monospace; font-size: 0.54rem; color: #cfcfd6;
+        letter-spacing: 0.08em; cursor: pointer; white-space: nowrap; flex-shrink: 0;
     }
     .cc-code:hover { color: #888; }
+    .cc-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+    .cc-tag {
+        font-family: 'Goldman', monospace; font-size: 0.53rem; color: #888;
+        background: #f4f4f7; border: none; border-radius: 100px;
+        padding: 3px 8px; white-space: nowrap;
+    }
 
-    .cc-stats-row { display: flex; gap: 6px; }
+    .cc-mini-actions { display: flex; gap: 5px; flex-shrink: 0; }
+    .cc-mini-btn {
+        width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        font-size: 0.66rem; border: none; cursor: pointer; text-decoration: none;
+        background: #f5f5f7; color: #999; transition: background 0.15s;
+    }
+    .cc-mini-btn.remind { background: #ecfdf5; color: #059669; }
+    .cc-mini-btn:hover { filter: brightness(0.96); }
+
+    .cc-stats-row {
+        display: flex; align-items: stretch; background: #fafafb; border-radius: 14px; padding: 9px 4px;
+    }
     .cc-stat {
-        flex: 1; min-width: 0; text-align: center; background: var(--primary-soft); border-radius: var(--radius-sm);
-        padding: 8px 4px; display: flex; flex-direction: column; align-items: center; gap: 2px;
+        flex: 1; min-width: 0; text-align: center; position: relative;
+        display: flex; flex-direction: column; align-items: center; gap: 2px;
     }
-    .cc-stat-icon { font-size: 0.9rem; line-height: 1; }
+    .cc-stat:not(:last-child)::after {
+        content: ''; position: absolute; right: 0; top: 12%; bottom: 12%; width: 1px; background: #e9e9ee;
+    }
+    .cc-stat-icon { font-size: 0.86rem; line-height: 1; }
     .cc-stat-val { font-family: 'Goldman', monospace; font-size: 0.7rem; color: #111; }
-    .cc-stat-lbl { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.46rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.02em; }
+    .cc-stat-lbl { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.44rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.02em; }
 
-    .cc-tiles-row { display: flex; gap: 6px; margin-top: auto; }
+    .cc-tiles-row { display: flex; gap: 8px; }
     .cc-tile {
-        flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-        background: var(--primary-soft); border-radius: var(--radius-sm); padding: 10px 6px; position: relative;
-        text-decoration: none; transition: background 0.2s;
+        flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 0;
+        background: var(--primary-soft); color: var(--primary); border-radius: 100px; padding: 9px 8px; position: relative;
+        text-decoration: none; transition: background 0.15s; font-family: 'Goldman', monospace; font-size: 0.6rem; letter-spacing: 0.02em;
     }
-    .cc-tile:hover { background: #e2ddff; }
-    .cc-tile-icon { font-size: 1.1rem; }
-    .cc-tile-label { font-family: 'Goldman', monospace; font-size: 0.58rem; color: #555; letter-spacing: 0.02em; }
+    .cc-tile:hover { background: #e2ddff; color: var(--primary); }
+    .cc-tile-icon { font-size: 0.86rem; line-height: 1; }
     .cc-tile-badge {
-        position: absolute; top: 6px; right: 8px; background: #dc2626; color: #fff;
-        font-family: 'Goldman', monospace; font-size: 0.5rem; font-weight: 700;
+        position: absolute; top: -4px; right: 2px; background: #dc2626; color: #fff;
+        font-family: 'Goldman', monospace; font-size: 0.48rem; font-weight: 700;
         border-radius: 100px; padding: 1px 5px; min-width: 14px; text-align: center;
     }
 
@@ -457,70 +462,74 @@
                 $pendingMarket = \App\Models\MarketPurchase::where('child_id', $child->id)->where('status','pending')->count();
             @endphp
             <div class="child-card" style="{{ !$child->is_active ? 'opacity:0.55;' : '' }}">
-                <div class="cc-side">
-                    <div class="cc-side-name">{{ $child->name }}</div>
+                @if(!$child->is_active)
+                <div style="display:flex;align-items:center;gap:6px;background:#fef2f2;border:1px solid #fecaca;border-radius:5px;padding:5px 8px;font-size:0.6rem;color:#dc2626;">
+                    <span>⊘</span>
+                    <span>გათიშული</span>
+                    <button type="button" onclick="document.getElementById('plansModal').classList.add('open')"
+                        style="margin-left:auto;background:none;border:1px solid #fca5a5;color:#dc2626;font-family:'Goldman',monospace;font-size:0.56rem;padding:2px 7px;border-radius:3px;cursor:pointer;white-space:nowrap;">↑ გეგმა</button>
+                </div>
+                @endif
+
+                <div class="cc-header">
                     <button type="button" class="cc-avatar-picker" title="პროფილის არჩევა"
                         onclick="document.getElementById('avatarModal{{ $child->id }}').classList.add('open')">
                         {{ $child->avatar === 'boy' ? '👦' : ($child->avatar === 'girl' ? '👧' : '👤') }}
                         <span class="cc-avatar-picker-edit">✎</span>
                     </button>
-                </div>
-                <div class="cc-main">
-                    @if(!$child->is_active)
-                    <div style="display:flex;align-items:center;gap:6px;background:#fef2f2;border:1px solid #fecaca;border-radius:5px;padding:5px 8px;font-size:0.6rem;color:#dc2626;">
-                        <span>⊘</span>
-                        <span>გათიშული</span>
-                        <button type="button" onclick="document.getElementById('plansModal').classList.add('open')"
-                            style="margin-left:auto;background:none;border:1px solid #fca5a5;color:#dc2626;font-family:'Goldman',monospace;font-size:0.56rem;padding:2px 7px;border-radius:3px;cursor:pointer;white-space:nowrap;">↑ გეგმა</button>
-                    </div>
-                    @endif
-                    <div class="cc-top-row">
+                    <div class="cc-header-info">
+                        <div class="cc-name-row">
+                            <span class="cc-name">{{ $child->name }}</span>
+                            @if($child->child_code)
+                            <span class="cc-code" onclick="copyChildCode(this, '{{ $child->child_code }}')"
+                                title="კოდის კოპირება">{{ $child->child_code }}</span>
+                            @endif
+                        </div>
                         <div class="cc-tags">
                             <span class="cc-tag">{{ $s?->grade?->name ?? 'კლასი —' }}</span>
                             @if($s)
                             <span class="cc-tag">დონე {{ $s->difficulty }}</span>
                             @endif
                         </div>
-                        <div class="cc-mini-actions">
-                            <button type="button" class="cc-mini-btn remind" title="შეხსენება"
-                                onclick="openRemind({{ $child->id }}, '{{ addslashes($child->name) }}')">🔔</button>
-                            <button type="button" class="cc-mini-btn edit" title="რედაქტირება"
-                                onclick="document.getElementById('editChildModal{{ $child->id }}').classList.add('open')">⚙</button>
-                        </div>
                     </div>
-                    @if($child->child_code)
-                    <span class="cc-code" onclick="copyChildCode(this, '{{ $child->child_code }}')"
-                        title="კოდის კოპირება">{{ $child->child_code }}</span>
-                    @endif
-                    @if($s)
-                    <div class="cc-stats-row">
-                        <div class="cc-stat">
-                            <span class="cc-stat-icon">📅</span>
-                            <span class="cc-stat-val">{{ $todayDone }}/{{ $s->tests_per_week }}</span>
-                            <span class="cc-stat-lbl">დღეს</span>
-                        </div>
-                        <div class="cc-stat">
-                            <span class="cc-stat-icon">💰</span>
-                            <span class="cc-stat-val">{{ $s->coins ?? 0 }}</span>
-                            <span class="cc-stat-lbl">მონეტა</span>
-                        </div>
+                    <div class="cc-mini-actions">
+                        <button type="button" class="cc-mini-btn remind" title="შეხსენება"
+                            onclick="openRemind({{ $child->id }}, '{{ addslashes($child->name) }}')">🔔</button>
+                        <button type="button" class="cc-mini-btn edit" title="რედაქტირება"
+                            onclick="document.getElementById('editChildModal{{ $child->id }}').classList.add('open')">⚙</button>
                     </div>
-                    @endif
-                    <div class="cc-tiles-row">
-                        <a href="{{ route('market.index', $child) }}" class="cc-tile">
-                            <span class="cc-tile-icon">🛒</span>
-                            <span class="cc-tile-label">მარკეტი</span>
-                            @if($pendingMarket)<span class="cc-tile-badge">{{ $pendingMarket }}</span>@endif
-                        </a>
-                        <a href="{{ route('child.stats', $child) }}" class="cc-tile">
-                            <span class="cc-tile-icon">📊</span>
-                            <span class="cc-tile-label">სტატისტიკა</span>
-                        </a>
-                    </div>
-                    @if(session('reminder_sent_' . $child->id))
-                    <div style="font-family:'Goldman',monospace;font-size:0.6rem;color:#059669;">&#10003; შეხსენება გაიგზავნა</div>
-                    @endif
                 </div>
+
+                @if($s)
+                <div class="cc-stats-row">
+                    <div class="cc-stat">
+                        <span class="cc-stat-icon">📅</span>
+                        <span class="cc-stat-val">{{ $todayDone }}/{{ $s->tests_per_week }}</span>
+                        <span class="cc-stat-lbl">დღეს</span>
+                    </div>
+                    <div class="cc-stat">
+                        <span class="cc-stat-icon">💰</span>
+                        <span class="cc-stat-val">{{ $s->coins ?? 0 }}</span>
+                        <span class="cc-stat-lbl">მონეტა</span>
+                    </div>
+                </div>
+                @endif
+
+                <div class="cc-tiles-row">
+                    <a href="{{ route('market.index', $child) }}" class="cc-tile">
+                        <span class="cc-tile-icon">🛒</span>
+                        <span>მარკეტი</span>
+                        @if($pendingMarket)<span class="cc-tile-badge">{{ $pendingMarket }}</span>@endif
+                    </a>
+                    <a href="{{ route('child.stats', $child) }}" class="cc-tile">
+                        <span class="cc-tile-icon">📊</span>
+                        <span>სტატისტიკა</span>
+                    </a>
+                </div>
+
+                @if(session('reminder_sent_' . $child->id))
+                <div style="font-family:'Goldman',monospace;font-size:0.6rem;color:#059669;margin-top:-6px;">&#10003; შეხსენება გაიგზავნა</div>
+                @endif
             </div>
             @empty
             <div class="no-children">
@@ -578,7 +587,7 @@
 
                     <div class="mlbl">ტესტი დღეში</div>
                     <div class="mrow">
-                        @for($i=1; $i<=5; $i++)
+                        @for($i=1; $i<=3; $i++)
                         <label class="mchip {{ ($es?->tests_per_week ?? 3) == $i ? 'sel' : '' }}"
                             onclick="chipSingle(this,'etpw{{ $child->id }}','{{ $i }}')">{{ $i }}</label>
                         @endfor
@@ -875,6 +884,16 @@
                 value="{{ old('name') }}" required maxlength="50" autocomplete="off">
             @error('name')<div class="merr">{{ $message }}</div>@enderror
 
+            {{-- Gender / avatar --}}
+            <div class="mlbl">სქესი</div>
+            <div class="mrow" id="genderRow">
+                <label class="mchip {{ old('avatar') == 'boy' ? 'sel' : '' }}"
+                    onclick="chipSingle(this,'avatar_input','boy')">👦 ბიჭი</label>
+                <label class="mchip {{ old('avatar') == 'girl' ? 'sel' : '' }}"
+                    onclick="chipSingle(this,'avatar_input','girl')">👧 გოგონა</label>
+            </div>
+            <input type="hidden" name="avatar" id="avatar_input" value="{{ old('avatar') }}">
+
             {{-- Grade --}}
             <div class="mlbl">კლასი <span>*</span></div>
             <div class="mrow" id="gradeRow">
@@ -889,7 +908,7 @@
             {{-- Tests per day --}}
             <div class="mlbl">ტესტი დღეში</div>
             <div class="mrow" id="tpwRow">
-                @for($i=1; $i<=5; $i++)
+                @for($i=1; $i<=3; $i++)
                 <label class="mchip {{ old('tests_per_week', 3) == $i ? 'sel' : '' }}"
                     onclick="chipSingle(this,'tpw_input','{{ $i }}')">{{ $i }}</label>
                 @endfor
