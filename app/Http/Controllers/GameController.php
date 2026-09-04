@@ -28,6 +28,12 @@ class GameController extends Controller
             'route' => 'games.memory',
             'type'  => 'score',
         ],
+        'quoridor' => [
+            'name'  => 'ქუორიდორი 5×5',
+            'icon'  => '🧱',
+            'route' => 'games.quoridor',
+            'type'  => 'versus',
+        ],
     ];
 
     // ── Games hub ────────────────────────────────────────────────────────────
@@ -244,5 +250,66 @@ class GameController extends Controller
             ]);
 
         return response()->json(['leaderboard' => $top]);
+    }
+
+    // ── ქუორიდორი 5×5 (Quoridor) ────────────────────────────────────────────
+    public function quoridor()
+    {
+        $child = auth()->user();
+        abort_if($child->role !== 'child', 403);
+
+        $session = GameSession::forChild($child->id, 'quoridor');
+        $global  = GameGlobalStat::forGame('quoridor');
+
+        return view('child.games.quoridor', compact('session', 'global'));
+    }
+
+    public function quoridorState(Request $request): JsonResponse
+    {
+        $child = auth()->user();
+        abort_if($child->role !== 'child', 403);
+
+        $data = $request->validate([
+            'state' => 'required|array',
+        ]);
+
+        $session = GameSession::forChild($child->id, 'quoridor');
+        $session->state = $data['state'];
+        $session->save();
+
+        return response()->json(['ok' => true]);
+    }
+
+    public function quoridorFinish(Request $request): JsonResponse
+    {
+        $child = auth()->user();
+        abort_if($child->role !== 'child', 403);
+
+        $data = $request->validate([
+            'result' => 'required|in:win,lose',
+        ]);
+
+        $session = GameSession::forChild($child->id, 'quoridor');
+        $global  = GameGlobalStat::forGame('quoridor');
+
+        if ($data['result'] === 'win') {
+            $session->wins++;
+            $global->increment('total_wins');
+        } else {
+            $session->losses++;
+            $global->increment('total_losses');
+        }
+        $session->state = null;
+        $session->save();
+        $global->refresh();
+
+        return response()->json([
+            'wins'   => $session->wins,
+            'losses' => $session->losses,
+            'global' => [
+                'total_wins'   => $global->total_wins,
+                'total_losses' => $global->total_losses,
+            ],
+        ]);
     }
 }

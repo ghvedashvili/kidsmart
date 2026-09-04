@@ -137,6 +137,10 @@ Route::middleware(['auth', 'role.permission'])->group(function () {
     Route::post('/games/memory/finish', [GameController::class, 'memoryFinish'])->name('games.memory.finish');
     Route::get('/games/memory/leaderboard', [GameController::class, 'memoryLeaderboard'])->name('games.memory.leaderboard');
 
+    Route::get('/games/quoridor', [GameController::class, 'quoridor'])->name('games.quoridor');
+    Route::post('/games/quoridor/state', [GameController::class, 'quoridorState'])->name('games.quoridor.state');
+    Route::post('/games/quoridor/finish', [GameController::class, 'quoridorFinish'])->name('games.quoridor.finish');
+
     // მარკეტი — parent manages
     Route::get('/children/{child}/market',              [MarketController::class, 'index'])->name('market.index');
     Route::post('/children/{child}/market/items',       [MarketController::class, 'store'])->name('market.store');
