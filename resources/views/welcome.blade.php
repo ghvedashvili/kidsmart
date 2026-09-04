@@ -135,6 +135,7 @@ body {
     backdrop-filter: blur(12px);
 }
 .btn-ghost:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.25); color: #fff; }
+
 .scroll-cue {
     position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
     color: rgba(255,255,255,0.18); font-size: 20px; z-index: 1;
@@ -467,14 +468,14 @@ body {
     <div class="hero-orb hero-orb-1"></div>
     <div class="hero-orb hero-orb-2"></div>
     <div class="hero-orb hero-orb-3"></div>
-   
+
     <h1 class="hero-h1">
         ბავშვი სწავლობს იმ ენაზე,<br>
         <em>რომელიც მას უყვარს.</em>
     </h1>
     <p class="hero-sub">ჩვენ ვქმნით ამოცანებს ბავშვის სამყაროდან — ფეხბურთიდან, კოსმოსიდან, სუპერგმირებიდან.</p>
     <div class="hero-btns">
-        <button class="btn-main" onclick="document.getElementById('loginNavBtn')?.click()">
+        <button class="btn-main" onclick="toggleLoginModal(event)">
             დაიწყე ახლა ✏️
         </button>
         <a class="btn-ghost" href="#questions" onclick="secScroll(event,'questions')">სცადე ამოცანა ↓</a>
@@ -689,7 +690,7 @@ body {
                 <li>დღეში 1 ტესტი</li>
                 <li>მარტივი სტატისტიკა</li>
             </ul>
-            <button class="price-btn price-btn-free" onclick="document.getElementById('loginNavBtn')?.click()">დაიწყე უფასოდ</button>
+            <button class="price-btn price-btn-free" onclick="toggleLoginModal(event)">დაიწყე უფასოდ</button>
         </div>
         <div class="price-card featured reveal">
             <div class="price-badge">✨ ყველაზე პოპულარული</div>
@@ -703,7 +704,7 @@ body {
                 <li>მშობლის სრული ანალიტიკა და გრაფიკები</li>
                 <li>ვირტუალური ოთახის სრული წვდომა</li>
             </ul>
-            <button class="price-btn price-btn-main" onclick="document.getElementById('loginNavBtn')?.click()">გახდი პრემიუმი</button>
+            <button class="price-btn price-btn-main" onclick="toggleLoginModal(event)">გახდი პრემიუმი</button>
         </div>
         <div class="price-card reveal">
             <div class="price-name">ჩემპიონი</div>
@@ -715,7 +716,7 @@ body {
                 <li>პერსონალური სერტიფიკატი წლის ბოლოს</li>
                 <li>პრიორიტეტული მხარდაჭერა</li>
             </ul>
-            <button class="price-btn price-btn-year" onclick="document.getElementById('loginNavBtn')?.click()">დაზოგე ახლავე</button>
+            <button class="price-btn price-btn-year" onclick="toggleLoginModal(event)">დაზოგე ახლავე</button>
         </div>
     </div>
 </div>
@@ -726,7 +727,7 @@ body {
     <h2 class="cta-h2">დაიწყე დღეს.<br>პირველი ამოცანა — 2 წუთში.</h2>
     <p class="cta-sub">Google-ით შესვლა · ბარათი არ სჭირდება.</p>
     <button class="btn-main" style="font-size:1.15rem;padding:16px 44px;"
-        onclick="document.getElementById('loginNavBtn')?.click()">
+        onclick="toggleLoginModal(event)">
         შექმენი პროფილი — უფასოდ ✏️
     </button>
 </div>

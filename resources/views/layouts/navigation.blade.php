@@ -40,15 +40,57 @@
 }
 .google-btn:hover { color: #fff; background: rgba(255,255,255,0.08); }
 .google-btn img { width: 16px; }
-#loginNavBtn, #loginNavBtn:hover, #loginNavBtn:active, #loginNavBtn:focus {
-    background: transparent !important;
-    color: rgba(255,255,255,0.8) !important;
-    outline: none !important;
-    box-shadow: none !important;
-    -webkit-tap-highlight-color: transparent;
+
+/* ── login modal ── */
+.auth-modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 99999;
+    background: rgba(2,9,23,0.75); backdrop-filter: blur(6px);
+    align-items: center; justify-content: center; padding: 16px;
 }
-#mlBtn, #mlBtn:active, #mlBtn:focus { background: none !important; outline: none; -webkit-tap-highlight-color: transparent; }
-@media (hover: hover) { #mlBtn:hover { background: rgba(255,255,255,0.08) !important; } }
+.auth-modal-overlay.open { display: flex; }
+.auth-modal-box {
+    background: #fff; border-radius: 24px; width: 100%; max-width: 380px;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.35); overflow: hidden;
+    animation: authModalIn 0.25s cubic-bezier(0.175,0.885,0.32,1.275);
+    font-family: 'Nunito', sans-serif;
+}
+@keyframes authModalIn { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.auth-modal-head { display: flex; align-items: center; justify-content: space-between; padding: 22px 22px 0; }
+.auth-modal-title { font-family: 'Fredoka One', cursive; font-size: 1.05rem; color: #0f172a; }
+.auth-modal-close { background: none; border: none; color: #cbd5e1; font-size: 1.3rem; cursor: pointer; padding: 0; line-height: 1; transition: color 0.15s; }
+.auth-modal-close:hover { color: #64748b; }
+.auth-modal-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 18px 22px 0; background: #f1f5f9; border-radius: 100px; padding: 4px; }
+.auth-modal-tab {
+    font-family: 'Fredoka One', cursive; font-size: 0.74rem;
+    padding: 10px; border: none; cursor: pointer; background: transparent; color: #64748b;
+    border-radius: 100px; transition: all 0.2s;
+}
+.auth-modal-tab.active { color: #fff; background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 4px 12px rgba(16,185,129,0.35); }
+.auth-modal-panel { padding: 22px 22px 26px; }
+.auth-google-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 13px; width: 100%; box-sizing: border-box;
+    font-family: 'Fredoka One', cursive; font-size: 0.85rem;
+    color: #fff; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 14px;
+    text-decoration: none; cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 6px 20px rgba(16,185,129,0.35);
+}
+.auth-google-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(16,185,129,0.45); }
+.auth-code-input {
+    width: 100%; box-sizing: border-box; padding: 12px;
+    font-family: 'Fredoka One', cursive; font-size: 0.95rem;
+    letter-spacing: 0.2em; text-align: center;
+    border: 2px solid #e2e8f0; border-radius: 14px; outline: none;
+    color: #0f172a; margin-bottom: 10px; transition: border-color 0.2s; background: #f8fafc;
+}
+.auth-code-input:focus { border-color: #10b981; background: #fff; }
+.auth-code-btn {
+    width: 100%; padding: 13px;
+    font-family: 'Fredoka One', cursive; font-size: 0.85rem;
+    background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; border-radius: 14px;
+    cursor: pointer; transition: all 0.2s; box-shadow: 0 6px 20px rgba(16,185,129,0.35);
+}
+.auth-code-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(16,185,129,0.45); }
 @media (max-width: 640px) {
     #secNav { display: none !important; }
     .desktop-only { display: none !important; }
@@ -184,11 +226,10 @@
             @endauth
 
             @guest
-            <a id="loginNavBtn" href="#" onclick="toggleLoginModal(event)" class="google-btn desktop-only"
-                style="font-size:0.78rem;padding:6px 12px;text-decoration:none;">
-                <svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="rgba(255,255,255,0.8)"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="rgba(255,255,255,0.8)"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="rgba(255,255,255,0.8)"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="rgba(255,255,255,0.8)"/></svg>
+            <button type="button" onclick="toggleLoginModal(event)" class="google-btn desktop-only"
+                style="font-size:0.78rem;padding:6px 12px;border:none;background:none;cursor:pointer;">
                 შესვლა
-            </a>
+            </button>
             @endguest
 
             <button id="mobileMenuBtn" class="nav-link-item" onclick="toggleMobileMenu()" aria-label="მენიუ" style="font-size:1.1rem;">☰</button>
@@ -285,126 +326,57 @@
 
     @guest
     <div style="border-top:1px solid #222;margin-top:4px;padding-top:4px;">
-        <button onclick="mlToggle()" id="mlBtn" style="
+        <button onclick="toggleMobileMenu();toggleLoginModal(event)" style="
             display:flex;align-items:center;gap:10px;width:100%;
             padding:11px 14px;border-radius:8px;border:none;background:none;
             color:rgba(255,255,255,0.75);font-family:'Nunito',sans-serif;
             font-size:0.95rem;font-weight:700;cursor:pointer;text-align:left;
-        ">
+            transition:background 0.15s;
+        " onmouseover="this.style.background='rgba(255,255,255,0.08)'"
+           onmouseout="this.style.background='none'">
             <span class="mn-icon">👤</span>შესვლა
-            <span id="mlArrow" style="margin-left:auto;font-size:0.75rem;opacity:0.5;transition:transform 0.2s;">▼</span>
         </button>
-        <div id="mlSection" style="display:none;padding:0 4px 4px;">
-            <div style="display:grid;grid-template-columns:1fr 1fr;border-radius:8px;overflow:hidden;border:1px solid #222;margin-bottom:8px;">
-                <button id="mlTabP" onclick="mlSwitch('parent')" style="
-                    font-family:'Goldman',monospace;font-size:0.72rem;letter-spacing:0.06em;
-                    padding:10px;border:none;cursor:pointer;background:#222;color:#fff;transition:all 0.15s;">მშობელი</button>
-                <button id="mlTabC" onclick="mlSwitch('child')" style="
-                    font-family:'Goldman',monospace;font-size:0.72rem;letter-spacing:0.06em;
-                    padding:10px;border:none;cursor:pointer;background:transparent;color:#888;transition:all 0.15s;">ბავშვი</button>
-            </div>
-            <div id="mlPanelP">
-                <a href="{{ route('google.login') }}" data-loader data-loader-text="შესვლა…"
-                    style="display:flex;align-items:center;justify-content:center;gap:8px;
-                    padding:11px;width:100%;box-sizing:border-box;
-                    font-family:'Goldman',monospace;font-size:0.75rem;letter-spacing:0.06em;
-                    color:#fff;background:#222;border:none;border-radius:8px;
-                    text-decoration:none;cursor:pointer;transition:background 0.2s;"
-                    onmouseover="this.style.background='#333'" onmouseout="this.style.background='#222'">
-                    <svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#fff"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#fff"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#fff"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#fff"/></svg>
-                    Google-ით შესვლა
-                </a>
-            </div>
-            <div id="mlPanelC" style="display:none;">
-                <form method="POST" action="{{ route('child-login') }}">
-                    @csrf
-                    <input type="text" name="child_code" placeholder="შენი კოდი" maxlength="8"
-                        autocomplete="off" oninput="this.value=this.value.toUpperCase()"
-                        style="width:100%;box-sizing:border-box;padding:10px 12px;
-                        font-family:'Goldman',monospace;font-size:0.88rem;letter-spacing:0.2em;
-                        text-align:center;border:1px solid #333;border-radius:8px;outline:none;
-                        color:#ddd;background:#1a1a1a;margin-bottom:8px;">
-                    <button type="submit" style="width:100%;padding:11px;
-                        font-family:'Goldman',monospace;font-size:0.75rem;letter-spacing:0.06em;
-                        background:#222;color:#fff;border:none;border-radius:8px;cursor:pointer;">შესვლა →</button>
-                </form>
-            </div>
-        </div>
     </div>
     @endguest
 </div>
 
-{{-- Login mini modal --}}
+{{-- Login modal --}}
 @guest
-<div id="loginModal" style="
-    display:none; position:fixed; top:58px; right:12px; z-index:99999;
-    background:#fff; border:1px solid #e0e0e0; border-radius:6px;
-    box-shadow:0 8px 32px rgba(0,0,0,0.13); width:260px;
-    font-family:'Goldman',monospace; overflow:hidden;
-">
-    {{-- Tabs --}}
-    <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #eee;">
-        <button id="lmTabParent" onclick="lmSwitch('parent')" style="
-            font-family:'Goldman',monospace;font-size:0.72rem;letter-spacing:0.06em;
-            padding:11px;border:none;cursor:pointer;transition:all 0.15s;
-            background:#111;color:#fff;
-        ">მშობელი</button>
-        <button id="lmTabChild" onclick="lmSwitch('child')" style="
-            font-family:'Goldman',monospace;font-size:0.72rem;letter-spacing:0.06em;
-            padding:11px;border:none;cursor:pointer;transition:all 0.15s;
-            background:transparent;color:#888;
-        ">ბავშვი</button>
-    </div>
+<div id="loginModal" class="auth-modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="auth-modal-box">
+        <div class="auth-modal-head">
+            <span class="auth-modal-title">KidSmart-ზე შესვლა</span>
+            <button type="button" class="auth-modal-close" onclick="document.getElementById('loginModal').classList.remove('open')">✕</button>
+        </div>
 
-    {{-- Parent panel --}}
-    <div id="lmPanelParent" style="padding:16px;">
-        <a href="{{ route('google.login') }}" data-loader data-loader-text="შესვლა…"
-            style="
-                display:flex;align-items:center;justify-content:center;gap:10px;
-                padding:11px;width:100%;box-sizing:border-box;
-                font-family:'Goldman',monospace;font-size:0.75rem;letter-spacing:0.06em;
-                color:#fff;background:#111;border:none;border-radius:4px;
-                text-decoration:none;cursor:pointer;transition:background 0.2s;
-            "
-            onmouseover="this.style.background='#333'"
-            onmouseout="this.style.background='#111'">
-            <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#fff"/>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#fff"/>
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#fff"/>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#fff"/>
-            </svg>
-            Google-ით შესვლა
-        </a>
-    </div>
+        <div class="auth-modal-tabs">
+            <button type="button" id="lmTabParent" class="auth-modal-tab active" onclick="lmSwitch('parent')">👨‍👩‍👧 მშობელი</button>
+            <button type="button" id="lmTabChild" class="auth-modal-tab" onclick="lmSwitch('child')">🧒 ბავშვი</button>
+        </div>
 
-    {{-- Child panel --}}
-    <div id="lmPanelChild" style="padding:16px;display:none;">
-        <form method="POST" action="{{ route('child-login') }}">
-            @csrf
-            <input type="text" name="child_code"
-                placeholder="შენი კოდი"
-                maxlength="8" autocomplete="off"
-                oninput="this.value=this.value.toUpperCase()"
-                style="
-                    width:100%;box-sizing:border-box;padding:10px 12px;
-                    font-family:'Goldman',monospace;font-size:0.88rem;
-                    letter-spacing:0.2em;text-align:center;
-                    border:1px solid #ddd;border-radius:4px;outline:none;
-                    color:#333;margin-bottom:10px;
-                    transition:border-color 0.2s;
-                "
-                onfocus="this.style.borderColor='#aaa'"
-                onblur="this.style.borderColor='#ddd'">
-            <button type="submit" style="
-                width:100%;padding:11px;
-                font-family:'Goldman',monospace;font-size:0.75rem;letter-spacing:0.06em;
-                background:#111;color:#fff;border:none;border-radius:4px;
-                cursor:pointer;transition:background 0.2s;
-            "
-            onmouseover="this.style.background='#333'"
-            onmouseout="this.style.background='#111'">შესვლა →</button>
-        </form>
+        {{-- Parent panel --}}
+        <div id="lmPanelParent" class="auth-modal-panel">
+            <a href="{{ route('google.login') }}" data-loader data-loader-text="შესვლა…" class="auth-google-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#fff"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#fff"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#fff"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#fff"/>
+                </svg>
+                Google-ით შესვლა
+            </a>
+        </div>
+
+        {{-- Child panel --}}
+        <div id="lmPanelChild" class="auth-modal-panel" style="display:none;">
+            <form method="POST" action="{{ route('child-login') }}">
+                @csrf
+                <input type="text" name="child_code" class="auth-code-input"
+                    placeholder="შენი კოდი" maxlength="8" autocomplete="off"
+                    oninput="this.value=this.value.toUpperCase()">
+                <button type="submit" class="auth-code-btn">შესვლა →</button>
+            </form>
+        </div>
     </div>
 </div>
 @endguest
@@ -421,50 +393,23 @@ document.addEventListener('submit', e => {
 });
 
 function toggleLoginModal(e) {
-    e.stopPropagation();
+    if (e) e.stopPropagation();
     var m = document.getElementById('loginModal');
     if (!m) return;
-    m.style.display = m.style.display === 'none' ? 'block' : 'none';
+    m.classList.toggle('open');
 }
 
 function lmSwitch(tab) {
     var isParent = tab === 'parent';
     document.getElementById('lmPanelParent').style.display = isParent ? 'block' : 'none';
     document.getElementById('lmPanelChild').style.display  = isParent ? 'none'  : 'block';
-    var tP = document.getElementById('lmTabParent');
-    var tC = document.getElementById('lmTabChild');
-    tP.style.background = isParent ? '#111' : 'transparent';
-    tP.style.color       = isParent ? '#fff' : '#888';
-    tC.style.background  = isParent ? 'transparent' : '#111';
-    tC.style.color        = isParent ? '#888' : '#fff';
+    document.getElementById('lmTabParent').classList.toggle('active', isParent);
+    document.getElementById('lmTabChild').classList.toggle('active', !isParent);
 }
 
 function toggleMobileMenu() {
     var m = document.getElementById('mobileNav');
     if (m) m.classList.toggle('open');
-    if (m && !m.classList.contains('open')) {
-        var s = document.getElementById('mlSection');
-        if (s) s.style.display = 'none';
-        var a = document.getElementById('mlArrow');
-        if (a) a.style.transform = '';
-    }
-}
-function mlToggle() {
-    var s = document.getElementById('mlSection');
-    var a = document.getElementById('mlArrow');
-    if (!s) return;
-    var open = s.style.display === 'none';
-    s.style.display = open ? 'block' : 'none';
-    if (a) a.style.transform = open ? 'rotate(180deg)' : '';
-}
-function mlSwitch(tab) {
-    var isP = tab === 'parent';
-    var pp = document.getElementById('mlPanelP'), pc = document.getElementById('mlPanelC');
-    var tp = document.getElementById('mlTabP'),  tc = document.getElementById('mlTabC');
-    if (pp) pp.style.display = isP ? 'block' : 'none';
-    if (pc) pc.style.display = isP ? 'none'  : 'block';
-    if (tp) { tp.style.background = isP ? '#222' : 'transparent'; tp.style.color = isP ? '#fff' : '#888'; }
-    if (tc) { tc.style.background = isP ? 'transparent' : '#222'; tc.style.color = isP ? '#888' : '#fff'; }
 }
 document.addEventListener('click', function(e) {
     var m = document.getElementById('mobileNav');
@@ -479,11 +424,5 @@ function secScroll(e, id) {
     if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 }
 
-document.addEventListener('click', function(e) {
-    var m = document.getElementById('loginModal');
-    var btn = document.getElementById('loginNavBtn');
-    if (m && btn && !m.contains(e.target) && !btn.contains(e.target)) {
-        m.style.display = 'none';
-    }
-});
+
 </script>
