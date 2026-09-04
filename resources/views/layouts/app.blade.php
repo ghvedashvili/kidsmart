@@ -280,7 +280,7 @@ if ('serviceWorker' in navigator) {
                 if (!t) {
                     t = document.createElement('div');
                     t.id = 'ks-notif-toast';
-                    t.style.cssText = 'position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(8px);background:#1a1a1a;color:#fff;padding:9px 20px;border-radius:10px;font-family:"Nunito",sans-serif;font-size:0.85rem;font-weight:700;z-index:99999;transition:opacity 0.3s,transform 0.3s;pointer-events:none;white-space:nowrap;opacity:0;';
+                    t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(8px);background:#1a1a1a;color:#fff;padding:9px 20px;border-radius:10px;font-family:"Nunito",sans-serif;font-size:0.85rem;font-weight:700;z-index:99999;transition:opacity 0.3s,transform 0.3s;pointer-events:none;white-space:nowrap;opacity:0;';
                     document.body.appendChild(t);
                 }
                 t.textContent = granted ? '🔔 შეტყობინებები ჩართულია' : '🔕 შეტყობინებები გამორთულია';

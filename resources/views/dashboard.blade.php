@@ -208,12 +208,12 @@
         border-radius: 100px; padding: 5px 12px; margin-bottom: 12px; align-self: flex-start;
     }
     .mission-card.resume .mission-badge { color: #b45309; background: rgba(255,255,255,0.9); }
-    .mission-title { font-family: 'Fredoka One', cursive; font-size: 1.2rem; color: #1a1a2e; margin-bottom: 6px; line-height: 1.25; }
-    .mission-sub { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.78rem; color: #4b4b63; margin-bottom: 14px; }
+    .mission-title { font-family: 'Fredoka One', cursive; font-size: 1.2rem; color: #1a1a2e; margin-bottom: 6px; line-height: 1.25; max-width: 60%; }
+    .mission-sub { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.78rem; color: #4b4b63; margin-bottom: 14px; max-width: 58%; }
     .mission-cta {
-        display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box;
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px; align-self: flex-start; width: auto; box-sizing: border-box;
         background: #1a1a2e; color: #fff; font-family: 'Fredoka One', cursive; font-size: 1rem;
-        padding: 14px; border-radius: 16px; text-decoration: none; box-shadow: 0 6px 16px rgba(0,0,0,0.15); transition: transform 0.15s;
+        padding: 13px 22px; border-radius: 16px; text-decoration: none; box-shadow: 0 6px 16px rgba(0,0,0,0.15); transition: transform 0.15s;
     }
     .mission-cta:hover { transform: translateY(-2px); color: #fff; }
 
@@ -244,10 +244,10 @@
         background: rgba(255,255,255,0.88); border-radius: 99px; padding: 3px 9px;
     }
 
-    .stat-card-4-photo.sc-practice { background-image: url('/img/practice-hero.jpg'); }
-    .stat-card-4-photo.sc-ach      { background-image: url('/img/achievements-hero.jpg'); }
-    .stat-card-4-photo.sc-tests    { background-image: url('/img/tests-hero.jpg'); }
-    .stat-card-4-photo.sc-market   { background-image: url('/img/market-hero.jpg'); }
+    .stat-card-4-photo.sc-practice { background-image: url('/img/Mission.jpg'); }
+    .stat-card-4-photo.sc-ach      { background-image: url('/img/Achievements.jpg'); }
+    .stat-card-4-photo.sc-tests    { background-image: url('/img/tests.jpg'); }
+    .stat-card-4-photo.sc-market   { background-image: url('/img/Market.jpg'); }
 
 
     /* Modal */
@@ -373,9 +373,31 @@
         .dash-inner { max-width: 960px; }
         .nav-tile-grid { grid-template-columns: repeat(6, 1fr); }
     }
+
+    /* ── mobile: fit the child dashboard in one screen, no scroll ── */
+    @media (max-width: 759px) {
+        html:has(.child-dash-fit) { overflow: hidden; }
+        body:has(.child-dash-fit) { height: 100dvh; overflow: hidden; box-sizing: border-box; }
+        .child-dash-fit {
+            height: calc(100dvh - 56px - 74px);
+            padding: 14px 16px 10px;
+            justify-content: flex-start;
+            overflow: hidden;
+        }
+        .child-dash-fit .dash-inner { height: 100%; justify-content: space-between; gap: 10px; }
+        .child-dash-fit .mission-card { min-height: 0; flex: 1 1 auto; padding: 16px 16px; justify-content: center; }
+        .child-dash-fit .mission-title { font-size: 1.05rem; margin-bottom: 4px; }
+        .child-dash-fit .mission-sub { font-size: 0.72rem; margin-bottom: 10px; }
+        .child-dash-fit .mission-cta { padding: 11px 20px; font-size: 0.92rem; }
+        .child-dash-fit .stat-grid-4 { flex: 1 1 auto; gap: 8px; }
+        .child-dash-fit .stat-card-4 { min-height: 0; }
+        .child-dash-fit .stat-card-4-body { padding: 10px; gap: 5px; justify-content: center; }
+        .child-dash-fit .stat-card-4-val { font-size: 1.15rem; }
+        .child-dash-fit .games-card { min-height: 0; flex: 0 0 auto; padding: 12px 14px; }
+    }
 </style>
 
-<div class="dash-hero">
+<div class="dash-hero{{ auth()->user()->role === 'child' ? ' child-dash-fit' : '' }}">
     <div class="dash-inner">
 
         @if(session('success'))

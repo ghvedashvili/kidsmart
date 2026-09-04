@@ -61,7 +61,7 @@
 .child-bottom-nav {
     display: none;
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 500;
-    background: #fff; padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    background: #fff; padding: 6px 16px calc(6px + env(safe-area-inset-bottom));
     box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
     justify-content: space-around; align-items: center;
 }
@@ -78,7 +78,7 @@
 .child-bottom-nav a .cbn-icon { font-size: 1.25rem; }
 @media (max-width: 640px) {
     .child-bottom-nav { display: flex; }
-    body:has(.child-bottom-nav) { padding-bottom: 82px; }
+    body:has(.child-bottom-nav) { padding-bottom: 74px; }
 }
 
 
