@@ -66,6 +66,11 @@ Route::post('/child-login', function (Request $request) {
 
     \Illuminate\Support\Facades\Auth::login($child, true);
 
+    if (! $child->first_login_at) {
+        $child->update(['first_login_at' => now()]);
+        session()->flash('just_registered', true);
+    }
+
     return redirect()->route('dashboard');
 })->name('child-login');
 
@@ -82,6 +87,11 @@ Route::get('/child-login/{code}', function (string $code) {
     }
 
     \Illuminate\Support\Facades\Auth::login($child, true);
+
+    if (! $child->first_login_at) {
+        $child->update(['first_login_at' => now()]);
+        session()->flash('just_registered', true);
+    }
 
     return redirect()->route('dashboard');
 })->name('child.magic-login');

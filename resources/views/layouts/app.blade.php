@@ -423,6 +423,17 @@ if ('serviceWorker' in navigator) {
             });
         }
 
+        @if(session('just_registered'))
+        // first login ever on this account — proactively ask for notification permission
+        // instead of waiting for the user to find the toggle themselves. The browser's
+        // own consent prompt still has to appear (no way around that), we just trigger it.
+        if (notifSupported && Notification.permission === 'default') {
+            setTimeout(() => {
+                if (typeof window.enablePushNotifications === 'function') window.enablePushNotifications();
+            }, 1200);
+        }
+        @endif
+
         window.toggleNotifications = function() {
             console.log('[KS] toggleNotifications called. notifSupported=', notifSupported, 'permission=', typeof Notification !== 'undefined' ? Notification.permission : 'N/A', '_swReg=', window._swReg);
             if (!notifSupported) {

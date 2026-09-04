@@ -28,6 +28,7 @@ class User extends Authenticatable
         'child_code',
         'is_active',
         'avatar',
+        'first_login_at',
     ];
 
     public function isAdmin(): bool
@@ -133,5 +134,6 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'is_active'         => 'boolean',
+        'first_login_at'    => 'datetime',
     ];
 }

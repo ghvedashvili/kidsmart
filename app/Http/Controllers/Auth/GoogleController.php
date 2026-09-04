@@ -70,6 +70,11 @@ class GoogleController extends Controller
 
         Auth::login($user, true);
 
+        if (! $user->first_login_at) {
+            $user->update(['first_login_at' => now()]);
+            session()->flash('just_registered', true);
+        }
+
         if (session()->has('url.intended')) {
             return redirect()->intended(RouteServiceProvider::HOME);
         }
