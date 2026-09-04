@@ -68,6 +68,23 @@ Route::post('/child-login', function (Request $request) {
     return redirect()->route('dashboard');
 })->name('child-login');
 
+// ბავშვის პირდაპირი შესვლის ბმული (გასაზიარებელი) — იგივე ნდობის მოდელი, რაც ზემოთა ფორმას (კოდის ცოდნა = შესვლა)
+Route::get('/child-login/{code}', function (string $code) {
+    $child = User::where('child_code', strtoupper(trim($code)))
+                 ->where('role', 'child')
+                 ->first();
+
+    if (! $child || ! $child->is_active) {
+        return redirect('/')->with('login_error', ! $child
+            ? 'ბმული არასწორია — კოდი ვერ მოიძებნა'
+            : 'ანგარიში გათიშულია — მშობლის გეგმა არ მოიცავს ამ ბავშვს');
+    }
+
+    \Illuminate\Support\Facades\Auth::login($child, true);
+
+    return redirect()->route('dashboard');
+})->name('child.magic-login');
+
 Route::middleware(['auth'])->post('/children', [ChildController::class, 'store'])->name('child.store');
 Route::middleware(['auth'])->post('/children/link', [ChildController::class, 'link'])->name('child.link');
 

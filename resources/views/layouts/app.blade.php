@@ -277,6 +277,15 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@if(session('login_error'))
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({ icon: 'error', title: 'ვერ შევედი', text: @json(session('login_error')), confirmButtonText: 'გასაგებია' });
+    }
+});
+</script>
+@endif
 <script>
 // ── Cookie consent ──
 (function() {

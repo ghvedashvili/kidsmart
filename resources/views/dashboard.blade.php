@@ -131,12 +131,18 @@
         font-family: 'Goldman', monospace; font-size: 0.84rem; color: #111;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .cc-code {
-        font-family: 'Goldman', monospace; font-size: 0.54rem; color: #cfcfd6;
-        letter-spacing: 0.08em; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+    .cc-meta-row { display: flex; align-items: center; gap: 6px; margin-top: 3px; flex-wrap: wrap; }
+    .cc-id-badge {
+        font-family: 'Goldman', monospace; font-size: 0.5rem; color: #bbb;
+        background: #f7f7f9; border-radius: 6px; padding: 2px 7px; letter-spacing: 0.03em; white-space: nowrap;
     }
-    .cc-code:hover { color: #888; }
-    .cc-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+    .cc-code {
+        font-family: 'Goldman', monospace; font-size: 0.58rem; color: #888;
+        background: #f4f4f7; border-radius: 6px; padding: 2px 8px;
+        letter-spacing: 0.1em; cursor: pointer; white-space: nowrap; transition: background 0.15s, color 0.15s;
+    }
+    .cc-code:hover { background: #ececf0; color: #444; }
+    .cc-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
     .cc-tag {
         font-family: 'Goldman', monospace; font-size: 0.53rem; color: #888;
         background: #f4f4f7; border: none; border-radius: 100px;
@@ -152,17 +158,47 @@
     .cc-mini-btn.remind { background: #ecfdf5; color: #059669; }
     .cc-mini-btn:hover { filter: brightness(0.96); }
 
+    .cc-share-toggle {
+        width: 100%; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 7px;
+        background: #eff6ff; color: #2563eb; border: none; border-radius: 100px;
+        padding: 10px 8px; font-family: 'Goldman', monospace; font-size: 0.64rem; letter-spacing: 0.02em;
+        cursor: pointer; transition: background 0.15s;
+    }
+    .cc-share-toggle:hover { background: #dbeafe; }
+
+    .cc-share-panel {
+        display: none; flex-direction: column; gap: 8px;
+        background: #fafafb; border-radius: 14px; padding: 12px;
+    }
+    .cc-share-panel.open { display: flex; }
+    .cc-share-link-box {
+        background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 8px 10px; overflow: hidden;
+    }
+    .cc-share-link-text {
+        display: block; font-family: 'Goldman', monospace; font-size: 0.6rem; color: #666;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .cc-share-actions { display: flex; gap: 8px; }
+    .cc-share-btn {
+        flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+        background: var(--primary-soft); color: var(--primary); border: none; border-radius: 100px;
+        padding: 9px 8px; font-family: 'Goldman', monospace; font-size: 0.62rem;
+        cursor: pointer; transition: background 0.15s; letter-spacing: 0.02em;
+    }
+    .cc-share-btn:hover { background: #e2ddff; }
+    .cc-share-btn.copied { background: #dcfce7; color: #15803d; }
+
     .cc-stats-row {
-        display: flex; align-items: stretch; background: #fafafb; border-radius: 14px; padding: 9px 4px;
+        display: flex; align-items: stretch; background: #fafafb; border-radius: 14px; padding: 8px 4px;
     }
     .cc-stat {
-        flex: 1; min-width: 0; text-align: center; position: relative;
-        display: flex; flex-direction: column; align-items: center; gap: 2px;
+        flex: 1; min-width: 0; position: relative;
+        display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 5px;
     }
     .cc-stat:not(:last-child)::after {
-        content: ''; position: absolute; right: 0; top: 12%; bottom: 12%; width: 1px; background: #e9e9ee;
+        content: ''; position: absolute; right: 0; top: 15%; bottom: 15%; width: 1px; background: #e9e9ee;
     }
-    .cc-stat-icon { font-size: 0.86rem; line-height: 1; }
+    .cc-stat-icon { font-size: 0.8rem; line-height: 1; flex-shrink: 0; }
     .cc-stat-val { font-family: 'Goldman', monospace; font-size: 0.7rem; color: #111; }
     .cc-stat-lbl { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.44rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.02em; }
 
@@ -311,6 +347,25 @@
     }
     .msave-danger:hover { border-color: #e74c3c; color: #e74c3c; background: transparent; }
     .merr { font-family: 'Goldman', monospace; font-size: 0.65rem; color: #e74c3c; margin-top: -12px; margin-bottom: 10px; }
+
+    /* ── multi-step wizard (add child) ── */
+    .wiz-step { display: none; }
+    .wiz-step.active { display: block; animation: wizIn 0.22s ease; }
+    @keyframes wizIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+    .wiz-step-title {
+        font-family: 'Goldman', monospace; font-size: 0.92rem; color: #111;
+        letter-spacing: 0.02em; margin-bottom: 16px;
+    }
+
+    .wiz-nav { display: flex; gap: 8px; margin-top: 6px; }
+    .wiz-btn {
+        flex: 1; border-radius: 8px; font-family: 'Goldman', monospace; font-size: 0.82rem;
+        padding: 13px; cursor: pointer; letter-spacing: 0.06em; transition: all 0.2s;
+    }
+    .wiz-btn-prev { background: transparent; border: 1px solid #ddd; color: #888; }
+    .wiz-btn-prev:hover { border-color: #aaa; color: #444; }
+    .wiz-btn-next, .wiz-btn-submit { background: #111; border: none; color: #fff; }
+    .wiz-btn-next:hover, .wiz-btn-submit:hover { background: #333; }
     .caction {
         font-family: 'Goldman', monospace; font-size: 0.62rem; color: #bbb;
         border: 1px solid #ebebeb; border-radius: 4px; padding: 5px 10px;
@@ -480,6 +535,9 @@
                     <div class="cc-header-info">
                         <div class="cc-name-row">
                             <span class="cc-name">{{ $child->name }}</span>
+                        </div>
+                        <div class="cc-meta-row">
+                            <span class="cc-id-badge">ID {{ $child->id }}</span>
                             @if($child->child_code)
                             <span class="cc-code" onclick="copyChildCode(this, '{{ $child->child_code }}')"
                                 title="კოდის კოპირება">{{ $child->child_code }}</span>
@@ -527,6 +585,23 @@
                     </a>
                 </div>
 
+                @if($child->child_code)
+                <button type="button" class="cc-share-toggle" onclick="toggleShare({{ $child->id }})">
+                    🔗 გაუზიარე {{ $child->name }}ს ლინკი
+                </button>
+                <div class="cc-share-panel" id="sharePanel{{ $child->id }}">
+                    <div class="cc-share-link-box">
+                        <span class="cc-share-link-text" id="shareLinkText{{ $child->id }}">{{ route('child.magic-login', $child->child_code) }}</span>
+                    </div>
+                    <div class="cc-share-actions">
+                        <button type="button" class="cc-share-btn" id="shareCopyBtn{{ $child->id }}"
+                            onclick="copyShareLink({{ $child->id }})">📋 კოპირება</button>
+                        <button type="button" class="cc-share-btn"
+                            onclick="shareLink({{ $child->id }}, '{{ addslashes($child->name) }}')">📤 გაზიარება</button>
+                    </div>
+                </div>
+                @endif
+
                 @if(session('reminder_sent_' . $child->id))
                 <div style="font-family:'Goldman',monospace;font-size:0.6rem;color:#059669;margin-top:-6px;">&#10003; შეხსენება გაიგზავნა</div>
                 @endif
@@ -538,7 +613,7 @@
             </div>
             @endforelse
             <button type="button" class="add-card"
-                onclick="document.getElementById('{{ $atChildLimit ? 'plansModal' : 'addChildModal' }}').classList.add('open')"
+                onclick="document.getElementById('{{ $atChildLimit ? 'plansModal' : 'addChildModal' }}').classList.add('open'); {{ $atChildLimit ? '' : 'wizReset();' }}"
                 @if($atChildLimit) title="{{ $currentPkg->name }} პლანი მხოლოდ {{ $currentPkg->max_children }} ბავშვს იძლევა" @endif>
                 <span class="add-card-plus">+</span>
                 <span class="add-card-label">
@@ -871,77 +946,99 @@
 
         {{-- Tab: New child --}}
         <div id="panelNew">
-        <form method="POST" action="{{ route('child.store') }}">
+        <form method="POST" action="{{ route('child.store') }}" id="addChildForm">
             @csrf
             <div class="modal-title">
                 შვილის დამატება
                 <button type="button" class="modal-close" onclick="document.getElementById('addChildModal').classList.remove('open')">✕</button>
             </div>
 
-            {{-- Name --}}
-            <div class="mlbl">სახელი <span>*</span></div>
-            <input type="text" name="name" class="minput" placeholder="სახელი"
-                value="{{ old('name') }}" required maxlength="50" autocomplete="off">
-            @error('name')<div class="merr">{{ $message }}</div>@enderror
 
-            {{-- Gender / avatar --}}
-            <div class="mlbl">სქესი</div>
-            <div class="mrow" id="genderRow">
-                <label class="mchip {{ old('avatar') == 'boy' ? 'sel' : '' }}"
-                    onclick="chipSingle(this,'avatar_input','boy')">👦 ბიჭი</label>
-                <label class="mchip {{ old('avatar') == 'girl' ? 'sel' : '' }}"
-                    onclick="chipSingle(this,'avatar_input','girl')">👧 გოგონა</label>
+            {{-- Step 1: Name + gender --}}
+            <div class="wiz-step" data-step="1">
+                <div class="wiz-step-title">ვინ არის შენი შვილი?</div>
+
+                <div class="mlbl">სახელი <span>*</span></div>
+                <input type="text" name="name" id="wiz_name" class="minput" placeholder="სახელი"
+                    value="{{ old('name') }}" required maxlength="50" autocomplete="off">
+                @error('name')<div class="merr">{{ $message }}</div>@enderror
+                <div class="merr" id="wizNameErr" style="display:none;">შეიყვანე სახელი</div>
+
+                <div class="mlbl">სქესი</div>
+                <div class="mrow" id="genderRow">
+                    <label class="mchip {{ old('avatar') == 'boy' ? 'sel' : '' }}"
+                        onclick="chipSingle(this,'avatar_input','boy')">👦 ბიჭი</label>
+                    <label class="mchip {{ old('avatar') == 'girl' ? 'sel' : '' }}"
+                        onclick="chipSingle(this,'avatar_input','girl')">👧 გოგონა</label>
+                </div>
+                <input type="hidden" name="avatar" id="avatar_input" value="{{ old('avatar') }}">
             </div>
-            <input type="hidden" name="avatar" id="avatar_input" value="{{ old('avatar') }}">
 
-            {{-- Grade --}}
-            <div class="mlbl">კლასი <span>*</span></div>
-            <div class="mrow" id="gradeRow">
-                @foreach($grades as $grade)
-                <label class="mchip {{ old('grade_id') == $grade->id ? 'sel' : '' }}"
-                    onclick="chipSingle(this,'grade_id_input','{{ $grade->id }}')">{{ $grade->name }}</label>
-                @endforeach
+            {{-- Step 2: Grade --}}
+            <div class="wiz-step" data-step="2">
+                <div class="wiz-step-title">რომელ კლასშია?</div>
+
+                <div class="mlbl">კლასი <span>*</span></div>
+                <div class="mrow" id="gradeRow">
+                    @foreach($grades as $grade)
+                    <label class="mchip {{ old('grade_id') == $grade->id ? 'sel' : '' }}"
+                        onclick="chipSingle(this,'grade_id_input','{{ $grade->id }}')">{{ $grade->name }}</label>
+                    @endforeach
+                </div>
+                <input type="hidden" name="grade_id" id="grade_id_input" value="{{ old('grade_id') }}">
+                @error('grade_id')<div class="merr">{{ $message }}</div>@enderror
+                <div class="merr" id="wizGradeErr" style="display:none;">აირჩიე კლასი</div>
             </div>
-            <input type="hidden" name="grade_id" id="grade_id_input" value="{{ old('grade_id') }}">
-            @error('grade_id')<div class="merr">{{ $message }}</div>@enderror
 
-            {{-- Tests per day --}}
-            <div class="mlbl">ტესტი დღეში</div>
-            <div class="mrow" id="tpwRow">
-                @for($i=1; $i<=3; $i++)
-                <label class="mchip {{ old('tests_per_week', 3) == $i ? 'sel' : '' }}"
-                    onclick="chipSingle(this,'tpw_input','{{ $i }}')">{{ $i }}</label>
-                @endfor
+            {{-- Step 3: Tests per day --}}
+            <div class="wiz-step" data-step="3">
+                <div class="wiz-step-title">რამდენი ტესტი გავიდეს დღეში?</div>
+
+                <div class="mlbl">ტესტი დღეში</div>
+                <div class="mrow" id="tpwRow">
+                    @for($i=1; $i<=3; $i++)
+                    <label class="mchip {{ old('tests_per_week', 3) == $i ? 'sel' : '' }}"
+                        onclick="chipSingle(this,'tpw_input','{{ $i }}')">{{ $i }}</label>
+                    @endfor
+                </div>
+                <input type="hidden" name="tests_per_week" id="tpw_input" value="{{ old('tests_per_week', 3) }}">
             </div>
-            <input type="hidden" name="tests_per_week" id="tpw_input" value="{{ old('tests_per_week', 3) }}">
 
-            {{-- Theme (optional, default სტანდარტი) --}}
-            @if($themes->count())
-            @php
-                $addThemeOld = old('theme_ids', []);
-                $addDefaultThemeId = $defaultThemeId ?? null;
-            @endphp
-            <div class="mlbl">თემატიკა <span style="color:#aaa;font-size:0.9em;">(სურვილისამებრ)</span></div>
-            <div class="mrow" id="addThemeRow">
-                @foreach($themes as $theme)
+            {{-- Step 4: Theme (optional) --}}
+            <div class="wiz-step" data-step="4">
+                <div class="wiz-step-title">ბოლო ნაბიჯი — თემატიკა</div>
+
+                @if($themes->count())
                 @php
-                    $isSelected = count($addThemeOld)
-                        ? in_array($theme->id, $addThemeOld)
-                        : ($theme->id == $addDefaultThemeId && $theme->is_active);
+                    $addThemeOld = old('theme_ids', []);
+                    $addDefaultThemeId = $defaultThemeId ?? null;
                 @endphp
-                @if($theme->is_active)
-                <label class="mchip {{ $isSelected ? 'sel' : '' }}"
-                    onclick="chipSingleTheme(this, '{{ $theme->id }}')">{{ $theme->icon }} {{ $theme->name }}</label>
-                @else
-                <span class="mchip" style="opacity:0.4;cursor:default;pointer-events:none;">{{ $theme->icon }} {{ $theme->name }}<span style="font-size:0.75em;margin-left:4px;color:#aaa;">მალე</span></span>
+                <div class="mlbl">თემატიკა <span style="color:#aaa;font-size:0.9em;">(სურვილისამებრ)</span></div>
+                <div class="mrow" id="addThemeRow">
+                    @foreach($themes as $theme)
+                    @php
+                        $isSelected = count($addThemeOld)
+                            ? in_array($theme->id, $addThemeOld)
+                            : ($theme->id == $addDefaultThemeId && $theme->is_active);
+                    @endphp
+                    @if($theme->is_active)
+                    <label class="mchip {{ $isSelected ? 'sel' : '' }}"
+                        onclick="chipSingleTheme(this, '{{ $theme->id }}')">{{ $theme->icon }} {{ $theme->name }}</label>
+                    @else
+                    <span class="mchip" style="opacity:0.4;cursor:default;pointer-events:none;">{{ $theme->icon }} {{ $theme->name }}<span style="font-size:0.75em;margin-left:4px;color:#aaa;">მალე</span></span>
+                    @endif
+                    @endforeach
+                </div>
+                <input type="hidden" name="theme_ids[]" id="add_theme_input"
+                    value="{{ count($addThemeOld) ? ($addThemeOld[0] ?? '') : ($addDefaultThemeId ?? '') }}">
                 @endif
-                @endforeach
             </div>
-            <input type="hidden" name="theme_ids[]" id="add_theme_input"
-                value="{{ count($addThemeOld) ? ($addThemeOld[0] ?? '') : ($addDefaultThemeId ?? '') }}">
-            @endif
 
-            <button type="submit" class="msave">+ შვილის შენახვა</button>
+            <div class="wiz-nav">
+                <button type="button" class="wiz-btn wiz-btn-prev" id="wizPrevBtn" onclick="wizPrev()" style="visibility:hidden;">← წინა</button>
+                <button type="button" class="wiz-btn wiz-btn-next" id="wizNextBtn" onclick="wizNext()">შემდეგი →</button>
+                <button type="submit" class="wiz-btn wiz-btn-submit" id="wizSubmitBtn" style="display:none;">+ შვილის შენახვა</button>
+            </div>
         </form>
         </div>{{-- /panelNew --}}
     </div>
@@ -1052,6 +1149,30 @@ function copyChildCode(el, code) {
     });
 }
 
+function toggleShare(childId) {
+    document.getElementById('sharePanel' + childId).classList.toggle('open');
+}
+
+function copyShareLink(childId) {
+    const text = document.getElementById('shareLinkText' + childId).textContent;
+    navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('shareCopyBtn' + childId);
+        const orig = btn.innerHTML;
+        btn.innerHTML = '✓ დაკოპირდა';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copied'); }, 1500);
+    });
+}
+
+function shareLink(childId, childName) {
+    const text = document.getElementById('shareLinkText' + childId).textContent;
+    if (navigator.share) {
+        navigator.share({ title: 'KidSmart — ' + childName, text: childName + '-ის შესვლის ბმული', url: text }).catch(() => {});
+    } else {
+        copyShareLink(childId);
+    }
+}
+
 function chipSingle(el, inputId, value) {
     el.closest('.mrow').querySelectorAll('.mchip').forEach(c => c.classList.remove('sel'));
     el.classList.add('sel');
@@ -1078,10 +1199,66 @@ function chipMulti(el, name, value) {
     }
 }
 
+// ── Add-child wizard ──
+const WIZ_TOTAL = 4;
+let wizStep = 1;
+
+function wizGoTo(n) {
+    n = Math.min(Math.max(n, 1), WIZ_TOTAL);
+    document.querySelectorAll('#panelNew .wiz-step').forEach(el => {
+        el.classList.toggle('active', +el.dataset.step === n);
+    });
+    document.getElementById('wizPrevBtn').style.visibility = n === 1 ? 'hidden' : 'visible';
+    document.getElementById('wizNextBtn').style.display = n === WIZ_TOTAL ? 'none' : '';
+    document.getElementById('wizSubmitBtn').style.display = n === WIZ_TOTAL ? '' : 'none';
+    wizStep = n;
+}
+
+function wizValidateStep(n) {
+    if (n === 1) {
+        const ok = document.getElementById('wiz_name').value.trim().length > 0;
+        document.getElementById('wizNameErr').style.display = ok ? 'none' : 'block';
+        return ok;
+    }
+    if (n === 2) {
+        const ok = !!document.getElementById('grade_id_input').value;
+        document.getElementById('wizGradeErr').style.display = ok ? 'none' : 'block';
+        return ok;
+    }
+    return true;
+}
+
+function wizNext() {
+    if (!wizValidateStep(wizStep)) return;
+    wizGoTo(wizStep + 1);
+}
+function wizPrev() {
+    wizGoTo(wizStep - 1);
+}
+function wizReset() {
+    document.getElementById('wizNameErr').style.display = 'none';
+    document.getElementById('wizGradeErr').style.display = 'none';
+    wizGoTo(1);
+}
+document.getElementById('addChildForm').addEventListener('submit', function(e) {
+    // guards against Enter-key submitting the form before the last step
+    if (wizStep !== WIZ_TOTAL) {
+        e.preventDefault();
+        wizNext();
+    }
+});
+
 @if($errors->hasAny(['name','grade_id','tests_per_week','theme_ids']))
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('addChildModal').classList.add('open');
+    @if($errors->has('grade_id'))
+    wizGoTo(2);
+    @else
+    wizGoTo(1);
+    @endif
 });
+@else
+document.addEventListener('DOMContentLoaded', function() { wizGoTo(1); });
 @endif
 </script>
 @endsection
