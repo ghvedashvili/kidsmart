@@ -12,6 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link href="https://fonts.googleapis.com/css2?family=Goldman&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     @stack('head')
@@ -19,8 +20,92 @@
 <body class="@yield('bodyClass')">
 
 <div id="page-loader">
-    <div class="spinner"></div>
+    <div class="ks-loader">
+        <div class="ks-loader-stage">
+            <div class="ks-loader-ring"></div>
+            <div class="ks-loader-symbol">+</div>
+            <div class="ks-loader-symbol">−</div>
+            <div class="ks-loader-symbol">×</div>
+            <div class="ks-loader-symbol">÷</div>
+        </div>
+        <div class="loader-text">KidSmart</div>
+    </div>
 </div>
+
+{{-- Pull-to-refresh (mobile) --}}
+<style>
+#ptr-indicator {
+    position: fixed; top: 0; left: 50%; z-index: 9998;
+    width: 40px; height: 40px; border-radius: 50%;
+    background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+    display: flex; align-items: center; justify-content: center;
+    transform: translate(-50%, -60px); opacity: 0;
+    transition: transform 0.25s ease-out, opacity 0.2s ease-out;
+    pointer-events: none;
+}
+#ptr-indicator.ptr-nt { transition: none; }
+#ptr-arrow { transition: transform 0.15s; }
+#ptr-indicator.ptr-spin #ptr-arrow { animation: ptr-spin 0.7s linear infinite; }
+@keyframes ptr-spin { to { transform: rotate(360deg); } }
+</style>
+<div id="ptr-indicator">
+    <svg id="ptr-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 5v14M5 12l7 7 7-7"/>
+    </svg>
+</div>
+<script>
+(function() {
+    var THRESHOLD = 70, MAX_PULL = 120;
+    var indicator = document.getElementById('ptr-indicator');
+    var arrow = document.getElementById('ptr-arrow');
+    var startY = 0, pulling = false, ready = false, refreshing = false;
+
+    function atTop() {
+        return (window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0) <= 0;
+    }
+    function reset() {
+        indicator.classList.remove('ptr-spin');
+        indicator.style.opacity = 0;
+        indicator.style.transform = 'translate(-50%, -60px)';
+        arrow.style.transform = 'rotate(0deg)';
+        pulling = false; ready = false;
+    }
+
+    window.addEventListener('touchstart', function(e) {
+        if (refreshing || !atTop() || e.touches.length !== 1) return;
+        startY = e.touches[0].clientY;
+        pulling = true;
+        indicator.classList.remove('ptr-nt');
+    }, { passive: true });
+
+    window.addEventListener('touchmove', function(e) {
+        if (!pulling || refreshing) return;
+        var dy = e.touches[0].clientY - startY;
+        if (dy <= 0 || !atTop()) { reset(); return; }
+        var dist = Math.min(dy, MAX_PULL);
+        indicator.style.opacity = Math.min(dist / THRESHOLD, 1);
+        indicator.style.transform = 'translate(-50%,' + (-60 + dist * 0.85) + 'px)';
+        ready = dist > THRESHOLD;
+        arrow.style.transform = ready ? 'rotate(180deg)' : 'rotate(0deg)';
+    }, { passive: true });
+
+    window.addEventListener('touchend', function() {
+        if (!pulling || refreshing) { pulling = false; return; }
+        pulling = false;
+        if (ready) {
+            refreshing = true;
+            indicator.style.transform = 'translate(-50%, 16px)';
+            indicator.style.opacity = 1;
+            indicator.classList.add('ptr-spin');
+            setTimeout(function() { window.location.reload(); }, 300);
+        } else {
+            reset();
+        }
+    }, { passive: true });
+
+    window.addEventListener('touchcancel', reset, { passive: true });
+})();
+</script>
 
 {{-- PWA Modal --}}
 <style>
@@ -105,14 +190,36 @@
     }
     .app-loader.hidden { display: none; }
 
-    .spinner {
-        width: 52px; height: 52px;
-        border: 4px solid rgba(255,255,255,0.25);
-        border-top-color: #fff; border-radius: 50%;
-        animation: spin 0.9s linear infinite;
+    /* ── themed loader: cycling math symbols ── */
+    .ks-loader { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .ks-loader-stage { position: relative; width: 68px; height: 68px; }
+    .ks-loader-ring {
+        position: absolute; inset: -8px; border-radius: 50%;
+        border: 3px solid rgba(108,92,231,0.28);
+        animation: ksRing 2.4s ease-in-out infinite;
     }
-    .loader-text { margin-top: 14px; color: #fff; font-size: 14px; opacity: 0.85; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .ks-loader-symbol {
+        position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+        font-family: 'Fredoka One', cursive; font-size: 2.3rem; line-height: 1;
+        opacity: 0; transform: scale(0.4) rotate(-15deg);
+        animation: ksSym 2.4s cubic-bezier(0.34,1.56,0.64,1) infinite;
+    }
+    .ks-loader-symbol:nth-child(2) { color: #fdcb6e; animation-delay: 0s; }
+    .ks-loader-symbol:nth-child(3) { color: #ff7675; animation-delay: 0.6s; }
+    .ks-loader-symbol:nth-child(4) { color: #55efc4; animation-delay: 1.2s; }
+    .ks-loader-symbol:nth-child(5) { color: #74b9ff; animation-delay: 1.8s; }
+    @keyframes ksSym {
+        0%   { opacity: 0; transform: scale(0.4) rotate(-15deg); }
+        12%  { opacity: 1; transform: scale(1.15) rotate(4deg); }
+        22%  { opacity: 1; transform: scale(1) rotate(0deg); }
+        32%  { opacity: 0; transform: scale(0.6) rotate(10deg); }
+        100% { opacity: 0; }
+    }
+    @keyframes ksRing {
+        0%, 100% { transform: scale(0.85); opacity: 0.3; }
+        50%      { transform: scale(1.08); opacity: 0.75; }
+    }
+    .loader-text { font-family: 'Nunito', sans-serif; font-weight: 800; color: #fff; font-size: 0.82rem; opacity: 0.85; letter-spacing: 0.02em; }
 </style>
 
 <div class="container-fluid px-0" style="position:relative;z-index:1;">
@@ -120,8 +227,16 @@
 </div>
 
 <div id="app-loader" class="app-loader hidden">
-    <div class="spinner"></div>
-    <div class="loader-text">Loading…</div>
+    <div class="ks-loader">
+        <div class="ks-loader-stage">
+            <div class="ks-loader-ring"></div>
+            <div class="ks-loader-symbol">+</div>
+            <div class="ks-loader-symbol">−</div>
+            <div class="ks-loader-symbol">×</div>
+            <div class="ks-loader-symbol">÷</div>
+        </div>
+        <div class="loader-text">იტვირთება…</div>
+    </div>
 </div>
 
 {{-- Cookie consent --}}
