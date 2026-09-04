@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('content')
 <style>
-    body { background: transparent !important; padding: 0 !important; }
+    body { background: transparent !important; }
     .wrap {
         max-width: 520px; margin: 0 auto;
         padding: 36px 20px 80px;
@@ -10,8 +10,6 @@
     .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
     .back { display:inline-flex; align-items:center; gap:6px; font-size: 0.72rem; font-weight: 700; color: #374151; text-decoration: none; background:#fff; border:1px solid #e8e8e8; border-radius:99px; padding:8px 16px; box-shadow:0 2px 8px rgba(0,0,0,0.06); transition: all 0.2s; }
     .back:hover { border-color:#bbb; color: #111; }
-    .settings-link { font-size: 0.68rem; color: #bbb; letter-spacing: 0.08em; text-decoration: none; transition: color 0.2s; }
-    .settings-link:hover { color: #555; }
 
     .child-title { font-size: clamp(1rem, 4vw, 1.3rem); color: #111; letter-spacing: 0.06em; margin-bottom: 4px; }
     .child-sub { font-size: 0.65rem; color: #bbb; letter-spacing: 0.1em; margin-bottom: 28px; }
@@ -59,12 +57,21 @@
         padding: 4px 10px; font-weight: 700;
     }
     .level-pct-pill .lvl { opacity: 0.65; font-weight: 400; }
+
+    .collapse-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 10px; margin-bottom: 20px; overflow: hidden; }
+    .collapse-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; cursor: pointer; user-select: none; transition: background 0.15s; }
+    .collapse-header:hover { background: #fafafa; }
+    .collapse-title { font-size: 0.62rem; color: #aaa; letter-spacing: 0.14em; text-transform: uppercase; }
+    .collapse-arrow { font-size: 0.68rem; color: #ccc; transition: transform 0.2s; flex-shrink: 0; }
+    .collapse-card.open .collapse-arrow { transform: rotate(90deg); }
+    .collapse-body { display: none; padding: 0 12px 12px; }
+    .collapse-card.open .collapse-body { display: block; }
+    .collapse-body .test-row:last-child, .collapse-body .topic-stat-row:last-child { margin-bottom: 0; }
 </style>
 
 <div class="wrap">
     <div class="topbar">
         <a href="{{ route('dashboard') }}" class="back">← დაბრუნება</a>
-        <a href="{{ route('child.settings.edit', $child) }}" class="settings-link">პარამეტრები →</a>
     </div>
 
     <div class="child-title">{{ $child->name }}</div>
@@ -86,37 +93,56 @@
     </div>
 
     @if($topicStats->count())
-    <div class="section-label">თემების მიხედვით</div>
-    @foreach($topicStats as $topicName => $levels)
-    <div class="topic-stat-row">
-        <div class="topic-stat-name">{{ $topicName }}</div>
-        <div class="topic-levels">
-            @foreach($levels as $lvl)
-            <span class="level-pct-pill {{ $lvl->pct >= 80 ? 'pct-hi' : ($lvl->pct >= 50 ? 'pct-mid' : 'pct-lo') }}">
-                <span class="lvl">დონე {{ $lvl->difficulty }}</span> {{ $lvl->pct }}%
-            </span>
+    <div class="collapse-card" id="secTopics">
+        <div class="collapse-header" onclick="toggleSection('secTopics')">
+            <span class="collapse-title">თემების მიხედვით · {{ $topicStats->count() }}</span>
+            <span class="collapse-arrow">▶</span>
+        </div>
+        <div class="collapse-body">
+            @foreach($topicStats as $topicName => $levels)
+            <div class="topic-stat-row">
+                <div class="topic-stat-name">{{ $topicName }}</div>
+                <div class="topic-levels">
+                    @foreach($levels as $lvl)
+                    <span class="level-pct-pill {{ $lvl->pct >= 80 ? 'pct-hi' : ($lvl->pct >= 50 ? 'pct-mid' : 'pct-lo') }}">
+                        <span class="lvl">დონე {{ $lvl->difficulty }}</span> {{ $lvl->pct }}%
+                    </span>
+                    @endforeach
+                </div>
+            </div>
             @endforeach
         </div>
     </div>
-    @endforeach
     @endif
 
-    <div class="section-label">ტესტების ისტორია</div>
-
-    @forelse($tests as $test)
-    @php $pct = round($test->correct_count / max($test->total_questions, 1) * 100); @endphp
-    <a href="{{ route('child.test.show', [$child, $test]) }}" class="test-row">
-        <div class="test-icon">{{ $test->theme?->icon ?? '📝' }}</div>
-        <div class="test-info">
-            <div class="test-date">{{ $test->completed_at->format('d.m.Y · H:i') }}</div>
-            <div class="test-score">{{ $test->correct_count }} / {{ $test->total_questions }} სწორი</div>
+    <div class="collapse-card" id="secTests">
+        <div class="collapse-header" onclick="toggleSection('secTests')">
+            <span class="collapse-title">ტესტების ისტორია · {{ $totalTests }}</span>
+            <span class="collapse-arrow">▶</span>
         </div>
-        <div class="test-pct {{ $pct >= 80 ? 'pct-hi' : ($pct >= 50 ? 'pct-mid' : 'pct-lo') }}">
-            {{ $pct }}%
+        <div class="collapse-body">
+            @forelse($tests as $test)
+            @php $pct = round($test->correct_count / max($test->total_questions, 1) * 100); @endphp
+            <a href="{{ route('child.test.show', [$child, $test]) }}" class="test-row">
+                <div class="test-icon">{{ $test->theme?->icon ?? '📝' }}</div>
+                <div class="test-info">
+                    <div class="test-date">{{ $test->completed_at->format('d.m.Y · H:i') }}</div>
+                    <div class="test-score">{{ $test->correct_count }} / {{ $test->total_questions }} სწორი</div>
+                </div>
+                <div class="test-pct {{ $pct >= 80 ? 'pct-hi' : ($pct >= 50 ? 'pct-mid' : 'pct-lo') }}">
+                    {{ $pct }}%
+                </div>
+            </a>
+            @empty
+            <div class="empty">ტესტები ჯერ არ დაწერილა</div>
+            @endforelse
         </div>
-    </a>
-    @empty
-    <div class="empty">ტესტები ჯერ არ დაწერილა</div>
-    @endforelse
+    </div>
 </div>
+
+<script>
+function toggleSection(id) {
+    document.getElementById(id).classList.toggle('open');
+}
+</script>
 @endsection

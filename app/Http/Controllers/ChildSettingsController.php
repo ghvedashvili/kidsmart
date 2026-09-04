@@ -3,10 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ChildSetting;
-use App\Models\Grade;
 use App\Models\Test;
-use App\Models\Theme;
-use App\Models\Topic;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -71,24 +68,6 @@ class ChildSettingsController extends Controller
         $answers   = $test->answers()->get()->keyBy('test_question_id');
 
         return view('parent.child-test', compact('child', 'test', 'questions', 'answers'));
-    }
-
-    public function edit(User $child)
-    {
-        $this->authorizeChild($child);
-
-        $setting  = $child->childSetting ?? new ChildSetting(['difficulty' => 1, 'tests_per_week' => 3]);
-        $grades   = Grade::orderBy('number')->get();
-        $themes   = Theme::all();
-        $topics   = Topic::with('grade')->orderBy('grade_id')->get();
-
-        $selectedThemes = $child->themes->pluck('id')->toArray();
-        $selectedTopics = $child->topics->pluck('id')->toArray();
-
-        return view('parent.child-settings', compact(
-            'child', 'setting', 'grades', 'themes', 'topics',
-            'selectedThemes', 'selectedTopics'
-        ));
     }
 
     public function updateAvatar(Request $request, User $child)

@@ -32,7 +32,7 @@ class RolePermission extends Model
         'dashboard'        => ['dashboard'],
         'tests'            => ['test.start', 'test.show', 'test.submit', 'test.result'],
         'achievements'     => ['achievements'],
-        'children'         => ['child.stats', 'child.test.show', 'child.settings.edit',
+        'children'         => ['child.stats', 'child.test.show',
                                'child.settings.update', 'child.destroy', 'child.store',
                                'child.link', 'push.remind'],
         'admin.panel'      => ['admin.panel', 'push.send'],
