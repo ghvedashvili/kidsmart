@@ -133,6 +133,10 @@ Route::middleware(['auth', 'role.permission'])->group(function () {
     Route::post('/games/wolves-hare/state', [GameController::class, 'wolvesHareState'])->name('games.wolves-hare.state');
     Route::post('/games/wolves-hare/finish', [GameController::class, 'wolvesHareFinish'])->name('games.wolves-hare.finish');
 
+    Route::get('/games/memory', [GameController::class, 'memory'])->name('games.memory');
+    Route::post('/games/memory/finish', [GameController::class, 'memoryFinish'])->name('games.memory.finish');
+    Route::get('/games/memory/leaderboard', [GameController::class, 'memoryLeaderboard'])->name('games.memory.leaderboard');
+
     // მარკეტი — parent manages
     Route::get('/children/{child}/market',              [MarketController::class, 'index'])->name('market.index');
     Route::post('/children/{child}/market/items',       [MarketController::class, 'store'])->name('market.store');

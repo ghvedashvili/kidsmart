@@ -48,7 +48,13 @@
         <div class="game-icon-tile">{{ $game['icon'] }}</div>
         <div class="game-info">
             <div class="game-name">{{ $game['name'] }}</div>
-            <div class="game-record">შენი ანგარიში: {{ $game['wins'] }} მოგება · {{ $game['losses'] }} წაგება</div>
+            <div class="game-record">
+                @if(($game['type'] ?? 'versus') === 'score')
+                    შენი საუკეთესო: {{ $game['best_score'] }} წყვილი
+                @else
+                    შენი ანგარიში: {{ $game['wins'] }} მოგება · {{ $game['losses'] }} წაგება
+                @endif
+            </div>
         </div>
         <div class="game-arrow">→</div>
     </a>

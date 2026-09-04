@@ -14,11 +14,19 @@ class GameController extends Controller
             'name'  => 'ქვა-ქაღალდი-მაკრატელი',
             'icon'  => '✊',
             'route' => 'games.rps',
+            'type'  => 'versus',
         ],
         'wolves_and_hare' => [
             'name'  => 'ბაჭია და მგლები',
             'icon'  => '🐰',
             'route' => 'games.wolves-hare',
+            'type'  => 'versus',
+        ],
+        'memory' => [
+            'name'  => 'მეხსიერების თამაში',
+            'icon'  => '🧠',
+            'route' => 'games.memory',
+            'type'  => 'score',
         ],
     ];
 
@@ -31,9 +39,10 @@ class GameController extends Controller
         $games = collect(self::GAMES)->map(function ($info, $slug) use ($child) {
             $session = GameSession::forChild($child->id, $slug);
             return array_merge($info, [
-                'slug'   => $slug,
-                'wins'   => $session->wins,
-                'losses' => $session->losses,
+                'slug'       => $slug,
+                'wins'       => $session->wins,
+                'losses'     => $session->losses,
+                'best_score' => $session->player_score,
             ]);
         });
 
@@ -169,5 +178,71 @@ class GameController extends Controller
                 'total_losses' => $global->total_losses,
             ],
         ]);
+    }
+
+    // ── მეხსიერების თამაში (Memory / find the pairs) ───────────────────────
+    public function memory()
+    {
+        $child = auth()->user();
+        abort_if($child->role !== 'child', 403);
+
+        $session = GameSession::forChild($child->id, 'memory');
+
+        return view('child.games.memory', [
+            'session' => $session,
+            'child'   => $child,
+        ]);
+    }
+
+    public function memoryFinish(Request $request): JsonResponse
+    {
+        $child = auth()->user();
+        abort_if($child->role !== 'child', 403);
+
+        $data = $request->validate([
+            'pairs_found' => 'required|integer|min:0',
+            'hints_used'  => 'nullable|integer|min:0',
+        ]);
+
+        $session  = GameSession::forChild($child->id, 'memory');
+        $isBest   = $data['pairs_found'] > $session->player_score;
+
+        if ($isBest) {
+            $session->player_score = $data['pairs_found'];
+            $session->state        = ['hints_used' => $data['hints_used'] ?? 0];
+            $session->save();
+        }
+
+        $rank = GameSession::where('game', 'memory')
+            ->where('player_score', '>', $session->player_score)
+            ->count() + 1;
+
+        return response()->json([
+            'best_score' => $session->player_score,
+            'is_best'    => $isBest,
+            'rank'       => $rank,
+        ]);
+    }
+
+    public function memoryLeaderboard(): JsonResponse
+    {
+        $child = auth()->user();
+        abort_if($child->role !== 'child', 403);
+
+        $top = GameSession::where('game', 'memory')
+            ->where('player_score', '>', 0)
+            ->with('child:id,name')
+            ->orderByDesc('player_score')
+            ->orderBy('updated_at')
+            ->limit(10)
+            ->get()
+            ->map(fn ($s) => [
+                'name'        => $s->child?->name ?? 'ბავშვი',
+                'score'       => $s->player_score,
+                'hints_used'  => $s->state['hints_used'] ?? 0,
+                'is_me'       => $s->child_id === $child->id,
+            ]);
+
+        return response()->json(['leaderboard' => $top]);
     }
 }
