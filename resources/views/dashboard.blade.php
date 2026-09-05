@@ -262,33 +262,19 @@
     .stat-grid-4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; }
     @media (min-width: 520px) { .stat-grid-4 { grid-template-columns: repeat(4, 1fr); } }
     .stat-card-4 {
-        background: #fff; border-radius: var(--radius-md); padding: 0; text-align: left;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.08); border: 1.5px solid #f5f5f5; text-decoration: none; color: inherit;
-        display: flex; position: relative; overflow: hidden; min-height: 118px;
+        background: #fff;
+        border-radius: var(--radius-md); padding: 14px; text-align: left;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.05); border: 1.5px solid #f5f5f5; text-decoration: none; color: inherit;
+        display: flex; position: relative; overflow: hidden; min-height: 100px;
     }
-    .stat-card-4-photo { position: absolute; inset: 0; background-size: cover; background-position: center; background-repeat: no-repeat; }
-    .stat-card-4-photo::after {
-        content: ''; position: absolute; inset: 0;
-        background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.05) 40%, rgba(255,255,255,0.85) 100%);
+    .stat-card-4-content { position: relative; z-index: 1; max-width: 66%; display: flex; flex-direction: column; gap: 8px; }
+    .stat-card-4-icon-img {
+        position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 65px;
+        object-fit: contain; z-index: 0; pointer-events: none;
     }
-    .stat-card-4-body { position: relative; z-index: 1; padding: 12px; display: flex; flex-direction: column; gap: 8px; width: 100%; box-sizing: border-box; }
-    .stat-card-4-head {
-        display: inline-flex; align-self: flex-start; align-items: center; gap: 5px;
-        font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.58rem; color: #555;
-        text-transform: uppercase; letter-spacing: 0.02em;
-        background: rgba(255,255,255,0.88); border-radius: 99px; padding: 4px 9px;
-    }
-    .stat-card-4-val { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: #1a1a2e; margin-top: auto; text-shadow: 0 1px 8px rgba(255,255,255,0.9), 0 1px 2px rgba(255,255,255,0.9); }
-    .stat-card-4-link {
-        display: inline-flex; align-self: flex-start;
-        font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.58rem; color: var(--primary);
-        background: rgba(255,255,255,0.88); border-radius: 99px; padding: 3px 9px;
-    }
-
-    .stat-card-4-photo.sc-practice { background-image: url('/img/Mission.jpg'); }
-    .stat-card-4-photo.sc-ach      { background-image: url('/img/Achievements.jpg'); }
-    .stat-card-4-photo.sc-tests    { background-image: url('/img/tests.jpg'); }
-    .stat-card-4-photo.sc-market   { background-image: url('/img/Market.jpg'); }
+    .stat-card-4-head { display: flex; align-items: center; gap: 8px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.6rem; color: #999; text-transform: uppercase; letter-spacing: 0.02em; }
+    .stat-card-4-val { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: #1a1a2e; }
+    .stat-card-4-link { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.58rem; color: var(--primary); }
 
 
     /* Modal */
@@ -404,16 +390,11 @@
     /* ── child view ── */
     .games-card {
         display: flex; align-items: center; gap: 14px; width: 100%; box-sizing: border-box;
-        min-height: 110px; position: relative; overflow: hidden;
-        background-image:
-            linear-gradient(90deg, rgba(240,253,244,0.94) 0%, rgba(240,253,244,0.78) 45%, rgba(240,253,244,0.08) 68%),
-            url('/img/games-hero.jpg');
-        background-size: cover;
-        background-position: right center;
-        background-repeat: no-repeat;
+        min-height: 110px; position: relative;
+        background: linear-gradient(160deg, #ecfdf5, #d1fae5);
         border-radius: var(--radius-lg);
         padding: 16px 18px; text-decoration: none; color: #14532d; text-align: left;
-        box-shadow: 0 8px 20px rgba(22,163,74,0.2); transition: transform 0.15s;
+        box-shadow: 0 8px 20px rgba(22,163,74,0.15); transition: transform 0.15s;
     }
     .games-card:hover { transform: translateY(-2px); color: #14532d; }
     .games-card-icon { font-size: 2.2rem; flex-shrink: 0; }
@@ -450,8 +431,8 @@
         .child-dash-fit .mission-sub { font-size: 0.72rem; margin-bottom: 10px; }
         .child-dash-fit .mission-cta { padding: 11px 20px; font-size: 0.92rem; }
         .child-dash-fit .stat-grid-4 { flex: 1 1 auto; gap: 8px; }
-        .child-dash-fit .stat-card-4 { min-height: 0; }
-        .child-dash-fit .stat-card-4-body { padding: 10px; gap: 5px; justify-content: center; }
+        .child-dash-fit .stat-card-4 { min-height: 0; padding: 10px; }
+        .child-dash-fit .stat-card-4-content { gap: 5px; justify-content: center; }
         .child-dash-fit .stat-card-4-val { font-size: 1.15rem; }
         .child-dash-fit .games-card { min-height: 0; flex: 0 0 auto; padding: 12px 14px; }
     }
@@ -829,33 +810,33 @@
         {{-- სტატისტიკის ბარათები --}}
         <div class="stat-grid-4">
             <a href="{{ route('practice.topics') }}" class="stat-card-4">
-                <div class="stat-card-4-photo sc-practice"></div>
-                <div class="stat-card-4-body">
-                    <div class="stat-card-4-head">🎯 სავარჯიშოები</div>
+                <img src="/img/Mission.jpg" class="stat-card-4-icon-img" alt="">
+                <div class="stat-card-4-content">
+                    <div class="stat-card-4-head">სავარჯიშოები</div>
                     <div class="stat-card-4-val">{{ $practiceTopicsCount }}</div>
                     <div class="stat-card-4-link">თემა · დაწყება →</div>
                 </div>
             </a>
             <a href="{{ route('achievements') }}" class="stat-card-4">
-                <div class="stat-card-4-photo sc-ach"></div>
-                <div class="stat-card-4-body">
-                    <div class="stat-card-4-head">🏆 ჩემი მედლები</div>
+                <img src="/img/Achievements.jpg" class="stat-card-4-icon-img" alt="">
+                <div class="stat-card-4-content">
+                    <div class="stat-card-4-head">ჩემი მედლები</div>
                     <div class="stat-card-4-val">{{ $achCount }}</div>
                     <div class="stat-card-4-link">ყველას ნახვა →</div>
                 </div>
             </a>
             <a href="{{ route('my.tests') }}" class="stat-card-4">
-                <div class="stat-card-4-photo sc-tests"></div>
-                <div class="stat-card-4-body">
-                    <div class="stat-card-4-head">📋 ჩემი ტესტები</div>
+                <img src="/img/tests.jpg" class="stat-card-4-icon-img" alt="">
+                <div class="stat-card-4-content">
+                    <div class="stat-card-4-head">ჩემი ტესტები</div>
                     <div class="stat-card-4-val">{{ $totalTestsCount }}</div>
                     <div class="stat-card-4-link">ისტორია →</div>
                 </div>
             </a>
             <a href="{{ route('market.child') }}" class="stat-card-4">
-                <div class="stat-card-4-photo sc-market"></div>
-                <div class="stat-card-4-body">
-                    <div class="stat-card-4-head">🛒 მარკეტი</div>
+                <img src="/img/Market.jpg" class="stat-card-4-icon-img" alt="">
+                <div class="stat-card-4-content">
+                    <div class="stat-card-4-head">მარკეტი</div>
                     <div class="stat-card-4-val">💰 {{ $coins }}</div>
                     <div class="stat-card-4-link">ნახვა →</div>
                 </div>

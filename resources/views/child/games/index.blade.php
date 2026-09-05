@@ -12,8 +12,14 @@
     .back-btn { display:inline-flex; align-items:center; gap:6px; margin:0 0 24px; font-family:'Nunito',sans-serif; font-size:0.82rem; font-weight:800; color:#16a34a; text-decoration:none; background:white; border-radius:99px; padding:8px 16px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
 
     .hero-card {
-        background: linear-gradient(135deg, #22c55e, #16a34a); border-radius:20px;
-        padding:22px 20px; margin-bottom:20px; color:#fff;
+        border-radius:20px; padding:22px 20px; margin-bottom:20px; color:#fff;
+        position: relative; overflow: hidden; min-height: 140px;
+        display: flex; flex-direction: column; justify-content: center;
+        background-image:
+            linear-gradient(90deg, rgba(21,128,61,0.92) 0%, rgba(21,128,61,0.75) 45%, rgba(21,128,61,0.15) 70%),
+            url('/img/games-hero.jpg');
+        background-size: cover; background-position: right center; background-repeat: no-repeat;
+        box-shadow: 0 10px 24px rgba(22,163,74,0.25);
     }
     .hero-title { font-family:'Fredoka One',cursive; font-size:1.5rem; margin-bottom:4px; }
     .hero-sub { font-family:'Nunito',sans-serif; font-weight:800; font-size:0.78rem; opacity:0.9; }
