@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ChildGradeHistory;
+use App\Models\Grade;
 use App\Models\Test;
 use App\Models\Topic;
 use Illuminate\Http\Request;
@@ -29,8 +31,13 @@ class VideoController extends Controller
     public function myHistory()
     {
         $child = auth()->user();
+
+        $currentGradeId = $child->childSetting?->grade_id;
+
         $tests = $child->tests()
             ->with('theme')
+            ->where('is_olympiad', false)
+            ->when($currentGradeId, fn ($q) => $q->where('grade_id', $currentGradeId))
             ->whereNotNull('completed_at')
             ->latest('completed_at')
             ->get();
@@ -40,9 +47,31 @@ class VideoController extends Controller
             ? round($tests->avg(fn($t) => $t->correct_count / max($t->total_questions, 1) * 100))
             : null;
 
-        $activeTest = $child->tests()->whereNull('completed_at')->latest()->first();
+        $activeTest = $child->tests()->where('is_olympiad', false)->whereNull('completed_at')->latest()->first();
 
-        return view('child.history', compact('child', 'tests', 'totalTests', 'avgScore', 'activeTest'));
+        $oldGradeIds = collect()
+            ->merge($child->tests()->whereNotNull('grade_id')->pluck('grade_id'))
+            ->merge(ChildGradeHistory::where('user_id', $child->id)->pluck('grade_id'))
+            ->filter()
+            ->unique()
+            ->reject(fn ($id) => $currentGradeId && $id == $currentGradeId);
+
+        $oldGrades = Grade::whereIn('id', $oldGradeIds)->orderBy('number')->get();
+
+        $oldGradeTests = $child->tests()
+            ->with('theme')
+            ->where('is_olympiad', false)
+            ->whereIn('grade_id', $oldGrades->pluck('id'))
+            ->whereNotNull('completed_at')
+            ->latest('completed_at')
+            ->get()
+            ->groupBy('grade_id');
+
+        $gradeHistory = ChildGradeHistory::where('user_id', $child->id)->orderBy('created_at')->get()->keyBy('grade_id');
+
+        return view('child.history', compact(
+            'child', 'tests', 'totalTests', 'avgScore', 'activeTest', 'oldGrades', 'oldGradeTests', 'gradeHistory'
+        ));
     }
 
     public function myTest(Test $test)

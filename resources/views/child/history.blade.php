@@ -63,6 +63,18 @@
     .empty { text-align:center; padding:60px 20px; }
     .empty-icon { font-size:3rem; margin-bottom:12px; }
     .empty-txt { font-family:'Fredoka One',cursive; font-size:1.05rem; color:#94a3b8; }
+
+    .old-grades-hr { border:none; border-top:1px solid #e2e8f0; margin:24px 0 14px; }
+    .old-grades-lbl { font-family:'Nunito',sans-serif; font-weight:800; font-size:0.68rem; letter-spacing:0.1em; text-transform:uppercase; color:#94a3b8; margin-bottom:12px; }
+
+    .old-grade-card { background:white; border-radius:16px; margin-bottom:10px; overflow:hidden; box-shadow:0 3px 12px rgba(0,0,0,0.06); }
+    .old-grade-header { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; cursor:pointer; font-family:'Fredoka One',cursive; font-size:0.85rem; color:#0e7490; user-select:none; }
+    .old-grade-arrow { font-size:0.7rem; color:#94a3b8; transition:transform 0.2s; }
+    .old-grade-card.open .old-grade-arrow { transform:rotate(90deg); }
+    .old-grade-body { display:none; padding:0 12px 12px; }
+    .old-grade-card.open .old-grade-body { display:block; }
+    .old-grade-meta { font-family:'Nunito',sans-serif; font-weight:700; font-size:0.66rem; color:#94a3b8; margin:0 4px 10px; }
+    .old-grade-empty { font-family:'Nunito',sans-serif; font-size:0.72rem; color:#cbd5e1; padding:8px 4px; }
 </style>
 
 <div class="wrap">
@@ -109,5 +121,47 @@
         <div class="empty-txt">ჯერ ტესტი არ გაქვს დაწერილი</div>
     </div>
     @endforelse
+
+    @if($oldGrades->isNotEmpty())
+    <hr class="old-grades-hr">
+    <div class="old-grades-lbl">ძველი კლასები</div>
+
+    @foreach($oldGrades as $grade)
+    @php
+        $gTests = $oldGradeTests->get($grade->id, collect());
+        $gHist  = $gradeHistory->get($grade->id);
+    @endphp
+    <div class="old-grade-card" id="secOldGrade{{ $grade->id }}">
+        <div class="old-grade-header" onclick="toggleOldGrade('secOldGrade{{ $grade->id }}')">
+            <span>{{ $grade->name }} · {{ $gTests->count() }}</span>
+            <span class="old-grade-arrow">▶</span>
+        </div>
+        <div class="old-grade-body">
+            @if($gHist)
+            <div class="old-grade-meta">საბოლოო დონე: {{ $gHist->difficulty }} · სულ {{ $gHist->tests_completed }} ტესტი</div>
+            @endif
+            @forelse($gTests as $test)
+            @php $pct = round($test->correct_count / max($test->total_questions, 1) * 100); @endphp
+            <a href="{{ route('my.test.show', $test) }}" class="test-link">
+                <div class="t-icon">{{ $test->theme?->icon ?? '📝' }}</div>
+                <div class="t-info">
+                    <div class="t-date">{{ $test->completed_at->format('d.m.Y · H:i') }}</div>
+                    <div class="t-score">{{ $test->correct_count }} / {{ $test->total_questions }} სწორი</div>
+                </div>
+                <div class="t-pct {{ $pct >= 80 ? 'pct-hi' : ($pct >= 50 ? 'pct-mid' : 'pct-lo') }}">{{ $pct }}%</div>
+                <div class="t-arrow">›</div>
+            </a>
+            @empty
+            <div class="old-grade-empty">ტესტები არ დაწერილა</div>
+            @endforelse
+        </div>
+    </div>
+    @endforeach
+    @endif
 </div>
+<script>
+function toggleOldGrade(id) {
+    document.getElementById(id).classList.toggle('open');
+}
+</script>
 @endsection

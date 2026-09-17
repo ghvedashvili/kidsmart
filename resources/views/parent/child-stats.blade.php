@@ -67,6 +67,10 @@
     .collapse-body { display: none; padding: 0 12px 12px; }
     .collapse-card.open .collapse-body { display: block; }
     .collapse-body .test-row:last-child, .collapse-body .topic-stat-row:last-child { margin-bottom: 0; }
+
+    .old-grades-hr { border: none; border-top: 1px solid #e8e8e8; margin: 28px 0 20px; }
+    .history-meta { font-size: 0.66rem; color: #aaa; letter-spacing: 0.04em; margin-bottom: 10px; }
+    .old-grade-oly-lbl { font-size: 0.6rem; color: #b45309; letter-spacing: 0.1em; text-transform: uppercase; margin: 12px 4px 8px; }
 </style>
 
 <div class="wrap">
@@ -162,6 +166,62 @@
             @endforelse
         </div>
     </div>
+
+    @if($oldGrades->isNotEmpty())
+    <hr class="old-grades-hr">
+    <div class="section-label">ძველი კლასები</div>
+
+    @foreach($oldGrades as $grade)
+    @php
+        $gTests   = $oldGradeTests->get($grade->id, collect());
+        $gOlyTests = $oldGradeOlympiadTests->get($grade->id, collect());
+        $gHist    = $gradeHistory->get($grade->id);
+    @endphp
+    <div class="collapse-card" id="secOldGrade{{ $grade->id }}">
+        <div class="collapse-header" onclick="toggleSection('secOldGrade{{ $grade->id }}')">
+            <span class="collapse-title">{{ $grade->name }} · {{ $gTests->count() }}@if($gOlyTests->count()) · 🏆{{ $gOlyTests->count() }}@endif</span>
+            <span class="collapse-arrow">▶</span>
+        </div>
+        <div class="collapse-body">
+            @if($gHist)
+            <div class="history-meta">საბოლოო დონე: {{ $gHist->difficulty }} · სულ {{ $gHist->tests_completed }} ტესტი</div>
+            @endif
+            @forelse($gTests as $test)
+            @php $pct = round($test->correct_count / max($test->total_questions, 1) * 100); @endphp
+            <a href="{{ route('child.test.show', [$child, $test]) }}" class="test-row">
+                <div class="test-icon">{{ $test->theme?->icon ?? '📝' }}</div>
+                <div class="test-info">
+                    <div class="test-date">{{ $test->completed_at->format('d.m.Y · H:i') }}</div>
+                    <div class="test-score">{{ $test->correct_count }} / {{ $test->total_questions }} სწორი</div>
+                </div>
+                <div class="test-pct {{ $pct >= 80 ? 'pct-hi' : ($pct >= 50 ? 'pct-mid' : 'pct-lo') }}">
+                    {{ $pct }}%
+                </div>
+            </a>
+            @empty
+            <div class="empty">ამ კლასში ტესტები არ დაწერილა</div>
+            @endforelse
+
+            @if($gOlyTests->isNotEmpty())
+            <div class="old-grade-oly-lbl">🏆 ოლიმპიადა</div>
+            @foreach($gOlyTests as $test)
+            @php $pct = round($test->correct_count / max($test->total_questions, 1) * 100); @endphp
+            <a href="{{ route('child.test.show', [$child, $test]) }}" class="test-row">
+                <div class="test-icon">🏆</div>
+                <div class="test-info">
+                    <div class="test-date">{{ $test->completed_at->format('d.m.Y · H:i') }}</div>
+                    <div class="test-score">{{ $test->correct_count }} / {{ $test->total_questions }} სწორი</div>
+                </div>
+                <div class="test-pct {{ $pct >= 80 ? 'pct-hi' : ($pct >= 50 ? 'pct-mid' : 'pct-lo') }}">
+                    {{ $pct }}%
+                </div>
+            </a>
+            @endforeach
+            @endif
+        </div>
+    </div>
+    @endforeach
+    @endif
 </div>
 
 <script>

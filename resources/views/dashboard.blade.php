@@ -368,6 +368,7 @@
     .notif-btn.on { color: #111; border-color: #111; }
     .flash { font-family: 'Goldman', monospace; font-size: 0.72rem; color: #2ecc71; letter-spacing: 0.06em; }
     .flash-err { font-family: 'Goldman', monospace; font-size: 0.72rem; color: #e74c3c; letter-spacing: 0.06em; }
+    .flash-warn { font-family: 'Goldman', monospace; font-size: 0.72rem; color: #d97706; letter-spacing: 0.06em; }
     /* ── child view ── */
     .games-card {
         display: flex; align-items: center; gap: 14px; width: 100%; box-sizing: border-box;
@@ -440,6 +441,11 @@
 
         @if(session('success'))
         <div class="flash">{{ session('success') }}</div>
+        @endif
+        @if(session('grade_change_notice'))
+        @foreach(session('grade_change_notice') as $notice)
+        <div class="flash-warn">{{ $notice }}</div>
+        @endforeach
         @endif
         @if(session('test_error'))
         <div class="flash-err">{{ session('test_error') }}</div>
@@ -614,7 +620,9 @@
                         onclick="document.getElementById('editChildModal{{ $child->id }}').classList.remove('open')">✕</button>
                 </div>
 
-                <form method="POST" action="{{ route('child.settings.update', $child) }}">
+                <form method="POST" action="{{ route('child.settings.update', $child) }}"
+                    id="editChildForm{{ $child->id }}" data-orig-grade="{{ $es?->grade_id }}"
+                    onsubmit="return handleEditChildSubmit(event, {{ $child->id }}, '{{ addslashes($child->name) }}')">
                     @csrf @method('PUT')
 
                     <div class="mlbl">სახელი</div>
@@ -1123,6 +1131,31 @@ function confirmDeleteChild(childId, childName) {
             document.getElementById('deleteChildForm' + childId).submit();
         }
     });
+}
+
+function handleEditChildSubmit(event, childId, childName) {
+    const form = document.getElementById('editChildForm' + childId);
+    const newGrade = document.getElementById('egid' + childId).value;
+    const origGrade = form.dataset.origGrade;
+    if (origGrade && newGrade && origGrade !== newGrade) {
+        event.preventDefault();
+        Swal.fire({
+            title: childName + '-ის კლასის შეცვლა?',
+            html: '<span style="font-size:0.9rem;color:#555;">დონე დაუბრუნდება თავიდან და ტესტების მთვლელი განულდება.<br>ძველი კლასის ნამუშევრები და მიღწეული დონე უსაფრთხოდ შენახული დარჩება სტატისტიკაში.</span>',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d97706',
+            cancelButtonColor: '#aaa',
+            confirmButtonText: 'დიახ, შევცვალო',
+            cancelButtonText: 'გაუქმება',
+        }).then(result => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+        return false;
+    }
+    return true;
 }
 
 function copyChildCode(el, code) {

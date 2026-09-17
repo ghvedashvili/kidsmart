@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ChildGradeHistory;
 use App\Models\ChildSetting;
+use App\Models\QuestionTemplate;
 use App\Models\Test;
+use App\Models\Theme;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -19,9 +22,15 @@ class ChildSettingsController extends Controller
     {
         $this->authorizeChild($child);
 
+        $currentGradeId = $child->childSetting?->grade_id;
+
+        // Test history / topic breakdown below reflect the CURRENT grade only —
+        // anything from a grade the child has since left surfaces in the
+        // "ძველი კლასები" accordion instead (built further down).
         $tests = $child->tests()
             ->with('theme')
             ->where('is_olympiad', false)
+            ->when($currentGradeId, fn ($q) => $q->where('grade_id', $currentGradeId))
             ->whereNotNull('completed_at')
             ->latest('completed_at')
             ->get();
@@ -29,6 +38,7 @@ class ChildSettingsController extends Controller
         $olympiadTests = $child->tests()
             ->with('theme')
             ->where('is_olympiad', true)
+            ->when($currentGradeId, fn ($q) => $q->where('grade_id', $currentGradeId))
             ->whereNotNull('completed_at')
             ->latest('completed_at')
             ->get();
@@ -47,6 +57,7 @@ class ChildSettingsController extends Controller
             ->join('topics', 'question_templates.topic_id', '=', 'topics.id')
             ->where('tests.child_id', $child->id)
             ->where('tests.is_olympiad', false)
+            ->when($currentGradeId, fn ($q) => $q->where('tests.grade_id', $currentGradeId))
             ->whereNotNull('tests.completed_at')
             ->selectRaw('topics.id as topic_id, topics.name as topic_name, question_templates.difficulty as difficulty, SUM(test_answers.is_correct) as correct, COUNT(*) as total')
             ->groupBy('topics.id', 'topics.name', 'question_templates.difficulty')
@@ -63,8 +74,40 @@ class ChildSettingsController extends Controller
             ])
             ->groupBy('topic_name');
 
+        // Old grades: every grade this child has test/history data for, other than
+        // the current one — one expandable card per grade in the view.
+        $oldGradeIds = collect()
+            ->merge($child->tests()->whereNotNull('grade_id')->pluck('grade_id'))
+            ->merge(ChildGradeHistory::where('user_id', $child->id)->pluck('grade_id'))
+            ->filter()
+            ->unique()
+            ->reject(fn ($id) => $currentGradeId && $id == $currentGradeId);
+
+        $oldGrades = \App\Models\Grade::whereIn('id', $oldGradeIds)->orderBy('number')->get();
+
+        $oldGradeTests = $child->tests()
+            ->with('theme')
+            ->where('is_olympiad', false)
+            ->whereIn('grade_id', $oldGrades->pluck('id'))
+            ->whereNotNull('completed_at')
+            ->latest('completed_at')
+            ->get()
+            ->groupBy('grade_id');
+
+        $oldGradeOlympiadTests = $child->tests()
+            ->with('theme')
+            ->where('is_olympiad', true)
+            ->whereIn('grade_id', $oldGrades->pluck('id'))
+            ->whereNotNull('completed_at')
+            ->latest('completed_at')
+            ->get()
+            ->groupBy('grade_id');
+
+        $gradeHistory = ChildGradeHistory::where('user_id', $child->id)->orderBy('created_at')->get()->keyBy('grade_id');
+
         return view('parent.child-stats', compact(
-            'child', 'tests', 'totalTests', 'avgScore', 'todayCount', 'required', 'topicStats', 'olympiadTests'
+            'child', 'tests', 'totalTests', 'avgScore', 'todayCount', 'required', 'topicStats', 'olympiadTests',
+            'oldGrades', 'oldGradeTests', 'oldGradeOlympiadTests', 'gradeHistory'
         ));
     }
 
@@ -126,18 +169,52 @@ class ChildSettingsController extends Controller
             $child->update(['name' => trim($data['name'])]);
         }
 
+        $oldSetting   = ChildSetting::where('user_id', $child->id)->first();
+        $gradeChanged = $oldSetting && $oldSetting->grade_id && $oldSetting->grade_id != ($data['grade_id'] ?? null);
+        $warnings     = [];
+
+        if ($gradeChanged) {
+            ChildGradeHistory::create([
+                'user_id'         => $child->id,
+                'grade_id'        => $oldSetting->grade_id,
+                'difficulty'      => $oldSetting->difficulty,
+                'tests_completed' => Test::where('child_id', $child->id)
+                    ->where('grade_id', $oldSetting->grade_id)
+                    ->where('is_olympiad', false)
+                    ->whereNotNull('completed_at')
+                    ->count(),
+            ]);
+            $warnings[] = 'დონე დაუბრუნდა თავიდან და ტესტების მთვლელი განულდა — ძველი კლასის ნამუშევრები სტატისტიკაში შენარჩუნებულია.';
+        }
+
+        $themeIds = $data['theme_ids'] ?? [];
+        if ($gradeChanged && !empty($themeIds) && !empty($data['grade_id'])) {
+            $hasTemplates = QuestionTemplate::whereIn('theme_id', $themeIds)
+                ->whereHas('topic', fn ($q) => $q->where('grade_id', $data['grade_id']))
+                ->exists();
+            if (! $hasTemplates) {
+                $oldNames = Theme::whereIn('id', $themeIds)->pluck('name')->implode(', ');
+                $defaultThemeId = Theme::where('name', 'სტანდარტი')->value('id');
+                $themeIds = $defaultThemeId ? [$defaultThemeId] : [];
+                $warnings[] = "თემატიკა („{$oldNames}“) ახალ კლასში ხელმისაწვდომი არ არის — გადართულია სტანდარტულზე.";
+            }
+        }
+
         ChildSetting::updateOrCreate(
             ['user_id' => $child->id],
             [
                 'grade_id'       => $data['grade_id'] ?? null,
-                'difficulty'     => $data['difficulty'],
+                'difficulty'     => $gradeChanged ? 1 : $data['difficulty'],
                 'tests_per_week' => $data['tests_per_week'],
+                ...($gradeChanged ? ['tests_since_level_review' => 0] : []),
             ]
         );
 
-        $child->themes()->sync($data['theme_ids'] ?? []);
+        $child->themes()->sync($themeIds);
         $child->topics()->sync($data['topic_ids'] ?? []);
 
-        return redirect()->route('dashboard')->with('success', $child->name . '-ის პარამეტრები შეინახა');
+        return redirect()->route('dashboard')
+            ->with('success', $child->name . '-ის პარამეტრები შეინახა')
+            ->with('grade_change_notice', $warnings);
     }
 }

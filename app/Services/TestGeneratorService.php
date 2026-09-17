@@ -91,6 +91,7 @@ class TestGeneratorService
         $test = Test::create([
             'child_id'        => $child->id,
             'theme_id'        => $theme?->id,
+            'grade_id'        => $setting->grade_id,
             'scheduled_at'    => now(),
             'total_questions' => $selectedTemplates->count(),
         ]);
@@ -196,6 +197,7 @@ class TestGeneratorService
         $test = Test::create([
             'child_id'        => $child->id,
             'theme_id'        => $theme?->id,
+            'grade_id'        => $setting->grade_id,
             'scheduled_at'    => now(),
             'total_questions' => $selectedTemplates->count(),
             'is_olympiad'     => true,

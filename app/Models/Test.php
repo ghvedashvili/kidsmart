@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Test extends Model
 {
-    protected $fillable = ['child_id', 'theme_id', 'scheduled_at', 'completed_at', 'correct_count', 'total_questions', 'coins_earned', 'is_olympiad'];
+    protected $fillable = ['child_id', 'theme_id', 'grade_id', 'scheduled_at', 'completed_at', 'correct_count', 'total_questions', 'coins_earned', 'is_olympiad'];
 
     protected $casts = [
         'scheduled_at' => 'datetime',
@@ -24,6 +24,11 @@ class Test extends Model
     public function theme(): BelongsTo
     {
         return $this->belongsTo(Theme::class);
+    }
+
+    public function grade(): BelongsTo
+    {
+        return $this->belongsTo(Grade::class);
     }
 
     public function questions(): HasMany
