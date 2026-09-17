@@ -165,7 +165,10 @@ class TestGeneratorService
             return ['error' => 'ამ კლასისთვის ოლიმპიადის კითხვები ჯერ არ დამატებულა'];
         }
 
-        $questionsNeeded  = min($rule['questions_count'], $pool->count());
+        $questionsNeeded  = min(
+            TestQuestionCount::resolveOlympiad($setting->grade_id, $theme?->id, $rule['questions_count']),
+            $pool->count()
+        );
         $templatesByTopic = $pool->groupBy('topic_id');
         $usedTemplateIds  = [];
         $selectedTemplates = collect();

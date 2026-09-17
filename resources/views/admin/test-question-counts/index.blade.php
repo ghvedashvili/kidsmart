@@ -37,22 +37,26 @@
     <div class="card-dark">
         <div class="card-label">ტესტში კითხვების რაოდენობა — წესის დამატება</div>
         <div class="hint">
-            ნაგულისხმევად ყველა ტესტს აქვს {{ \App\Models\TestQuestionCount::DEFAULT_COUNT }} კითხვა. აქ შეგიძლია დაადგინო გამონაკლისი კონკრეტული კლასის/დონის/თემატიკისთვის — თემატიკის გარეშე დატოვება ნიშნავს, რომ წესი მოქმედებს ამ კლასის+დონეზე ნებისმიერი თემატიკით.
+            ნაგულისხმევად ყველა ტესტს აქვს {{ \App\Models\TestQuestionCount::DEFAULT_COUNT }} კითხვა. აქ შეგიძლია დაადგინო გამონაკლისი კონკრეტული კლასის/დონის/თემატიკისთვის — დონის ან თემატიკის „ნებისმიერი“-დატოვება ნიშნავს, რომ წესი მოქმედებს ამ განზომილების ყველა მნიშვნელობაზე. დონის ჩამონათვალი ავტომატურად შეიზღუდება კლასისთვის დაწესებულ მაქსიმალურ ლეველამდე.
+            „🏆 ოლიმპიადა“-ს არჩევით განსაზღვრავ ამ კლასის ოლიმპიადის ტესტში კითხვების რაოდენობას — ეს უფრო კონკრეტული გამონაკლისია, ვიდრე <a href="{{ route('admin.olympiad-rules.index') }}" style="color:#6366f1;">ოლიმპიადის გვერდზე</a> დაწესებული რაოდენობა და მას წინ უსწრებს.
         </div>
-        <form method="POST" action="{{ route('admin.question-counts.store') }}">
+        <form method="POST" action="{{ route('admin.question-counts.store') }}" onsubmit="return qcPrepareSubmit()">
             @csrf
-            <select name="grade_id" class="fc" required>
+            <select name="grade_id" id="qcGrade" class="fc" required onchange="qcApplyGradeMaxLevel(this.value)">
                 <option value="">კლასი</option>
                 @foreach($grades as $grade)
-                <option value="{{ $grade->id }}" {{ old('grade_id') == $grade->id ? 'selected' : '' }}>{{ $grade->name }}</option>
+                <option value="{{ $grade->id }}" data-max-level="{{ $grade->max_level }}" {{ old('grade_id') == $grade->id ? 'selected' : '' }}>{{ $grade->name }}</option>
                 @endforeach
             </select>
-            <select name="difficulty" class="fc" required>
-                <option value="">დონე</option>
-                @for($i = 1; $i <= 3; $i++)
+            <select name="difficulty" id="qcDifficulty" class="fc" onchange="qcSyncOlympiad(this.value)">
+                <option value="">ნებისმიერი დონე</option>
+                @for($i = 1; $i <= 5; $i++)
                 <option value="{{ $i }}" {{ old('difficulty') == $i ? 'selected' : '' }}>დონე {{ $i }}</option>
                 @endfor
+                <option value="olympiad" {{ old('is_olympiad') ? 'selected' : '' }}>🏆 ოლიმპიადა</option>
             </select>
+            <input type="hidden" name="is_olympiad" id="qcIsOlympiad" value="{{ old('is_olympiad') ? 1 : 0 }}">
+            @error('difficulty')<div class="err">{{ $message }}</div>@enderror
             <select name="theme_id" class="fc">
                 <option value="">ნებისმიერი თემატიკა</option>
                 @foreach($themes as $theme)
@@ -73,7 +77,11 @@
             <div class="row-display" id="qd{{ $row->id }}">
                 <span>
                     <span class="pill">{{ $row->grade->name ?? '—' }}</span>
-                    <span class="pill">დონე {{ $row->difficulty }}</span>
+                    <span class="pill">
+                        @if($row->is_olympiad) 🏆 ოლიმპიადა
+                        @else {{ $row->difficulty ? 'დონე ' . $row->difficulty : 'ნებისმიერი დონე' }}
+                        @endif
+                    </span>
                     <span class="pill">{{ $row->theme ? ($row->theme->icon . ' ' . $row->theme->name) : 'ნებისმიერი თემატიკა' }}</span>
                     <b>{{ $row->questions_count }}</b> კითხვა
                 </span>
@@ -107,6 +115,37 @@ function qcEdit(id) {
 function qcCancel(id) {
     document.getElementById('qd' + id).style.display = 'flex';
     document.getElementById('qe' + id).style.display = 'none';
+}
+
+// ── Cap the difficulty options to the selected grade's max_level (does not hide
+// "ნებისმიერი დონე", which always applies regardless of grade)
+function qcApplyGradeMaxLevel(gradeId) {
+    const gradeSelect = document.getElementById('qcGrade');
+    const opt = gradeSelect.querySelector('option[value="' + gradeId + '"]');
+    const max = gradeId && opt ? (+opt.dataset.maxLevel || 5) : 5;
+
+    const diffSelect = document.getElementById('qcDifficulty');
+    Array.from(diffSelect.options).forEach(o => {
+        if (o.value === '') { o.hidden = false; return; }
+        o.hidden = (+o.value) > max;
+    });
+    if (diffSelect.value && (+diffSelect.value) > max) {
+        diffSelect.value = '';
+    }
+}
+qcApplyGradeMaxLevel(document.getElementById('qcGrade').value);
+
+// ── Olympiad is a special "difficulty" pick — always available regardless of
+// grade's max_level, and isn't itself a real numeric difficulty.
+function qcSyncOlympiad(value) {
+    document.getElementById('qcIsOlympiad').value = value === 'olympiad' ? 1 : 0;
+}
+function qcPrepareSubmit() {
+    const diffSelect = document.getElementById('qcDifficulty');
+    if (diffSelect.value === 'olympiad') {
+        diffSelect.value = ''; // is_olympiad hidden input already carries the real signal
+    }
+    return true;
 }
 </script>
 @endsection
