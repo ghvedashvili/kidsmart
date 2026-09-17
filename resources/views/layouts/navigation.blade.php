@@ -205,6 +205,9 @@
             @if($__canAdm('admin.levelrules'))
             <a class="nav-link-item{{ request()->routeIs('admin.level-rules.*') ? ' nav-act' : '' }}" href="{{ route('admin.level-rules.index') }}" style="font-size:0.74rem;">დონის ცვლილება</a>
             @endif
+            @if($__canAdm('admin.olympiadrules'))
+            <a class="nav-link-item{{ request()->routeIs('admin.olympiad-rules.*') ? ' nav-act' : '' }}" href="{{ route('admin.olympiad-rules.index') }}" style="font-size:0.74rem;">ოლიმპიადა</a>
+            @endif
             @if($__canAdm('admin.users'))
             <a class="nav-link-item{{ request()->routeIs('admin.users.*') ? ' nav-act' : '' }}" href="{{ route('admin.users.index') }}" style="font-size:0.74rem;">მომხ.</a>
             @endif
@@ -298,6 +301,9 @@
     @endif
     @if($__mCan('admin.levelrules'))
     <a href="{{ route('admin.level-rules.index') }}" onclick="toggleMobileMenu()"><span class="mn-icon">📈</span>დონის ცვლილება</a>
+    @endif
+    @if($__mCan('admin.olympiadrules'))
+    <a href="{{ route('admin.olympiad-rules.index') }}" onclick="toggleMobileMenu()"><span class="mn-icon">🏆</span>ოლიმპიადის განრიგი</a>
     @endif
     @if($__mCan('admin.users'))
     <a href="{{ route('admin.users.index') }}" onclick="toggleMobileMenu()"><span class="mn-icon">👥</span>მომხმარებლები</a>

@@ -384,6 +384,22 @@
     .games-card-sub { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.7rem; color: #166534; opacity: 0.85; }
     .games-card-arrow { font-size: 1.1rem; flex-shrink: 0; opacity: 0.85; }
 
+    .oly-card {
+        display: flex; align-items: center; gap: 14px; width: 100%; box-sizing: border-box;
+        min-height: 110px; position: relative; margin-top: 12px;
+        background: linear-gradient(160deg, #fffbeb, #fde68a);
+        border-radius: var(--radius-lg);
+        padding: 16px 18px; text-decoration: none; color: #78350f; text-align: left;
+        box-shadow: 0 8px 20px rgba(217,119,6,0.18); transition: transform 0.15s;
+    }
+    .oly-card:hover { transform: translateY(-2px); color: #78350f; }
+    .oly-card.locked { opacity: 0.55; filter: grayscale(0.35); }
+    .oly-card-icon { font-size: 2.2rem; flex-shrink: 0; }
+    .oly-card-text { flex: 1; min-width: 0; }
+    .oly-card-title { font-family: 'Fredoka One', cursive; font-size: 1rem; margin-bottom: 2px; color: #78350f; }
+    .oly-card-sub { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.7rem; color: #92400e; opacity: 0.9; }
+    .oly-card-arrow { font-size: 1.1rem; flex-shrink: 0; opacity: 0.85; }
+
 
     /* ── responsive widths + multi-column grids on desktop (kept last so it wins the cascade) ── */
     @media (min-width: 760px) {
@@ -682,6 +698,7 @@
             'admin.questions' => ['route' => 'admin.questions.index',   'icon' => '❓',  'name' => 'კითხვები'],
             'admin.qcounts'   => ['route' => 'admin.question-counts.index', 'icon' => '🔢', 'name' => 'ტესტის ზომა'],
             'admin.levelrules' => ['route' => 'admin.level-rules.index',    'icon' => '📈', 'name' => 'დონის ცვლილება'],
+            'admin.olympiadrules' => ['route' => 'admin.olympiad-rules.index', 'icon' => '🏆', 'name' => 'ოლიმპიადა'],
             'admin.users'     => ['route' => 'admin.users.index',       'icon' => '👥', 'name' => 'მომხმარებლები'],
             'admin.perms'     => ['route' => 'admin.permissions.index', 'icon' => '🔐', 'name' => 'ნებართვები'],
             'admin.packages'  => ['route' => 'admin.packages.index',    'icon' => '📦', 'name' => 'პაკეტები'],
@@ -731,10 +748,11 @@
         {{-- ბავშვის ხედი --}}
         @if(auth()->user()->role === 'child')
         @php
-            $activeTest    = auth()->user()->tests()->whereNull('completed_at')->latest()->first();
+            $activeTest    = auth()->user()->tests()->where('is_olympiad', false)->whereNull('completed_at')->latest()->first();
             $setting       = auth()->user()->childSetting;
             $required      = $setting?->tests_per_week ?? 0;
-            $todayCount    = auth()->user()->tests()->whereNotNull('completed_at')->whereDate('completed_at', today())->count();
+            $todayCount    = auth()->user()->tests()->where('is_olympiad', false)->whereNotNull('completed_at')->whereDate('completed_at', today())->count();
+            $olympiadStatus = (new \App\Services\OlympiadService())->statusFor(auth()->user());
             $doneToday     = $required > 0 && $todayCount >= $required && !$activeTest;
             $coins         = $setting?->coins ?? 0;
             $achCount      = auth()->user()->achievements()->count();
@@ -826,6 +844,23 @@
             <span class="games-card-arrow">→</span>
         </a>
 
+        {{-- ოლიმპიადა --}}
+        <a href="{{ route('olympiad.index') }}" class="oly-card {{ $olympiadStatus['eligible_today'] || $olympiadStatus['already_attempted_today'] ? '' : 'locked' }}">
+            <span class="oly-card-icon">🏆</span>
+            <div class="oly-card-text">
+                <div class="oly-card-title">ოლიმპიადა</div>
+                <div class="oly-card-sub">
+                    @if($olympiadStatus['already_attempted_today'])
+                        {{ $olympiadStatus['todays_test']->completed_at ? 'დღევანდელი ოლიმპიადა დასრულებულია!' : 'ოლიმპიადა დაწყებულია — გააგრძელე!' }}
+                    @elseif($olympiadStatus['eligible_today'])
+                        დღეს შეგიძლია დაწერო — დააჭირე და დაიწყე!
+                    @else
+                        {{ $olympiadStatus['reason'] }}
+                    @endif
+                </div>
+            </div>
+            <span class="oly-card-arrow">→</span>
+        </a>
 
         @endif
 

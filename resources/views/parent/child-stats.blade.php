@@ -138,6 +138,30 @@
             @endforelse
         </div>
     </div>
+
+    <div class="collapse-card" id="secOlympiad">
+        <div class="collapse-header" onclick="toggleSection('secOlympiad')">
+            <span class="collapse-title">🏆 ოლიმპიადა · {{ $olympiadTests->count() }}</span>
+            <span class="collapse-arrow">▶</span>
+        </div>
+        <div class="collapse-body">
+            @forelse($olympiadTests as $test)
+            @php $pct = round($test->correct_count / max($test->total_questions, 1) * 100); @endphp
+            <a href="{{ route('child.test.show', [$child, $test]) }}" class="test-row">
+                <div class="test-icon">🏆</div>
+                <div class="test-info">
+                    <div class="test-date">{{ $test->completed_at->format('d.m.Y · H:i') }}</div>
+                    <div class="test-score">{{ $test->correct_count }} / {{ $test->total_questions }} სწორი</div>
+                </div>
+                <div class="test-pct {{ $pct >= 80 ? 'pct-hi' : ($pct >= 50 ? 'pct-mid' : 'pct-lo') }}">
+                    {{ $pct }}%
+                </div>
+            </a>
+            @empty
+            <div class="empty">ოლიმპიადაზე ჯერ არ დაწერილა</div>
+            @endforelse
+        </div>
+    </div>
 </div>
 
 <script>

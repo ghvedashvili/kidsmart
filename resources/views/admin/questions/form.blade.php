@@ -184,6 +184,13 @@
                 <input type="hidden" name="difficulty" id="diffInput"
                     value="{{ old('difficulty', $template?->difficulty ?? 1) }}">
 
+                <div style="margin-top:6px;">
+                    <button type="button" id="olyBtn" class="diff-btn {{ old('is_olympiad', $template?->is_olympiad) ? 'sel' : '' }}" style="width:auto;padding:7px 14px;"
+                        onclick="toggleOlympiad()">🏆 ოლიმპიადა</button>
+                </div>
+                <input type="hidden" name="is_olympiad" id="isOlympiadInput"
+                    value="{{ old('is_olympiad', $template?->is_olympiad ? 1 : 0) }}">
+
                 {{-- Pyramid config (shown only for pyramid type) --}}
                 <div id="pyrFields" style="display:none;margin-top:14px;border-top:1px solid #f1f5f9;padding-top:14px;">
                     <div class="sec-title" style="margin-bottom:10px;">🔺 პირამიდის პარამეტრები</div>
@@ -873,7 +880,25 @@ function genPreviewCw() {
 // ── Difficulty
 function setDiff(n) {
     document.getElementById('diffInput').value = n;
-    document.querySelectorAll('.diff-btn').forEach((b, i) => b.classList.toggle('sel', i + 1 === n));
+    document.querySelectorAll('#diffRow .diff-btn').forEach((b, i) => b.classList.toggle('sel', i + 1 === n));
+    const oi = document.getElementById('isOlympiadInput');
+    if (oi.value === '1') {
+        oi.value = '0';
+        document.getElementById('olyBtn').classList.remove('sel');
+    }
+}
+
+// ── Olympiad toggle — mutually exclusive with the normal 1-5 difficulty picker
+function toggleOlympiad() {
+    const input = document.getElementById('isOlympiadInput');
+    const active = input.value !== '1';
+    input.value = active ? '1' : '0';
+    document.getElementById('olyBtn').classList.toggle('sel', active);
+    document.querySelectorAll('#diffRow .diff-btn').forEach(b => {
+        b.disabled = active;
+        b.style.opacity = active ? '0.35' : '';
+        b.style.pointerEvents = active ? 'none' : '';
+    });
 }
 
 // ── Insert at cursor (template text)
@@ -1562,6 +1587,12 @@ document.getElementById('condRows').addEventListener('focusin', function(e) {
 
 // ── Init
 (function init() {
+    // Restore olympiad toggle visual state (edit mode or old() restore)
+    if (document.getElementById('isOlympiadInput').value === '1') {
+        document.getElementById('isOlympiadInput').value = '0'; // toggleOlympiad() flips it back to '1'
+        toggleOlympiad();
+    }
+
     // Load vars for the currently selected theme (edit mode or old() restore)
     const themeEl = document.getElementById('themeSelect');
     if (themeEl && themeEl.value) onThemeChange(themeEl.value);

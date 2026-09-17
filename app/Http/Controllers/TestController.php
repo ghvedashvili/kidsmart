@@ -16,6 +16,7 @@ class TestController extends Controller
         $child = auth()->user();
 
         $existing = Test::where('child_id', $child->id)
+            ->where('is_olympiad', false)
             ->whereNull('completed_at')
             ->latest()
             ->first();
@@ -29,6 +30,7 @@ class TestController extends Controller
 
         if ($required > 0) {
             $todayCount = Test::where('child_id', $child->id)
+                ->where('is_olympiad', false)
                 ->whereNotNull('completed_at')
                 ->whereDate('completed_at', today())
                 ->count();

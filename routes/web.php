@@ -17,6 +17,8 @@ use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\SubscriptionController;
 use App\Http\Controllers\Admin\TestQuestionCountController;
 use App\Http\Controllers\Admin\LevelUpRuleController;
+use App\Http\Controllers\Admin\OlympiadRuleController;
+use App\Http\Controllers\OlympiadController;
 use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\MarketController;
 use App\Http\Controllers\PracticeController;
@@ -172,6 +174,10 @@ Route::middleware(['auth', 'role.permission'])->group(function () {
     Route::get('/test/{test}/result',   [TestController::class, 'result'])->name('test.result');
 
     Route::get('/test-preview', [TestPreviewController::class, 'show'])->name('test.preview');
+
+    // ოლიმპიადა
+    Route::get('/olympiad',        [OlympiadController::class, 'index'])->name('olympiad.index');
+    Route::post('/olympiad/start', [OlympiadController::class, 'start'])->name('olympiad.start');
 });
 
 // /admin entry-point — ნებისმიერი admin-permissioned user შედის (per-page check არ არის)
@@ -248,4 +254,10 @@ Route::middleware(['auth', 'admin', 'role.permission'])->group(function () {
     Route::post('/admin/level-rules',                    [LevelUpRuleController::class, 'store'])->name('admin.level-rules.store');
     Route::put('/admin/level-rules/{levelUpRule}',        [LevelUpRuleController::class, 'update'])->name('admin.level-rules.update');
     Route::delete('/admin/level-rules/{levelUpRule}',     [LevelUpRuleController::class, 'destroy'])->name('admin.level-rules.destroy');
+
+    Route::get('/admin/olympiad-rules',                      [OlympiadRuleController::class, 'index'])->name('admin.olympiad-rules.index');
+    Route::put('/admin/olympiad-rules/global',                [OlympiadRuleController::class, 'updateGlobal'])->name('admin.olympiad-rules.global');
+    Route::post('/admin/olympiad-rules',                      [OlympiadRuleController::class, 'store'])->name('admin.olympiad-rules.store');
+    Route::put('/admin/olympiad-rules/{olympiadRule}',        [OlympiadRuleController::class, 'update'])->name('admin.olympiad-rules.update');
+    Route::delete('/admin/olympiad-rules/{olympiadRule}',     [OlympiadRuleController::class, 'destroy'])->name('admin.olympiad-rules.destroy');
 });

@@ -23,6 +23,7 @@ class TestGeneratorService
         $childTopicIds = $child->topics()->pluck('id')->toArray();
 
         $baseQuery = fn () => QuestionTemplate::where('difficulty', $setting->difficulty)
+            ->where('is_olympiad', false)
             ->whereHas('topic', fn ($q) => $q->where('grade_id', $setting->grade_id))
             ->when(! empty($childTopicIds), fn ($q) => $q->whereIn('topic_id', $childTopicIds));
 
@@ -109,6 +110,110 @@ class TestGeneratorService
         }
 
         $setting->save(); // persist the topic_rotation state updated by pickTopicIdsForTest()
+
+        return ['test' => $test];
+    }
+
+    /**
+     * Builds a one-off Olympiad test from is_olympiad-tagged templates for the child's
+     * grade. Unlike generate(), this does not persist a topic_rotation cursor — an
+     * Olympiad happens at most once a year, so fairness across sittings isn't meaningful.
+     * Selection is still fair within a single test: one template per topic first, then
+     * extras drawn from the whole pool to reach $rule['questions_count'].
+     */
+    public function generateOlympiad(User $child, array $rule): array
+    {
+        $setting = $child->childSetting;
+
+        if (! $setting || ! $setting->grade_id) {
+            return ['error' => 'მშობელმა ჯერ კლასი და დონე არ დააყენა'];
+        }
+
+        $childTopicIds = $child->topics()->pluck('id')->toArray();
+
+        $baseQuery = fn () => QuestionTemplate::where('is_olympiad', true)
+            ->whereHas('topic', fn ($q) => $q->where('grade_id', $setting->grade_id))
+            ->when(! empty($childTopicIds), fn ($q) => $q->whereIn('topic_id', $childTopicIds));
+
+        $specialTemplates = $baseQuery()
+            ->whereIn('question_type', ['pyramid', 'code', 'crossword'])
+            ->with('topic')
+            ->get();
+
+        $availableThemeIds = $baseQuery()->whereNotNull('theme_id')->pluck('theme_id')->unique();
+
+        $theme       = null;
+        $mcTemplates = collect();
+
+        if ($availableThemeIds->isNotEmpty()) {
+            $childThemeIds = $child->themes()->pluck('id');
+            $candidateIds  = $availableThemeIds->intersect($childThemeIds);
+            if ($candidateIds->isEmpty()) {
+                $candidateIds = $availableThemeIds;
+            }
+            $themeId = $candidateIds->random();
+            $theme   = Theme::find($themeId);
+            if ($theme) {
+                $mcTemplates = $baseQuery()->where('theme_id', $themeId)->with('topic')->get();
+            }
+        }
+
+        $pool = $mcTemplates->merge($specialTemplates);
+
+        if ($pool->isEmpty()) {
+            return ['error' => 'ამ კლასისთვის ოლიმპიადის კითხვები ჯერ არ დამატებულა'];
+        }
+
+        $questionsNeeded  = min($rule['questions_count'], $pool->count());
+        $templatesByTopic = $pool->groupBy('topic_id');
+        $usedTemplateIds  = [];
+        $selectedTemplates = collect();
+
+        // one per topic first, shuffled so no topic is favored
+        foreach ($templatesByTopic->keys()->shuffle() as $topicId) {
+            if ($selectedTemplates->count() >= $questionsNeeded) break;
+            $candidates = $templatesByTopic->get($topicId)
+                ->reject(fn ($t) => in_array($t->id, $usedTemplateIds, true));
+            if ($candidates->isEmpty()) continue;
+            $picked = $candidates->random();
+            $usedTemplateIds[] = $picked->id;
+            $selectedTemplates->push($picked);
+        }
+
+        // fill any remaining slots from the whole pool, avoiding reuse where possible
+        while ($selectedTemplates->count() < $questionsNeeded) {
+            $candidates = $pool->reject(fn ($t) => in_array($t->id, $usedTemplateIds, true));
+            if ($candidates->isEmpty()) {
+                $candidates = $pool; // reuse unavoidable — pool smaller than questionsNeeded
+            }
+            $picked = $candidates->random();
+            $usedTemplateIds[] = $picked->id;
+            $selectedTemplates->push($picked);
+        }
+
+        $selectedTemplates = $selectedTemplates->shuffle()->values();
+
+        $test = Test::create([
+            'child_id'        => $child->id,
+            'theme_id'        => $theme?->id,
+            'scheduled_at'    => now(),
+            'total_questions' => $selectedTemplates->count(),
+            'is_olympiad'     => true,
+        ]);
+
+        foreach ($selectedTemplates as $i => $template) {
+            $generated = $template->generate($theme);
+            TestQuestion::create([
+                'test_id'        => $test->id,
+                'template_id'    => $template->id,
+                'question_type'  => $template->question_type ?? 'multiple_choice',
+                'question_text'  => $generated['question_text'],
+                'hint_text'      => $generated['hint_text'] ?? null,
+                'options'        => $generated['options'],
+                'correct_answer' => $generated['correct_answer'],
+                'order'          => $i + 1,
+            ]);
+        }
 
         return ['test' => $test];
     }

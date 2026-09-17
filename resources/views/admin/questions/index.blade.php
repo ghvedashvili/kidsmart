@@ -91,6 +91,7 @@
             @for($i=1;$i<=5;$i++)
             <option value="{{ $i }}" {{ ($filters['difficulty'] ?? '') == $i ? 'selected' : '' }}>დონე {{ $i }}</option>
             @endfor
+            <option value="olympiad" {{ ($filters['difficulty'] ?? '') === 'olympiad' ? 'selected' : '' }}>🏆 ოლიმპიადა</option>
         </select>
         @if(array_filter($filters))
         <a href="{{ route('admin.questions.index') }}" style="color:#555;font-size:0.72rem;text-decoration:none;padding:9px 0;">× გასუფთავება</a>
@@ -111,7 +112,11 @@
                 @if($tpl->theme)
                 <span class="q-tag" style="color:#7c3aed;border-color:#e9d5ff;">{{ $tpl->theme->icon ?? '' }} {{ $tpl->theme->name }}</span>
                 @endif
+                @if($tpl->is_olympiad)
+                <span class="q-tag" style="color:#b45309;border-color:#fde68a;">🏆 ოლიმპიადა</span>
+                @else
                 <span class="q-tag">დონე {{ $tpl->difficulty }}</span>
+                @endif
                 <span class="q-tag" style="color:#888;">= {{ $tpl->correct_formula }}</span>
                 <button type="button" class="q-regen" onclick="regenPreview(this)" title="ახალი მაგალითი">↺</button>
                 <div style="flex:1;"></div>

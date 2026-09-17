@@ -40,8 +40,10 @@ class AchievementService
         // 3. Achievements
         $newAchievements = $this->checkAchievements($child, $test, $setting, $pct);
 
-        // 4. Level (difficulty) re-evaluation — every N completed tests (per-grade configurable)
-        $levelChange = $this->adjustLevelIfDue($setting, $child);
+        // 4. Level (difficulty) re-evaluation — every N completed tests (per-grade configurable).
+        // Olympiad attempts never feed into or reset this counter: eligibility already
+        // requires max level, and a bad Olympiad score must not demote the child.
+        $levelChange = $test->is_olympiad ? null : $this->adjustLevelIfDue($setting, $child);
 
         return [
             'coins'             => $coins,

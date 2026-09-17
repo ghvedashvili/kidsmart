@@ -7,9 +7,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class QuestionTemplate extends Model
 {
-    protected $fillable = ['topic_id', 'theme_id', 'difficulty', 'answer_type', 'question_type', 'template_text', 'hint_text', 'correct_formula', 'num_config', 'distractors', 'conditions'];
+    protected $fillable = ['topic_id', 'theme_id', 'difficulty', 'is_olympiad', 'answer_type', 'question_type', 'template_text', 'hint_text', 'correct_formula', 'num_config', 'distractors', 'conditions'];
 
-    protected $casts = ['num_config' => 'array', 'distractors' => 'array', 'conditions' => 'array'];
+    protected $casts = ['num_config' => 'array', 'distractors' => 'array', 'conditions' => 'array', 'is_olympiad' => 'boolean'];
 
     private function evalExpr(string $expr, array $vars): int
     {

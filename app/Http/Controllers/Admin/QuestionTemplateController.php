@@ -27,7 +27,11 @@ class QuestionTemplateController extends Controller
             $query->where('theme_id', $request->theme_id);
         }
         if ($request->filled('difficulty')) {
-            $query->where('difficulty', $request->difficulty);
+            if ($request->difficulty === 'olympiad') {
+                $query->where('is_olympiad', true);
+            } else {
+                $query->where('difficulty', $request->difficulty)->where('is_olympiad', false);
+            }
         }
 
         return view('admin.questions.index', [
@@ -188,6 +192,7 @@ class QuestionTemplateController extends Controller
             'topic_id'        => 'required|exists:topics,id',
             'theme_id'        => 'nullable|exists:themes,id',
             'difficulty'      => 'required|integer|min:1|max:5',
+            'is_olympiad'     => 'nullable|boolean',
             'question_type'   => 'required|in:multiple_choice,pyramid,code,crossword',
             'answer_type'     => $isSpecial ? 'nullable' : 'required|in:numeric,text',
             'template_text'   => $isSpecial ? 'nullable|string' : 'required|string',
@@ -205,8 +210,10 @@ class QuestionTemplateController extends Controller
             ]);
         }
 
+        $isOlympiad = $request->boolean('is_olympiad');
+
         $grade = Topic::find($raw['topic_id'])?->grade;
-        if ($grade && $raw['difficulty'] > $grade->max_level) {
+        if (! $isOlympiad && $grade && $raw['difficulty'] > $grade->max_level) {
             throw \Illuminate\Validation\ValidationException::withMessages([
                 'difficulty' => "ამ კლასს მაქსიმუმ {$grade->max_level} დონე აქვს",
             ]);
@@ -220,6 +227,7 @@ class QuestionTemplateController extends Controller
                 'topic_id'        => $raw['topic_id'],
                 'theme_id'        => null,
                 'difficulty'      => $raw['difficulty'],
+                'is_olympiad'     => $isOlympiad,
                 'question_type'   => 'pyramid',
                 'answer_type'     => 'numeric',
                 'template_text'   => "პირამიდა {$pyrHeight}-ძირი · {$pyrHide} ცარიელი",
@@ -244,6 +252,7 @@ class QuestionTemplateController extends Controller
                 'topic_id'        => $raw['topic_id'],
                 'theme_id'        => null,
                 'difficulty'      => $raw['difficulty'],
+                'is_olympiad'     => $isOlympiad,
                 'question_type'   => 'crossword',
                 'answer_type'     => 'numeric',
                 'template_text'   => "კროსვორდი {$rows}×{$cols} {$minVal}-{$maxVal} {$opsStr}" . ($revealedCount ? " ({$revealedCount}✓)" : ''),
@@ -275,6 +284,7 @@ class QuestionTemplateController extends Controller
                 'topic_id'        => $raw['topic_id'],
                 'theme_id'        => null,
                 'difficulty'      => $raw['difficulty'],
+                'is_olympiad'     => $isOlympiad,
                 'question_type'   => 'code',
                 'answer_type'     => 'numeric',
                 'template_text'   => implode(' · ', $descParts),
@@ -308,6 +318,7 @@ class QuestionTemplateController extends Controller
             'topic_id'        => $raw['topic_id'],
             'theme_id'        => $raw['theme_id'] ?? null,
             'difficulty'      => $raw['difficulty'],
+            'is_olympiad'     => $isOlympiad,
             'question_type'   => 'multiple_choice',
             'answer_type'     => $raw['answer_type'],
             'template_text'   => $raw['template_text'],

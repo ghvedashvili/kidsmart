@@ -21,6 +21,14 @@ class ChildSettingsController extends Controller
 
         $tests = $child->tests()
             ->with('theme')
+            ->where('is_olympiad', false)
+            ->whereNotNull('completed_at')
+            ->latest('completed_at')
+            ->get();
+
+        $olympiadTests = $child->tests()
+            ->with('theme')
+            ->where('is_olympiad', true)
             ->whereNotNull('completed_at')
             ->latest('completed_at')
             ->get();
@@ -38,6 +46,7 @@ class ChildSettingsController extends Controller
             ->join('question_templates', 'test_questions.template_id', '=', 'question_templates.id')
             ->join('topics', 'question_templates.topic_id', '=', 'topics.id')
             ->where('tests.child_id', $child->id)
+            ->where('tests.is_olympiad', false)
             ->whereNotNull('tests.completed_at')
             ->selectRaw('topics.id as topic_id, topics.name as topic_name, question_templates.difficulty as difficulty, SUM(test_answers.is_correct) as correct, COUNT(*) as total')
             ->groupBy('topics.id', 'topics.name', 'question_templates.difficulty')
@@ -55,7 +64,7 @@ class ChildSettingsController extends Controller
             ->groupBy('topic_name');
 
         return view('parent.child-stats', compact(
-            'child', 'tests', 'totalTests', 'avgScore', 'todayCount', 'required', 'topicStats'
+            'child', 'tests', 'totalTests', 'avgScore', 'todayCount', 'required', 'topicStats', 'olympiadTests'
         ));
     }
 
