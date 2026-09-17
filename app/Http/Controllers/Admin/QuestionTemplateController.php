@@ -205,6 +205,13 @@ class QuestionTemplateController extends Controller
             ]);
         }
 
+        $grade = Topic::find($raw['topic_id'])?->grade;
+        if ($grade && $raw['difficulty'] > $grade->max_level) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'difficulty' => "ამ კლასს მაქსიმუმ {$grade->max_level} დონე აქვს",
+            ]);
+        }
+
         if ($isPyramid) {
             $pyrHeight = max(3, (int) ($numConfig['height']       ?? 3));
             $pyrMax    = max(2, (int) ($numConfig['max_base']     ?? 9));

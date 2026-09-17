@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\SubscriptionController;
 use App\Http\Controllers\Admin\TestQuestionCountController;
+use App\Http\Controllers\Admin\LevelUpRuleController;
 use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\MarketController;
 use App\Http\Controllers\PracticeController;
@@ -242,4 +243,9 @@ Route::middleware(['auth', 'admin', 'role.permission'])->group(function () {
     Route::post('/admin/question-counts',                      [TestQuestionCountController::class, 'store'])->name('admin.question-counts.store');
     Route::put('/admin/question-counts/{testQuestionCount}',   [TestQuestionCountController::class, 'update'])->name('admin.question-counts.update');
     Route::delete('/admin/question-counts/{testQuestionCount}', [TestQuestionCountController::class, 'destroy'])->name('admin.question-counts.destroy');
+
+    Route::get('/admin/level-rules',                     [LevelUpRuleController::class, 'index'])->name('admin.level-rules.index');
+    Route::post('/admin/level-rules',                    [LevelUpRuleController::class, 'store'])->name('admin.level-rules.store');
+    Route::put('/admin/level-rules/{levelUpRule}',        [LevelUpRuleController::class, 'update'])->name('admin.level-rules.update');
+    Route::delete('/admin/level-rules/{levelUpRule}',     [LevelUpRuleController::class, 'destroy'])->name('admin.level-rules.destroy');
 });

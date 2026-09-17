@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\ChildAchievement;
 use App\Models\ChildSetting;
+use App\Models\Grade;
+use App\Models\LevelUpRule;
 use App\Models\Test;
 use App\Models\User;
 
@@ -38,8 +40,8 @@ class AchievementService
         // 3. Achievements
         $newAchievements = $this->checkAchievements($child, $test, $setting, $pct);
 
-        // 4. Level (difficulty) re-evaluation — every 7 completed tests
-        $levelChange = $this->adjustLevelEvery7Tests($setting, $child);
+        // 4. Level (difficulty) re-evaluation — every N completed tests (per-grade configurable)
+        $levelChange = $this->adjustLevelIfDue($setting, $child);
 
         return [
             'coins'             => $coins,
@@ -51,38 +53,50 @@ class AchievementService
     }
 
     /**
-     * Re-evaluates the child's level every 7 completed tests, based on their combined
-     * correct-answer rate across those 7 tests: >85% moves up a level, <60% moves down,
-     * 60–85% (inclusive) stays. Capped between level 1 and 3. The counter resets to 0
-     * after each evaluation so this fires again after the next 7 tests, not on a rolling
-     * window.
+     * Re-evaluates the child's level once at least N completed tests have accumulated
+     * since the last level change, based on the combined correct-answer rate across
+     * the N most recent tests. N and the up/down % thresholds are configurable per
+     * grade by an admin (see LevelUpRule); a grade with no rule set falls back to the
+     * defaults (7 tests, >85% up, <60% down, 60–85% inclusive stays). Capped between
+     * level 1 and that grade's max_level (see Grade). Once warmed up (counter >= N), this checks the trailing N-test
+     * window on every subsequent test — not just every Nth one — so a level change can
+     * land as soon as the window qualifies. The counter only resets to 0 when the
+     * level actually changes; while it stays the same, counting is not restarted.
      */
-    private function adjustLevelEvery7Tests(ChildSetting $setting, User $child): ?string
+    private function adjustLevelIfDue(ChildSetting $setting, User $child): ?string
     {
+        $rule = LevelUpRule::resolve($setting->grade_id);
+
         $setting->increment('tests_since_level_review');
         $setting->refresh();
 
-        if ($setting->tests_since_level_review < 7) {
+        if ($setting->tests_since_level_review < $rule['tests_required']) {
             return null;
         }
 
         $recentTests = Test::where('child_id', $child->id)
             ->whereNotNull('completed_at')
             ->latest('completed_at')
-            ->take(7)
+            ->take($rule['tests_required'])
             ->get();
 
         $totalQuestions = $recentTests->sum('total_questions');
         $totalCorrect   = $recentTests->sum('correct_count');
         $pct            = $totalQuestions > 0 ? ($totalCorrect / $totalQuestions) * 100 : 0;
 
+        $maxLevel = Grade::find($setting->grade_id)->max_level ?? Grade::DEFAULT_MAX_LEVEL;
+
         $before = $setting->difficulty;
         $after  = $before;
 
-        if ($pct > 85) {
-            $after = min(3, $before + 1);
-        } elseif ($pct < 60) {
+        if ($pct > $rule['up_threshold']) {
+            $after = min($maxLevel, $before + 1);
+        } elseif ($pct < $rule['down_threshold']) {
             $after = max(1, $before - 1);
+        }
+
+        if ($after === $before) {
+            return null;
         }
 
         $setting->update([

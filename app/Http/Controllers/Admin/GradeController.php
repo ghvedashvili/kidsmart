@@ -17,8 +17,9 @@ class GradeController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'number' => 'required|integer|min:1|max:12|unique:grades,number',
-            'name'   => 'required|string|max:100',
+            'number'    => 'required|integer|min:1|max:12|unique:grades,number',
+            'name'      => 'required|string|max:100',
+            'max_level' => 'required|integer|min:1|max:5',
         ]);
         Grade::create($data);
         return back()->with('success', 'კლასი დაემატა');
@@ -27,8 +28,9 @@ class GradeController extends Controller
     public function update(Request $request, Grade $grade)
     {
         $data = $request->validate([
-            'number' => ['required', 'integer', 'min:1', 'max:12', Rule::unique('grades', 'number')->ignore($grade->id)],
-            'name'   => 'required|string|max:100',
+            'number'    => ['required', 'integer', 'min:1', 'max:12', Rule::unique('grades', 'number')->ignore($grade->id)],
+            'name'      => 'required|string|max:100',
+            'max_level' => 'required|integer|min:1|max:5',
         ]);
         $grade->update($data);
         return back()->with('success', 'კლასი განახლდა');

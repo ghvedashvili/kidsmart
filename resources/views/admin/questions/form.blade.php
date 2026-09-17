@@ -174,12 +174,13 @@
                 </div>
 
                 <div class="lbl">სირთულე</div>
-                <div class="diff-row">
+                <div class="diff-row" id="diffRow">
                     @for($i=1;$i<=5;$i++)
                     <button type="button" class="diff-btn {{ old('difficulty', $template?->difficulty ?? 1) == $i ? 'sel' : '' }}"
                         onclick="setDiff({{ $i }})">{{ $i }}</button>
                     @endfor
                 </div>
+                <div class="hint" id="diffMaxHint" style="display:none;"></div>
                 <input type="hidden" name="difficulty" id="diffInput"
                     value="{{ old('difficulty', $template?->difficulty ?? 1) }}">
 
@@ -481,6 +482,7 @@ const _KS = {
     themeVarMap:        {},
     varGroups:          [],
     topicsByGrade:      @json($topics->groupBy('grade_id')->map(fn($g) => $g->map(fn($t) => ['id' => $t->id, 'name' => $t->name])->values())),
+    maxLevelByGrade:    @json($grades->pluck('max_level', 'id')),
     selectedTopic:      {{ (int)($template?->topic_id ?? 0) }},
     selectedTheme:      {{ (int)($template?->theme_id ?? $defaultThemeId ?? 0) }},
     distractors:        @json($template?->distractors ?? []),
@@ -522,6 +524,26 @@ function onGradeChange(gradeId) {
         if (t.id === prev || t.id === _KS.selectedTopic) opt.selected = true;
         sel.add(opt);
     });
+    applyGradeMaxLevel(gradeId);
+}
+
+// ── Grade → difficulty cap (a grade's max_level, set on the Grades admin page)
+function applyGradeMaxLevel(gradeId) {
+    const max = gradeId ? (+_KS.maxLevelByGrade[gradeId] || 5) : 5;
+    const hint = document.getElementById('diffMaxHint');
+    document.querySelectorAll('#diffRow .diff-btn').forEach((b, i) => {
+        b.style.display = (i + 1) <= max ? '' : 'none';
+    });
+    if (gradeId && max < 5) {
+        hint.style.display = '';
+        hint.textContent = 'ამ კლასს მაქსიმუმ ' + max + ' დონე აქვს (იმართება კლასების გვერდზე)';
+    } else {
+        hint.style.display = 'none';
+    }
+    const diffInput = document.getElementById('diffInput');
+    if (+diffInput.value > max) {
+        setDiff(max);
+    }
 }
 
 // ── Theme → variable chips
@@ -1564,6 +1586,7 @@ document.getElementById('condRows').addEventListener('focusin', function(e) {
                     if (t.id === curTopicId) opt.selected = true;
                     sel.add(opt);
                 });
+                applyGradeMaxLevel(gId);
                 break;
             }
         }

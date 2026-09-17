@@ -40,14 +40,19 @@
 
     <div class="card-dark">
         <div class="card-label">კლასის დამატება</div>
+        <div style="font-size:0.68rem;color:#94a3b8;margin:-10px 0 14px;line-height:1.6;">
+            „მაქს. ლეველი" განსაზღვრავს რამდენ სირთულის დონემდე შეიძლება ავიდეს ბავშვი ამ კლასში (ლეველის ავტომატური მატება ამაზე მაღლა არასდროს ავალს) და რამდენი დონე გამოჩნდება კითხვების შექმნის ფორმაში ამ კლასის არჩევისას.
+        </div>
         <form method="POST" action="{{ route('admin.grades.store') }}">
             @csrf
             <div style="display:flex;gap:10px;">
                 <input type="number" name="number" class="fc" placeholder="№ (1–12)" min="1" max="12" style="width:100px;margin-bottom:0;" required>
                 <input type="text" name="name" class="fc" placeholder="სახელი, მაგ: მე-2 კლასი" style="flex:1;margin-bottom:0;" required>
+                <input type="number" name="max_level" class="fc" placeholder="მაქს. ლეველი" min="1" max="5" value="{{ old('max_level', \App\Models\Grade::DEFAULT_MAX_LEVEL) }}" style="width:120px;margin-bottom:0;" required>
                 <button type="submit" class="btn">+ დამატება</button>
             </div>
             @error('number')<div style="color:#e74c3c;font-size:0.72rem;margin-top:6px;">{{ $message }}</div>@enderror
+            @error('max_level')<div style="color:#e74c3c;font-size:0.72rem;margin-top:6px;">{{ $message }}</div>@enderror
         </form>
     </div>
 
@@ -59,6 +64,7 @@
             <div class="row-display" id="gd{{ $grade->id }}">
                 <span style="{{ !$grade->is_active ? 'color:#bbb;' : '' }}">
                     <span style="margin-right:10px;color:#94a3b8;">{{ $grade->number }}</span>{{ $grade->name }}
+                    <span style="margin-left:10px;background:#f1f5f9;color:#64748b;border-radius:20px;padding:2px 10px;font-size:0.64rem;">მაქს. {{ $grade->max_level }} ლ.</span>
                 </span>
                 <div style="display:flex;align-items:center;gap:8px;">
                     <form method="POST" action="{{ route('admin.grades.toggle', $grade) }}">
@@ -76,10 +82,11 @@
             </div>
             {{-- Edit mode --}}
             <div class="row-edit" id="ge{{ $grade->id }}">
-                <form method="POST" action="{{ route('admin.grades.update', $grade) }}" style="display:flex;gap:8px;align-items:center;width:100%;">
+                <form method="POST" action="{{ route('admin.grades.update', $grade) }}" style="display:flex;gap:8px;align-items:center;width:100%;flex-wrap:wrap;">
                     @csrf @method('PUT')
                     <input type="number" name="number" class="fc" value="{{ $grade->number }}" min="1" max="12" style="width:74px;margin-bottom:0;" required>
-                    <input type="text" name="name" class="fc" value="{{ $grade->name }}" style="flex:1;margin-bottom:0;" required>
+                    <input type="text" name="name" class="fc" value="{{ $grade->name }}" style="flex:1;min-width:120px;margin-bottom:0;" required>
+                    <input type="number" name="max_level" class="fc" value="{{ $grade->max_level }}" min="1" max="5" style="width:110px;margin-bottom:0;" required>
                     <button type="submit" class="btn">შენახვა</button>
                     <button type="button" class="btn-del" onclick="gradeCancel({{ $grade->id }})">✕</button>
                 </form>

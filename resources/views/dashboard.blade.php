@@ -126,20 +126,15 @@
     }
 
     .cc-header-info { flex: 1; min-width: 0; }
-    .cc-name-row { display: flex; align-items: baseline; gap: 7px; }
+    .cc-name-row { display: flex; align-items: baseline; justify-content: space-between; gap: 7px; }
     .cc-name {
-        font-family: 'Goldman', monospace; font-size: 0.84rem; color: #111;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .cc-meta-row { display: flex; align-items: center; gap: 6px; margin-top: 3px; flex-wrap: wrap; }
-    .cc-id-badge {
-        font-family: 'Goldman', monospace; font-size: 0.5rem; color: #bbb;
-        background: #f7f7f9; border-radius: 6px; padding: 2px 7px; letter-spacing: 0.03em; white-space: nowrap;
+        font-family: 'Goldman', monospace; font-size: 0.95rem; color: #111;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0;
     }
     .cc-code {
         font-family: 'Goldman', monospace; font-size: 0.58rem; color: #888;
-        background: #f4f4f7; border-radius: 6px; padding: 2px 8px;
-        letter-spacing: 0.1em; cursor: pointer; white-space: nowrap; transition: background 0.15s, color 0.15s;
+        background: #f4f4f7; border-radius: 6px; padding: 2px 8px; flex-shrink: 0;
+        letter-spacing: 0.06em; cursor: pointer; white-space: nowrap; transition: background 0.15s, color 0.15s;
     }
     .cc-code:hover { background: #ececf0; color: #444; }
     .cc-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
@@ -149,22 +144,20 @@
         padding: 3px 8px; white-space: nowrap;
     }
 
-    .cc-mini-actions { display: flex; gap: 5px; flex-shrink: 0; }
     .cc-mini-btn {
-        width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-        font-size: 0.66rem; border: none; cursor: pointer; text-decoration: none;
-        background: #f5f5f7; color: #999; transition: background 0.15s;
+        width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; border: none;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.72rem; background: #f5f5f7; color: #999; cursor: pointer; transition: background 0.15s;
     }
-    .cc-mini-btn.remind { background: #ecfdf5; color: #059669; }
-    .cc-mini-btn:hover { filter: brightness(0.96); }
+    .cc-mini-btn:hover { background: #ececf0; }
 
-    .cc-share-toggle {
-        width: 100%; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 7px;
-        background: #eff6ff; color: #2563eb; border: none; border-radius: 100px;
-        padding: 10px 8px; font-family: 'Goldman', monospace; font-size: 0.64rem; letter-spacing: 0.02em;
-        cursor: pointer; transition: background 0.15s;
+    .cc-stats-line { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 10px; }
+    .cc-stat-chip {
+        font-family: 'Goldman', monospace; font-size: 0.53rem; color: #888;
+        background: #f4f4f7; border: none; border-radius: 100px;
+        padding: 3px 9px; white-space: nowrap;
     }
-    .cc-share-toggle:hover { background: #dbeafe; }
+    .cc-stat-chip b { font-weight: normal; color: #111; }
 
     .cc-share-panel {
         display: none; flex-direction: column; gap: 8px;
@@ -188,25 +181,13 @@
     .cc-share-btn:hover { background: #e2ddff; }
     .cc-share-btn.copied { background: #dcfce7; color: #15803d; }
 
-    .cc-stats-row {
-        display: flex; align-items: stretch; background: #fafafb; border-radius: 14px; padding: 8px 4px;
-    }
-    .cc-stat {
-        flex: 1; min-width: 0; position: relative;
-        display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 5px;
-    }
-    .cc-stat:not(:last-child)::after {
-        content: ''; position: absolute; right: 0; top: 15%; bottom: 15%; width: 1px; background: #e9e9ee;
-    }
-    .cc-stat-icon { font-size: 0.8rem; line-height: 1; flex-shrink: 0; }
-    .cc-stat-val { font-family: 'Goldman', monospace; font-size: 0.7rem; color: #111; }
-    .cc-stat-lbl { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.44rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.02em; }
 
-    .cc-tiles-row { display: flex; gap: 8px; }
+    .cc-tiles-row { display: flex; flex-wrap: wrap; gap: 8px; }
     .cc-tile {
-        flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 0;
+        flex: 1 1 calc(50% - 4px); display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 0;
         background: var(--primary-soft); color: var(--primary); border-radius: 100px; padding: 9px 8px; position: relative;
         text-decoration: none; transition: background 0.15s; font-family: 'Goldman', monospace; font-size: 0.6rem; letter-spacing: 0.02em;
+        border: none; cursor: pointer;
     }
     .cc-tile:hover { background: #e2ddff; color: var(--primary); }
     .cc-tile-icon { font-size: 0.86rem; line-height: 1; }
@@ -516,12 +497,9 @@
                     <div class="cc-header-info">
                         <div class="cc-name-row">
                             <span class="cc-name">{{ $child->name }}</span>
-                        </div>
-                        <div class="cc-meta-row">
-                            <span class="cc-id-badge">ID {{ $child->id }}</span>
                             @if($child->child_code)
                             <span class="cc-code" onclick="copyChildCode(this, '{{ $child->child_code }}')"
-                                title="კოდის კოპირება">{{ $child->child_code }}</span>
+                                title="კოდის კოპირება">ID: {{ $child->child_code }}</span>
                             @endif
                         </div>
                         <div class="cc-tags">
@@ -530,29 +508,16 @@
                             <span class="cc-tag">დონე {{ $s->difficulty }}</span>
                             @endif
                         </div>
+                        @if($s)
+                        <div class="cc-stats-line">
+                            <span class="cc-stat-chip">📅 <b>{{ $todayDone }}/{{ $s->tests_per_week }}</b> დღეს</span>
+                            <span class="cc-stat-chip">💰 <b>{{ $s->coins ?? 0 }}</b> მონეტა</span>
+                        </div>
+                        @endif
                     </div>
-                    <div class="cc-mini-actions">
-                        <button type="button" class="cc-mini-btn remind" title="შეხსენება"
-                            onclick="openRemind({{ $child->id }}, '{{ addslashes($child->name) }}')">🔔</button>
-                        <button type="button" class="cc-mini-btn edit" title="რედაქტირება"
-                            onclick="document.getElementById('editChildModal{{ $child->id }}').classList.add('open')">⚙</button>
-                    </div>
+                    <button type="button" class="cc-mini-btn edit" title="რედაქტირება"
+                        onclick="document.getElementById('editChildModal{{ $child->id }}').classList.add('open')">⚙</button>
                 </div>
-
-                @if($s)
-                <div class="cc-stats-row">
-                    <div class="cc-stat">
-                        <span class="cc-stat-icon">📅</span>
-                        <span class="cc-stat-val">{{ $todayDone }}/{{ $s->tests_per_week }}</span>
-                        <span class="cc-stat-lbl">დღეს</span>
-                    </div>
-                    <div class="cc-stat">
-                        <span class="cc-stat-icon">💰</span>
-                        <span class="cc-stat-val">{{ $s->coins ?? 0 }}</span>
-                        <span class="cc-stat-lbl">მონეტა</span>
-                    </div>
-                </div>
-                @endif
 
                 <div class="cc-tiles-row">
                     <a href="{{ route('market.index', $child) }}" class="cc-tile">
@@ -564,12 +529,19 @@
                         <span class="cc-tile-icon">📊</span>
                         <span>სტატისტიკა</span>
                     </a>
+                    <button type="button" class="cc-tile" onclick="openRemind({{ $child->id }}, '{{ addslashes($child->name) }}')">
+                        <span class="cc-tile-icon">🔔</span>
+                        <span>შეხსენება</span>
+                    </button>
+                    @if($child->child_code)
+                    <button type="button" class="cc-tile" onclick="toggleShare({{ $child->id }})">
+                        <span class="cc-tile-icon">🔗</span>
+                        <span>გაზიარება</span>
+                    </button>
+                    @endif
                 </div>
 
                 @if($child->child_code)
-                <button type="button" class="cc-share-toggle" onclick="toggleShare({{ $child->id }})">
-                    🔗 გაუზიარე {{ $child->name }}ს ლინკი
-                </button>
                 <div class="cc-share-panel" id="sharePanel{{ $child->id }}">
                     <div class="cc-share-link-box">
                         <span class="cc-share-link-text" id="shareLinkText{{ $child->id }}">{{ route('child.magic-login', $child->child_code) }}</span>
@@ -709,6 +681,7 @@
             'admin.topics'    => ['route' => 'admin.topics.index',      'icon' => '📚', 'name' => 'თემები'],
             'admin.questions' => ['route' => 'admin.questions.index',   'icon' => '❓',  'name' => 'კითხვები'],
             'admin.qcounts'   => ['route' => 'admin.question-counts.index', 'icon' => '🔢', 'name' => 'ტესტის ზომა'],
+            'admin.levelrules' => ['route' => 'admin.level-rules.index',    'icon' => '📈', 'name' => 'დონის ცვლილება'],
             'admin.users'     => ['route' => 'admin.users.index',       'icon' => '👥', 'name' => 'მომხმარებლები'],
             'admin.perms'     => ['route' => 'admin.permissions.index', 'icon' => '🔐', 'name' => 'ნებართვები'],
             'admin.packages'  => ['route' => 'admin.packages.index',    'icon' => '📦', 'name' => 'პაკეტები'],
@@ -1134,6 +1107,7 @@ function copyChildCode(el, code) {
 function toggleShare(childId) {
     document.getElementById('sharePanel' + childId).classList.toggle('open');
 }
+
 
 function copyShareLink(childId) {
     const text = document.getElementById('shareLinkText' + childId).textContent;
