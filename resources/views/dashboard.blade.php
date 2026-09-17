@@ -707,6 +707,7 @@
             'admin.qcounts'   => ['route' => 'admin.question-counts.index', 'icon' => '🔢', 'name' => 'ტესტის ზომა'],
             'admin.levelrules' => ['route' => 'admin.level-rules.index',    'icon' => '📈', 'name' => 'დონის ცვლილება'],
             'admin.olympiadrules' => ['route' => 'admin.olympiad-rules.index', 'icon' => '🏆', 'name' => 'ოლიმპიადა'],
+            'admin.pointrules' => ['route' => 'admin.point-rules.index', 'icon' => '💰', 'name' => 'ქულების წესები'],
             'admin.users'     => ['route' => 'admin.users.index',       'icon' => '👥', 'name' => 'მომხმარებლები'],
             'admin.perms'     => ['route' => 'admin.permissions.index', 'icon' => '🔐', 'name' => 'ნებართვები'],
             'admin.packages'  => ['route' => 'admin.packages.index',    'icon' => '📦', 'name' => 'პაკეტები'],

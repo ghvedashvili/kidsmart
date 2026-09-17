@@ -33,24 +33,6 @@
     .collapse-body { display:none; padding:0 16px 16px; }
     .collapse-card.open .collapse-body { display:block; }
 
-    .card {
-        display:flex; align-items:center; justify-content:space-between;
-        background:#f8fafc; border-radius:14px; padding:14px 16px; margin-bottom:8px;
-        text-decoration:none; transition:background 0.15s;
-    }
-    .card:hover { background:#f1f5f9; }
-    .card-left { display:flex; align-items:center; gap:12px; }
-    .card-icon { font-size:1.5rem; }
-    .card-name { font-family:'Fredoka One',cursive; font-size:0.95rem; color:#0c4a6e; }
-    .card-sub { font-family:'Nunito',sans-serif; font-weight:800; font-size:0.6rem; color:#94a3b8; margin-top:1px; }
-    .card-arrow { font-size:1rem; color:#cbd5e1; }
-
-    .level-pill { font-family:'Nunito',sans-serif; font-weight:900; font-size:0.65rem; padding:3px 10px; border-radius:99px; }
-    .lp-1 { background:#dcfce7; color:#15803d; }
-    .lp-2 { background:#fef9c3; color:#ca8a04; }
-    .lp-3 { background:#fed7aa; color:#c2410c; }
-    .lp-4 { background:#fce7f3; color:#db2777; }
-    .lp-5 { background:#ede9fe; color:#7c3aed; }
 
     /* Nested video accordion */
     .vtopic-card { background:#f8fafc; border-radius:14px; margin-bottom:8px; overflow:hidden; }
@@ -68,6 +50,20 @@
     .empty { text-align:center; padding:40px 20px; }
     .empty-icon { font-size:2.5rem; margin-bottom:10px; }
     .empty-txt { font-family:'Fredoka One',cursive; font-size:1rem; color:#94a3b8; }
+
+    .start-practice-card {
+        display: flex; align-items: center; gap: 14px; width: 100%; box-sizing: border-box;
+        min-height: 96px; margin-bottom: 20px;
+        background: linear-gradient(160deg, #eff6ff, #dbeafe);
+        border-radius: 18px; padding: 16px 18px; text-decoration: none; color: #1e40af; text-align: left;
+        box-shadow: 0 8px 20px rgba(37,99,235,0.15); transition: transform 0.15s;
+    }
+    .start-practice-card:hover { transform: translateY(-2px); color: #1e40af; }
+    .spc-icon { font-size: 2.2rem; flex-shrink: 0; }
+    .spc-text { flex: 1; min-width: 0; }
+    .spc-title { font-family: 'Fredoka One', cursive; font-size: 1.05rem; margin-bottom: 2px; color: #1e40af; }
+    .spc-sub { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.72rem; color: #2563eb; opacity: 0.85; }
+    .spc-arrow { font-size: 1.1rem; flex-shrink: 0; opacity: 0.85; }
 </style>
 
 <div class="wrap">
@@ -75,45 +71,18 @@
 
     <div class="page-hero">
         <div class="page-hero-title">🎯 სავარჯიშოები</div>
-        <div class="page-hero-sub">აირჩიე თემა და ივარჯიშე დღეს!</div>
+        <div class="page-hero-sub">ივარჯიშე დღეს — კითხვები მოვა ყველა თემიდან რიგრიგობით!</div>
     </div>
 
-    {{-- სავარჯიშოები თემების მიხედვით --}}
-    <div class="collapse-card" id="secPractice">
-        <div class="collapse-header" onclick="toggleSection('secPractice')">
-            <div class="collapse-title-wrap">
-                <span class="collapse-icon-badge" style="background:#dbeafe;color:#2563eb;">🎯</span>
-                <span class="collapse-title">სავარჯიშოები თემების მიხედვით</span>
-            </div>
-            <span class="collapse-arrow">▶</span>
+    {{-- ვარჯიშის დაწყება — ყველა თემა თანმიმდევრობით, აღარ ირჩევა ცალკე თემა --}}
+    <a href="{{ route('practice.show', 'auto') }}" class="start-practice-card">
+        <span class="spc-icon">🎯</span>
+        <div class="spc-text">
+            <div class="spc-title">ვარჯიშის დაწყება</div>
+            <div class="spc-sub">კითხვები მოვა ყველა თემიდან რიგრიგობით</div>
         </div>
-        <div class="collapse-body">
-            @forelse($topics as $topic)
-            @php $sess = $sessions->get($topic->id); @endphp
-            <a href="{{ route('practice.show', $topic->id) }}" class="card">
-                <div class="card-left">
-                    <div class="card-icon">📘</div>
-                    <div>
-                        <div class="card-name">{{ $topic->name }}</div>
-                        <div class="card-sub">
-                            {{ $sess ? 'დონე ' . $sess->level . ' · ' . $sess->total_correct . '/' . $sess->total_answered . ' სწორი' : 'ახალი' }}
-                        </div>
-                    </div>
-                </div>
-                @if($sess)
-                <span class="level-pill lp-{{ $sess->level }}">L{{ $sess->level }}</span>
-                @else
-                <span class="card-arrow">›</span>
-                @endif
-            </a>
-            @empty
-            <div class="empty">
-                <div class="empty-icon">📚</div>
-                <div class="empty-txt">თემები ჯერ არ დამატებულა</div>
-            </div>
-            @endforelse
-        </div>
-    </div>
+        <span class="spc-arrow">→</span>
+    </a>
 
     {{-- ვიდეო გაკვეთილები თემების მიხედვით --}}
     <div class="collapse-card" id="secVideos">

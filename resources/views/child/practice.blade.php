@@ -11,6 +11,7 @@
     .topbar { display:flex; align-items:center; justify-content:space-between; padding:16px 16px 0; }
     .back { font-family:'Nunito',sans-serif; font-size:0.78rem; font-weight:800; color:#0284c7; text-decoration:none; padding:5px 14px; background:white; border-radius:99px; box-shadow:0 2px 8px rgba(0,0,0,0.07); }
     .title { font-family:'Fredoka One',cursive; font-size:1rem; color:#0c4a6e; }
+    .topic-tag { font-family:'Nunito',sans-serif; font-weight:800; font-size:0.68rem; color:#2563eb; background:#eff6ff; border-radius:99px; padding:4px 12px; margin:8px 16px 0; display:inline-block; }
 
     /* ── Progress bar ── */
     .progress-wrap { padding:12px 16px 0; }
@@ -125,19 +126,28 @@
 <div class="wrap">
     <div class="topbar">
         <a href="{{ route('practice.topics') }}" class="back">← სავარჯიშოები</a>
-        <div class="title">{{ $type === 'pyramid' ? '🔺 პირამიდა' : '📘 ' . $topic->name }}</div>
+        <div class="title">
+            @if($type === 'pyramid') 🔺 პირამიდა
+            @elseif($type === 'auto') 🎯 ვარჯიში
+            @else 📘 {{ $topic->name }}
+            @endif
+        </div>
     </div>
+
+    @if($type === 'auto')
+    <div class="topic-tag" id="topicTag"></div>
+    @endif
 
     <div class="progress-wrap">
         <div class="prog-row">
-            <span class="level-badge" id="levelBadge">დონე {{ $session->level }}</span>
+            <span class="level-badge" id="levelBadge">{{ $session ? 'დონე ' . $session->level : '' }}</span>
             <div class="streak-dots" id="streakDots">
-                <div class="sdot {{ $session->streak >= 1 ? 'filled' : '' }}"></div>
-                <div class="sdot {{ $session->streak >= 2 ? 'filled' : '' }}"></div>
-                <div class="sdot {{ $session->streak >= 3 ? 'filled' : '' }}"></div>
+                <div class="sdot {{ ($session?->streak ?? 0) >= 1 ? 'filled' : '' }}"></div>
+                <div class="sdot {{ ($session?->streak ?? 0) >= 2 ? 'filled' : '' }}"></div>
+                <div class="sdot {{ ($session?->streak ?? 0) >= 3 ? 'filled' : '' }}"></div>
             </div>
         </div>
-        <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:{{ ($session->level - 1) * 25 }}%"></div></div>
+        <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:{{ (($session?->level ?? 1) - 1) * 25 }}%"></div></div>
     </div>
 
     <div class="spinner show" id="spinner">⏳ იტვირთება...</div>
@@ -215,6 +225,10 @@ async function loadQuestion() {
 function renderQuestion(q) {
     document.getElementById('spinner').classList.remove('show');
     document.getElementById('qCard').style.display = 'block';
+
+    const topicTag = document.getElementById('topicTag');
+    if (topicTag) topicTag.textContent = q.topic_name ? '📘 ' + q.topic_name : '';
+    if (q.level !== undefined) updateProgress(q.level, q.streak);
 
     document.getElementById('mcArea').style.display   = 'none';
     document.getElementById('pyrArea').style.display  = 'none';
@@ -494,7 +508,7 @@ function showFeedback(data) {
 
     if (data.correct) {
         fb.className  = 'feedback correct';
-        fb.textContent = '🎉 სწორია! ' + '⭐'.repeat(Math.min(data.streak, 3));
+        fb.textContent = '🎉 სწორია! ' + '⭐'.repeat(Math.min(data.streak, 3)) + (data.coins > 0 ? ' +' + data.coins + ' 🪙' : '');
     } else {
         fb.className   = 'feedback wrong';
         fb.textContent = '❌ არასწორია — სცადე თავიდან!';

@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\SubscriptionController;
 use App\Http\Controllers\Admin\TestQuestionCountController;
 use App\Http\Controllers\Admin\LevelUpRuleController;
 use App\Http\Controllers\Admin\OlympiadRuleController;
+use App\Http\Controllers\Admin\PointRuleController;
 use App\Http\Controllers\OlympiadController;
 use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\MarketController;
@@ -260,4 +261,9 @@ Route::middleware(['auth', 'admin', 'role.permission'])->group(function () {
     Route::post('/admin/olympiad-rules',                      [OlympiadRuleController::class, 'store'])->name('admin.olympiad-rules.store');
     Route::put('/admin/olympiad-rules/{olympiadRule}',        [OlympiadRuleController::class, 'update'])->name('admin.olympiad-rules.update');
     Route::delete('/admin/olympiad-rules/{olympiadRule}',     [OlympiadRuleController::class, 'destroy'])->name('admin.olympiad-rules.destroy');
+
+    Route::get('/admin/point-rules',                     [PointRuleController::class, 'index'])->name('admin.point-rules.index');
+    Route::post('/admin/point-rules',                    [PointRuleController::class, 'store'])->name('admin.point-rules.store');
+    Route::put('/admin/point-rules/{pointRule}',          [PointRuleController::class, 'update'])->name('admin.point-rules.update');
+    Route::delete('/admin/point-rules/{pointRule}',       [PointRuleController::class, 'destroy'])->name('admin.point-rules.destroy');
 });

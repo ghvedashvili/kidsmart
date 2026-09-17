@@ -6,6 +6,7 @@ use App\Models\ChildAchievement;
 use App\Models\ChildSetting;
 use App\Models\Grade;
 use App\Models\LevelUpRule;
+use App\Models\PointRule;
 use App\Models\Test;
 use App\Models\User;
 
@@ -31,8 +32,9 @@ class AchievementService
         $correct = $test->correct_count ?? 0;
         $pct     = $total > 0 ? $correct / $total : 0;
 
-        // 1. Coins — 1 coin per correct answer
-        $coins = $correct;
+        // 1. Coins — points-per-correct is admin-configurable per grade/difficulty/context
+        $pointsPerCorrect = PointRule::resolve($setting->grade_id, $setting->difficulty, $test->is_olympiad ? 'olympiad' : 'test');
+        $coins = $correct * $pointsPerCorrect;
         $test->update(['coins_earned' => $coins]);
         $setting->increment('coins', $coins);
         $setting->refresh();

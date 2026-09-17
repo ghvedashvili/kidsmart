@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ChildSetting;
+use App\Models\PointRule;
 use App\Models\PracticeSession;
 use App\Models\QuestionTemplate;
 use App\Models\Theme;
@@ -14,20 +16,11 @@ class PracticeController extends Controller
     private const LEVEL_UP_STREAK = 3;
     private const MAX_LEVEL       = 5;
 
-    // ── Topic selection ─────────────────────────────────────────────────────
+    // ── Practice hub (topics screen was replaced by a single auto-rotating entry) ──
     public function topics()
     {
         $child   = auth()->user();
         $gradeId = $child->childSetting?->grade_id;
-
-        $topics = Topic::where('grade_id', $gradeId)
-            ->whereHas('questionTemplates')
-            ->orderBy('name')
-            ->get();
-
-        $sessions = PracticeSession::where('child_id', $child->id)
-            ->get()
-            ->keyBy(fn($s) => $s->session_type === 'pyramid' ? 'pyramid' : $s->topic_id);
 
         $videoTopics = Topic::where('grade_id', $gradeId)
             ->with(['videos' => fn($q) => $q->orderBy('order')])
@@ -35,7 +28,7 @@ class PracticeController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('child.practice-topics', compact('topics', 'sessions', 'videoTopics'));
+        return view('child.practice-topics', compact('videoTopics'));
     }
 
     // ── Practice shell page ─────────────────────────────────────────────────
@@ -48,11 +41,47 @@ class PracticeController extends Controller
             return view('child.practice', ['type' => 'pyramid', 'topic' => null, 'session' => $session, 'slug' => 'pyramid']);
         }
 
+        if ($slug === 'auto') {
+            return view('child.practice', ['type' => 'auto', 'topic' => null, 'session' => null, 'slug' => 'auto']);
+        }
+
         $topic = Topic::findOrFail((int) $slug);
         abort_if($topic->grade_id !== $child->childSetting?->grade_id, 403);
         $session = PracticeSession::forChild($child->id, $topic->id, 'topic');
 
         return view('child.practice', ['type' => 'topic', 'topic' => $topic, 'session' => $session, 'slug' => $slug]);
+    }
+
+    /**
+     * Picks the next topic for auto-rotating practice: a shuffled, persisted-cursor
+     * order that never repeats a topic until every available topic has had a turn —
+     * the same strategy as TestGeneratorService::pickTopicIdsForTest(), but consuming
+     * one topic per call instead of N upfront, and stored under its own rotation
+     * column (practice_topic_rotation) so it never interferes with test generation's.
+     */
+    private function pickNextPracticeTopicId(ChildSetting $setting, array $availableTopicIds): ?int
+    {
+        $availableTopicIds = array_values(array_unique($availableTopicIds));
+        $n = count($availableTopicIds);
+        if ($n === 0) return null;
+
+        $rotation = $setting->practice_topic_rotation ?? [];
+        $order    = $rotation['order']  ?? [];
+        $cursor   = (int) ($rotation['cursor'] ?? 0);
+
+        $sortedStored    = $order; sort($sortedStored);
+        $sortedAvailable = $availableTopicIds; sort($sortedAvailable);
+        if ($sortedStored !== $sortedAvailable) {
+            $order  = $availableTopicIds;
+            shuffle($order);
+            $cursor = 0;
+        }
+
+        $topicId = $order[$cursor % $n];
+        $setting->practice_topic_rotation = ['order' => $order, 'cursor' => ($cursor + 1) % $n];
+        $setting->save();
+
+        return $topicId;
     }
 
     // ── AJAX: next question ──────────────────────────────────────────────────
@@ -67,7 +96,21 @@ class PracticeController extends Controller
             return response()->json($this->buildPyramid($config, $key));
         }
 
-        $topic   = Topic::findOrFail((int) $slug);
+        if ($slug === 'auto') {
+            $setting = $child->childSetting;
+            $gradeId = $setting?->grade_id;
+            $availableTopicIds = Topic::where('grade_id', $gradeId)->whereHas('questionTemplates')->pluck('id')->all();
+            $topicId = $setting ? $this->pickNextPracticeTopicId($setting, $availableTopicIds) : null;
+
+            if (! $topicId) {
+                return response()->json(['error' => 'თემები ვერ მოიძებნა'], 404);
+            }
+            $topic = Topic::find($topicId);
+        } else {
+            $topic = Topic::findOrFail((int) $slug);
+            abort_if($topic->grade_id !== $child->childSetting?->grade_id, 403);
+        }
+
         $session = PracticeSession::forChild($child->id, $topic->id, 'topic');
         $diff    = min($session->level, 5);
 
@@ -81,25 +124,27 @@ class PracticeController extends Controller
             return response()->json(['error' => 'კითხვები ვერ მოიძებნა'], 404);
         }
 
+        $meta = ['topic_id' => $topic->id, 'topic_name' => $topic->name, 'level' => $session->level, 'streak' => $session->streak];
+
         if ($template->isPyramid()) {
             $key  = "pq_{$child->id}_{$topic->id}_" . uniqid();
             $data = $template->generatePyramid();
-            cache()->put($key, $data['solutions'], now()->addMinutes(20));
-            return response()->json(['type' => 'pyramid', 'key' => $key, 'rows' => $data['rows'], 'height' => count($data['rows'])]);
+            cache()->put($key, ['topic_id' => $topic->id, 'data' => $data['solutions']], now()->addMinutes(20));
+            return response()->json(array_merge(['type' => 'pyramid', 'key' => $key, 'rows' => $data['rows'], 'height' => count($data['rows'])], $meta));
         }
 
         if ($template->isCode()) {
             $key  = "pq_{$child->id}_{$topic->id}_" . uniqid();
             $data = $template->generateCode();
             $q    = json_decode($data['question_text'], true);
-            cache()->put($key, json_decode($data['correct_answer'], true), now()->addMinutes(20));
-            return response()->json([
+            cache()->put($key, ['topic_id' => $topic->id, 'data' => json_decode($data['correct_answer'], true)], now()->addMinutes(20));
+            return response()->json(array_merge([
                 'type'      => 'code',
                 'key'       => $key,
                 'symbols'   => $q['symbols'],
                 'equations' => $q['equations'],
                 'target'    => $q['target'],
-            ]);
+            ], $meta));
         }
 
         if ($template->isCrossword()) {
@@ -107,13 +152,13 @@ class PracticeController extends Controller
             $data        = $template->generateCrossword();
             $q           = json_decode($data['question_text'], true);
             $correctArr  = json_decode($data['correct_answer'], true) ?? [];
-            cache()->put($key, $correctArr, now()->addMinutes(20));
+            cache()->put($key, ['topic_id' => $topic->id, 'data' => $correctArr], now()->addMinutes(20));
             $revealed     = $q['revealed'] ?? [];
             $revealedVals = [];
             foreach ($revealed as $pos) {
                 $revealedVals[(string)$pos] = $correctArr[(string)$pos] ?? null;
             }
-            return response()->json([
+            return response()->json(array_merge([
                 'type'           => 'crossword',
                 'key'            => $key,
                 'rows'           => $q['rows'] ?? 2,
@@ -124,22 +169,22 @@ class PracticeController extends Controller
                 'col_results'    => $q['col_results'] ?? [],
                 'revealed'       => $revealed,
                 'revealed_values'=> $revealedVals,
-            ]);
+            ], $meta));
         }
 
         $theme     = $template->theme ?? Theme::first();
         $generated = $template->generate($theme);
 
         $key = "pq_{$child->id}_{$topic->id}_" . uniqid();
-        cache()->put($key, ['type' => 'mc', 'correct' => $generated['correct_answer']], now()->addMinutes(20));
+        cache()->put($key, ['topic_id' => $topic->id, 'data' => ['type' => 'mc', 'correct' => $generated['correct_answer']]], now()->addMinutes(20));
 
-        return response()->json([
+        return response()->json(array_merge([
             'type'     => 'mc',
             'key'      => $key,
             'question' => $generated['question_text'],
             'options'  => $generated['options'],
             'hint'     => $generated['hint_text'] ?? null,
-        ]);
+        ], $meta));
     }
 
     // ── AJAX: submit answer ──────────────────────────────────────────────────
@@ -153,28 +198,31 @@ class PracticeController extends Controller
             return response()->json(['error' => 'კითხვის ვადა გავიდა'], 422);
         }
 
+        $topicId = $cached['topic_id'] ?? null;
+        $payload = $cached['data'];
+
         $isCorrect = false;
         $feedback  = null;
 
-        if (isset($cached['type']) && $cached['type'] === 'mc') {
-            $isCorrect = (string) $request->input('answer') === (string) $cached['correct'];
-            $feedback  = ['correct_answer' => $cached['correct']];
+        if (isset($payload['type']) && $payload['type'] === 'mc') {
+            $isCorrect = (string) $request->input('answer') === (string) $payload['correct'];
+            $feedback  = ['correct_answer' => $payload['correct']];
         } elseif ($request->has('code_answers')) {
-            // code: cached = [pos => value]
-            $result    = \App\Services\CodeService::check(json_encode($cached), $request->input('code_answers', []));
+            // code: payload = [pos => value]
+            $result    = \App\Services\CodeService::check(json_encode($payload), $request->input('code_answers', []));
             $isCorrect = $result['ok'];
             $feedback  = ['results' => $result['results']];
         } elseif ($request->has('crossword_answers')) {
-            // crossword: cached = ['0'=>a, '1'=>b, '2'=>c, '3'=>d]
-            $result    = \App\Services\CrosswordService::check(json_encode($cached), $request->input('crossword_answers', []));
+            // crossword: payload = ['0'=>a, '1'=>b, '2'=>c, '3'=>d]
+            $result    = \App\Services\CrosswordService::check(json_encode($payload), $request->input('crossword_answers', []));
             $isCorrect = $result['ok'];
             $feedback  = ['results' => $result['results']];
         } else {
-            // pyramid: cached = ['r,c' => value, ...]
+            // pyramid: payload = ['r,c' => value, ...]
             $userAnswers = $request->input('answers', []);
             $results     = [];
             $allOk       = true;
-            foreach ($cached as $pos => $val) {
+            foreach ($payload as $pos => $val) {
                 $ok            = intval($userAnswers[$pos] ?? PHP_INT_MIN) === $val;
                 $results[$pos] = ['correct' => $ok, 'value' => $val];
                 if (! $ok) $allOk = false;
@@ -184,9 +232,9 @@ class PracticeController extends Controller
         }
 
         // Update session
-        $session = $slug === 'pyramid'
-            ? PracticeSession::forChild($child->id, null, 'pyramid')
-            : PracticeSession::forChild($child->id, Topic::findOrFail((int) $slug)->id, 'topic');
+        $session = $topicId
+            ? PracticeSession::forChild($child->id, $topicId, 'topic')
+            : PracticeSession::forChild($child->id, null, 'pyramid');
 
         $session->total_answered++;
         $leveledUp = false;
@@ -206,11 +254,22 @@ class PracticeController extends Controller
         $session->last_activity_at = now();
         $session->save();
 
+        // Coins — points-per-correct is admin-configurable per grade/level for practice too
+        $points = 0;
+        if ($isCorrect) {
+            $setting = $child->childSetting;
+            $points  = PointRule::resolve($setting?->grade_id, $session->level, 'practice');
+            if ($setting && $points > 0) {
+                $setting->increment('coins', $points);
+            }
+        }
+
         return response()->json(array_merge($feedback, [
             'correct'    => $isCorrect,
             'level'      => $session->level,
             'streak'     => $session->streak,
             'leveled_up' => $leveledUp,
+            'coins'      => $points,
         ]));
     }
 
@@ -235,7 +294,7 @@ class PracticeController extends Controller
             $config['hidden_count']
         );
 
-        cache()->put($key, $result['solutions'], now()->addMinutes(20));
+        cache()->put($key, ['topic_id' => null, 'data' => $result['solutions']], now()->addMinutes(20));
 
         return ['type' => 'pyramid', 'key' => $key, 'rows' => $result['rows'], 'height' => $config['height']];
     }
