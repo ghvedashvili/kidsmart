@@ -7,9 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TestQuestionCount extends Model
 {
-    protected $fillable = ['grade_id', 'difficulty', 'theme_id', 'questions_count', 'is_olympiad'];
-
-    protected $casts = ['is_olympiad' => 'boolean'];
+    protected $fillable = ['grade_id', 'difficulty', 'theme_id', 'questions_count'];
 
     /** Used when no admin override matches at all. */
     public const DEFAULT_COUNT = 15;
@@ -34,7 +32,6 @@ class TestQuestionCount extends Model
     {
         if ($themeId) {
             $exact = static::where('grade_id', $gradeId)
-                ->where('is_olympiad', false)
                 ->where('difficulty', $difficulty)
                 ->where('theme_id', $themeId)
                 ->value('questions_count');
@@ -42,7 +39,6 @@ class TestQuestionCount extends Model
         }
 
         $general = static::where('grade_id', $gradeId)
-            ->where('is_olympiad', false)
             ->where('difficulty', $difficulty)
             ->whereNull('theme_id')
             ->value('questions_count');
@@ -50,7 +46,6 @@ class TestQuestionCount extends Model
 
         if ($themeId) {
             $anyDifficulty = static::where('grade_id', $gradeId)
-                ->where('is_olympiad', false)
                 ->whereNull('difficulty')
                 ->where('theme_id', $themeId)
                 ->value('questions_count');
@@ -58,38 +53,11 @@ class TestQuestionCount extends Model
         }
 
         $anyDifficultyGeneral = static::where('grade_id', $gradeId)
-            ->where('is_olympiad', false)
             ->whereNull('difficulty')
             ->whereNull('theme_id')
             ->value('questions_count');
         if ($anyDifficultyGeneral) return $anyDifficultyGeneral;
 
         return self::DEFAULT_COUNT;
-    }
-
-    /**
-     * Resolve how many questions an Olympiad test should have for this grade(+theme).
-     * Priority: exact (grade,olympiad,theme) > (grade,olympiad,any theme) > $fallback
-     * (typically OlympiadRule::resolve()'s already-tiered questions_count) > global default.
-     * This page is a more specific override layered on top of the Olympiad schedule page,
-     * not a replacement for it.
-     */
-    public static function resolveOlympiad(int $gradeId, ?int $themeId, ?int $fallback = null): int
-    {
-        if ($themeId) {
-            $exact = static::where('grade_id', $gradeId)
-                ->where('is_olympiad', true)
-                ->where('theme_id', $themeId)
-                ->value('questions_count');
-            if ($exact) return $exact;
-        }
-
-        $general = static::where('grade_id', $gradeId)
-            ->where('is_olympiad', true)
-            ->whereNull('theme_id')
-            ->value('questions_count');
-        if ($general) return $general;
-
-        return $fallback ?? self::DEFAULT_COUNT;
     }
 }
