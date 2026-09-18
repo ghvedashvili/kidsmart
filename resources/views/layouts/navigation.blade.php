@@ -156,7 +156,7 @@
 <style>
     .child-top-bar {
         display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
-        padding: 10px 16px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        padding: 10px 16px; background: transparent; box-shadow: none;
         position: relative; z-index: 500;
     }
     .child-top-left { justify-self: start; }
@@ -168,19 +168,25 @@
     .child-back-btn {
         display: flex; align-items: center; gap: 6px;
         flex-shrink: 0;
-        background: #f8fafc; border: none; border-radius: 99px;
+        background: rgba(255,255,255,0.65); border: 1.5px solid rgba(108,92,231,0.28);
+        backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+        border-radius: 99px;
         padding: 8px 14px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.72rem;
-        color: #6c5ce7; cursor: pointer;
+        color: #6c5ce7; cursor: pointer; transition: background 0.15s;
     }
+    .child-back-btn:hover { background: rgba(255,255,255,0.85); }
     .child-top-actions button {
         display: flex; align-items: center; gap: 6px;
-        background: #f8fafc; border: none; border-radius: 99px;
+        background: rgba(255,255,255,0.65); border: 1.5px solid rgba(108,92,231,0.28);
+        backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+        border-radius: 99px;
         padding: 8px 14px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.72rem;
-        color: #6c5ce7; cursor: pointer;
+        color: #6c5ce7; cursor: pointer; transition: background 0.15s;
     }
-    .child-top-actions button.on { color: #16a34a; }
+    .child-top-actions button:hover { background: rgba(255,255,255,0.85); }
+    .child-top-actions button.on { color: #16a34a; border-color: rgba(22,163,74,0.3); }
     .child-top-actions form { margin: 0; }
-    .child-top-actions .logout-btn { color: #e17055; }
+    .child-top-actions .logout-btn { color: #e17055; border-color: rgba(225,112,85,0.3); }
 </style>
 <div class="child-top-bar{{ request()->routeIs('dashboard') ? ' no-back' : '' }}">
     @unless(request()->routeIs('dashboard'))
