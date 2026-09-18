@@ -5,14 +5,14 @@
 @section('content')
 <style>
     body { background: transparent !important; }
-    .wrap { max-width: 520px; margin: 0 auto; padding: 28px 16px 80px; }
+    .wrap { max-width: 520px; margin: 0 auto; padding: 28px 16px 24px; box-sizing: border-box; }
     @media (min-width: 760px)  { .wrap { max-width: 700px; } }
     @media (min-width: 1040px) { .wrap { max-width: 960px; } }
 
     .page-hero {
-        width: 100%; box-sizing: border-box; border-radius: 20px; padding: 26px 20px;
-        min-height: 120px; display: flex; flex-direction: column; justify-content: center;
-        position: relative; overflow: hidden; margin-bottom: 20px;
+        width: 100%; box-sizing: border-box; border-radius: 20px; padding: 20px;
+        min-height: 100px; display: flex; flex-direction: column; justify-content: center;
+        position: relative; overflow: hidden; margin-bottom: 16px;
         background-image:
             linear-gradient(90deg, rgba(238,235,255,0.94) 0%, rgba(238,235,255,0.78) 45%, rgba(238,235,255,0.08) 68%),
             url('/img/mission-hero.jpg');
