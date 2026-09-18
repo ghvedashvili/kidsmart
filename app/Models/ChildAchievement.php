@@ -9,12 +9,17 @@ class ChildAchievement extends Model
 {
     public $timestamps = false;
 
-    protected $fillable = ['child_id', 'slug', 'earned_at'];
+    protected $fillable = ['child_id', 'grade_id', 'slug', 'tier_level', 'earned_at'];
 
     protected $casts = ['earned_at' => 'datetime'];
 
     public function child(): BelongsTo
     {
         return $this->belongsTo(User::class, 'child_id');
+    }
+
+    public function grade(): BelongsTo
+    {
+        return $this->belongsTo(Grade::class);
     }
 }

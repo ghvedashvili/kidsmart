@@ -8,6 +8,7 @@ use App\Models\QuestionTemplate;
 use App\Models\Test;
 use App\Models\Theme;
 use App\Models\User;
+use App\Services\AchievementService;
 use Illuminate\Http\Request;
 
 class ChildSettingsController extends Controller
@@ -109,6 +110,13 @@ class ChildSettingsController extends Controller
             'child', 'tests', 'totalTests', 'avgScore', 'todayCount', 'required', 'topicStats', 'olympiadTests',
             'oldGrades', 'oldGradeTests', 'oldGradeOlympiadTests', 'gradeHistory'
         ));
+    }
+
+    public function achievements(User $child, AchievementService $service)
+    {
+        $this->authorizeChild($child);
+
+        return view('parent.child-achievements', ['child' => $child] + $service->wallFor($child));
     }
 
     public function showTest(User $child, Test $test)

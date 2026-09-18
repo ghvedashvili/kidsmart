@@ -45,7 +45,6 @@ body { font-family: 'Nunito', sans-serif; background: transparent !important; }
 .stat-val { font-size: 1.4rem; font-weight: 900; line-height: 1; color: #1e293b; }
 .stat-lbl { font-size: 0.62rem; font-weight: 700; color: #94a3b8; margin-top: 4px; }
 
-/* Section */
 .section { padding: 20px 0 0; }
 .sec-title {
     font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em;
@@ -53,7 +52,6 @@ body { font-family: 'Nunito', sans-serif; background: transparent !important; }
     margin-bottom: 12px; padding-left: 2px;
 }
 
-/* Achievement grid */
 .ach-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -78,7 +76,6 @@ body { font-family: 'Nunito', sans-serif; background: transparent !important; }
     opacity: 0.45;
     filter: grayscale(0.6);
 }
-.ach-card.earned:hover { transform: translateY(-2px); }
 
 .ach-emoji { font-size: 2.4rem; line-height: 1; margin-bottom: 8px; }
 .ach-img { width: 56px; height: 56px; object-fit: contain; margin: 0 auto 8px; display: block; }
@@ -95,13 +92,11 @@ body { font-family: 'Nunito', sans-serif; background: transparent !important; }
     font-size: 0.55rem; color: white; font-weight: 900;
 }
 
-/* Progress bar */
 .progress-wrap { margin-bottom: 28px; }
 .progress-info { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.72rem; font-weight: 700; color: #64748b; }
 .progress-bar { height: 8px; background: #e2e8f0; border-radius: 99px; overflow: hidden; }
 .progress-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #8b5cf6); border-radius: 99px; transition: width 0.6s ease; }
 
-/* Old grades accordion */
 .old-grades-hr { border: none; border-top: 1px solid #e2e8f0; margin: 24px 0 16px; }
 .old-grades-lbl { font-family:'Nunito',sans-serif; font-weight:800; font-size:0.68rem; letter-spacing:0.1em; text-transform:uppercase; color:#94a3b8; margin-bottom:12px; }
 .old-grade-card { background: white; border-radius: 16px; margin-bottom: 10px; overflow: hidden; box-shadow: 0 3px 12px rgba(0,0,0,0.06); }
@@ -113,11 +108,11 @@ body { font-family: 'Nunito', sans-serif; background: transparent !important; }
 </style>
 
 <div class="wrap">
-<a href="{{ route('dashboard') }}" class="back-btn">← დაბრუნება</a>
+<a href="{{ route('child.stats', $child) }}" class="back-btn">← {{ $child->name }}-ის სტატისტიკა</a>
 
 <div class="page-hero">
-    <div class="page-hero-title">🏆 ჩემი მედლები</div>
-    <div class="page-hero-sub">{{ $earned->count() }}/{{ $achievements->count() }} მედალი მოგებული — გააგრძელე!</div>
+    <div class="page-hero-title">🏆 {{ $child->name }}-ის მედლები</div>
+    <div class="page-hero-sub">{{ $earned->count() }}/{{ $achievements->count() }} მედალი მოგებული</div>
 </div>
 
 <div class="stats-row">
@@ -136,7 +131,6 @@ body { font-family: 'Nunito', sans-serif; background: transparent !important; }
 </div>
 
 <div class="section">
-    <!-- Progress -->
     <div class="progress-wrap">
         @php $pct = $achievements->count() > 0 ? round($earned->count() / $achievements->count() * 100) : 0; @endphp
         <div class="progress-info">
@@ -148,7 +142,6 @@ body { font-family: 'Nunito', sans-serif; background: transparent !important; }
         </div>
     </div>
 
-    <!-- Market rewards -->
     @if($marketRewards->count())
     <div class="sec-title" style="color:#d97706;">🛒 მარკეტის ჯილდოები</div>
     <div class="ach-grid" style="margin-bottom:28px;">
@@ -164,7 +157,6 @@ body { font-family: 'Nunito', sans-serif; background: transparent !important; }
     </div>
     @endif
 
-    <!-- Achievements -->
     <div class="sec-title">🏅 მიღწევები</div>
     <div class="ach-grid">
         @foreach($achievements as $ach)

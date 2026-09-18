@@ -2,28 +2,68 @@
 
 namespace App\Services;
 
+use App\Models\Achievement;
 use App\Models\ChildAchievement;
+use App\Models\ChildGradeHistory;
 use App\Models\ChildSetting;
 use App\Models\Grade;
 use App\Models\LevelUpRule;
+use App\Models\MarketPurchase;
 use App\Models\PointRule;
 use App\Models\Test;
 use App\Models\User;
+use Carbon\Carbon;
 
 class AchievementService
 {
-    // All achievement definitions
-    public const ACHIEVEMENTS = [
-        // სტიკერები
-        'first_test'    => ['emoji' => '⭐', 'name' => 'პირველი ტესტი!',      'desc' => 'პირველი ტესტი დაასრულე',                    'type' => 'sticker'],
-        'first_perfect' => ['emoji' => '🎯', 'name' => 'პედრი!',           'desc' => 'ყველა პასუხი პედრის პასებივით სწორეა',                 'type' => 'sticker'],
-        'comeback'      => ['emoji' => '💪', 'name' => 'დაბრუნება!',          'desc' => 'ცუდი ტესტის შემდეგ 80%+ მოიპოვე',          'type' => 'sticker'],
-        'early_bird'    => ['emoji' => '🌅', 'name' => 'დილა მშვიდობისა',    'desc' => 'გააკეთე ტესტი დილის 9:00-მდე',                     'type' => 'sticker'],
-        'night_owl'     => ['emoji' => '🌙', 'name' => 'ძილისნებისა',        'desc' => 'გააკეთე ტესტი 22:30-ის შემდეგ',                    'type' => 'sticker'],
-        'ronaldo'       => ['emoji' => '⚡', 'name' => 'კრისტიანო რონალდო',  'desc' => 'ტესტი 1 წუთში დაასრულე — იყავი რონალდოსავით სწრაფი!',  'type' => 'sticker'],
-        'messi'         => ['emoji' => '🐐', 'name' => 'ლეო მესი',           'desc' => '10 დღე ზედიზედ მინიმუმ 1 ტესტი',           'type' => 'sticker'],
-        'yamal'         => ['emoji' => '🌟', 'name' => 'ლამინე იამალი',      'desc' => '19 კითხვა ზედიზედ სწორად',                 'type' => 'sticker'],
-    ];
+    /**
+     * Builds everything the achievements "wall" needs — used by both the child's own
+     * page and the parent's read-only view of it, so the two never drift apart.
+     * Achievements are scoped to the child's CURRENT grade; anything earned under a
+     * grade they've since left is grouped separately under $oldGradeAchievements,
+     * mirroring the "ძველი კლასები" pattern already used on the stats pages.
+     */
+    public function wallFor(User $child): array
+    {
+        $setting        = $child->childSetting;
+        $currentGradeId = $setting?->grade_id;
+
+        $achievements = Achievement::with('tiers')->where('is_active', true)->get();
+
+        $earned = ChildAchievement::where('child_id', $child->id)
+            ->where('grade_id', $currentGradeId)
+            ->get()
+            ->keyBy('slug');
+
+        $totalTests = Test::where('child_id', $child->id)
+            ->where('is_olympiad', false)
+            ->when($currentGradeId, fn ($q) => $q->where('grade_id', $currentGradeId))
+            ->whereNotNull('completed_at')
+            ->count();
+
+        $marketRewards = MarketPurchase::where('child_id', $child->id)
+            ->where('status', 'approved')
+            ->with('item')
+            ->latest()
+            ->get();
+
+        $oldGradeIds = collect()
+            ->merge(ChildAchievement::where('child_id', $child->id)->whereNotNull('grade_id')->pluck('grade_id'))
+            ->merge(ChildGradeHistory::where('user_id', $child->id)->pluck('grade_id'))
+            ->filter()
+            ->unique()
+            ->reject(fn ($id) => $currentGradeId && $id == $currentGradeId);
+
+        $oldGrades = Grade::whereIn('id', $oldGradeIds)->orderBy('number')->get();
+
+        $oldGradeAchievements = ChildAchievement::where('child_id', $child->id)
+            ->whereIn('grade_id', $oldGrades->pluck('id'))
+            ->get()
+            ->groupBy('grade_id')
+            ->map(fn ($rows) => $rows->keyBy('slug'));
+
+        return compact('setting', 'achievements', 'earned', 'totalTests', 'marketRewards', 'oldGrades', 'oldGradeAchievements');
+    }
 
     public function handleTestCompletion(Test $test, User $child): array
     {
@@ -113,53 +153,96 @@ class AchievementService
         return 'same';
     }
 
+    /**
+     * Evaluates every active Achievement's tiers against the child's current-grade
+     * metrics and records any newly-reached tier. Achievements (and their metrics)
+     * are scoped to the child's CURRENT grade — this is what makes progress restart
+     * cleanly after a grade change (ChildSettingsController::update()) with no
+     * explicit reset step: a new grade simply has no Test rows yet to count.
+     * `coins_earned` is the one metric that is NOT grade-scoped, since coins are a
+     * single wallet shared across grades.
+     */
     private function checkAchievements(User $child, Test $test, ChildSetting $setting, float $pct): array
     {
-        $earned   = ChildAchievement::where('child_id', $child->id)->pluck('slug')->flip()->toArray();
-        $totalTests = Test::where('child_id', $child->id)->whereNotNull('completed_at')->count();
+        $gradeId = $setting->grade_id;
+        if (! $gradeId) return [];
 
-        // Last 7 tests' performance for streak
-        $lastTests  = Test::where('child_id', $child->id)
-            ->whereNotNull('completed_at')
-            ->latest('completed_at')
-            ->take(7)
-            ->get();
+        $metrics = $this->computeMetrics($child, $test, $gradeId, $pct, $setting);
 
-        $streak = 0;
-        foreach ($lastTests as $t) {
-            if ($t->total_questions > 0 && $t->correct_count / $t->total_questions >= 0.8) {
-                $streak++;
-            } else break;
-        }
-
-        // Previous test for comeback check
-        $prevTest = Test::where('child_id', $child->id)
-            ->whereNotNull('completed_at')
-            ->where('id', '!=', $test->id)
-            ->latest('completed_at')
-            ->first();
-        $prevPct = $prevTest && $prevTest->total_questions > 0
-            ? $prevTest->correct_count / $prevTest->total_questions
-            : null;
-
-        // Messi: 10 consecutive days with at least 1 test
-        $dayStreak = 0;
-        $testDays  = Test::where('child_id', $child->id)
-            ->whereNotNull('completed_at')
+        $earnedByGrade = ChildAchievement::where('child_id', $child->id)
+            ->where('grade_id', $gradeId)
             ->get()
-            ->groupBy(fn($t) => $t->completed_at->toDateString())
-            ->keys()
-            ->flip()
-            ->toArray();
-        for ($d = 0; $d < 10; $d++) {
-            if (isset($testDays[now()->subDays($d)->toDateString()])) {
-                $dayStreak++;
-            } else {
-                break;
+            ->keyBy('slug');
+
+        $achievements = Achievement::with('tiers')->where('is_active', true)->get();
+
+        // "1 new achievement per day" only gates the FIRST-ever unlock of a daily-limited
+        // achievement — tier_level=1 is the only tier a fresh unlock can grant, so filtering
+        // on it (rather than just "touched today") keeps later tier upgrades from being
+        // miscounted as a first unlock. Continued progress on something already started
+        // is never blocked by this gate, only brand-new surprises are rationed.
+        $dailyLimitSlugs = $achievements->where('daily_limit', true)->pluck('slug');
+        $dailyLimitUsedToday = ChildAchievement::where('child_id', $child->id)
+            ->where('grade_id', $gradeId)
+            ->whereIn('slug', $dailyLimitSlugs)
+            ->where('tier_level', 1)
+            ->whereDate('earned_at', today())
+            ->exists();
+
+        $new = [];
+        $awardedDailyLimitNow = false;
+
+        foreach ($achievements as $achievement) {
+            $current        = $earnedByGrade->get($achievement->slug);
+            $currentTier    = $current->tier_level ?? 0;
+            $isFirstEverNow = $currentTier === 0;
+
+            if ($isFirstEverNow && $achievement->daily_limit && ($dailyLimitUsedToday || $awardedDailyLimitNow)) continue;
+
+            foreach ($achievement->tiers as $tier) {
+                if ($tier->level <= $currentTier) continue;
+
+                // tiers are ordered by ascending difficulty — if this one isn't met,
+                // no higher tier will be either, so stop checking this achievement
+                if (! $this->metricMeets($achievement->condition_type, $achievement->condition_config, $metrics, $tier->threshold)) {
+                    break;
+                }
+
+                ChildAchievement::updateOrCreate(
+                    ['child_id' => $child->id, 'slug' => $achievement->slug, 'grade_id' => $gradeId],
+                    ['tier_level' => $tier->level, 'earned_at' => now()]
+                );
+
+                $new[] = [
+                    'slug'  => $achievement->slug,
+                    'name'  => $tier->label,
+                    'desc'  => $tier->threshold !== null
+                        ? str_replace('{n}', (string) $tier->threshold, $achievement->description ?? '')
+                        : ($achievement->description ?? ''),
+                    'image' => $tier->imageUrl(),
+                    'tier'  => $tier->level,
+                ];
+
+                if ($isFirstEverNow && $achievement->daily_limit) $awardedDailyLimitNow = true;
+
+                break; // one tier advance per achievement per test — no silent bronze→gold jumps
             }
         }
 
-        // Yamal: 19 consecutive correct answers across recent 100% tests
+        return $new;
+    }
+
+    private function computeMetrics(User $child, Test $test, int $gradeId, float $pct, ChildSetting $setting): array
+    {
+        $baseQuery = fn () => Test::where('child_id', $child->id)
+            ->where('grade_id', $gradeId)
+            ->where('is_olympiad', false)
+            ->whereNotNull('completed_at');
+
+        $testCount = $baseQuery()->count();
+
+        $lastTests = $baseQuery()->latest('completed_at')->take(7)->get();
+
         $consecCorrect = 0;
         foreach ($lastTests as $t) {
             if ($t->total_questions > 0 && $t->correct_count === $t->total_questions) {
@@ -169,46 +252,74 @@ class AchievementService
             }
         }
 
-        // Ronaldo: test completed within 60 seconds
-        $testSeconds = $test->created_at->diffInSeconds($test->completed_at);
+        $prevTest = $baseQuery()->where('id', '!=', $test->id)->latest('completed_at')->first();
+        $prevPct  = $prevTest && $prevTest->total_questions > 0
+            ? $prevTest->correct_count / $prevTest->total_questions
+            : null;
+        $comeback = ! $test->is_olympiad && $prevPct !== null && $prevPct <= 0.4 && $pct >= 0.8;
 
-        $candidates = [
-            'first_test'    => $totalTests === 1,
-            'first_perfect' => $pct >= 1.0,
-            'comeback'      => $prevPct !== null && $prevPct <= 0.4 && $pct >= 0.8,
-            'early_bird'    => now()->hour < 9,
-            'night_owl'     => now()->hour > 22 || (now()->hour === 22 && now()->minute >= 30),
-            'ronaldo'       => $testSeconds <= 60,
-            'messi'         => $dayStreak >= 10,
-            'yamal'         => $consecCorrect >= 19,
-        ];
-
-        $stickerSlugs = array_keys(array_filter(self::ACHIEVEMENTS, fn($a) => $a['type'] === 'sticker'));
-        $stickerEarnedToday = ChildAchievement::where('child_id', $child->id)
-            ->whereIn('slug', $stickerSlugs)
-            ->whereDate('earned_at', today())
-            ->exists();
-
-        $new = [];
-        $awardedStickerNow = false;
-
-        foreach ($candidates as $slug => $met) {
-            if (! $met || isset($earned[$slug])) continue;
-
-            $isSticker = (self::ACHIEVEMENTS[$slug]['type'] ?? '') === 'sticker';
-
-            if ($isSticker && ($stickerEarnedToday || $awardedStickerNow)) continue;
-
-            ChildAchievement::create([
-                'child_id'  => $child->id,
-                'slug'      => $slug,
-                'earned_at' => now(),
-            ]);
-            $new[] = array_merge(['slug' => $slug], self::ACHIEVEMENTS[$slug]);
-
-            if ($isSticker) $awardedStickerNow = true;
+        $testDays = $baseQuery()->get()
+            ->groupBy(fn ($t) => $t->completed_at->toDateString())
+            ->keys()->flip()->toArray();
+        $dayStreak = 0;
+        for ($d = 0; $d < 30; $d++) {
+            if (isset($testDays[now()->subDays($d)->toDateString()])) {
+                $dayStreak++;
+            } else {
+                break;
+            }
         }
 
-        return $new;
+        $speedSeconds = $test->is_olympiad ? null : $test->created_at->diffInSeconds($test->completed_at);
+
+        $grade           = Grade::find($gradeId);
+        $maxLevelReached = $grade && $setting->difficulty >= $grade->max_level;
+
+        $olympiadCompleted = Test::where('child_id', $child->id)
+            ->where('grade_id', $gradeId)
+            ->where('is_olympiad', true)
+            ->whereNotNull('completed_at')
+            ->count();
+
+        return [
+            'test_count'          => $testCount,
+            'perfect_score'       => ! $test->is_olympiad && $pct >= 1.0,
+            'comeback'            => $comeback,
+            'speed_seconds'       => $speedSeconds,
+            'day_streak'          => $dayStreak,
+            'consecutive_correct' => $consecCorrect,
+            'max_level_reached'   => $maxLevelReached,
+            'olympiad_completed'  => $olympiadCompleted,
+            'coins_earned'        => $setting->coins,
+            'now'                 => now(),
+        ];
+    }
+
+    private function metricMeets(string $conditionType, ?array $config, array $metrics, ?int $threshold): bool
+    {
+        return match ($conditionType) {
+            'test_count'          => $metrics['test_count'] >= $threshold,
+            'perfect_score'       => $metrics['perfect_score'],
+            'comeback'            => $metrics['comeback'],
+            'speed_seconds'       => $metrics['speed_seconds'] !== null && $metrics['speed_seconds'] <= $threshold,
+            'day_streak'          => $metrics['day_streak'] >= $threshold,
+            'consecutive_correct' => $metrics['consecutive_correct'] >= $threshold,
+            'max_level_reached'   => $metrics['max_level_reached'],
+            'olympiad_completed'  => $metrics['olympiad_completed'] >= $threshold,
+            'coins_earned'        => $metrics['coins_earned'] >= $threshold,
+            'time_of_day'         => $this->timeOfDayMet($config, $metrics['now']),
+            default               => false,
+        };
+    }
+
+    private function timeOfDayMet(?array $config, Carbon $now): bool
+    {
+        if (isset($config['before'])) {
+            return $now->format('H:i') < $config['before'];
+        }
+        if (isset($config['after'])) {
+            return $now->format('H:i') >= $config['after'];
+        }
+        return false;
     }
 }

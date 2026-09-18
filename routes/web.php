@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\TestQuestionCountController;
 use App\Http\Controllers\Admin\LevelUpRuleController;
 use App\Http\Controllers\Admin\OlympiadRuleController;
 use App\Http\Controllers\Admin\PointRuleController;
+use App\Http\Controllers\Admin\AchievementController as AdminAchievementController;
 use App\Http\Controllers\OlympiadController;
 use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\MarketController;
@@ -119,6 +120,7 @@ Route::middleware(['auth', 'role.permission'])->group(function () {
 
     // შვილის პარამეტრები (მხოლოდ მშობელი)
     Route::get('/children/{child}/stats',                [ChildSettingsController::class, 'stats'])->name('child.stats');
+    Route::get('/children/{child}/achievements',          [ChildSettingsController::class, 'achievements'])->name('child.achievements');
     Route::get('/children/{child}/tests/{test}',         [ChildSettingsController::class, 'showTest'])->name('child.test.show');
     Route::put('/children/{child}/settings',    [ChildSettingsController::class, 'update'])->name('child.settings.update');
     Route::put('/children/{child}/avatar',      [ChildSettingsController::class, 'updateAvatar'])->name('child.avatar.update');
@@ -266,4 +268,12 @@ Route::middleware(['auth', 'admin', 'role.permission'])->group(function () {
     Route::post('/admin/point-rules',                    [PointRuleController::class, 'store'])->name('admin.point-rules.store');
     Route::put('/admin/point-rules/{pointRule}',          [PointRuleController::class, 'update'])->name('admin.point-rules.update');
     Route::delete('/admin/point-rules/{pointRule}',       [PointRuleController::class, 'destroy'])->name('admin.point-rules.destroy');
+
+    Route::get('/admin/achievements',                          [AdminAchievementController::class, 'index'])->name('admin.achievements.index');
+    Route::get('/admin/achievements/create',                   [AdminAchievementController::class, 'create'])->name('admin.achievements.create');
+    Route::post('/admin/achievements',                         [AdminAchievementController::class, 'store'])->name('admin.achievements.store');
+    Route::get('/admin/achievements/{achievement}/edit',       [AdminAchievementController::class, 'edit'])->name('admin.achievements.edit');
+    Route::put('/admin/achievements/{achievement}',            [AdminAchievementController::class, 'update'])->name('admin.achievements.update');
+    Route::patch('/admin/achievements/{achievement}/toggle',   [AdminAchievementController::class, 'toggleActive'])->name('admin.achievements.toggle');
+    Route::delete('/admin/achievements/{achievement}',         [AdminAchievementController::class, 'destroy'])->name('admin.achievements.destroy');
 });

@@ -76,6 +76,7 @@
 <div class="wrap">
     <div class="topbar">
         <a href="{{ route('dashboard') }}" class="back">← დაბრუნება</a>
+        <a href="{{ route('child.achievements', $child) }}" class="back" style="color:#7c3aed;">🏆 მედლები</a>
     </div>
 
     <div class="child-title">{{ $child->name }}</div>

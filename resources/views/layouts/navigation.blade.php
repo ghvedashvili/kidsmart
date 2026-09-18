@@ -211,6 +211,9 @@
             @if($__canAdm('admin.pointrules'))
             <a class="nav-link-item{{ request()->routeIs('admin.point-rules.*') ? ' nav-act' : '' }}" href="{{ route('admin.point-rules.index') }}" style="font-size:0.74rem;">ქულების წესები</a>
             @endif
+            @if($__canAdm('admin.achievements'))
+            <a class="nav-link-item{{ request()->routeIs('admin.achievements.*') ? ' nav-act' : '' }}" href="{{ route('admin.achievements.index') }}" style="font-size:0.74rem;">მიღწევები</a>
+            @endif
             @if($__canAdm('admin.users'))
             <a class="nav-link-item{{ request()->routeIs('admin.users.*') ? ' nav-act' : '' }}" href="{{ route('admin.users.index') }}" style="font-size:0.74rem;">მომხ.</a>
             @endif
@@ -310,6 +313,9 @@
     @endif
     @if($__mCan('admin.pointrules'))
     <a href="{{ route('admin.point-rules.index') }}" onclick="toggleMobileMenu()"><span class="mn-icon">💰</span>ქულების წესები</a>
+    @endif
+    @if($__mCan('admin.achievements'))
+    <a href="{{ route('admin.achievements.index') }}" onclick="toggleMobileMenu()"><span class="mn-icon">🏅</span>მიღწევები</a>
     @endif
     @if($__mCan('admin.users'))
     <a href="{{ route('admin.users.index') }}" onclick="toggleMobileMenu()"><span class="mn-icon">👥</span>მომხმარებლები</a>
