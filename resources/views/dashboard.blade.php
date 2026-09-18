@@ -62,16 +62,18 @@
     /* ── hero banners ── */
     .parent-hero-banner {
         width: 100%; box-sizing: border-box; border-radius: var(--radius-lg); padding: 22px 24px;
-        display: flex; align-items: center; justify-content: space-between; gap: 16px; text-align: left;
+        display: flex; flex-direction: column; align-items: flex-start; gap: 14px; text-align: left;
         background: linear-gradient(135deg, var(--primary), var(--primary-light));
         box-shadow: 0 10px 24px rgba(108,92,231,0.25);
     }
-    .parent-hero-text h2 { font-family: 'Goldman', monospace; font-size: 1.05rem; color: #fff; margin: 0 0 10px; letter-spacing: 0.02em; }
+    .parent-hero-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; width: 100%; }
+    .parent-hero-text h2 { font-family: 'Goldman', monospace; font-size: 0.95rem; color: rgba(255,255,255,0.85); margin: 0; letter-spacing: 0.02em; }
+    .parent-hero-name { font-family: 'Goldman', monospace; font-size: 1.3rem; color: #fff; margin-top: 4px; letter-spacing: 0.02em; }
 
     .plan-pill {
-        display: inline-flex; align-items: center; gap: 7px;
+        display: flex; align-items: center; gap: 7px; width: 100%; box-sizing: border-box;
         background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3);
-        border-radius: 100px; padding: 6px 14px; font-family: 'Goldman', monospace;
+        border-radius: 100px; padding: 8px 14px; font-family: 'Goldman', monospace;
         font-size: 0.66rem; color: #fff; cursor: pointer; letter-spacing: 0.03em; transition: background 0.2s;
     }
     .plan-pill:hover { background: rgba(255,255,255,0.28); }
@@ -116,35 +118,56 @@
     }
     .child-card:hover { box-shadow: 0 10px 28px rgba(0,0,0,0.1); transform: translateY(-2px); }
 
-    /* ── mobile: avatar + name + ID together in one tinted header pill ── */
-    .cc-mheader {
-        display: flex; align-items: center; justify-content: center; gap: 14px;
-        border-radius: 18px; padding: 16px;
+    /* ── mobile: full-height photo on the left, name+4 mini-cards on the right ── */
+    .cc-mcard {
+        display: flex; flex-direction: column; gap: 10px; position: relative; cursor: pointer;
+        width: 100%; max-width: 100%; box-sizing: border-box; overflow: hidden; margin: 0 auto;
+    }
+    @media (min-width: 700px) { .cc-mcard { display: none; } }
+    .cc-mcard-body { display: flex; gap: 10px; align-items: stretch; width: 100%; max-width: 100%; box-sizing: border-box; }
+    .cc-mphoto-panel {
+        flex-shrink: 0; width: 52px; min-width: 0; border-radius: 14px; position: relative; overflow: hidden;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+        padding: 8px 3px; box-sizing: border-box;
         background: linear-gradient(135deg, var(--primary-soft), #e2ddff);
+        border: none; cursor: pointer;
     }
-    .cc-mheader.boy  { background: linear-gradient(135deg, #eff6ff, #dbeafe); }
-    .cc-mheader.girl { background: linear-gradient(135deg, #fdf2f8, #fce7f3); }
-    .cc-mheader-avatar {
-        width: 64px; height: 64px; border-radius: 50%; flex-shrink: 0; position: relative;
+    .cc-mphoto-panel.boy  { background: linear-gradient(135deg, #eff6ff, #dbeafe); }
+    .cc-mphoto-panel.girl { background: linear-gradient(135deg, #fdf2f8, #fce7f3); }
+    .cc-mphoto-panel .cc-code {
+        max-width: 100%; box-sizing: border-box; white-space: normal; text-align: center;
+        font-size: 0.48rem; padding: 2px 4px; line-height: 1.2; word-break: break-word;
+    }
+    .cc-mphoto-ring {
+        width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
         background: linear-gradient(135deg, var(--primary), var(--primary-light));
-        padding: 2px; border: none; cursor: pointer; transition: transform 0.15s;
+        padding: 2px; display: flex; align-items: center; justify-content: center;
+        border: none; cursor: pointer;
     }
-    .cc-mheader-avatar:hover { transform: scale(1.05); }
-    .cc-mheader.boy  .cc-mheader-avatar { background: linear-gradient(135deg, #3b82f6, #93c5fd); }
-    .cc-mheader.girl .cc-mheader-avatar { background: linear-gradient(135deg, #ec4899, #f9a8d4); }
-    .cc-mheader-avatar-inner {
+    .cc-mphoto-panel.boy  .cc-mphoto-ring { background: linear-gradient(135deg, #3b82f6, #93c5fd); }
+    .cc-mphoto-panel.girl .cc-mphoto-ring { background: linear-gradient(135deg, #ec4899, #f9a8d4); }
+    .cc-mphoto-inner {
         width: 100%; height: 100%; border-radius: 50%; background: #fff;
-        display: flex; align-items: center; justify-content: center; font-size: 1.7rem;
+        display: flex; align-items: center; justify-content: center; font-size: 1.05rem;
     }
-    .cc-mheader-info { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
-    .cc-mheader-code {
-        display: inline-flex; align-self: flex-start; margin-top: 6px;
-        font-family: 'Goldman', monospace; font-size: 0.64rem; font-weight: 700; color: #64748b;
-        background: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.9); border-radius: 10px; padding: 5px 10px;
-        letter-spacing: 0.05em; cursor: pointer; white-space: nowrap; transition: background 0.15s, color 0.15s;
+    .cc-mcard-right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; justify-content: center; }
+    .cc-mcard-name-row { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+    .cc-mcard-name-row .cc-mini-btn { width: 28px; height: 28px; border-radius: 9px; font-size: 0.78rem; flex-shrink: 0; }
+    .cc-mcard-name {
+        flex: 1; min-width: 0;
+        font-family: 'Goldman', monospace; font-size: 0.92rem; color: #1e293b;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        text-align: center;
     }
-    .cc-mheader-code:hover { background: #fff; color: #334155; }
-    @media (min-width: 700px) { .cc-mheader { display: none; } }
+    .cc-mcard-right .cc-mini-grid { gap: 6px; min-width: 0; }
+    .cc-mcard-right .cc-mini {
+        padding: 4px 8px; border-radius: 10px; gap: 5px; min-width: 0;
+    }
+    .cc-mcard-right .cc-mini-icon {
+        width: auto; height: auto; background: none !important; font-size: 0.8rem;
+    }
+    .cc-mcard-right .cc-mini-label { display: none; }
+    .cc-mcard-right .cc-mini-value { font-size: 0.64rem; }
 
     /* ── desktop: full-height photo panel on the left ── */
     .cc-layout { display: flex; gap: 16px; align-items: stretch; }
@@ -184,6 +207,15 @@
     .cc-body { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 14px; }
     .cc-header-row { display: none; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
     @media (min-width: 700px) { .cc-header-row { display: flex; } }
+    /* the desktop body's own mini-grid/buttons — mobile shows the .cc-mcard version instead */
+    .cc-body .cc-mini-grid,
+    .cc-body .cc-btn-row,
+    .cc-body .cc-full-btn-secondary { display: none; }
+    @media (min-width: 700px) {
+        .cc-body .cc-mini-grid { display: grid; }
+        .cc-body .cc-btn-row { display: flex; }
+        .cc-body .cc-full-btn-secondary { display: flex; }
+    }
     .cc-name { font-family: 'Goldman', monospace; font-size: 1.2rem; color: #1e293b; letter-spacing: 0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     .cc-code {
@@ -555,24 +587,27 @@
             }
         @endphp
         <div class="parent-hero-banner">
-            <div class="parent-hero-text">
-                <h2>გამარჯობა, {{ auth()->user()->name }}! 👋</h2>
-                @if(in_array(auth()->user()->role, ['parent', 'admin']))
-                <button type="button" class="plan-pill" onclick="document.getElementById('plansModal').classList.add('open')">
-                    <span style="width:8px;height:8px;border-radius:50%;background:{{ $currentPkg->is_free ? '#10b981' : '#93c5fd' }};display:inline-block;"></span>
-                    {{ $currentPkg->name }}
-                    @if($activeSub?->expires_at)
-                        <span style="opacity:0.7;font-size:0.6rem;">· {{ $activeSub->expires_at->format('d.m.Y') }}-მდე</span>
-                    @endif
-                    <span style="opacity:0.8;font-size:0.62rem;">↑ გეგმა</span>
+            <div class="parent-hero-top">
+                <div class="parent-hero-text">
+                    <h2>გამარჯობა! 👋</h2>
+                    <div class="parent-hero-name">{{ auth()->user()->name }}</div>
+                </div>
+                @if(in_array(auth()->user()->role, ['parent', 'admin']) && $children->count() > 0)
+                <button type="button" class="add-mini-btn"
+                    onclick="document.getElementById('{{ $atChildLimit ? 'plansModal' : 'addChildModal' }}').classList.add('open'); {{ $atChildLimit ? '' : 'wizReset();' }}"
+                    title="{{ $atChildLimit ? $currentPkg->name . ' პლანი მხოლოდ ' . $currentPkg->max_children . ' ბავშვს იძლევა' : 'შვილის დამატება' }}">
+                    <i class="bi bi-plus-lg"></i> შვილი
                 </button>
                 @endif
             </div>
-            @if(in_array(auth()->user()->role, ['parent', 'admin']) && $children->count() > 0)
-            <button type="button" class="add-mini-btn"
-                onclick="document.getElementById('{{ $atChildLimit ? 'plansModal' : 'addChildModal' }}').classList.add('open'); {{ $atChildLimit ? '' : 'wizReset();' }}"
-                title="{{ $atChildLimit ? $currentPkg->name . ' პლანი მხოლოდ ' . $currentPkg->max_children . ' ბავშვს იძლევა' : 'შვილის დამატება' }}">
-                <i class="bi bi-plus-lg"></i> შვილი
+            @if(in_array(auth()->user()->role, ['parent', 'admin']))
+            <button type="button" class="plan-pill" onclick="document.getElementById('plansModal').classList.add('open')">
+                <span style="width:8px;height:8px;border-radius:50%;background:{{ $currentPkg->is_free ? '#10b981' : '#93c5fd' }};display:inline-block;"></span>
+                {{ $currentPkg->name }}
+                @if($activeSub?->expires_at)
+                    <span style="opacity:0.7;font-size:0.6rem;">· {{ $activeSub->expires_at->format('d.m.Y') }}-მდე</span>
+                @endif
+                <span style="opacity:0.8;font-size:0.62rem;margin-left:auto;">↑ გეგმა</span>
             </button>
             @endif
         </div>
@@ -600,19 +635,59 @@
                 </div>
                 @endif
 
-                <div class="cc-mheader {{ $child->avatar === 'boy' ? 'boy' : ($child->avatar === 'girl' ? 'girl' : '') }}">
-                    <button type="button" class="cc-mheader-avatar" title="პროფილის არჩევა"
-                        onclick="document.getElementById('avatarModal{{ $child->id }}').classList.add('open')">
-                        <span class="cc-mheader-avatar-inner">{{ $child->avatar === 'boy' ? '👦' : ($child->avatar === 'girl' ? '👧' : '👤') }}</span>
-                        <span class="cc-avatar-picker-edit">✎</span>
-                    </button>
-                    <div class="cc-mheader-info">
-                        <div class="cc-name">{{ $child->name }}</div>
-                        @if($child->child_code)
-                        <span class="cc-mheader-code" onclick="copyChildCode(this, '{{ $child->child_code }}')"
-                            title="კოდის კოპირება">ID: {{ $child->child_code }}</span>
-                        @endif
+                <div class="cc-mcard" onclick="window.location.href='{{ route('child.hub', $child) }}'">
+                    <div class="cc-mcard-body">
+                        <div class="cc-mphoto-panel {{ $child->avatar === 'boy' ? 'boy' : ($child->avatar === 'girl' ? 'girl' : '') }}">
+                            <button type="button" class="cc-mphoto-ring" title="პროფილის არჩევა"
+                                onclick="event.stopPropagation(); document.getElementById('avatarModal{{ $child->id }}').classList.add('open')">
+                                <span class="cc-mphoto-inner">{{ $child->avatar === 'boy' ? '👦' : ($child->avatar === 'girl' ? '👧' : '👤') }}</span>
+                            </button>
+                            @if($child->child_code)
+                            <span class="cc-code" onclick="event.stopPropagation(); copyChildCode(this, '{{ $child->child_code }}')"
+                                title="კოდის კოპირება">ID: {{ $child->child_code }}</span>
+                            @endif
+                        </div>
+
+                        <div class="cc-mcard-right">
+                            <div class="cc-mcard-name-row">
+                                <div class="cc-mcard-name">{{ $child->name }}</div>
+                                <button type="button" class="cc-mini-btn edit" title="რედაქტირება"
+                                    onclick="event.stopPropagation(); document.getElementById('editChildModal{{ $child->id }}').classList.add('open')"><i class="bi bi-gear-fill"></i></button>
+                            </div>
+                            <div class="cc-mini-grid">
+                                <div class="cc-mini purple">
+                                    <div class="cc-mini-icon">🎓</div>
+                                    <div class="cc-mini-text">
+                                        <p class="cc-mini-value">{{ $s?->grade?->name ?? '—' }}</p>
+                                    </div>
+                                </div>
+                                <div class="cc-mini blue">
+                                    <div class="cc-mini-icon">🏆</div>
+                                    <div class="cc-mini-text">
+                                        <p class="cc-mini-value">{{ $s ? 'დონე ' . $s->difficulty : '—' }}</p>
+                                    </div>
+                                </div>
+                                <div class="cc-mini amber">
+                                    <div class="cc-mini-icon">📅</div>
+                                    <div class="cc-mini-text">
+                                        <p class="cc-mini-value">{{ $s ? $todayDone . '/' . $s->tests_per_week . ' დღეს' : '—' }}</p>
+                                    </div>
+                                </div>
+                                <div class="cc-mini emerald">
+                                    <div class="cc-mini-icon">💰</div>
+                                    <div class="cc-mini-text">
+                                        <p class="cc-mini-value">{{ $s->coins ?? 0 }} მონეტა</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+
+                    @if($child->child_code)
+                    <button type="button" class="cc-full-btn-secondary" onclick="event.stopPropagation(); toggleShare({{ $child->id }})">
+                        <i class="bi bi-link-45deg"></i> გაზიარება
+                    </button>
+                    @endif
                 </div>
 
                 <div class="cc-layout">
