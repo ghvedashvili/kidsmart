@@ -15,15 +15,15 @@
         min-height: 120px; display: flex; flex-direction: column; justify-content: center;
         position: relative; overflow: hidden; margin-bottom: 24px;
         background-image:
-            linear-gradient(90deg, rgba(240,253,244,0.94) 0%, rgba(240,253,244,0.78) 45%, rgba(240,253,244,0.08) 68%),
-            url('/img/tests-hero.jpg');
+            linear-gradient(90deg, rgba(255,251,235,0.94) 0%, rgba(255,251,235,0.78) 45%, rgba(255,251,235,0.08) 68%),
+            url('/img/achievements-hero.jpg');
         background-size: cover; background-position: right center; background-repeat: no-repeat;
-        box-shadow: 0 8px 20px rgba(22,163,74,0.18);
+        box-shadow: 0 8px 20px rgba(217,119,6,0.18);
     }
-    .page-hero-title { font-family:'Goldman', monospace; font-size:1.05rem; color:#166534; margin-bottom:4px; letter-spacing: 0.04em; }
-    .page-hero-sub { font-family:'Goldman', monospace; font-size:0.65rem; color:#16a34a; letter-spacing: 0.08em; }
+    .page-hero-title { font-family:'Goldman', monospace; font-size:1.05rem; color:#92400e; margin-bottom:4px; letter-spacing: 0.04em; }
+    .page-hero-sub { font-family:'Goldman', monospace; font-size:0.65rem; color:#b45309; letter-spacing: 0.08em; }
 
-    .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 32px; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 32px; }
     .stat-card {
         background: #fff; border: 1px solid #e8e8e8; border-radius: 10px;
         padding: 16px 12px; text-align: center;
@@ -54,19 +54,6 @@
 
     .empty { text-align: center; padding: 40px 20px; color: #ccc; font-size: 0.72rem; letter-spacing: 0.08em; }
 
-    .topic-stat-row {
-        background: #fff; border: 1px solid #e8e8e8; border-radius: 10px;
-        padding: 12px 16px; margin-bottom: 8px;
-    }
-    .topic-stat-name { font-size: 0.8rem; color: #111; letter-spacing: 0.03em; margin-bottom: 8px; }
-    .topic-levels { display: flex; gap: 6px; flex-wrap: wrap; }
-    .level-pct-pill {
-        display: inline-flex; align-items: center; gap: 5px;
-        font-size: 0.66rem; letter-spacing: 0.03em; border-radius: 99px;
-        padding: 4px 10px; font-weight: 700;
-    }
-    .level-pct-pill .lvl { opacity: 0.65; font-weight: 400; }
-
     .collapse-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 10px; margin-bottom: 20px; overflow: hidden; }
     .collapse-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; cursor: pointer; user-select: none; transition: background 0.15s; }
     .collapse-header:hover { background: #fafafa; }
@@ -75,66 +62,38 @@
     .collapse-card.open .collapse-arrow { transform: rotate(90deg); }
     .collapse-body { display: none; padding: 0 12px 12px; }
     .collapse-card.open .collapse-body { display: block; }
-    .collapse-body .test-row:last-child, .collapse-body .topic-stat-row:last-child { margin-bottom: 0; }
+    .collapse-body .test-row:last-child { margin-bottom: 0; }
 
     .old-grades-hr { border: none; border-top: 1px solid #e8e8e8; margin: 28px 0 20px; }
-    .history-meta { font-size: 0.66rem; color: #aaa; letter-spacing: 0.04em; margin-bottom: 10px; }
 </style>
 
 <div class="wrap">
     <div class="page-hero">
-        <div class="page-hero-title">📊 {{ $child->name }}-ის სტატისტიკა</div>
-        <div class="page-hero-sub">ტესტების ისტორია და შედეგები</div>
+        <div class="page-hero-title">🏆 {{ $child->name }}-ის ოლიმპიადა</div>
+        <div class="page-hero-sub">ოლიმპიადის ტესტების ისტორია და შედეგები</div>
     </div>
 
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-val">{{ $totalTests }}</div>
-            <div class="stat-label">ტესტი სულ</div>
+            <div class="stat-val">{{ $totalOlympiad }}</div>
+            <div class="stat-label">ოლიმპიადა სულ</div>
         </div>
         <div class="stat-card">
             <div class="stat-val">{{ $avgScore !== null ? $avgScore . '%' : '—' }}</div>
             <div class="stat-label">საშ. შედეგი</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-val">{{ $todayCount }}@if($required > 0)<span style="font-size:0.9rem;color:#bbb;">/{{ $required }}</span>@endif</div>
-            <div class="stat-label">დღეს</div>
-        </div>
     </div>
 
-    @if($topicStats->count())
-    <div class="collapse-card" id="secTopics">
-        <div class="collapse-header" onclick="toggleSection('secTopics')">
-            <span class="collapse-title">თემების მიხედვით · {{ $topicStats->count() }}</span>
+    <div class="collapse-card open" id="secOlympiad">
+        <div class="collapse-header" onclick="toggleSection('secOlympiad')">
+            <span class="collapse-title">ოლიმპიადის ისტორია · {{ $totalOlympiad }}</span>
             <span class="collapse-arrow">▶</span>
         </div>
         <div class="collapse-body">
-            @foreach($topicStats as $topicName => $levels)
-            <div class="topic-stat-row">
-                <div class="topic-stat-name">{{ $topicName }}</div>
-                <div class="topic-levels">
-                    @foreach($levels as $lvl)
-                    <span class="level-pct-pill {{ $lvl->pct >= 80 ? 'pct-hi' : ($lvl->pct >= 50 ? 'pct-mid' : 'pct-lo') }}">
-                        <span class="lvl">დონე {{ $lvl->difficulty }}</span> {{ $lvl->pct }}%
-                    </span>
-                    @endforeach
-                </div>
-            </div>
-            @endforeach
-        </div>
-    </div>
-    @endif
-
-    <div class="collapse-card" id="secTests">
-        <div class="collapse-header" onclick="toggleSection('secTests')">
-            <span class="collapse-title">ტესტების ისტორია · {{ $totalTests }}</span>
-            <span class="collapse-arrow">▶</span>
-        </div>
-        <div class="collapse-body">
-            @forelse($tests as $test)
+            @forelse($olympiadTests as $test)
             @php $pct = round($test->correct_count / max($test->total_questions, 1) * 100); @endphp
             <a href="{{ route('child.test.show', [$child, $test]) }}" class="test-row">
-                <div class="test-icon">{{ $test->theme?->icon ?? '📝' }}</div>
+                <div class="test-icon">🏆</div>
                 <div class="test-info">
                     <div class="test-date">{{ $test->completed_at->format('d.m.Y · H:i') }}</div>
                     <div class="test-score">{{ $test->correct_count }} / {{ $test->total_questions }} სწორი</div>
@@ -144,7 +103,7 @@
                 </div>
             </a>
             @empty
-            <div class="empty">ტესტები ჯერ არ დაწერილა</div>
+            <div class="empty">ოლიმპიადაზე ჯერ არ დაწერილა</div>
             @endforelse
         </div>
     </div>
@@ -154,23 +113,17 @@
     <div class="section-label">ძველი კლასები</div>
 
     @foreach($oldGrades as $grade)
-    @php
-        $gTests   = $oldGradeTests->get($grade->id, collect());
-        $gHist    = $gradeHistory->get($grade->id);
-    @endphp
+    @php $gOlyTests = $oldGradeOlympiadTests->get($grade->id, collect()); @endphp
     <div class="collapse-card" id="secOldGrade{{ $grade->id }}">
         <div class="collapse-header" onclick="toggleSection('secOldGrade{{ $grade->id }}')">
-            <span class="collapse-title">{{ $grade->name }} · {{ $gTests->count() }}</span>
+            <span class="collapse-title">{{ $grade->name }} · {{ $gOlyTests->count() }}</span>
             <span class="collapse-arrow">▶</span>
         </div>
         <div class="collapse-body">
-            @if($gHist)
-            <div class="history-meta">საბოლოო დონე: {{ $gHist->difficulty }} · სულ {{ $gHist->tests_completed }} ტესტი</div>
-            @endif
-            @forelse($gTests as $test)
+            @forelse($gOlyTests as $test)
             @php $pct = round($test->correct_count / max($test->total_questions, 1) * 100); @endphp
             <a href="{{ route('child.test.show', [$child, $test]) }}" class="test-row">
-                <div class="test-icon">{{ $test->theme?->icon ?? '📝' }}</div>
+                <div class="test-icon">🏆</div>
                 <div class="test-info">
                     <div class="test-date">{{ $test->completed_at->format('d.m.Y · H:i') }}</div>
                     <div class="test-score">{{ $test->correct_count }} / {{ $test->total_questions }} სწორი</div>
@@ -180,7 +133,7 @@
                 </div>
             </a>
             @empty
-            <div class="empty">ამ კლასში ტესტები არ დაწერილა</div>
+            <div class="empty">ამ კლასში ოლიმპიადაზე არ დაწერილა</div>
             @endforelse
         </div>
     </div>

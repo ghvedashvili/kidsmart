@@ -21,20 +21,11 @@
     }
     .page-hero-title { font-family:'Fredoka One',cursive; font-size:1.15rem; color:#4338ca; margin-bottom:4px; }
     .page-hero-sub { font-family:'Nunito',sans-serif; font-weight:800; font-size:0.75rem; color:#6c5ce7; }
-
-    .hub-header {
-        display: flex; align-items: center; gap: 14px;
-        background: #fff; border-radius: 20px; padding: 18px 20px;
-        margin-bottom: 20px; box-shadow: 0 4px 18px rgba(0,0,0,0.055); border: 1px solid #f2f2f5;
+    .hub-hero-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .hub-hero-tag {
+        font-family: 'Goldman', monospace; font-size: 0.62rem; font-weight: 700; color: #4338ca;
+        background: rgba(255,255,255,0.75); border-radius: 100px; padding: 4px 12px;
     }
-    .hub-avatar {
-        width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0;
-        background: linear-gradient(160deg, #6c5ce7, #a29bfe);
-        color: #fff; font-size: 1.6rem; display: flex; align-items: center; justify-content: center;
-        box-shadow: 0 4px 12px rgba(108,92,231,0.32);
-    }
-    .hub-name { font-family: 'Goldman', monospace; font-size: 1.05rem; color: #111; }
-    .hub-sub { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.72rem; color: #999; margin-top: 4px; }
 
     /* ── info cards, matching the child's own dashboard stat cards ── */
     .hub-stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; }
@@ -119,13 +110,11 @@
     <div class="page-hero">
         <div class="page-hero-title">👦 {{ $child->name }}-ის გვერდი</div>
         <div class="page-hero-sub">ყველა საჭირო ინფორმაცია ერთ ადგილზე</div>
-    </div>
-
-    <div class="hub-header">
-        <div class="hub-avatar">{{ $child->avatar === 'boy' ? '👦' : ($child->avatar === 'girl' ? '👧' : '👤') }}</div>
-        <div>
-            <div class="hub-name">{{ $child->name }}</div>
-            <div class="hub-sub">{{ $child->childSetting?->grade?->name ?? 'კლასი —' }}</div>
+        <div class="hub-hero-tags">
+            <span class="hub-hero-tag">🎓 {{ $child->childSetting?->grade?->name ?? 'კლასი —' }}</span>
+            @if($child->childSetting)
+            <span class="hub-hero-tag">🏆 დონე {{ $child->childSetting->difficulty }}</span>
+            @endif
         </div>
     </div>
 
@@ -171,7 +160,7 @@
     </div>
 
     <div class="hub-mini-row">
-        <a href="{{ route('child.stats', $child) }}" class="hub-oly-card">
+        <a href="{{ route('child.olympiad-stats', $child) }}" class="hub-oly-card">
             <span class="hub-mini-icon">🏆</span>
             <div class="hub-mini-text">
                 <div class="hub-mini-title">ოლიმპიადა</div>

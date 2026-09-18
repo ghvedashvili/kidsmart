@@ -98,8 +98,6 @@
     <div class="topbar">
         @if(!empty($isChild))
         <a href="{{ route('dashboard') }}" class="back">← მთავარი</a>
-        @else
-        <a href="{{ route('child.stats', $child) }}" class="back">← {{ $child->name }}</a>
         @endif
         <span class="test-date">{{ $test->completed_at->format('d.m.Y · H:i') }}</span>
     </div>

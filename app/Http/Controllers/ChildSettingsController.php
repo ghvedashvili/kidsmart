@@ -80,14 +80,6 @@ class ChildSettingsController extends Controller
             ->latest('completed_at')
             ->get();
 
-        $olympiadTests = $child->tests()
-            ->with('theme')
-            ->where('is_olympiad', true)
-            ->when($currentGradeId, fn ($q) => $q->where('grade_id', $currentGradeId))
-            ->whereNotNull('completed_at')
-            ->latest('completed_at')
-            ->get();
-
         $totalTests  = $tests->count();
         $avgScore    = $totalTests > 0
             ? round($tests->avg(fn($t) => $t->correct_count / max($t->total_questions, 1) * 100))
@@ -139,6 +131,40 @@ class ChildSettingsController extends Controller
             ->get()
             ->groupBy('grade_id');
 
+        $gradeHistory = ChildGradeHistory::where('user_id', $child->id)->orderBy('created_at')->get()->keyBy('grade_id');
+
+        return view('parent.child-stats', compact(
+            'child', 'tests', 'totalTests', 'avgScore', 'todayCount', 'required', 'topicStats',
+            'oldGrades', 'oldGradeTests', 'gradeHistory'
+        ));
+    }
+
+    public function olympiadStats(User $child)
+    {
+        $this->authorizeChild($child);
+
+        $currentGradeId = $child->childSetting?->grade_id;
+
+        $olympiadTests = $child->tests()
+            ->with('theme')
+            ->where('is_olympiad', true)
+            ->when($currentGradeId, fn ($q) => $q->where('grade_id', $currentGradeId))
+            ->whereNotNull('completed_at')
+            ->latest('completed_at')
+            ->get();
+
+        $totalOlympiad = $olympiadTests->count();
+        $avgScore      = $totalOlympiad > 0
+            ? round($olympiadTests->avg(fn($t) => $t->correct_count / max($t->total_questions, 1) * 100))
+            : null;
+
+        $oldGradeIds = $child->tests()->where('is_olympiad', true)->whereNotNull('grade_id')->pluck('grade_id')
+            ->filter()
+            ->unique()
+            ->reject(fn ($id) => $currentGradeId && $id == $currentGradeId);
+
+        $oldGrades = \App\Models\Grade::whereIn('id', $oldGradeIds)->orderBy('number')->get();
+
         $oldGradeOlympiadTests = $child->tests()
             ->with('theme')
             ->where('is_olympiad', true)
@@ -148,11 +174,8 @@ class ChildSettingsController extends Controller
             ->get()
             ->groupBy('grade_id');
 
-        $gradeHistory = ChildGradeHistory::where('user_id', $child->id)->orderBy('created_at')->get()->keyBy('grade_id');
-
-        return view('parent.child-stats', compact(
-            'child', 'tests', 'totalTests', 'avgScore', 'todayCount', 'required', 'topicStats', 'olympiadTests',
-            'oldGrades', 'oldGradeTests', 'oldGradeOlympiadTests', 'gradeHistory'
+        return view('parent.child-olympiad-stats', compact(
+            'child', 'olympiadTests', 'totalOlympiad', 'avgScore', 'oldGrades', 'oldGradeOlympiadTests'
         ));
     }
 
