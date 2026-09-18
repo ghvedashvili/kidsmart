@@ -118,56 +118,69 @@
     }
     .child-card:hover { box-shadow: 0 10px 28px rgba(0,0,0,0.1); transform: translateY(-2px); }
 
-    /* ── mobile: full-height photo on the left, name+4 mini-cards on the right ── */
+    /* ── mobile: tinted header band (photo+name+ID) + light stat row + two equal buttons ── */
     .cc-mcard {
-        display: flex; flex-direction: column; gap: 10px; position: relative; cursor: pointer;
-        width: 100%; max-width: 100%; box-sizing: border-box; overflow: hidden; margin: 0 auto;
+        display: flex; flex-direction: column; gap: 14px; position: relative; cursor: pointer;
+        width: 100%; max-width: 100%; box-sizing: border-box; overflow: hidden;
     }
     @media (min-width: 700px) { .cc-mcard { display: none; } }
-    .cc-mcard-body { display: flex; gap: 10px; align-items: flex-start; width: 100%; max-width: 100%; box-sizing: border-box; }
-    .cc-mphoto-panel {
-        flex-shrink: 0; width: 68px; min-width: 0; border-radius: 14px; position: relative; overflow: hidden;
-        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
-        padding: 10px 4px; box-sizing: border-box;
+
+    .cc-mheader {
+        display: flex; align-items: center; gap: 14px; position: relative;
+        border-radius: 18px; padding: 14px 48px 14px 14px; box-sizing: border-box;
         background: linear-gradient(135deg, var(--primary-soft), #e2ddff);
-        border: none; cursor: pointer;
     }
-    .cc-mphoto-panel.boy  { background: linear-gradient(135deg, #eff6ff, #dbeafe); }
-    .cc-mphoto-panel.girl { background: linear-gradient(135deg, #fdf2f8, #fce7f3); }
-    .cc-mphoto-panel .cc-code {
-        max-width: 100%; box-sizing: border-box; white-space: normal; text-align: center;
-        font-size: 0.54rem; padding: 3px 5px; line-height: 1.2; word-break: break-word;
-    }
-    .cc-mphoto-ring {
-        width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+    .cc-mheader.boy  { background: linear-gradient(135deg, #eff6ff, #dbeafe); }
+    .cc-mheader.girl { background: linear-gradient(135deg, #fdf2f8, #fce7f3); }
+    .cc-mavatar {
+        width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0; position: relative;
         background: linear-gradient(135deg, var(--primary), var(--primary-light));
-        padding: 2px; display: flex; align-items: center; justify-content: center;
-        border: none; cursor: pointer;
+        padding: 2px; border: none; cursor: pointer;
     }
-    .cc-mphoto-panel.boy  .cc-mphoto-ring { background: linear-gradient(135deg, #3b82f6, #93c5fd); }
-    .cc-mphoto-panel.girl .cc-mphoto-ring { background: linear-gradient(135deg, #ec4899, #f9a8d4); }
-    .cc-mphoto-inner {
+    .cc-mheader.boy  .cc-mavatar { background: linear-gradient(135deg, #3b82f6, #93c5fd); }
+    .cc-mheader.girl .cc-mavatar { background: linear-gradient(135deg, #ec4899, #f9a8d4); }
+    .cc-mavatar-inner {
         width: 100%; height: 100%; border-radius: 50%; background: #fff;
-        display: flex; align-items: center; justify-content: center; font-size: 1.15rem;
+        display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
     }
-    .cc-mcard-right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; justify-content: center; }
-    .cc-mcard-name-row { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
-    .cc-mcard-name-row .cc-mini-btn { width: 28px; height: 28px; border-radius: 9px; font-size: 0.78rem; flex-shrink: 0; }
-    .cc-mcard-name {
-        flex: 1; min-width: 0;
-        font-family: 'Goldman', monospace; font-size: 0.92rem; color: #1e293b;
+    .cc-mheader-info { flex: 1; min-width: 0; }
+    .cc-mheader-name {
+        font-family: 'Goldman', monospace; font-size: 1.05rem; color: #1e293b;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        text-align: center;
     }
-    .cc-mcard-right .cc-mini-grid { gap: 6px; min-width: 0; }
-    .cc-mcard-right .cc-mini {
-        padding: 4px 8px; border-radius: 10px; gap: 5px; min-width: 0;
+    .cc-mheader-code {
+        display: inline-flex; margin-top: 6px;
+        font-family: 'Goldman', monospace; font-size: 0.62rem; font-weight: 700; color: #4338ca;
+        background: rgba(255,255,255,0.8); border-radius: 8px; padding: 3px 9px; letter-spacing: 0.04em; cursor: pointer;
     }
-    .cc-mcard-right .cc-mini-icon {
-        width: auto; height: auto; background: none !important; font-size: 0.8rem;
+    .cc-mheader-edit {
+        position: absolute; top: 12px; right: 12px; z-index: 1;
+        width: 30px; height: 30px; border-radius: 10px; border: none;
+        background: rgba(255,255,255,0.65); color: #4338ca;
+        display: flex; align-items: center; justify-content: center; font-size: 0.85rem; cursor: pointer;
     }
-    .cc-mcard-right .cc-mini-label { display: none; }
-    .cc-mcard-right .cc-mini-value { font-size: 0.64rem; }
+
+    .cc-mstat-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .cc-mstat {
+        display: flex; align-items: center; gap: 7px; min-width: 0;
+        background: #f8fafc; border-radius: 12px; padding: 9px 11px;
+    }
+    .cc-mstat-icon { font-size: 0.95rem; flex-shrink: 0; }
+    .cc-mstat-val {
+        font-family: 'Goldman', monospace; font-size: 0.7rem; font-weight: 700; color: #334155;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+    }
+    .cc-mstat.purple  { background: #faf5ff; } .cc-mstat.purple  .cc-mstat-val { color: #7e22ce; }
+    .cc-mstat.blue    { background: #eff6ff; } .cc-mstat.blue    .cc-mstat-val { color: #1d4ed8; }
+    .cc-mstat.amber   { background: #fffbeb; } .cc-mstat.amber   .cc-mstat-val { color: #b45309; }
+    .cc-mstat.emerald { background: #ecfdf5; } .cc-mstat.emerald .cc-mstat-val { color: #047857; }
+
+    .cc-mfull-row { display: flex; justify-content: flex-end; }
+    .cc-mfull-link {
+        display: inline-flex; align-items: center; gap: 5px;
+        font-family: 'Goldman', monospace; font-size: 0.68rem; font-weight: 700; color: var(--primary);
+        text-decoration: none; padding: 2px 0;
+    }
 
     /* ── desktop: full-height photo panel on the left ── */
     .cc-layout { display: flex; gap: 16px; align-items: stretch; }
@@ -637,50 +650,38 @@
                 @endif
 
                 <div class="cc-mcard" onclick="window.location.href='{{ route('child.hub', $child) }}'">
-                    <div class="cc-mcard-body">
-                        <div class="cc-mphoto-panel {{ $child->avatar === 'boy' ? 'boy' : ($child->avatar === 'girl' ? 'girl' : '') }}">
-                            <button type="button" class="cc-mphoto-ring" title="პროფილის არჩევა"
-                                onclick="event.stopPropagation(); document.getElementById('avatarModal{{ $child->id }}').classList.add('open')">
-                                <span class="cc-mphoto-inner">{{ $child->avatar === 'boy' ? '👦' : ($child->avatar === 'girl' ? '👧' : '👤') }}</span>
-                            </button>
+                    <div class="cc-mheader {{ $child->avatar === 'boy' ? 'boy' : ($child->avatar === 'girl' ? 'girl' : '') }}">
+                        <button type="button" class="cc-mavatar" title="პროფილის არჩევა"
+                            onclick="event.stopPropagation(); document.getElementById('avatarModal{{ $child->id }}').classList.add('open')">
+                            <span class="cc-mavatar-inner">{{ $child->avatar === 'boy' ? '👦' : ($child->avatar === 'girl' ? '👧' : '👤') }}</span>
+                        </button>
+                        <div class="cc-mheader-info">
+                            <div class="cc-mheader-name">{{ $child->name }}</div>
                             @if($child->child_code)
-                            <span class="cc-code" onclick="event.stopPropagation(); copyChildCode(this, '{{ $child->child_code }}')"
+                            <span class="cc-mheader-code" onclick="event.stopPropagation(); copyChildCode(this, '{{ $child->child_code }}')"
                                 title="კოდის კოპირება">ID: {{ $child->child_code }}</span>
                             @endif
                         </div>
+                        <button type="button" class="cc-mheader-edit" title="რედაქტირება"
+                            onclick="event.stopPropagation(); document.getElementById('editChildModal{{ $child->id }}').classList.add('open')"><i class="bi bi-gear-fill"></i></button>
+                    </div>
 
-                        <div class="cc-mcard-right">
-                            <div class="cc-mcard-name-row">
-                                <div class="cc-mcard-name">{{ $child->name }}</div>
-                                <button type="button" class="cc-mini-btn edit" title="რედაქტირება"
-                                    onclick="event.stopPropagation(); document.getElementById('editChildModal{{ $child->id }}').classList.add('open')"><i class="bi bi-gear-fill"></i></button>
-                            </div>
-                            <div class="cc-mini-grid">
-                                <div class="cc-mini purple">
-                                    <div class="cc-mini-icon">🎓</div>
-                                    <div class="cc-mini-text">
-                                        <p class="cc-mini-value">{{ $s?->grade?->name ?? '—' }}</p>
-                                    </div>
-                                </div>
-                                <div class="cc-mini blue">
-                                    <div class="cc-mini-icon">🏆</div>
-                                    <div class="cc-mini-text">
-                                        <p class="cc-mini-value">{{ $s ? 'დონე ' . $s->difficulty : '—' }}</p>
-                                    </div>
-                                </div>
-                                <div class="cc-mini amber">
-                                    <div class="cc-mini-icon">📅</div>
-                                    <div class="cc-mini-text">
-                                        <p class="cc-mini-value">{{ $s ? $todayDone . '/' . $s->tests_per_week . ' დღეს' : '—' }}</p>
-                                    </div>
-                                </div>
-                                <div class="cc-mini emerald">
-                                    <div class="cc-mini-icon">💰</div>
-                                    <div class="cc-mini-text">
-                                        <p class="cc-mini-value">{{ $s->coins ?? 0 }} მონეტა</p>
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="cc-mstat-row">
+                        <div class="cc-mstat purple">
+                            <span class="cc-mstat-icon">🎓</span>
+                            <span class="cc-mstat-val">{{ $s?->grade?->name ?? '—' }}</span>
+                        </div>
+                        <div class="cc-mstat blue">
+                            <span class="cc-mstat-icon">🏆</span>
+                            <span class="cc-mstat-val">{{ $s ? 'დონე ' . $s->difficulty : '—' }}</span>
+                        </div>
+                        <div class="cc-mstat amber">
+                            <span class="cc-mstat-icon">📅</span>
+                            <span class="cc-mstat-val">{{ $s ? $todayDone . '/' . $s->tests_per_week . ' დღეს' : '—' }}</span>
+                        </div>
+                        <div class="cc-mstat emerald">
+                            <span class="cc-mstat-icon">💰</span>
+                            <span class="cc-mstat-val">{{ $s->coins ?? 0 }} მონეტა</span>
                         </div>
                     </div>
 
@@ -689,6 +690,12 @@
                         <i class="bi bi-link-45deg"></i> გაზიარება
                     </button>
                     @endif
+
+                    <div class="cc-mfull-row">
+                        <a href="{{ route('child.hub', $child) }}" class="cc-mfull-link" onclick="event.stopPropagation();">
+                            სრულად <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
                 </div>
 
                 <div class="cc-layout">
