@@ -83,7 +83,7 @@
     .appr-date { font-size:0.6rem; color:#aaa; margin-left:auto; white-space:nowrap; }
 
     /* ── Price modal ── */
-    .m-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(3px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px; }
+    .m-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(3px);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px; }
     .m-overlay.open { display:flex; }
     .m-box { background:#fff;border-radius:14px;padding:24px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:mIn 0.2s cubic-bezier(0.175,0.885,0.32,1.275); }
     @keyframes mIn { from{transform:scale(0.92);opacity:0} to{transform:scale(1);opacity:1} }
@@ -98,7 +98,7 @@
     /* ── Emoji picker ── */
     .emoji-btn { width:52px;height:38px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color 0.15s;flex-shrink:0; }
     .emoji-btn:hover { border-color:#94a3b8; }
-    .emoji-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(2px);z-index:500;display:none;align-items:center;justify-content:center;padding:16px; }
+    .emoji-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(2px);z-index:1100;display:none;align-items:center;justify-content:center;padding:16px; }
     .emoji-overlay.open { display:flex; }
     .emoji-sheet { background:#fff;border-radius:16px;padding:16px;width:100%;max-width:340px;max-height:70vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25); }
     .emoji-sheet-title { font-family:'Goldman',monospace;font-size:0.7rem;color:#94a3b8;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px; }
