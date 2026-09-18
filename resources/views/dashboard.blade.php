@@ -126,9 +126,9 @@
     @media (min-width: 700px) { .cc-mcard { display: none; } }
     .cc-mcard-body { display: flex; gap: 10px; align-items: stretch; width: 100%; max-width: 100%; box-sizing: border-box; }
     .cc-mphoto-panel {
-        flex-shrink: 0; width: 52px; min-width: 0; border-radius: 14px; position: relative; overflow: hidden;
+        flex-shrink: 0; width: 68px; min-width: 0; border-radius: 14px; position: relative; overflow: hidden;
         display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
-        padding: 8px 3px; box-sizing: border-box;
+        padding: 8px 4px; box-sizing: border-box;
         background: linear-gradient(135deg, var(--primary-soft), #e2ddff);
         border: none; cursor: pointer;
     }
@@ -136,7 +136,7 @@
     .cc-mphoto-panel.girl { background: linear-gradient(135deg, #fdf2f8, #fce7f3); }
     .cc-mphoto-panel .cc-code {
         max-width: 100%; box-sizing: border-box; white-space: normal; text-align: center;
-        font-size: 0.48rem; padding: 2px 4px; line-height: 1.2; word-break: break-word;
+        font-size: 0.54rem; padding: 3px 5px; line-height: 1.2; word-break: break-word;
     }
     .cc-mphoto-ring {
         width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
