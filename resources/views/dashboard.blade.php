@@ -124,11 +124,11 @@
         width: 100%; max-width: 100%; box-sizing: border-box; overflow: hidden; margin: 0 auto;
     }
     @media (min-width: 700px) { .cc-mcard { display: none; } }
-    .cc-mcard-body { display: flex; gap: 10px; align-items: stretch; width: 100%; max-width: 100%; box-sizing: border-box; }
+    .cc-mcard-body { display: flex; gap: 10px; align-items: flex-start; width: 100%; max-width: 100%; box-sizing: border-box; }
     .cc-mphoto-panel {
         flex-shrink: 0; width: 68px; min-width: 0; border-radius: 14px; position: relative; overflow: hidden;
         display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
-        padding: 8px 4px; box-sizing: border-box;
+        padding: 10px 4px; box-sizing: border-box;
         background: linear-gradient(135deg, var(--primary-soft), #e2ddff);
         border: none; cursor: pointer;
     }
@@ -139,7 +139,7 @@
         font-size: 0.54rem; padding: 3px 5px; line-height: 1.2; word-break: break-word;
     }
     .cc-mphoto-ring {
-        width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+        width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
         background: linear-gradient(135deg, var(--primary), var(--primary-light));
         padding: 2px; display: flex; align-items: center; justify-content: center;
         border: none; cursor: pointer;
@@ -148,7 +148,7 @@
     .cc-mphoto-panel.girl .cc-mphoto-ring { background: linear-gradient(135deg, #ec4899, #f9a8d4); }
     .cc-mphoto-inner {
         width: 100%; height: 100%; border-radius: 50%; background: #fff;
-        display: flex; align-items: center; justify-content: center; font-size: 1.05rem;
+        display: flex; align-items: center; justify-content: center; font-size: 1.15rem;
     }
     .cc-mcard-right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; justify-content: center; }
     .cc-mcard-name-row { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
@@ -276,6 +276,7 @@
     .cc-share-panel {
         display: none; flex-direction: column; gap: 8px;
         background: #f8fafc; border-radius: 14px; padding: 12px;
+        margin-top: -8px;
     }
     .cc-share-panel.open { display: flex; }
     .cc-share-link-box {
@@ -796,101 +797,8 @@
             @endif
             </div>
         </div>
-
-        {{-- Edit modals (one per child) --}}
-        @foreach($children as $child)
-        @php
-            $es = $child->childSetting;
-            $eThemeIds = $child->themes->pluck('id')->toArray();
-        @endphp
-        <div id="editChildModal{{ $child->id }}" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
-            <div class="mbox">
-                {{-- Header bar — same style as add modal tab bar --}}
-                <div style="display:flex;align-items:center;gap:0;margin-bottom:16px;border-bottom:2px solid #f0f0f0;">
-                    <span style="flex:1;font-family:'Goldman',monospace;font-size:0.72rem;letter-spacing:0.06em;
-                        color:#111;padding:8px 0;border-bottom:2px solid #111;margin-bottom:-2px;text-align:left;">
-                        ✏️ {{ $child->name }}
-                    </span>
-                    <button type="button" class="modal-close" style="margin-bottom:-2px;"
-                        onclick="document.getElementById('editChildModal{{ $child->id }}').classList.remove('open')">✕</button>
-                </div>
-
-                <form method="POST" action="{{ route('child.settings.update', $child) }}"
-                    id="editChildForm{{ $child->id }}" data-orig-grade="{{ $es?->grade_id }}"
-                    onsubmit="return handleEditChildSubmit(event, {{ $child->id }}, '{{ addslashes($child->name) }}')">
-                    @csrf @method('PUT')
-
-                    <div class="mlbl">სახელი</div>
-                    <input type="text" name="name" class="minput" value="{{ $child->name }}" maxlength="50" autocomplete="off">
-
-                    <div class="mlbl">კლასი <span>*</span></div>
-                    <div class="mrow">
-                        @foreach($grades as $grade)
-                        <label class="mchip {{ $es?->grade_id == $grade->id ? 'sel' : '' }}"
-                            onclick="chipSingle(this,'egid{{ $child->id }}','{{ $grade->id }}')">{{ $grade->name }}</label>
-                        @endforeach
-                    </div>
-                    <input type="hidden" name="grade_id" id="egid{{ $child->id }}" value="{{ $es?->grade_id }}">
-
-                    <div class="mlbl">ტესტი დღეში</div>
-                    <div class="mrow">
-                        @for($i=1; $i<=3; $i++)
-                        <label class="mchip {{ ($es?->tests_per_week ?? 3) == $i ? 'sel' : '' }}"
-                            onclick="chipSingle(this,'etpw{{ $child->id }}','{{ $i }}')">{{ $i }}</label>
-                        @endfor
-                    </div>
-                    <input type="hidden" name="tests_per_week" id="etpw{{ $child->id }}" value="{{ $es?->tests_per_week ?? 3 }}">
-
-                    <input type="hidden" name="difficulty" value="{{ $es?->difficulty ?? 1 }}">
-
-                    @if($themes->count())
-                    <div class="mlbl">თემატიკა <span style="color:#aaa;font-size:0.9em;">(სურვილისამებრ)</span></div>
-                    <div class="mrow">
-                        @foreach($themes as $theme)
-                        @if($theme->is_active)
-                        <label class="mchip {{ in_array($theme->id, $eThemeIds) ? 'sel' : '' }}"
-                            onclick="chipSingle(this,'etheme{{ $child->id }}','{{ $theme->id }}')">{{ $theme->icon }} {{ $theme->name }}</label>
-                        @else
-                        <span class="mchip" style="opacity:0.4;cursor:default;pointer-events:none;">{{ $theme->icon }} {{ $theme->name }}<span style="font-size:0.75em;margin-left:4px;color:#aaa;">მალე</span></span>
-                        @endif
-                        @endforeach
-                    </div>
-                    <input type="hidden" name="theme_ids[]" id="etheme{{ $child->id }}"
-                        value="{{ count($eThemeIds) ? $eThemeIds[0] : ($defaultThemeId ?? '') }}">
-                    @endif
-
-                    <div style="display:flex;gap:8px;margin-top:4px;">
-                        <button type="submit" class="msave" style="margin-top:0;">შენახვა</button>
-                        <button type="button" class="msave msave-danger" style="margin-top:0;flex:0 0 auto;width:auto;padding-left:18px;padding-right:18px;"
-                            onclick="confirmDeleteChild({{ $child->id }}, '{{ addslashes($child->name) }}')">წაშლა</button>
-                    </div>
-                </form>
-
-                <form id="deleteChildForm{{ $child->id }}" method="POST"
-                    action="{{ route('child.destroy', $child) }}" style="display:none;">
-                    @csrf @method('DELETE')
-                </form>
-            </div>
-        </div>
-
-        <div id="avatarModal{{ $child->id }}" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
-            <div class="mbox" style="max-width:320px;">
-                <div class="modal-title">
-                    პროფილის არჩევა
-                    <button type="button" class="modal-close"
-                        onclick="document.getElementById('avatarModal{{ $child->id }}').classList.remove('open')">✕</button>
-                </div>
-                <form method="POST" action="{{ route('child.avatar.update', $child) }}"
-                    style="display:flex;gap:14px;justify-content:center;padding:8px 0 4px;">
-                    @csrf @method('PUT')
-                    <button type="submit" name="avatar" value="boy" style="background:{{ $child->avatar === 'boy' ? '#eef2ff' : '#fafafa' }};border:2px solid {{ $child->avatar === 'boy' ? '#818cf8' : '#eee' }};border-radius:14px;padding:18px 20px;font-size:2.2rem;cursor:pointer;transition:all 0.15s;">👦</button>
-                    <button type="submit" name="avatar" value="girl" style="background:{{ $child->avatar === 'girl' ? '#fdf2f8' : '#fafafa' }};border:2px solid {{ $child->avatar === 'girl' ? '#f9a8d4' : '#eee' }};border-radius:14px;padding:18px 20px;font-size:2.2rem;cursor:pointer;transition:all 0.15s;">👧</button>
-                </form>
-            </div>
-        </div>
-        @endforeach
-
         @endif
+
 
         @php
         $_adminMap = [
@@ -1081,6 +989,103 @@
 
     </div>
 </div>
+
+{{-- Edit / avatar modals (one per child) — rendered outside .dash-hero/.dash-inner (which have
+     overflow:hidden for the decorative background pattern) so their fixed-position backdrop
+     isn't clipped to that box instead of the full viewport --}}
+@if(in_array(auth()->user()->role, ['parent', 'admin']))
+@foreach($children as $child)
+@php
+    $es = $child->childSetting;
+    $eThemeIds = $child->themes->pluck('id')->toArray();
+@endphp
+<div id="editChildModal{{ $child->id }}" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="mbox">
+        {{-- Header bar — same style as add modal tab bar --}}
+        <div style="display:flex;align-items:center;gap:0;margin-bottom:16px;border-bottom:2px solid #f0f0f0;">
+            <span style="flex:1;font-family:'Goldman',monospace;font-size:0.72rem;letter-spacing:0.06em;
+                color:#111;padding:8px 0;border-bottom:2px solid #111;margin-bottom:-2px;text-align:left;">
+                ✏️ {{ $child->name }}
+            </span>
+            <button type="button" class="modal-close" style="margin-bottom:-2px;"
+                onclick="document.getElementById('editChildModal{{ $child->id }}').classList.remove('open')">✕</button>
+        </div>
+
+        <form method="POST" action="{{ route('child.settings.update', $child) }}"
+            id="editChildForm{{ $child->id }}" data-orig-grade="{{ $es?->grade_id }}"
+            onsubmit="return handleEditChildSubmit(event, {{ $child->id }}, '{{ addslashes($child->name) }}')">
+            @csrf @method('PUT')
+
+            <div class="mlbl">სახელი</div>
+            <input type="text" name="name" class="minput" value="{{ $child->name }}" maxlength="50" autocomplete="off">
+
+            <div class="mlbl">კლასი <span>*</span></div>
+            <div class="mrow">
+                @foreach($grades as $grade)
+                <label class="mchip {{ $es?->grade_id == $grade->id ? 'sel' : '' }}"
+                    onclick="chipSingle(this,'egid{{ $child->id }}','{{ $grade->id }}')">{{ $grade->name }}</label>
+                @endforeach
+            </div>
+            <input type="hidden" name="grade_id" id="egid{{ $child->id }}" value="{{ $es?->grade_id }}">
+
+            <div class="mlbl">ტესტი დღეში</div>
+            <div class="mrow">
+                @for($i=1; $i<=3; $i++)
+                <label class="mchip {{ ($es?->tests_per_week ?? 3) == $i ? 'sel' : '' }}"
+                    onclick="chipSingle(this,'etpw{{ $child->id }}','{{ $i }}')">{{ $i }}</label>
+                @endfor
+            </div>
+            <input type="hidden" name="tests_per_week" id="etpw{{ $child->id }}" value="{{ $es?->tests_per_week ?? 3 }}">
+
+            <input type="hidden" name="difficulty" value="{{ $es?->difficulty ?? 1 }}">
+
+            @if($themes->count())
+            <div class="mlbl">თემატიკა <span style="color:#aaa;font-size:0.9em;">(სურვილისამებრ)</span></div>
+            <div class="mrow">
+                @foreach($themes as $theme)
+                @if($theme->is_active)
+                <label class="mchip {{ in_array($theme->id, $eThemeIds) ? 'sel' : '' }}"
+                    onclick="chipSingle(this,'etheme{{ $child->id }}','{{ $theme->id }}')">{{ $theme->icon }} {{ $theme->name }}</label>
+                @else
+                <span class="mchip" style="opacity:0.4;cursor:default;pointer-events:none;">{{ $theme->icon }} {{ $theme->name }}<span style="font-size:0.75em;margin-left:4px;color:#aaa;">მალე</span></span>
+                @endif
+                @endforeach
+            </div>
+            <input type="hidden" name="theme_ids[]" id="etheme{{ $child->id }}"
+                value="{{ count($eThemeIds) ? $eThemeIds[0] : ($defaultThemeId ?? '') }}">
+            @endif
+
+            <div style="display:flex;gap:8px;margin-top:4px;">
+                <button type="submit" class="msave" style="margin-top:0;">შენახვა</button>
+                <button type="button" class="msave msave-danger" style="margin-top:0;flex:0 0 auto;width:auto;padding-left:18px;padding-right:18px;"
+                    onclick="confirmDeleteChild({{ $child->id }}, '{{ addslashes($child->name) }}')">წაშლა</button>
+            </div>
+        </form>
+
+        <form id="deleteChildForm{{ $child->id }}" method="POST"
+            action="{{ route('child.destroy', $child) }}" style="display:none;">
+            @csrf @method('DELETE')
+        </form>
+    </div>
+</div>
+
+<div id="avatarModal{{ $child->id }}" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="mbox" style="max-width:320px;">
+        <div class="modal-title">
+            პროფილის არჩევა
+            <button type="button" class="modal-close"
+                onclick="document.getElementById('avatarModal{{ $child->id }}').classList.remove('open')">✕</button>
+        </div>
+        <form method="POST" action="{{ route('child.avatar.update', $child) }}"
+            style="display:flex;gap:14px;justify-content:center;padding:8px 0 4px;">
+            @csrf @method('PUT')
+            <button type="submit" name="avatar" value="boy" style="background:{{ $child->avatar === 'boy' ? '#eef2ff' : '#fafafa' }};border:2px solid {{ $child->avatar === 'boy' ? '#818cf8' : '#eee' }};border-radius:14px;padding:18px 20px;font-size:2.2rem;cursor:pointer;transition:all 0.15s;">👦</button>
+            <button type="submit" name="avatar" value="girl" style="background:{{ $child->avatar === 'girl' ? '#fdf2f8' : '#fafafa' }};border:2px solid {{ $child->avatar === 'girl' ? '#f9a8d4' : '#eee' }};border-radius:14px;padding:18px 20px;font-size:2.2rem;cursor:pointer;transition:all 0.15s;">👧</button>
+        </form>
+    </div>
+</div>
+@endforeach
+@endif
 
 {{-- Remind Modal --}}
 @if(in_array(auth()->user()->role, ['parent', 'admin']))
@@ -1360,13 +1365,9 @@ function handleEditChildSubmit(event, childId, childName) {
 function copyChildCode(el, code) {
     navigator.clipboard.writeText(code).then(() => {
         const orig = el.textContent;
-        el.style.width = el.offsetWidth + 'px';
-        el.style.textAlign = 'center';
-        el.textContent = '✓';
+        el.textContent = '✓ კოპირებულია';
         setTimeout(() => {
             el.textContent = orig;
-            el.style.width = '';
-            el.style.textAlign = '';
         }, 1500);
     });
 }
