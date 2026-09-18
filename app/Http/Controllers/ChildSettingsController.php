@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\ChildGradeHistory;
 use App\Models\ChildSetting;
 use App\Models\MarketPurchase;
+use App\Models\PracticeAnswerLog;
 use App\Models\QuestionTemplate;
 use App\Models\Test;
 use App\Models\Theme;
 use App\Models\User;
 use App\Services\AchievementService;
+use App\Services\OlympiadService;
 use Illuminate\Http\Request;
 
 class ChildSettingsController extends Controller
@@ -24,9 +26,41 @@ class ChildSettingsController extends Controller
     {
         $this->authorizeChild($child);
 
-        $pendingMarket = MarketPurchase::where('child_id', $child->id)->where('status', 'pending')->count();
+        $s = $child->childSetting;
 
-        return view('parent.child-hub', compact('child', 'pendingMarket'));
+        $pendingMarket        = MarketPurchase::where('child_id', $child->id)->where('status', 'pending')->count();
+        $coins                = $s?->coins ?? 0;
+        $achCount             = $child->achievements()->count();
+        $totalTestsCount      = $child->tests()->whereNotNull('completed_at')->where('is_olympiad', false)->count();
+        $olympiadCount        = $child->tests()->whereNotNull('completed_at')->where('is_olympiad', true)->count();
+        $practiceAnsweredCount = PracticeAnswerLog::where('child_id', $child->id)->count();
+        $practiceTodayCount    = PracticeAnswerLog::where('child_id', $child->id)->whereDate('created_at', today())->count();
+        $olympiadStatus       = (new OlympiadService())->statusFor($child);
+
+        return view('parent.child-hub', compact(
+            'child', 'pendingMarket', 'coins', 'achCount', 'totalTestsCount',
+            'olympiadCount', 'practiceAnsweredCount', 'practiceTodayCount', 'olympiadStatus'
+        ));
+    }
+
+    public function practiceStats(User $child)
+    {
+        $this->authorizeChild($child);
+
+        $totalAnswered = PracticeAnswerLog::where('child_id', $child->id)->count();
+        $totalWrong    = PracticeAnswerLog::where('child_id', $child->id)->where('is_correct', false)->count();
+        $todayAnswered = PracticeAnswerLog::where('child_id', $child->id)->whereDate('created_at', today())->count();
+        $todayWrong    = PracticeAnswerLog::where('child_id', $child->id)->where('is_correct', false)->whereDate('created_at', today())->count();
+
+        $wrongAnswers = PracticeAnswerLog::where('child_id', $child->id)
+            ->where('is_correct', false)
+            ->with('topic')
+            ->latest()
+            ->paginate(20);
+
+        return view('parent.child-practice-stats', compact(
+            'child', 'totalAnswered', 'totalWrong', 'todayAnswered', 'todayWrong', 'wrongAnswers'
+        ));
     }
 
     public function stats(User $child)

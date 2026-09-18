@@ -22,7 +22,7 @@ body { font-family: 'Nunito', sans-serif; background: transparent !important; }
 .page-hero {
     width: 100%; box-sizing: border-box; border-radius: 20px; padding: 26px 20px;
     min-height: 140px; display: flex; flex-direction: column; justify-content: center;
-    position: relative; overflow: hidden; margin: 16px 0 0;
+    position: relative; overflow: hidden; margin: 0 0 0;
     background-image:
         linear-gradient(90deg, rgba(245,243,255,0.94) 0%, rgba(245,243,255,0.78) 45%, rgba(245,243,255,0.08) 68%),
         url('/img/achievements-hero.jpg');
@@ -108,8 +108,6 @@ body { font-family: 'Nunito', sans-serif; background: transparent !important; }
 </style>
 
 <div class="wrap">
-<a href="{{ route('child.stats', $child) }}" class="back-btn">← {{ $child->name }}-ის სტატისტიკა</a>
-
 <div class="page-hero">
     <div class="page-hero-title">🏆 {{ $child->name }}-ის მედლები</div>
     <div class="page-hero-sub">{{ $earned->count() }}/{{ $achievements->count() }} მედალი მოგებული</div>

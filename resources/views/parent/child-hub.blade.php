@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @push('head')
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Goldman&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Goldman&family=Fredoka+One&display=swap" rel="stylesheet">
 @endpush
 @section('content')
 <style>
@@ -8,6 +8,19 @@
     .wrap { max-width: 520px; margin: 0 auto; padding: 28px 16px 80px; }
     @media (min-width: 760px)  { .wrap { max-width: 700px; } }
     @media (min-width: 1040px) { .wrap { max-width: 960px; } }
+
+    .page-hero {
+        width: 100%; box-sizing: border-box; border-radius: 20px; padding: 26px 20px;
+        min-height: 120px; display: flex; flex-direction: column; justify-content: center;
+        position: relative; overflow: hidden; margin-bottom: 20px;
+        background-image:
+            linear-gradient(90deg, rgba(238,235,255,0.94) 0%, rgba(238,235,255,0.78) 45%, rgba(238,235,255,0.08) 68%),
+            url('/img/mission-hero.jpg');
+        background-size: cover; background-position: right center; background-repeat: no-repeat;
+        box-shadow: 0 8px 20px rgba(108,92,231,0.18);
+    }
+    .page-hero-title { font-family:'Fredoka One',cursive; font-size:1.15rem; color:#4338ca; margin-bottom:4px; }
+    .page-hero-sub { font-family:'Nunito',sans-serif; font-weight:800; font-size:0.75rem; color:#6c5ce7; }
 
     .hub-header {
         display: flex; align-items: center; gap: 14px;
@@ -23,24 +36,38 @@
     .hub-name { font-family: 'Goldman', monospace; font-size: 1.05rem; color: #111; }
     .hub-sub { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.72rem; color: #999; margin-top: 4px; }
 
-    .hub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    @media (min-width: 520px) { .hub-grid { grid-template-columns: repeat(4, 1fr); } }
+    /* ── info cards, matching the child's own dashboard stat cards ── */
+    .hub-stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; }
+    .hub-stat-card {
+        background: #fff; border-radius: 16px; padding: 14px; text-align: left;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.05); border: 1.5px solid #f5f5f5; text-decoration: none; color: inherit;
+        display: flex; position: relative; overflow: hidden; min-height: 100px;
+        transition: transform 0.15s;
+    }
+    .hub-stat-card:hover { transform: translateY(-2px); color: inherit; }
+    .hub-stat-card-content { position: relative; z-index: 1; max-width: 66%; display: flex; flex-direction: column; gap: 8px; }
+    .hub-stat-card-icon-img { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 65px; object-fit: contain; z-index: 0; pointer-events: none; }
+    .hub-stat-card-head { display: flex; align-items: center; gap: 8px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.6rem; color: #999; text-transform: uppercase; letter-spacing: 0.02em; }
+    .hub-stat-card-val { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: #1a1a2e; }
+    .hub-stat-card-link { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.58rem; color: #6c5ce7; }
 
-    .hub-tile {
-        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
-        background: #fff; border-radius: 18px; padding: 22px 12px; text-align: center;
-        text-decoration: none; box-shadow: 0 4px 18px rgba(0,0,0,0.055); border: 1px solid #f2f2f5;
-        transition: box-shadow 0.2s, transform 0.15s; position: relative;
-        font-family: inherit; cursor: pointer; width: 100%;
+    /* ── olympiad + reminder, matching the child's own mini-cards-row ── */
+    .hub-mini-row { display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 12px; }
+    @media (min-width: 520px) { .hub-mini-row { display: grid; grid-template-columns: 1fr 1fr; } }
+    .hub-oly-card, .hub-remind-card {
+        display: flex; align-items: center; gap: 14px; border-radius: 18px; padding: 18px;
+        text-decoration: none; transition: transform 0.15s; border: none; cursor: pointer;
+        width: 100%; text-align: left; font-family: inherit;
     }
-    .hub-tile:hover { box-shadow: 0 8px 26px rgba(0,0,0,0.09); transform: translateY(-2px); color: inherit; }
-    .hub-tile-icon { font-size: 1.7rem; line-height: 1; }
-    .hub-tile-label { font-family: 'Goldman', monospace; font-size: 0.68rem; color: #333; letter-spacing: 0.02em; }
-    .hub-tile-badge {
-        position: absolute; top: 10px; right: 10px; background: #dc2626; color: #fff;
-        font-family: 'Goldman', monospace; font-size: 0.55rem; font-weight: 700;
-        border-radius: 100px; padding: 2px 7px; min-width: 16px;
-    }
+    .hub-oly-card { background: linear-gradient(160deg, #fffbeb, #fde68a); color: #78350f; box-shadow: 0 8px 20px rgba(217,119,6,0.18); }
+    .hub-oly-card:hover { transform: translateY(-2px); color: #78350f; }
+    .hub-remind-card { background: linear-gradient(160deg, #eef2ff, #c7d2fe); color: #312e81; box-shadow: 0 8px 20px rgba(79,70,229,0.18); }
+    .hub-remind-card:hover { transform: translateY(-2px); color: #312e81; }
+    .hub-mini-icon { font-size: 2.2rem; flex-shrink: 0; }
+    .hub-mini-text { flex: 1; min-width: 0; }
+    .hub-mini-title { font-family: 'Fredoka One', cursive; font-size: 1rem; margin-bottom: 2px; }
+    .hub-mini-sub { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.7rem; opacity: 0.85; }
+    .hub-mini-arrow { font-size: 1.1rem; flex-shrink: 0; opacity: 0.85; }
     .hub-toast-wrap {
         position: fixed; top: 0; left: 50%; transform: translate(-50%, -130%);
         z-index: 2000; display: flex; flex-direction: column; gap: 8px; align-items: center;
@@ -89,6 +116,11 @@
 @endif
 
 <div class="wrap">
+    <div class="page-hero">
+        <div class="page-hero-title">👦 {{ $child->name }}-ის გვერდი</div>
+        <div class="page-hero-sub">ყველა საჭირო ინფორმაცია ერთ ადგილზე</div>
+    </div>
+
     <div class="hub-header">
         <div class="hub-avatar">{{ $child->avatar === 'boy' ? '👦' : ($child->avatar === 'girl' ? '👧' : '👤') }}</div>
         <div>
@@ -97,23 +129,72 @@
         </div>
     </div>
 
-    <div class="hub-grid">
-        <a href="{{ route('market.index', $child) }}" class="hub-tile">
-            <span class="hub-tile-icon">🛒</span>
-            <span class="hub-tile-label">მარკეტი</span>
-            @if($pendingMarket)<span class="hub-tile-badge">{{ $pendingMarket }}</span>@endif
+    <div class="hub-stat-grid">
+        <a href="{{ route('child.practice-stats', $child) }}" class="hub-stat-card">
+            <img src="/img/Mission.jpg" class="hub-stat-card-icon-img" alt="">
+            <div class="hub-stat-card-content">
+                <div class="hub-stat-card-head">სავარჯიშოები</div>
+                <div class="hub-stat-card-val">{{ $practiceAnsweredCount }}</div>
+                <div class="hub-stat-card-link">დღეს {{ $practiceTodayCount }} · სტატისტიკა →</div>
+            </div>
         </a>
-        <a href="{{ route('child.stats', $child) }}" class="hub-tile">
-            <span class="hub-tile-icon">📊</span>
-            <span class="hub-tile-label">სტატისტიკა</span>
+        <a href="{{ route('child.stats', $child) }}" class="hub-stat-card">
+            <img src="/img/tests.jpg" class="hub-stat-card-icon-img" alt="">
+            <div class="hub-stat-card-content">
+                <div class="hub-stat-card-head">ტესტები</div>
+                <div class="hub-stat-card-val">{{ $totalTestsCount }}</div>
+                <div class="hub-stat-card-link">ისტორია →</div>
+            </div>
         </a>
-        <a href="{{ route('child.achievements', $child) }}" class="hub-tile">
-            <span class="hub-tile-icon">🏆</span>
-            <span class="hub-tile-label">მიღწევები</span>
+        <a href="{{ route('child.achievements', $child) }}" class="hub-stat-card">
+            <img src="/img/Achievements.jpg" class="hub-stat-card-icon-img" alt="">
+            <div class="hub-stat-card-content">
+                <div class="hub-stat-card-head">მიღწევები</div>
+                <div class="hub-stat-card-val">{{ $achCount }}</div>
+                <div class="hub-stat-card-link">ყველას ნახვა →</div>
+            </div>
         </a>
-        <button type="button" class="hub-tile" onclick="document.getElementById('remindModal').classList.add('open')">
-            <span class="hub-tile-icon">🔔</span>
-            <span class="hub-tile-label">შეხსენება</span>
+        <a href="{{ route('market.index', $child) }}" class="hub-stat-card">
+            <img src="/img/Market.jpg" class="hub-stat-card-icon-img" alt="">
+            <div class="hub-stat-card-content">
+                <div class="hub-stat-card-head">მარკეტი</div>
+                <div class="hub-stat-card-val">💰 {{ $coins }}</div>
+                <div class="hub-stat-card-link">
+                    @if($pendingMarket)
+                        {{ $pendingMarket }} მოთხოვნა →
+                    @else
+                        ნახვა →
+                    @endif
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="hub-mini-row">
+        <a href="{{ route('child.stats', $child) }}" class="hub-oly-card">
+            <span class="hub-mini-icon">🏆</span>
+            <div class="hub-mini-text">
+                <div class="hub-mini-title">ოლიმპიადა</div>
+                <div class="hub-mini-sub">
+                    @if($olympiadStatus['already_attempted_today'])
+                        {{ $olympiadStatus['todays_test']->completed_at ? 'დღევანდელი ოლიმპიადა დასრულებულია' : 'ოლიმპიადა დაწყებულია' }}
+                    @elseif($olympiadStatus['eligible_today'])
+                        დღეს შეუძლია დაწეროს — სულ {{ $olympiadCount }} ოლიმპიადა
+                    @else
+                        {{ $olympiadStatus['reason'] }}
+                    @endif
+                </div>
+            </div>
+            <span class="hub-mini-arrow">→</span>
+        </a>
+
+        <button type="button" class="hub-remind-card" onclick="document.getElementById('remindModal').classList.add('open')">
+            <span class="hub-mini-icon">🔔</span>
+            <div class="hub-mini-text">
+                <div class="hub-mini-title">შეხსენება</div>
+                <div class="hub-mini-sub">გაუგზავნე შეტყობინება {{ $child->name }}-ს</div>
+            </div>
+            <span class="hub-mini-arrow">→</span>
         </button>
     </div>
 </div>

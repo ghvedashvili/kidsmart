@@ -16,6 +16,19 @@
     .btn-del:hover { color:#ef4444; }
     .back-btn { display:inline-flex; align-items:center; gap:6px; margin-bottom:20px; font-family:'Goldman',monospace; font-size:0.72rem; font-weight:700; color:#374151; text-decoration:none; background:#fff; border:1px solid #e2e8f0; border-radius:99px; padding:8px 16px; box-shadow:0 2px 8px rgba(0,0,0,0.06); transition:all 0.2s; }
     .back-btn:hover { border-color:#94a3b8; color:#1e293b; }
+
+    .page-hero {
+        width: 100%; box-sizing: border-box; border-radius: 20px; padding: 26px 20px;
+        min-height: 120px; display: flex; flex-direction: column; justify-content: center;
+        position: relative; overflow: hidden; margin-bottom: 20px;
+        background-image:
+            linear-gradient(90deg, rgba(255,251,235,0.94) 0%, rgba(255,251,235,0.78) 45%, rgba(255,251,235,0.08) 68%),
+            url('/img/market-hero.jpg');
+        background-size: cover; background-position: right center; background-repeat: no-repeat;
+        box-shadow: 0 8px 20px rgba(217,119,6,0.18);
+    }
+    .page-hero-title { font-family:'Goldman', monospace; font-size:1.05rem; color:#92400e; margin-bottom:4px; }
+    .page-hero-sub { font-family:'Goldman', monospace; font-size:0.65rem; color:#b45309; letter-spacing: 0.06em; }
     .toast-wrap {
         position: fixed; top: 0; left: 50%; transform: translate(-50%, -130%);
         z-index: 2000; display: flex; flex-direction: column; gap: 8px; align-items: center;
@@ -30,10 +43,17 @@
         box-shadow: 0 10px 30px rgba(0,0,0,0.18); max-width: 100%;
     }
 
-    .item-row { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid #f1f5f9; }
-    .item-row:last-child { border-bottom:none; }
-    .item-icon { font-size:1.4rem; width:36px; text-align:center; flex-shrink:0; }
-    .item-cat   { font-size:0.6rem; color:#aaa; margin-top:1px; }
+    .item-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:10px; }
+    .item-card {
+        background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:14px;
+        display:flex; flex-direction:column; gap:6px; position:relative; transition:border-color 0.15s;
+    }
+    .item-card:hover { border-color:#cbd5e1; }
+    .item-card-del { position:absolute; top:8px; right:8px; }
+    .item-card-icon { font-size:1.8rem; line-height:1; }
+    .item-card-title { font-size:0.82rem; color:#374151; padding-right:18px; }
+    .item-cat   { font-size:0.6rem; color:#aaa; margin-top:-4px; }
+    .item-card-footer { display:flex; align-items:center; justify-content:space-between; gap:6px; margin-top:6px; }
     .cost-badge { font-size:0.7rem; background:#fef9c3; border:1px solid #fde68a; color:#92400e; border-radius:20px; padding:2px 10px; white-space:nowrap; }
     .toggle-pill { font-size:0.6rem; border-radius:20px; padding:3px 9px; border:none; cursor:pointer; font-family:'Goldman',monospace; }
     .toggle-pill.on  { background:#dcfce7; color:#15803d; }
@@ -86,18 +106,18 @@
     .ep { font-size:1.3rem;padding:5px;border-radius:6px;cursor:pointer;text-align:center;border:none;background:none;transition:background 0.1s;line-height:1.4; }
     .ep:hover { background:#f1f5f9; }
 
+    /* ── Add-item modal tab switcher ── */
+    .tab-switch { display:flex; gap:0; margin-bottom:16px; border-bottom:2px solid #f0f0f0; }
+    .tab-btn { flex:1; background:none; border:none; border-bottom:2px solid transparent; margin-bottom:-2px; font-family:'Goldman',monospace; font-size:0.72rem; letter-spacing:0.06em; color:#aaa; padding:8px; cursor:pointer; }
+    .tab-btn.active { border-bottom-color:#1e293b; color:#1e293b; }
+
     @media(max-width:640px) { .aw{padding:12px 10px 60px;} .card{padding:14px;} .tpl-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));} .emoji-grid{grid-template-columns:repeat(7,1fr);} }
 </style>
 
 <div class="aw">
-    <a href="{{ route('dashboard') }}" class="back-btn">← მთავარი</a>
-
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
-        <span style="font-size:1.6rem;">🛒</span>
-        <div>
-            <div style="font-family:'Goldman',monospace;font-size:1rem;color:#1e293b;letter-spacing:0.04em;">{{ $child->name }}-ის მარკეტი</div>
-            <div style="font-family:'Goldman',monospace;font-size:0.62rem;color:#94a3b8;letter-spacing:0.08em;">მონეტები: 💰 {{ $child->childSetting?->coins ?? 0 }}</div>
-        </div>
+    <div class="page-hero">
+        <div class="page-hero-title">🛒 {{ $child->name }}-ის მარკეტი</div>
+        <div class="page-hero-sub">მონეტები: 💰 {{ $child->childSetting?->coins ?? 0 }}</div>
     </div>
 
     @if(session('success'))
@@ -149,77 +169,32 @@
     <div class="card">
         <div class="sec">მარკეტის პროდუქტები · {{ $items->count() }}</div>
         @forelse($items as $item)
-        <div class="item-row">
-            <div class="item-icon" style="{{ !$item->is_active ? 'opacity:0.35;' : '' }}">{{ $item->icon }}</div>
-            <div style="flex:1;">
-                <div style="font-size:0.8rem;color:{{ $item->is_active ? '#374151' : '#aaa' }};">{{ $item->title }}</div>
-                @if($item->category)<div class="item-cat">{{ $item->category }}</div>@endif
-            </div>
-            <span class="cost-badge">💰 {{ $item->coin_cost }}</span>
-            <form method="POST" action="{{ route('market.item.toggle', $item) }}">
-                @csrf @method('PATCH')
-                <button type="submit" class="toggle-pill {{ $item->is_active ? 'on' : 'off' }}">
-                    {{ $item->is_active ? '● ჩართ.' : '○ გამრ.' }}
-                </button>
-            </form>
-            <form method="POST" action="{{ route('market.item.destroy', $item) }}">
+        @if($loop->first)<div class="item-grid">@endif
+        <div class="item-card" style="{{ !$item->is_active ? 'opacity:0.55;' : '' }}">
+            <form method="POST" action="{{ route('market.item.destroy', $item) }}" class="item-card-del">
                 @csrf @method('DELETE')
                 <button type="submit" class="btn-del" onclick="return confirm('წაიშალოს?')">✕</button>
             </form>
+            <div class="item-card-icon">{{ $item->icon }}</div>
+            <div class="item-card-title">{{ $item->title }}</div>
+            @if($item->category)<div class="item-cat">{{ $item->category }}</div>@endif
+            <div class="item-card-footer">
+                <span class="cost-badge">💰 {{ $item->coin_cost }}</span>
+                <form method="POST" action="{{ route('market.item.toggle', $item) }}">
+                    @csrf @method('PATCH')
+                    <button type="submit" class="toggle-pill {{ $item->is_active ? 'on' : 'off' }}">
+                        {{ $item->is_active ? '● ჩართ.' : '○ გამრ.' }}
+                    </button>
+                </form>
+            </div>
         </div>
+        @if($loop->last)</div>@endif
         @empty
         <div style="color:#aaa;font-size:0.76rem;text-align:center;padding:14px 0;">მარკეტი ცარიელია — დაამატე შაბლონიდან ან ხელით</div>
         @endforelse
     </div>
 
-    {{-- Add custom item --}}
-    <div class="card">
-        <div class="sec">ხელით დამატება</div>
-        <form method="POST" action="{{ route('market.store', $child) }}" id="customForm">
-            @csrf
-            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-                {{-- Emoji picker --}}
-                <button type="button" class="emoji-btn" id="emojiBtn" onclick="openEmojiModal()" title="სმაილის არჩევა">
-                    <span id="emojiDisplay">🎁</span>
-                </button>
-                <input type="hidden" name="icon" id="iconInput" value="🎁">
-                <input type="text" name="title" class="fc" placeholder="პროდუქტის სახელი" required style="flex:1;min-width:140px;">
-                <input type="number" name="coin_cost" class="fc" placeholder="💰 მონეტა" min="1" max="9999" required style="width:110px;">
-                <button type="submit" class="btn">+ დამატება</button>
-            </div>
-        </form>
-    </div>
-
-    {{-- Templates --}}
-    <div class="card">
-        <div class="sec">შაბლონებიდან სწრაფი დამატება</div>
-        @php $existingTitles = $items->pluck('title')->flip()->toArray(); @endphp
-        @foreach($templates as $catName => $tplItems)
-        <div class="cat-lbl">{{ $catName }}</div>
-        <div class="tpl-grid">
-            @foreach($tplItems as $tpl)
-            @php $alreadyAdded = isset($existingTitles[$tpl['title']]); @endphp
-            @if($alreadyAdded)
-            <div class="tpl-card added">
-                <span class="tpl-icon">{{ $tpl['icon'] }}</span>
-                <span class="tpl-info">
-                    <span class="tpl-name">{{ $tpl['title'] }}</span>
-                    <span class="tpl-cost">✓ დამატებულია</span>
-                </span>
-            </div>
-            @else
-            <button type="button" class="tpl-card"
-                onclick="openPriceModal('{{ addslashes($tpl['title']) }}','{{ $tpl['icon'] }}','{{ $catName }}')">
-                <span class="tpl-icon">{{ $tpl['icon'] }}</span>
-                <span class="tpl-info">
-                    <span class="tpl-name">{{ $tpl['title'] }}</span>
-                </span>
-            </button>
-            @endif
-            @endforeach
-        </div>
-        @endforeach
-    </div>
+    <button type="button" class="btn" style="width:100%;padding:14px;font-size:0.8rem;margin-bottom:18px;" onclick="openAddItemModal()">+ პროდუქტის დამატება</button>
 
     {{-- Approved history --}}
     @if($approved->count())
@@ -235,6 +210,65 @@
         @endforeach
     </div>
     @endif
+</div>
+
+{{-- Add item modal (manual entry / templates) --}}
+<div class="m-overlay" id="addItemModal" onclick="if(event.target===this)closeAddItemModal()">
+    <div class="m-box" style="max-width:480px;">
+        <div class="m-title">
+            <span style="flex:1;">+ პროდუქტის დამატება</span>
+            <button type="button" class="m-cancel" style="padding:4px 10px;" onclick="closeAddItemModal()">✕</button>
+        </div>
+
+        <div class="tab-switch">
+            <button type="button" class="tab-btn active" id="aiTabManual" onclick="switchItemTab('manual')">✎ ხელით</button>
+            <button type="button" class="tab-btn" id="aiTabTpl" onclick="switchItemTab('templates')">📋 შაბლონები</button>
+        </div>
+
+        <div id="aiPanelManual">
+            <form method="POST" action="{{ route('market.store', $child) }}" id="customForm">
+                @csrf
+                <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                    <button type="button" class="emoji-btn" id="emojiBtn" onclick="openEmojiModal()" title="სმაილის არჩევა">
+                        <span id="emojiDisplay">🎁</span>
+                    </button>
+                    <input type="hidden" name="icon" id="iconInput" value="🎁">
+                    <input type="text" name="title" class="fc" placeholder="პროდუქტის სახელი" required style="flex:1;min-width:140px;">
+                    <input type="number" name="coin_cost" class="fc" placeholder="💰 მონეტა" min="1" max="9999" required style="width:110px;">
+                </div>
+                <button type="submit" class="m-save" style="width:100%;margin-top:14px;">+ მარკეტში დამატება</button>
+            </form>
+        </div>
+
+        <div id="aiPanelTpl" style="display:none;max-height:50vh;overflow-y:auto;">
+            @php $existingTitles = $items->pluck('title')->flip()->toArray(); @endphp
+            @foreach($templates as $catName => $tplItems)
+            <div class="cat-lbl">{{ $catName }}</div>
+            <div class="tpl-grid">
+                @foreach($tplItems as $tpl)
+                @php $alreadyAdded = isset($existingTitles[$tpl['title']]); @endphp
+                @if($alreadyAdded)
+                <div class="tpl-card added">
+                    <span class="tpl-icon">{{ $tpl['icon'] }}</span>
+                    <span class="tpl-info">
+                        <span class="tpl-name">{{ $tpl['title'] }}</span>
+                        <span class="tpl-cost">✓ დამატებულია</span>
+                    </span>
+                </div>
+                @else
+                <button type="button" class="tpl-card"
+                    onclick="openPriceModal('{{ addslashes($tpl['title']) }}','{{ $tpl['icon'] }}','{{ $catName }}')">
+                    <span class="tpl-icon">{{ $tpl['icon'] }}</span>
+                    <span class="tpl-info">
+                        <span class="tpl-name">{{ $tpl['title'] }}</span>
+                    </span>
+                </button>
+                @endif
+                @endforeach
+            </div>
+            @endforeach
+        </div>
+    </div>
 </div>
 
 {{-- Emoji overlay --}}
@@ -269,8 +303,25 @@
 </div>
 
 <script>
+// ── Add item modal ───────────────────────────────────
+function openAddItemModal() {
+    document.getElementById('addItemModal').classList.add('open');
+    switchItemTab('manual');
+}
+function closeAddItemModal() {
+    document.getElementById('addItemModal').classList.remove('open');
+}
+function switchItemTab(tab) {
+    const isManual = tab === 'manual';
+    document.getElementById('aiPanelManual').style.display = isManual ? 'block' : 'none';
+    document.getElementById('aiPanelTpl').style.display    = isManual ? 'none' : 'block';
+    document.getElementById('aiTabManual').classList.toggle('active', isManual);
+    document.getElementById('aiTabTpl').classList.toggle('active', !isManual);
+}
+
 // ── Price modal ──────────────────────────────────────
 function openPriceModal(title, icon, category) {
+    closeAddItemModal();
     document.getElementById('pm-icon').textContent      = icon;
     document.getElementById('pm-title').textContent     = title;
     document.getElementById('pm-icon-inp').value        = icon;

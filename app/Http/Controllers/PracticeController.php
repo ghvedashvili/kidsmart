@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ChildSetting;
 use App\Models\PointRule;
+use App\Models\PracticeAnswerLog;
 use App\Models\PracticeSession;
 use App\Models\QuestionTemplate;
 use App\Models\Theme;
@@ -93,7 +94,7 @@ class PracticeController extends Controller
             $session = PracticeSession::forChild($child->id, null, 'pyramid');
             $config  = self::pyramidConfig($session->level);
             $key     = "pq_{$child->id}_pyramid_" . uniqid();
-            return response()->json($this->buildPyramid($config, $key));
+            return response()->json($this->buildPyramid($config, $key, '🔺 პირამიდა'));
         }
 
         if ($slug === 'auto') {
@@ -129,7 +130,7 @@ class PracticeController extends Controller
         if ($template->isPyramid()) {
             $key  = "pq_{$child->id}_{$topic->id}_" . uniqid();
             $data = $template->generatePyramid();
-            cache()->put($key, ['topic_id' => $topic->id, 'data' => $data['solutions']], now()->addMinutes(20));
+            cache()->put($key, ['topic_id' => $topic->id, 'qtype' => 'pyramid', 'data' => $data['solutions'], 'prompt' => "🔺 პირამიდა — {$topic->name}"], now()->addMinutes(20));
             return response()->json(array_merge(['type' => 'pyramid', 'key' => $key, 'rows' => $data['rows'], 'height' => count($data['rows'])], $meta));
         }
 
@@ -137,7 +138,7 @@ class PracticeController extends Controller
             $key  = "pq_{$child->id}_{$topic->id}_" . uniqid();
             $data = $template->generateCode();
             $q    = json_decode($data['question_text'], true);
-            cache()->put($key, ['topic_id' => $topic->id, 'data' => json_decode($data['correct_answer'], true)], now()->addMinutes(20));
+            cache()->put($key, ['topic_id' => $topic->id, 'qtype' => 'code', 'data' => json_decode($data['correct_answer'], true), 'prompt' => "🔢 კოდური ამოცანა — მიზანი: {$q['target']}"], now()->addMinutes(20));
             return response()->json(array_merge([
                 'type'      => 'code',
                 'key'       => $key,
@@ -152,7 +153,7 @@ class PracticeController extends Controller
             $data        = $template->generateCrossword();
             $q           = json_decode($data['question_text'], true);
             $correctArr  = json_decode($data['correct_answer'], true) ?? [];
-            cache()->put($key, ['topic_id' => $topic->id, 'data' => $correctArr], now()->addMinutes(20));
+            cache()->put($key, ['topic_id' => $topic->id, 'qtype' => 'crossword', 'data' => $correctArr, 'prompt' => "🧩 კროსვორდი — {$topic->name}"], now()->addMinutes(20));
             $revealed     = $q['revealed'] ?? [];
             $revealedVals = [];
             foreach ($revealed as $pos) {
@@ -176,7 +177,7 @@ class PracticeController extends Controller
         $generated = $template->generate($theme);
 
         $key = "pq_{$child->id}_{$topic->id}_" . uniqid();
-        cache()->put($key, ['topic_id' => $topic->id, 'data' => ['type' => 'mc', 'correct' => $generated['correct_answer']]], now()->addMinutes(20));
+        cache()->put($key, ['topic_id' => $topic->id, 'qtype' => 'mc', 'data' => ['type' => 'mc', 'correct' => $generated['correct_answer']], 'prompt' => $generated['question_text']], now()->addMinutes(20));
 
         return response()->json(array_merge([
             'type'     => 'mc',
@@ -200,23 +201,35 @@ class PracticeController extends Controller
 
         $topicId = $cached['topic_id'] ?? null;
         $payload = $cached['data'];
+        $qtype   = $cached['qtype'] ?? ($payload['type'] ?? 'mc');
+        $prompt  = $cached['prompt'] ?? '';
 
         $isCorrect = false;
         $feedback  = null;
+        $given     = null;
+        $correct   = null;
 
         if (isset($payload['type']) && $payload['type'] === 'mc') {
             $isCorrect = (string) $request->input('answer') === (string) $payload['correct'];
             $feedback  = ['correct_answer' => $payload['correct']];
+            $given     = (string) $request->input('answer');
+            $correct   = (string) $payload['correct'];
         } elseif ($request->has('code_answers')) {
             // code: payload = [pos => value]
-            $result    = \App\Services\CodeService::check(json_encode($payload), $request->input('code_answers', []));
+            $codeAnswers = $request->input('code_answers', []);
+            $result    = \App\Services\CodeService::check(json_encode($payload), $codeAnswers);
             $isCorrect = $result['ok'];
             $feedback  = ['results' => $result['results']];
+            $given     = implode(', ', $codeAnswers);
+            $correct   = implode(', ', $payload);
         } elseif ($request->has('crossword_answers')) {
             // crossword: payload = ['0'=>a, '1'=>b, '2'=>c, '3'=>d]
-            $result    = \App\Services\CrosswordService::check(json_encode($payload), $request->input('crossword_answers', []));
+            $crosswordAnswers = $request->input('crossword_answers', []);
+            $result    = \App\Services\CrosswordService::check(json_encode($payload), $crosswordAnswers);
             $isCorrect = $result['ok'];
             $feedback  = ['results' => $result['results']];
+            $given     = implode(', ', $crosswordAnswers);
+            $correct   = implode(', ', $payload);
         } else {
             // pyramid: payload = ['r,c' => value, ...]
             $userAnswers = $request->input('answers', []);
@@ -229,7 +242,19 @@ class PracticeController extends Controller
             }
             $isCorrect = $allOk;
             $feedback  = ['results' => $results];
+            $given     = implode(', ', $userAnswers);
+            $correct   = implode(', ', $payload);
         }
+
+        PracticeAnswerLog::create([
+            'child_id'   => $child->id,
+            'topic_id'   => $topicId,
+            'type'       => $qtype,
+            'is_correct' => $isCorrect,
+            'prompt'     => $prompt,
+            'given'      => $given,
+            'correct'    => $correct,
+        ]);
 
         // Update session
         $session = $topicId
@@ -286,7 +311,7 @@ class PracticeController extends Controller
     }
 
     // ── Pyramid generator ────────────────────────────────────────────────────
-    private function buildPyramid(array $config, string $key): array
+    private function buildPyramid(array $config, string $key, string $prompt = '🔺 პირამიდა'): array
     {
         $result = \App\Services\PyramidService::build(
             $config['height'],
@@ -294,7 +319,7 @@ class PracticeController extends Controller
             $config['hidden_count']
         );
 
-        cache()->put($key, ['topic_id' => null, 'data' => $result['solutions']], now()->addMinutes(20));
+        cache()->put($key, ['topic_id' => null, 'qtype' => 'pyramid', 'data' => $result['solutions'], 'prompt' => $prompt], now()->addMinutes(20));
 
         return ['type' => 'pyramid', 'key' => $key, 'rows' => $result['rows'], 'height' => $config['height']];
     }

@@ -120,6 +120,7 @@ Route::middleware(['auth', 'role.permission'])->group(function () {
 
     // შვილის პარამეტრები (მხოლოდ მშობელი)
     Route::get('/children/{child}/hub',                   [ChildSettingsController::class, 'hub'])->name('child.hub');
+    Route::get('/children/{child}/practice-stats',         [ChildSettingsController::class, 'practiceStats'])->name('child.practice-stats');
     Route::get('/children/{child}/stats',                [ChildSettingsController::class, 'stats'])->name('child.stats');
     Route::get('/children/{child}/achievements',          [ChildSettingsController::class, 'achievements'])->name('child.achievements');
     Route::get('/children/{child}/tests/{test}',         [ChildSettingsController::class, 'showTest'])->name('child.test.show');

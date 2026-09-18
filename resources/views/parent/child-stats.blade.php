@@ -4,17 +4,24 @@
     body { background: transparent !important; }
     .wrap {
         max-width: 520px; margin: 0 auto;
-        padding: 36px 20px 80px;
+        padding: 28px 20px 80px;
         font-family: 'Goldman', monospace;
     }
     @media (min-width: 760px)  { .wrap { max-width: 700px; } }
     @media (min-width: 1040px) { .wrap { max-width: 960px; } }
-    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
-    .back { display:inline-flex; align-items:center; gap:6px; font-size: 0.72rem; font-weight: 700; color: #374151; text-decoration: none; background:#fff; border:1px solid #e8e8e8; border-radius:99px; padding:8px 16px; box-shadow:0 2px 8px rgba(0,0,0,0.06); transition: all 0.2s; }
-    .back:hover { border-color:#bbb; color: #111; }
 
-    .child-title { font-size: clamp(1rem, 4vw, 1.3rem); color: #111; letter-spacing: 0.06em; margin-bottom: 4px; }
-    .child-sub { font-size: 0.65rem; color: #bbb; letter-spacing: 0.1em; margin-bottom: 28px; }
+    .page-hero {
+        width: 100%; box-sizing: border-box; border-radius: 20px; padding: 26px 20px;
+        min-height: 120px; display: flex; flex-direction: column; justify-content: center;
+        position: relative; overflow: hidden; margin-bottom: 24px;
+        background-image:
+            linear-gradient(90deg, rgba(240,253,244,0.94) 0%, rgba(240,253,244,0.78) 45%, rgba(240,253,244,0.08) 68%),
+            url('/img/tests-hero.jpg');
+        background-size: cover; background-position: right center; background-repeat: no-repeat;
+        box-shadow: 0 8px 20px rgba(22,163,74,0.18);
+    }
+    .page-hero-title { font-family:'Goldman', monospace; font-size:1.05rem; color:#166534; margin-bottom:4px; letter-spacing: 0.04em; }
+    .page-hero-sub { font-family:'Goldman', monospace; font-size:0.65rem; color:#16a34a; letter-spacing: 0.08em; }
 
     .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 32px; }
     .stat-card {
@@ -76,13 +83,10 @@
 </style>
 
 <div class="wrap">
-    <div class="topbar">
-        <a href="{{ route('dashboard') }}" class="back">← დაბრუნება</a>
-        <a href="{{ route('child.achievements', $child) }}" class="back" style="color:#7c3aed;">🏆 მედლები</a>
+    <div class="page-hero">
+        <div class="page-hero-title">📊 {{ $child->name }}-ის სტატისტიკა</div>
+        <div class="page-hero-sub">ტესტების ისტორია და შედეგები</div>
     </div>
-
-    <div class="child-title">{{ $child->name }}</div>
-    <div class="child-sub">სტატისტიკა</div>
 
     <div class="stats-grid">
         <div class="stat-card">
