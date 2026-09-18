@@ -67,7 +67,6 @@
         box-shadow: 0 10px 24px rgba(108,92,231,0.25);
     }
     .parent-hero-text h2 { font-family: 'Goldman', monospace; font-size: 1.05rem; color: #fff; margin: 0 0 10px; letter-spacing: 0.02em; }
-    .parent-hero-avatar { font-size: 2.6rem; line-height: 1; flex-shrink: 0; filter: drop-shadow(0 6px 6px rgba(0,0,0,0.15)); }
 
     .plan-pill {
         display: inline-flex; align-items: center; gap: 7px;
@@ -83,6 +82,13 @@
         font-family: 'Goldman', monospace; font-size: 0.62rem; color: #bbb;
         letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 12px; text-align: left;
     }
+    .add-mini-btn {
+        display: flex; align-items: center; gap: 6px; flex-shrink: 0; align-self: flex-start;
+        background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); color: #fff;
+        border-radius: 100px; padding: 7px 14px; font-family: 'Goldman', monospace; font-size: 0.62rem; letter-spacing: 0.03em;
+        cursor: pointer; transition: background 0.2s;
+    }
+    .add-mini-btn:hover { background: rgba(255,255,255,0.28); }
     .add-card {
         background: var(--primary-soft); border: 2px dashed #c9c0f7; border-radius: var(--radius-lg);
         display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
@@ -98,70 +104,146 @@
     .add-card:hover .add-card-plus { border-color: var(--primary); }
     .add-card-label { font-family: 'Goldman', monospace; font-size: 0.62rem; letter-spacing: 0.04em; text-align: center; }
 
-    /* ── child card (parent view) — modern flowing profile card ── */
-    .children-grid { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; }
+    /* ── child card (parent view) — profile-card design ── */
+    .children-grid { display: grid; grid-template-columns: 1fr; gap: 16px; width: 100%; }
     .child-card {
-        background: #fff; border-radius: var(--radius-lg);
+        background: #fff; border-radius: 24px;
         display: flex; flex-direction: column; gap: 14px;
-        padding: 16px 16px 14px;
-        box-shadow: 0 4px 18px rgba(0,0,0,0.055); border: 1px solid #f2f2f5;
-        transition: box-shadow 0.2s;
+        padding: 20px;
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.01);
+        border: 1px solid #f1f5f9;
+        transition: box-shadow 0.2s, transform 0.2s;
     }
-    .child-card:hover { box-shadow: 0 8px 26px rgba(0,0,0,0.09); }
+    .child-card:hover { box-shadow: 0 10px 28px rgba(0,0,0,0.1); transform: translateY(-2px); }
 
-    .cc-header { display: flex; align-items: center; gap: 12px; }
-    .cc-avatar-picker {
-        width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0; position: relative;
-        background: linear-gradient(160deg, var(--primary), var(--primary-light));
-        border: none; color: #fff; font-size: 1.5rem; display: flex; align-items: center; justify-content: center;
-        cursor: pointer; transition: transform 0.15s; box-shadow: 0 4px 12px rgba(108,92,231,0.32);
+    /* ── mobile: avatar + name + ID together in one tinted header pill ── */
+    .cc-mheader {
+        display: flex; align-items: center; justify-content: center; gap: 14px;
+        border-radius: 18px; padding: 16px;
+        background: linear-gradient(135deg, var(--primary-soft), #e2ddff);
     }
-    .cc-avatar-picker:hover { transform: scale(1.05); }
-    .children-grid .child-card:nth-child(3n+2) .cc-avatar-picker { background: linear-gradient(160deg, var(--accent-pink), #fca5a5); box-shadow: 0 4px 12px rgba(255,118,117,0.32); }
-    .children-grid .child-card:nth-child(3n+3) .cc-avatar-picker { background: linear-gradient(160deg, #2fae74, var(--accent-green)); box-shadow: 0 4px 12px rgba(47,174,116,0.32); }
+    .cc-mheader.boy  { background: linear-gradient(135deg, #eff6ff, #dbeafe); }
+    .cc-mheader.girl { background: linear-gradient(135deg, #fdf2f8, #fce7f3); }
+    .cc-mheader-avatar {
+        width: 64px; height: 64px; border-radius: 50%; flex-shrink: 0; position: relative;
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        padding: 2px; border: none; cursor: pointer; transition: transform 0.15s;
+    }
+    .cc-mheader-avatar:hover { transform: scale(1.05); }
+    .cc-mheader.boy  .cc-mheader-avatar { background: linear-gradient(135deg, #3b82f6, #93c5fd); }
+    .cc-mheader.girl .cc-mheader-avatar { background: linear-gradient(135deg, #ec4899, #f9a8d4); }
+    .cc-mheader-avatar-inner {
+        width: 100%; height: 100%; border-radius: 50%; background: #fff;
+        display: flex; align-items: center; justify-content: center; font-size: 1.7rem;
+    }
+    .cc-mheader-info { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+    .cc-mheader-code {
+        display: inline-flex; align-self: flex-start; margin-top: 6px;
+        font-family: 'Goldman', monospace; font-size: 0.64rem; font-weight: 700; color: #64748b;
+        background: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.9); border-radius: 10px; padding: 5px 10px;
+        letter-spacing: 0.05em; cursor: pointer; white-space: nowrap; transition: background 0.15s, color 0.15s;
+    }
+    .cc-mheader-code:hover { background: #fff; color: #334155; }
+    @media (min-width: 700px) { .cc-mheader { display: none; } }
+
+    /* ── desktop: full-height photo panel on the left ── */
+    .cc-layout { display: flex; gap: 16px; align-items: stretch; }
+
+    .cc-photo {
+        display: none;
+        flex-shrink: 0; width: 76px; border-radius: 18px; position: relative;
+        align-items: center; justify-content: center;
+        background: linear-gradient(135deg, var(--primary-soft), #e2ddff);
+        border: none; cursor: pointer; padding: 0; transition: transform 0.15s;
+    }
+    .cc-photo:hover { transform: scale(1.02); }
+    .cc-photo.boy  { background: linear-gradient(135deg, #eff6ff, #dbeafe); }
+    .cc-photo.girl { background: linear-gradient(135deg, #fdf2f8, #fce7f3); }
+    @media (min-width: 700px) { .cc-photo { display: flex; width: 150px; } }
+
+    .cc-avatar-ring {
+        width: 56px; height: 56px; border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        padding: 2px; display: flex; align-items: center; justify-content: center;
+    }
+    .cc-photo.boy  .cc-avatar-ring { background: linear-gradient(135deg, #3b82f6, #93c5fd); }
+    .cc-photo.girl .cc-avatar-ring { background: linear-gradient(135deg, #ec4899, #f9a8d4); }
+    @media (min-width: 700px) { .cc-avatar-ring { width: 88px; height: 88px; } }
+
+    .cc-avatar-inner {
+        width: 100%; height: 100%; border-radius: 50%; background: #fff;
+        display: flex; align-items: center; justify-content: center; font-size: 1.7rem;
+    }
+    @media (min-width: 700px) { .cc-avatar-inner { font-size: 2.6rem; } }
     .cc-avatar-picker-edit {
-        position: absolute; bottom: -2px; right: -2px; width: 16px; height: 16px; border-radius: 50%;
-        background: #fff; color: #666; font-size: 0.5rem; display: flex; align-items: center; justify-content: center;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+        position: absolute; bottom: 8px; right: 8px; width: 24px; height: 24px; border-radius: 50%;
+        background: #fff; color: #334155; font-size: 0.65rem; display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.25); border: 1px solid #e2e8f0;
     }
 
-    .cc-header-info { flex: 1; min-width: 0; }
-    .cc-name-row { display: flex; align-items: baseline; justify-content: space-between; gap: 7px; }
-    .cc-name {
-        font-family: 'Goldman', monospace; font-size: 0.95rem; color: #111;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0;
-    }
+    .cc-body { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 14px; }
+    .cc-header-row { display: none; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+    @media (min-width: 700px) { .cc-header-row { display: flex; } }
+    .cc-name { font-family: 'Goldman', monospace; font-size: 1.2rem; color: #1e293b; letter-spacing: 0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
     .cc-code {
-        font-family: 'Goldman', monospace; font-size: 0.58rem; color: #888;
-        background: #f4f4f7; border-radius: 6px; padding: 2px 8px; flex-shrink: 0;
-        letter-spacing: 0.06em; cursor: pointer; white-space: nowrap; transition: background 0.15s, color 0.15s;
+        display: inline-flex; flex-shrink: 0;
+        font-family: 'Goldman', monospace; font-size: 0.64rem; font-weight: 700; color: #64748b;
+        background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 10px; padding: 5px 10px;
+        letter-spacing: 0.05em; cursor: pointer; white-space: nowrap; transition: background 0.15s, color 0.15s;
     }
-    .cc-code:hover { background: #ececf0; color: #444; }
-    .cc-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
-    .cc-tag {
-        font-family: 'Goldman', monospace; font-size: 0.53rem; color: #888;
-        background: #f4f4f7; border: none; border-radius: 100px;
-        padding: 3px 8px; white-space: nowrap;
-    }
+    .cc-code:hover { background: #e2e8f0; color: #334155; }
 
+    .cc-mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media (min-width: 700px) { .cc-mini-grid { grid-template-columns: repeat(4, 1fr); } }
+    .cc-mini {
+        display: flex; align-items: center; gap: 10px; min-width: 0;
+        border-radius: 16px; padding: 10px 12px; border: 1px solid; transition: transform 0.15s;
+    }
+    .cc-mini:hover { transform: translateY(-2px); }
+    .cc-mini-icon { width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+    .cc-mini-text { min-width: 0; overflow: hidden; }
+    .cc-mini-label { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.56rem; text-transform: uppercase; letter-spacing: 0.05em; margin: 0; }
+    .cc-mini-value { font-family: 'Goldman', monospace; font-size: 0.78rem; font-weight: 700; margin: 1px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cc-mini.purple  { background: #faf5ff; border-color: #f3e8ff; } .cc-mini.purple  .cc-mini-icon { background: #f3e8ff; color: #9333ea; } .cc-mini.purple  .cc-mini-label { color: #c084fc; } .cc-mini.purple  .cc-mini-value { color: #581c87; }
+    .cc-mini.blue    { background: #eff6ff; border-color: #dbeafe; } .cc-mini.blue    .cc-mini-icon { background: #dbeafe; color: #2563eb; } .cc-mini.blue    .cc-mini-label { color: #60a5fa; } .cc-mini.blue    .cc-mini-value { color: #1e3a8a; }
+    .cc-mini.amber   { background: #fffbeb; border-color: #fef3c7; } .cc-mini.amber   .cc-mini-icon { background: #fef3c7; color: #d97706; } .cc-mini.amber   .cc-mini-label { color: #f59e0b; } .cc-mini.amber   .cc-mini-value { color: #78350f; }
+    .cc-mini.emerald { background: #ecfdf5; border-color: #d1fae5; } .cc-mini.emerald .cc-mini-icon { background: #d1fae5; color: #059669; } .cc-mini.emerald .cc-mini-label { color: #34d399; } .cc-mini.emerald .cc-mini-value { color: #064e3b; }
+
+    .cc-btn-row { display: flex; gap: 8px; }
+    .cc-full-btn {
+        display: flex; align-items: center; justify-content: center; gap: 8px; flex: 1; box-sizing: border-box;
+        background: var(--primary); color: #fff; border: none; border-radius: 16px;
+        padding: 13px 14px; font-family: 'Goldman', monospace; font-size: 0.7rem; letter-spacing: 0.02em;
+        text-decoration: none; cursor: pointer; transition: background 0.15s, transform 0.1s; position: relative;
+        box-shadow: 0 2px 8px rgba(108,92,231,0.25);
+    }
+    .cc-full-btn:hover { background: var(--primary-light); color: #fff; }
+    .cc-full-btn:active { transform: scale(0.98); }
+    .cc-full-btn-badge {
+        background: #dc2626; color: #fff; font-family: 'Goldman', monospace; font-size: 0.55rem; font-weight: 700;
+        border-radius: 100px; padding: 2px 7px; min-width: 16px; text-align: center;
+    }
     .cc-mini-btn {
-        width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; border: none;
+        width: 44px; height: 44px; border-radius: 16px; flex-shrink: 0; border: 1px solid #e2e8f0;
         display: flex; align-items: center; justify-content: center;
-        font-size: 0.72rem; background: #f5f5f7; color: #999; cursor: pointer; transition: background 0.15s;
+        font-size: 1.05rem; background: #f1f5f9; color: #334155; cursor: pointer; transition: background 0.15s;
     }
-    .cc-mini-btn:hover { background: #ececf0; }
+    .cc-mini-btn:hover { background: #e2e8f0; }
+    .cc-mini-btn:active { transform: scale(0.98); }
 
-    .cc-stats-line { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 10px; }
-    .cc-stat-chip {
-        font-family: 'Goldman', monospace; font-size: 0.53rem; color: #888;
-        background: #f4f4f7; border: none; border-radius: 100px;
-        padding: 3px 9px; white-space: nowrap;
+    .cc-full-btn-secondary {
+        display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box;
+        background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 16px;
+        padding: 13px 14px; font-family: 'Goldman', monospace; font-size: 0.7rem; letter-spacing: 0.02em;
+        cursor: pointer; transition: background 0.15s;
     }
-    .cc-stat-chip b { font-weight: normal; color: #111; }
+    .cc-full-btn-secondary:hover { background: #e2e8f0; }
+    .cc-full-btn-secondary:active { transform: scale(0.98); }
 
     .cc-share-panel {
         display: none; flex-direction: column; gap: 8px;
-        background: #fafafb; border-radius: 14px; padding: 12px;
+        background: #f8fafc; border-radius: 14px; padding: 12px;
     }
     .cc-share-panel.open { display: flex; }
     .cc-share-link-box {
@@ -182,20 +264,6 @@
     .cc-share-btn.copied { background: #dcfce7; color: #15803d; }
 
 
-    .cc-tiles-row { display: flex; flex-wrap: wrap; gap: 8px; }
-    .cc-tile {
-        flex: 1 1 calc(50% - 4px); display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 0;
-        background: var(--primary-soft); color: var(--primary); border-radius: 100px; padding: 9px 8px; position: relative;
-        text-decoration: none; transition: background 0.15s; font-family: 'Goldman', monospace; font-size: 0.6rem; letter-spacing: 0.02em;
-        border: none; cursor: pointer;
-    }
-    .cc-tile:hover { background: #e2ddff; color: var(--primary); }
-    .cc-tile-icon { font-size: 0.86rem; line-height: 1; }
-    .cc-tile-badge {
-        position: absolute; top: -4px; right: 2px; background: #dc2626; color: #fff;
-        font-family: 'Goldman', monospace; font-size: 0.48rem; font-weight: 700;
-        border-radius: 100px; padding: 1px 5px; min-width: 14px; text-align: center;
-    }
 
     /* ── quick-link tiles (admin/staff nav) ── */
     .nav-tile-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; }
@@ -366,9 +434,22 @@
     }
     .notif-btn:hover { color: #333; border-color: #aaa; }
     .notif-btn.on { color: #111; border-color: #111; }
-    .flash { font-family: 'Goldman', monospace; font-size: 0.72rem; color: #2ecc71; letter-spacing: 0.06em; }
-    .flash-err { font-family: 'Goldman', monospace; font-size: 0.72rem; color: #e74c3c; letter-spacing: 0.06em; }
-    .flash-warn { font-family: 'Goldman', monospace; font-size: 0.72rem; color: #d97706; letter-spacing: 0.06em; }
+    .dash-toast-wrap {
+        position: fixed; top: 0; left: 50%; transform: translate(-50%, -130%);
+        z-index: 2000; display: flex; flex-direction: column; gap: 8px; align-items: center;
+        width: 100%; max-width: 420px; padding: 14px 16px 0; box-sizing: border-box;
+        transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        pointer-events: none;
+    }
+    .dash-toast-wrap.show { transform: translate(-50%, 0); }
+    .dash-toast {
+        font-family: 'Goldman', monospace; font-size: 0.7rem; letter-spacing: 0.03em;
+        background: #fff; border-radius: 14px; padding: 12px 20px; text-align: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.18); max-width: 100%;
+    }
+    .dash-toast.ok   { color: #15803d; }
+    .dash-toast.err  { color: #dc2626; }
+    .dash-toast.warn { color: #b45309; }
     /* ── child view ── */
     .mini-cards-row { display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 12px; }
     @media (min-width: 520px) { .mini-cards-row { display: grid; grid-template-columns: 1fr 1fr; } }
@@ -401,7 +482,6 @@
     /* ── responsive widths + multi-column grids on desktop (kept last so it wins the cascade) ── */
     @media (min-width: 760px) {
         .dash-inner { max-width: 700px; }
-        .children-grid { grid-template-columns: repeat(2, 1fr); }
         .nav-tile-grid { grid-template-columns: repeat(4, 1fr); }
     }
     @media (min-width: 1040px) {
@@ -431,29 +511,47 @@
     }
 </style>
 
+@php
+    $__toasts = [];
+    if (session('success'))     $__toasts[] = ['type' => 'ok',   'text' => session('success')];
+    if (session('test_done'))   $__toasts[] = ['type' => 'ok',   'text' => session('test_done')];
+    if (session('child_added')) $__toasts[] = ['type' => 'ok',   'text' => session('child_added')];
+    if (session('test_error'))  $__toasts[] = ['type' => 'err',  'text' => session('test_error')];
+    foreach ((array) session('grade_change_notice', []) as $__notice) {
+        $__toasts[] = ['type' => 'warn', 'text' => $__notice];
+    }
+@endphp
+@if(count($__toasts))
+@push('toasts')
+<div class="dash-toast-wrap" id="dashToastWrap">
+    @foreach($__toasts as $__toast)
+    <div class="dash-toast {{ $__toast['type'] }}">{{ $__toast['text'] }}</div>
+    @endforeach
+</div>
+<script>
+(function(){
+    var wrap = document.getElementById('dashToastWrap');
+    if (!wrap) return;
+    requestAnimationFrame(function(){ wrap.classList.add('show'); });
+    setTimeout(function(){
+        wrap.classList.remove('show');
+        setTimeout(function(){ wrap.remove(); }, 400);
+    }, 3200);
+})();
+</script>
+@endpush
+@endif
+
 <div class="dash-hero{{ auth()->user()->role === 'child' ? ' child-dash-fit' : '' }}">
     <div class="dash-inner">
-
-        @if(session('success'))
-        <div class="flash">{{ session('success') }}</div>
-        @endif
-        @if(session('grade_change_notice'))
-        @foreach(session('grade_change_notice') as $notice)
-        <div class="flash-warn">{{ $notice }}</div>
-        @endforeach
-        @endif
-        @if(session('test_error'))
-        <div class="flash-err">{{ session('test_error') }}</div>
-        @endif
-        @if(session('test_done'))
-        <div class="flash">{{ session('test_done') }}</div>
-        @endif
 
         @if(auth()->user()->role !== 'child')
         @php
             if (in_array(auth()->user()->role, ['parent', 'admin'])) {
-                $currentPkg = auth()->user()->currentPackage();
-                $activeSub  = auth()->user()->activeSubscription();
+                $currentPkg  = auth()->user()->currentPackage();
+                $activeSub   = auth()->user()->activeSubscription();
+                $children    = auth()->user()->children()->with(['childSetting.grade','themes','topics'])->withTimestamps()->orderByPivot('created_at','asc')->get();
+                $atChildLimit = $currentPkg->max_children > 0 && $children->count() >= $currentPkg->max_children;
             }
         @endphp
         <div class="parent-hero-banner">
@@ -470,24 +568,21 @@
                 </button>
                 @endif
             </div>
-            <div class="parent-hero-avatar">👨‍👩‍👧</div>
+            @if(in_array(auth()->user()->role, ['parent', 'admin']) && $children->count() > 0)
+            <button type="button" class="add-mini-btn"
+                onclick="document.getElementById('{{ $atChildLimit ? 'plansModal' : 'addChildModal' }}').classList.add('open'); {{ $atChildLimit ? '' : 'wizReset();' }}"
+                title="{{ $atChildLimit ? $currentPkg->name . ' პლანი მხოლოდ ' . $currentPkg->max_children . ' ბავშვს იძლევა' : 'შვილის დამატება' }}">
+                <i class="bi bi-plus-lg"></i> შვილი
+            </button>
+            @endif
         </div>
         @endif
 
         {{-- მშობლის ხედი --}}
         @if(in_array(auth()->user()->role, ['parent', 'admin']))
-        @php
-            $children = auth()->user()->children()->with(['childSetting.grade','themes','topics'])->withTimestamps()->orderByPivot('created_at','asc')->get();
-        @endphp
-
-        @if(session('child_added'))
-        <div class="flash">{{ session('child_added') }}</div>
-        @endif
-
         <div class="children-section">
             <div class="section-label">შვილები · {{ $children->count() }}</div>
 
-            @php $atChildLimit = $currentPkg->max_children > 0 && $children->count() >= $currentPkg->max_children; @endphp
             <div class="children-grid">
             @forelse($children as $child)
             @php
@@ -505,57 +600,85 @@
                 </div>
                 @endif
 
-                <div class="cc-header">
-                    <button type="button" class="cc-avatar-picker" title="პროფილის არჩევა"
+                <div class="cc-mheader {{ $child->avatar === 'boy' ? 'boy' : ($child->avatar === 'girl' ? 'girl' : '') }}">
+                    <button type="button" class="cc-mheader-avatar" title="პროფილის არჩევა"
                         onclick="document.getElementById('avatarModal{{ $child->id }}').classList.add('open')">
-                        {{ $child->avatar === 'boy' ? '👦' : ($child->avatar === 'girl' ? '👧' : '👤') }}
+                        <span class="cc-mheader-avatar-inner">{{ $child->avatar === 'boy' ? '👦' : ($child->avatar === 'girl' ? '👧' : '👤') }}</span>
                         <span class="cc-avatar-picker-edit">✎</span>
                     </button>
-                    <div class="cc-header-info">
-                        <div class="cc-name-row">
-                            <span class="cc-name">{{ $child->name }}</span>
+                    <div class="cc-mheader-info">
+                        <div class="cc-name">{{ $child->name }}</div>
+                        @if($child->child_code)
+                        <span class="cc-mheader-code" onclick="copyChildCode(this, '{{ $child->child_code }}')"
+                            title="კოდის კოპირება">ID: {{ $child->child_code }}</span>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="cc-layout">
+                    <button type="button" class="cc-photo {{ $child->avatar === 'boy' ? 'boy' : ($child->avatar === 'girl' ? 'girl' : '') }}" title="პროფილის არჩევა"
+                        onclick="document.getElementById('avatarModal{{ $child->id }}').classList.add('open')">
+                        <span class="cc-avatar-ring">
+                            <span class="cc-avatar-inner">{{ $child->avatar === 'boy' ? '👦' : ($child->avatar === 'girl' ? '👧' : '👤') }}</span>
+                        </span>
+                        <span class="cc-avatar-picker-edit">✎</span>
+                    </button>
+
+                    <div class="cc-body">
+                        <div class="cc-header-row">
+                            <div class="cc-name">{{ $child->name }}</div>
                             @if($child->child_code)
                             <span class="cc-code" onclick="copyChildCode(this, '{{ $child->child_code }}')"
                                 title="კოდის კოპირება">ID: {{ $child->child_code }}</span>
                             @endif
                         </div>
-                        <div class="cc-tags">
-                            <span class="cc-tag">{{ $s?->grade?->name ?? 'კლასი —' }}</span>
-                            @if($s)
-                            <span class="cc-tag">დონე {{ $s->difficulty }}</span>
-                            @endif
+
+                        <div class="cc-mini-grid">
+                            <div class="cc-mini purple">
+                                <div class="cc-mini-icon">🎓</div>
+                                <div class="cc-mini-text">
+                                    <p class="cc-mini-label">კლასი</p>
+                                    <p class="cc-mini-value">{{ $s?->grade?->name ?? '—' }}</p>
+                                </div>
+                            </div>
+                            <div class="cc-mini blue">
+                                <div class="cc-mini-icon">🏆</div>
+                                <div class="cc-mini-text">
+                                    <p class="cc-mini-label">პროგრესი</p>
+                                    <p class="cc-mini-value">{{ $s ? 'დონე ' . $s->difficulty : '—' }}</p>
+                                </div>
+                            </div>
+                            <div class="cc-mini amber">
+                                <div class="cc-mini-icon">📅</div>
+                                <div class="cc-mini-text">
+                                    <p class="cc-mini-label">დღიური</p>
+                                    <p class="cc-mini-value">{{ $s ? $todayDone . '/' . $s->tests_per_week . ' დღეს' : '—' }}</p>
+                                </div>
+                            </div>
+                            <div class="cc-mini emerald">
+                                <div class="cc-mini-icon">💰</div>
+                                <div class="cc-mini-text">
+                                    <p class="cc-mini-label">ბალანსი</p>
+                                    <p class="cc-mini-value">{{ $s->coins ?? 0 }} მონეტა</p>
+                                </div>
+                            </div>
                         </div>
-                        @if($s)
-                        <div class="cc-stats-line">
-                            <span class="cc-stat-chip">📅 <b>{{ $todayDone }}/{{ $s->tests_per_week }}</b> დღეს</span>
-                            <span class="cc-stat-chip">💰 <b>{{ $s->coins ?? 0 }}</b> მონეტა</span>
+
+                        <div class="cc-btn-row">
+                            <a href="{{ route('child.hub', $child) }}" class="cc-full-btn">
+                                გახსენი სრულად
+                                <i class="bi bi-arrow-right"></i>
+                                @if($pendingMarket)<span class="cc-full-btn-badge">{{ $pendingMarket }}</span>@endif
+                            </a>
+                            <button type="button" class="cc-mini-btn edit" title="რედაქტირება"
+                                onclick="document.getElementById('editChildModal{{ $child->id }}').classList.add('open')"><i class="bi bi-gear-fill"></i></button>
                         </div>
+                        @if($child->child_code)
+                        <button type="button" class="cc-full-btn-secondary" onclick="toggleShare({{ $child->id }})">
+                            <i class="bi bi-link-45deg"></i> გაზიარება
+                        </button>
                         @endif
                     </div>
-                    <button type="button" class="cc-mini-btn edit" title="რედაქტირება"
-                        onclick="document.getElementById('editChildModal{{ $child->id }}').classList.add('open')">⚙</button>
-                </div>
-
-                <div class="cc-tiles-row">
-                    <a href="{{ route('market.index', $child) }}" class="cc-tile">
-                        <span class="cc-tile-icon">🛒</span>
-                        <span>მარკეტი</span>
-                        @if($pendingMarket)<span class="cc-tile-badge">{{ $pendingMarket }}</span>@endif
-                    </a>
-                    <a href="{{ route('child.stats', $child) }}" class="cc-tile">
-                        <span class="cc-tile-icon">📊</span>
-                        <span>სტატისტიკა</span>
-                    </a>
-                    <button type="button" class="cc-tile" onclick="openRemind({{ $child->id }}, '{{ addslashes($child->name) }}')">
-                        <span class="cc-tile-icon">🔔</span>
-                        <span>შეხსენება</span>
-                    </button>
-                    @if($child->child_code)
-                    <button type="button" class="cc-tile" onclick="toggleShare({{ $child->id }})">
-                        <span class="cc-tile-icon">🔗</span>
-                        <span>გაზიარება</span>
-                    </button>
-                    @endif
                 </div>
 
                 @if($child->child_code)
@@ -582,6 +705,7 @@
                 <span style="font-size:0.62rem;color:#ccc;margin-top:4px;display:block;">კოდი გაუზიარე შვილს</span>
             </div>
             @endforelse
+            @if($children->count() === 0)
             <button type="button" class="add-card"
                 onclick="document.getElementById('{{ $atChildLimit ? 'plansModal' : 'addChildModal' }}').classList.add('open'); {{ $atChildLimit ? '' : 'wizReset();' }}"
                 @if($atChildLimit) title="{{ $currentPkg->name }} პლანი მხოლოდ {{ $currentPkg->max_children }} ბავშვს იძლევა" @endif>
@@ -594,6 +718,7 @@
                     @endif
                 </span>
             </button>
+            @endif
             </div>
         </div>
 

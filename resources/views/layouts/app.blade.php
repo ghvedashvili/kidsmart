@@ -174,7 +174,7 @@
         overscroll-behavior: none;
         scroll-behavior: smooth;
     }
-    body { background: transparent; overscroll-behavior: none; padding-top: {{ (auth()->check() && auth()->user()->role === 'child') ? '0' : '56px' }}; }
+    body { background: transparent; overscroll-behavior: none; padding-top: {{ (auth()->check() && in_array(auth()->user()->role, ['child', 'parent'])) ? '0' : '56px' }}; }
 
     #page-loader {
         position: fixed; inset: 0; background: #080808;
@@ -221,6 +221,8 @@
     }
     .loader-text { font-family: 'Nunito', sans-serif; font-weight: 800; color: #fff; font-size: 0.82rem; opacity: 0.85; letter-spacing: 0.02em; }
 </style>
+
+@stack('toasts')
 
 <div class="container-fluid px-0" style="position:relative;z-index:1;">
     @yield('content')

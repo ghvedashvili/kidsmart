@@ -147,10 +147,10 @@
 </style>
 
 @php
-    // Every child page replaces the shared top/bottom nav with one compact bar
+    // Child AND parent pages replace the shared top/bottom nav with one compact bar
     // (logo + notification + logout) — navigation between sections happens via
     // each page's own "back" link and the dashboard's cards instead.
-    $__hideChildChrome = auth()->check() && auth()->user()->role === 'child';
+    $__hideChildChrome = auth()->check() && in_array(auth()->user()->role, ['child', 'parent']);
 @endphp
 @if($__hideChildChrome)
 <style>

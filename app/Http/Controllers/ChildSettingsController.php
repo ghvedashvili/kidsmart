@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ChildGradeHistory;
 use App\Models\ChildSetting;
+use App\Models\MarketPurchase;
 use App\Models\QuestionTemplate;
 use App\Models\Test;
 use App\Models\Theme;
@@ -17,6 +18,15 @@ class ChildSettingsController extends Controller
     {
         abort_if($child->role !== 'child', 403);
         abort_if(! $child->parents()->where('users.id', auth()->id())->exists(), 403);
+    }
+
+    public function hub(User $child)
+    {
+        $this->authorizeChild($child);
+
+        $pendingMarket = MarketPurchase::where('child_id', $child->id)->where('status', 'pending')->count();
+
+        return view('parent.child-hub', compact('child', 'pendingMarket'));
     }
 
     public function stats(User $child)

@@ -7,6 +7,8 @@
         padding: 36px 20px 80px;
         font-family: 'Goldman', monospace;
     }
+    @media (min-width: 760px)  { .wrap { max-width: 700px; } }
+    @media (min-width: 1040px) { .wrap { max-width: 960px; } }
     .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
     .back { display:inline-flex; align-items:center; gap:6px; font-size: 0.72rem; font-weight: 700; color: #374151; text-decoration: none; background:#fff; border:1px solid #e8e8e8; border-radius:99px; padding:8px 16px; box-shadow:0 2px 8px rgba(0,0,0,0.06); transition: all 0.2s; }
     .back:hover { border-color:#bbb; color: #111; }

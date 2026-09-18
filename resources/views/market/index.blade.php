@@ -16,7 +16,19 @@
     .btn-del:hover { color:#ef4444; }
     .back-btn { display:inline-flex; align-items:center; gap:6px; margin-bottom:20px; font-family:'Goldman',monospace; font-size:0.72rem; font-weight:700; color:#374151; text-decoration:none; background:#fff; border:1px solid #e2e8f0; border-radius:99px; padding:8px 16px; box-shadow:0 2px 8px rgba(0,0,0,0.06); transition:all 0.2s; }
     .back-btn:hover { border-color:#94a3b8; color:#1e293b; }
-    .msg   { font-size:0.72rem; color:#059669; margin-bottom:12px; }
+    .toast-wrap {
+        position: fixed; top: 0; left: 50%; transform: translate(-50%, -130%);
+        z-index: 2000; display: flex; flex-direction: column; gap: 8px; align-items: center;
+        width: 100%; max-width: 420px; padding: 14px 16px 0; box-sizing: border-box;
+        transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        pointer-events: none;
+    }
+    .toast-wrap.show { transform: translate(-50%, 0); }
+    .toast {
+        font-family: 'Goldman', monospace; font-size: 0.7rem; letter-spacing: 0.03em;
+        background: #fff; color: #059669; border-radius: 14px; padding: 12px 20px; text-align: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.18); max-width: 100%;
+    }
 
     .item-row { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid #f1f5f9; }
     .item-row:last-child { border-bottom:none; }
@@ -88,7 +100,24 @@
         </div>
     </div>
 
-    @if(session('success'))<div class="msg">✓ {{ session('success') }}</div>@endif
+    @if(session('success'))
+    @push('toasts')
+    <div class="toast-wrap" id="marketToastWrap">
+        <div class="toast">✓ {{ session('success') }}</div>
+    </div>
+    <script>
+    (function(){
+        var wrap = document.getElementById('marketToastWrap');
+        if (!wrap) return;
+        requestAnimationFrame(function(){ wrap.classList.add('show'); });
+        setTimeout(function(){
+            wrap.classList.remove('show');
+            setTimeout(function(){ wrap.remove(); }, 400);
+        }, 3200);
+    })();
+    </script>
+    @endpush
+    @endif
 
     {{-- Pending requests --}}
     @if($pending->count())
