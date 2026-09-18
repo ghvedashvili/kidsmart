@@ -22,7 +22,7 @@
         justify-content: flex-start;
         position: relative;
         overflow: hidden;
-        padding: 40px 24px 60px;
+        padding: 28px 24px 60px;
         gap: 20px;
         --primary: #6c5ce7;
         --primary-light: #a29bfe;
@@ -370,14 +370,17 @@
     .flash-err { font-family: 'Goldman', monospace; font-size: 0.72rem; color: #e74c3c; letter-spacing: 0.06em; }
     .flash-warn { font-family: 'Goldman', monospace; font-size: 0.72rem; color: #d97706; letter-spacing: 0.06em; }
     /* ── child view ── */
-    .games-card {
+    .mini-cards-row { display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 12px; }
+    @media (min-width: 520px) { .mini-cards-row { display: grid; grid-template-columns: 1fr 1fr; } }
+
+    .games-card, .oly-card {
         display: flex; align-items: center; gap: 14px; width: 100%; box-sizing: border-box;
         min-height: 110px; position: relative;
-        background: linear-gradient(160deg, #ecfdf5, #d1fae5);
         border-radius: var(--radius-lg);
-        padding: 16px 18px; text-decoration: none; color: #14532d; text-align: left;
-        box-shadow: 0 8px 20px rgba(22,163,74,0.15); transition: transform 0.15s;
+        padding: 16px 18px; text-decoration: none; text-align: left;
+        transition: transform 0.15s;
     }
+    .games-card { background: linear-gradient(160deg, #ecfdf5, #d1fae5); color: #14532d; box-shadow: 0 8px 20px rgba(22,163,74,0.15); }
     .games-card:hover { transform: translateY(-2px); color: #14532d; }
     .games-card-icon { font-size: 2.2rem; flex-shrink: 0; }
     .games-card-text { flex: 1; min-width: 0; }
@@ -385,14 +388,7 @@
     .games-card-sub { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.7rem; color: #166534; opacity: 0.85; }
     .games-card-arrow { font-size: 1.1rem; flex-shrink: 0; opacity: 0.85; }
 
-    .oly-card {
-        display: flex; align-items: center; gap: 14px; width: 100%; box-sizing: border-box;
-        min-height: 110px; position: relative; margin-top: 12px;
-        background: linear-gradient(160deg, #fffbeb, #fde68a);
-        border-radius: var(--radius-lg);
-        padding: 16px 18px; text-decoration: none; color: #78350f; text-align: left;
-        box-shadow: 0 8px 20px rgba(217,119,6,0.18); transition: transform 0.15s;
-    }
+    .oly-card { background: linear-gradient(160deg, #fffbeb, #fde68a); color: #78350f; box-shadow: 0 8px 20px rgba(217,119,6,0.18); }
     .oly-card:hover { transform: translateY(-2px); color: #78350f; }
     .oly-card.locked { opacity: 0.55; filter: grayscale(0.35); }
     .oly-card-icon { font-size: 2.2rem; flex-shrink: 0; }
@@ -413,18 +409,16 @@
         .nav-tile-grid { grid-template-columns: repeat(6, 1fr); }
     }
 
-    /* ── mobile: fit the child dashboard in one screen, no scroll ── */
+    /* ── mobile: compact child dashboard, scrolls naturally with breathing room at the bottom ── */
     @media (max-width: 759px) {
-        html:has(.child-dash-fit) { overflow: hidden; }
-        body:has(.child-dash-fit) { height: 100dvh; overflow: hidden; box-sizing: border-box; }
         .child-dash-fit {
-            height: calc(100dvh - 56px - 74px);
-            padding: 14px 16px 10px;
+            min-height: calc(100dvh - var(--nav-h, 56px));
+            padding: 28px 16px 100px;
             justify-content: flex-start;
-            overflow: hidden;
+            gap: 8px;
         }
-        .child-dash-fit .dash-inner { height: 100%; justify-content: space-between; gap: 10px; }
-        .child-dash-fit .mission-card { min-height: 0; flex: 1 1 auto; padding: 16px 16px; justify-content: center; }
+        .child-dash-fit .dash-inner { justify-content: flex-start; gap: 10px; }
+        .child-dash-fit .mission-card { min-height: 0; padding: 16px 16px; justify-content: center; }
         .child-dash-fit .mission-title { font-size: 1.05rem; margin-bottom: 4px; }
         .child-dash-fit .mission-sub { font-size: 0.72rem; margin-bottom: 10px; }
         .child-dash-fit .mission-cta { padding: 11px 20px; font-size: 0.92rem; }
@@ -432,7 +426,8 @@
         .child-dash-fit .stat-card-4 { min-height: 0; padding: 10px; }
         .child-dash-fit .stat-card-4-content { gap: 5px; justify-content: center; }
         .child-dash-fit .stat-card-4-val { font-size: 1.15rem; }
-        .child-dash-fit .games-card { min-height: 0; flex: 0 0 auto; padding: 12px 14px; }
+        .child-dash-fit .mini-cards-row { flex: 0 0 auto; gap: 8px; margin-top: 8px; }
+        .child-dash-fit .games-card, .child-dash-fit .oly-card { min-height: 0; padding: 12px 14px; }
     }
 </style>
 
@@ -844,33 +839,35 @@
             </a>
         </div>
 
-        {{-- თამაშები --}}
-        <a href="{{ route('games.index') }}" class="games-card">
-            <span class="games-card-icon">🎮</span>
-            <div class="games-card-text">
-                <div class="games-card-title">თამაშები</div>
-                <div class="games-card-sub">ითამაშე Kidsmart-თან და აჯობე!</div>
-            </div>
-            <span class="games-card-arrow">→</span>
-        </a>
-
-        {{-- ოლიმპიადა --}}
-        <a href="{{ route('olympiad.index') }}" class="oly-card {{ $olympiadStatus['eligible_today'] || $olympiadStatus['already_attempted_today'] ? '' : 'locked' }}">
-            <span class="oly-card-icon">🏆</span>
-            <div class="oly-card-text">
-                <div class="oly-card-title">ოლიმპიადა</div>
-                <div class="oly-card-sub">
-                    @if($olympiadStatus['already_attempted_today'])
-                        {{ $olympiadStatus['todays_test']->completed_at ? 'დღევანდელი ოლიმპიადა დასრულებულია!' : 'ოლიმპიადა დაწყებულია — გააგრძელე!' }}
-                    @elseif($olympiadStatus['eligible_today'])
-                        დღეს შეგიძლია დაწერო — დააჭირე და დაიწყე!
-                    @else
-                        {{ $olympiadStatus['reason'] }}
-                    @endif
+        <div class="mini-cards-row">
+            {{-- თამაშები --}}
+            <a href="{{ route('games.index') }}" class="games-card">
+                <span class="games-card-icon">🎮</span>
+                <div class="games-card-text">
+                    <div class="games-card-title">თამაშები</div>
+                    <div class="games-card-sub">ითამაშე Kidsmart-თან და აჯობე!</div>
                 </div>
-            </div>
-            <span class="oly-card-arrow">→</span>
-        </a>
+                <span class="games-card-arrow">→</span>
+            </a>
+
+            {{-- ოლიმპიადა --}}
+            <a href="{{ route('olympiad.index') }}" class="oly-card {{ $olympiadStatus['eligible_today'] || $olympiadStatus['already_attempted_today'] ? '' : 'locked' }}">
+                <span class="oly-card-icon">🏆</span>
+                <div class="oly-card-text">
+                    <div class="oly-card-title">ოლიმპიადა</div>
+                    <div class="oly-card-sub">
+                        @if($olympiadStatus['already_attempted_today'])
+                            {{ $olympiadStatus['todays_test']->completed_at ? 'დღევანდელი ოლიმპიადა დასრულებულია!' : 'ოლიმპიადა დაწყებულია — გააგრძელე!' }}
+                        @elseif($olympiadStatus['eligible_today'])
+                            დღეს შეგიძლია დაწერო — დააჭირე და დაიწყე!
+                        @else
+                            {{ $olympiadStatus['reason'] }}
+                        @endif
+                    </div>
+                </div>
+                <span class="oly-card-arrow">→</span>
+            </a>
+        </div>
 
         @endif
 

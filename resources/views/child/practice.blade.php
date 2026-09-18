@@ -5,10 +5,10 @@
 @section('content')
 <style>
     body { background: transparent !important; }
-    .wrap { max-width: 520px; margin: 0 auto; padding: 0 0 80px; }
+    .wrap { max-width: 520px; margin: 0 auto; padding: 28px 0 80px; }
 
     /* ── Header ── */
-    .topbar { display:flex; align-items:center; justify-content:space-between; padding:16px 16px 0; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; padding:0 16px; }
     .back { font-family:'Nunito',sans-serif; font-size:0.78rem; font-weight:800; color:#0284c7; text-decoration:none; padding:5px 14px; background:white; border-radius:99px; box-shadow:0 2px 8px rgba(0,0,0,0.07); }
     .title { font-family:'Fredoka One',cursive; font-size:1rem; color:#0c4a6e; }
     .topic-tag { font-family:'Nunito',sans-serif; font-weight:800; font-size:0.68rem; color:#2563eb; background:#eff6ff; border-radius:99px; padding:4px 12px; margin:8px 16px 0; display:inline-block; }
@@ -125,7 +125,6 @@
 
 <div class="wrap">
     <div class="topbar">
-        <a href="{{ route('practice.topics') }}" class="back">← სავარჯიშოები</a>
         <div class="title">
             @if($type === 'pyramid') 🔺 პირამიდა
             @elseif($type === 'auto') 🎯 ვარჯიში

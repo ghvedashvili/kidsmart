@@ -110,7 +110,6 @@ h1 { margin: 0; font-size: 20px; color: #1b5e20; flex: 1; text-align: left; }
 <div class="wrap">
     <div class="game">
         <div class="header-row">
-            <a href="{{ route('games.index') }}" class="back-btn">← თამაშები</a>
             <h1>🐰 ბაჭია და მგლები 🐺</h1>
         </div>
         <div class="subtitle">შენ ხარ 3 მგელი — დაიჭირე Kidsmart-ის ბაჭია!</div>

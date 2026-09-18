@@ -174,7 +174,7 @@
         overscroll-behavior: none;
         scroll-behavior: smooth;
     }
-    body { background: transparent; overscroll-behavior: none; padding-top: 56px; }
+    body { background: transparent; overscroll-behavior: none; padding-top: {{ (auth()->check() && auth()->user()->role === 'child') ? '0' : '56px' }}; }
 
     #page-loader {
         position: fixed; inset: 0; background: #080808;

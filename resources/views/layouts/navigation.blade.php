@@ -146,6 +146,61 @@
 #mobileNav .mn-icon { font-size: 1.1rem; width: 24px; text-align: center; }
 </style>
 
+@php
+    // Every child page replaces the shared top/bottom nav with one compact bar
+    // (logo + notification + logout) — navigation between sections happens via
+    // each page's own "back" link and the dashboard's cards instead.
+    $__hideChildChrome = auth()->check() && auth()->user()->role === 'child';
+@endphp
+@if($__hideChildChrome)
+<style>
+    .child-top-bar {
+        display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+        padding: 10px 16px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        position: relative; z-index: 500;
+    }
+    .child-top-left { justify-self: start; }
+    .child-top-logo { justify-self: center; }
+    .child-top-bar.no-back { grid-template-columns: auto 1fr; }
+    .child-top-bar.no-back .child-top-logo { justify-self: start; }
+    .child-top-bar img { height: 36px; width: auto; display: block; }
+    .child-top-actions { justify-self: end; display: flex; gap: 8px; }
+    .child-back-btn {
+        display: flex; align-items: center; gap: 6px;
+        flex-shrink: 0;
+        background: #f8fafc; border: none; border-radius: 99px;
+        padding: 8px 14px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.72rem;
+        color: #6c5ce7; cursor: pointer;
+    }
+    .child-top-actions button {
+        display: flex; align-items: center; gap: 6px;
+        background: #f8fafc; border: none; border-radius: 99px;
+        padding: 8px 14px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.72rem;
+        color: #6c5ce7; cursor: pointer;
+    }
+    .child-top-actions button.on { color: #16a34a; }
+    .child-top-actions form { margin: 0; }
+    .child-top-actions .logout-btn { color: #e17055; }
+</style>
+<div class="child-top-bar{{ request()->routeIs('dashboard') ? ' no-back' : '' }}">
+    @unless(request()->routeIs('dashboard'))
+    <div class="child-top-left">
+        <button type="button" onclick="history.back()" class="child-back-btn" aria-label="უკან">← უკან</button>
+    </div>
+    @endunless
+    <a href="{{ route('dashboard') }}" class="child-top-logo"><img src="/img/logo.png" alt="KidSmart"></a>
+    <div class="child-top-actions">
+        <button type="button" id="notifBtn" onclick="window._notifToast=true;toggleNotifications()">
+            <i id="notifIcon" class="bi bi-bell"></i>
+        </button>
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="logout-btn">↩</button>
+        </form>
+    </div>
+</div>
+@endif
+@unless($__hideChildChrome)
 <nav class="bg-dark border-bottom fixed-top" style="border-color:#2a2a2a!important;" data-bs-theme="dark">
     <div class="nav-grid" style="min-height:52px;">
         <div class="nav-left">
@@ -251,9 +306,10 @@
         </div>
     </div>
 </nav>
+@endunless
 
 @auth
-@if(auth()->user()->role === 'child')
+@if(auth()->user()->role === 'child' && ! $__hideChildChrome)
 <nav class="child-bottom-nav">
     <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'cbn-act' : '' }}"><span class="cbn-icon">🏠</span>მთავარი</a>
     <a href="{{ route('market.child') }}" class="cbn-market {{ request()->routeIs('market.child') ? 'cbn-act' : '' }}"><span class="cbn-icon">🛒</span>მარკეტი</a>
@@ -413,7 +469,7 @@
 
 <script>
 (function() {
-    const nav = document.querySelector('nav');
+    const nav = document.querySelector('nav') || document.querySelector('.child-top-bar');
     if (nav) document.documentElement.style.setProperty('--nav-h', nav.offsetHeight + 'px');
 })();
 

@@ -35,8 +35,6 @@
 </style>
 
 <div class="wrap">
-    <a href="{{ route('dashboard') }}" class="back">← მთავარი</a>
-
     @if($topics->isEmpty())
     <div class="empty-state">
         <div class="empty-icon">🎬</div>

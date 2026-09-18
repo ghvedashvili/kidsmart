@@ -81,8 +81,6 @@ body { font-family: 'Nunito', sans-serif; background: transparent !important; }
 </style>
 
 <div class="wrap">
-<a href="{{ route('dashboard') }}" class="back-btn">← დაბრუნება</a>
-
 <div class="page-hero">
     <div class="page-hero-title">🛒 მარკეტი</div>
     <div class="page-hero-sub">💰 {{ $coins }} მონეტა — აირჩიე შენი ჯილდო!</div>

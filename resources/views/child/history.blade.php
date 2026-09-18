@@ -78,8 +78,6 @@
 </style>
 
 <div class="wrap">
-    <a href="{{ route('dashboard') }}" class="back">← მთავარი</a>
-
     <div class="page-hero">
         <div class="page-hero-title">📋 ჩემი ტესტები</div>
         <div class="page-hero-sub">ყველა შესრულებული ტესტი ერთ ადგილას</div>

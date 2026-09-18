@@ -113,8 +113,6 @@ body { font-family: 'Nunito', sans-serif; background: transparent !important; }
 </style>
 
 <div class="wrap">
-<a href="{{ route('dashboard') }}" class="back-btn">← დაბრუნება</a>
-
 <div class="page-hero">
     <div class="page-hero-title">🏆 ჩემი მედლები</div>
     <div class="page-hero-sub">{{ $earned->count() }}/{{ $achievements->count() }} მედალი მოგებული — გააგრძელე!</div>

@@ -67,8 +67,6 @@
 </style>
 
 <div class="wrap">
-    <a href="{{ route('dashboard') }}" class="back">← მთავარი</a>
-
     <div class="page-hero">
         <div class="page-hero-title">🎯 სავარჯიშოები</div>
         <div class="page-hero-sub">ივარჯიშე დღეს — კითხვები მოვა ყველა თემიდან რიგრიგობით!</div>

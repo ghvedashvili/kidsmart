@@ -42,8 +42,6 @@
 </style>
 
 <div class="wrap">
-    <a href="{{ route('dashboard') }}" class="back-btn">← მთავარი</a>
-
     <div class="hero-card">
         <div class="hero-title">🎮 თამაშები</div>
         <div class="hero-sub">ითამაშე Kidsmart-თან და გაიუმჯობესე შენი ანგარიში!</div>

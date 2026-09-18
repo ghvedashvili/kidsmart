@@ -59,8 +59,6 @@ body { font-family: 'Nunito', sans-serif; background: transparent !important; }
 </style>
 
 <div class="wrap">
-<a href="{{ route('dashboard') }}" class="back-btn">← დაბრუნება</a>
-
 @if(session('test_error'))
 <div class="flash-err">{{ session('test_error') }}</div>
 @endif
