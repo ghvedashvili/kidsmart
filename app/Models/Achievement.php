@@ -3,11 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Achievement extends Model
 {
-    protected $fillable = ['slug', 'name', 'description', 'condition_type', 'condition_config', 'daily_limit', 'is_active'];
+    protected $fillable = ['slug', 'theme_id', 'name', 'description', 'condition_type', 'condition_config', 'daily_limit', 'is_active'];
 
     protected $casts = [
         'condition_config' => 'array',
@@ -34,5 +35,10 @@ class Achievement extends Model
     public function tiers(): HasMany
     {
         return $this->hasMany(AchievementTier::class)->orderBy('level');
+    }
+
+    public function theme(): BelongsTo
+    {
+        return $this->belongsTo(Theme::class);
     }
 }

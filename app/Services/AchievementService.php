@@ -27,8 +27,14 @@ class AchievementService
     {
         $setting        = $child->childSetting;
         $currentGradeId = $setting?->grade_id;
+        $themeId        = $this->resolveChildThemeId($child);
 
-        $achievements = Achievement::with('tiers')->where('is_active', true)->get();
+        $achievements = Achievement::with('tiers')->where('is_active', true)
+            ->where(function ($q) use ($themeId) {
+                $q->whereNull('theme_id');
+                if ($themeId) $q->orWhere('theme_id', $themeId);
+            })
+            ->get();
 
         $earned = ChildAchievement::where('child_id', $child->id)
             ->where('grade_id', $currentGradeId)
@@ -63,6 +69,16 @@ class AchievementService
             ->map(fn ($rows) => $rows->keyBy('slug'));
 
         return compact('setting', 'achievements', 'earned', 'totalTests', 'marketRewards', 'oldGrades', 'oldGradeAchievements');
+    }
+
+    /**
+     * A child's assigned theme is a single-select despite the underlying many-to-many
+     * pivot (the edit-child form only ever keeps one active) — this is what decides
+     * which theme-exclusive achievements are visible/earnable for them right now.
+     */
+    private function resolveChildThemeId(User $child): ?int
+    {
+        return $child->themes()->value('themes.id');
     }
 
     public function handleTestCompletion(Test $test, User $child): array
@@ -174,7 +190,13 @@ class AchievementService
             ->get()
             ->keyBy('slug');
 
-        $achievements = Achievement::with('tiers')->where('is_active', true)->get();
+        $themeId = $this->resolveChildThemeId($child);
+        $achievements = Achievement::with('tiers')->where('is_active', true)
+            ->where(function ($q) use ($themeId) {
+                $q->whereNull('theme_id');
+                if ($themeId) $q->orWhere('theme_id', $themeId);
+            })
+            ->get();
 
         // "1 new achievement per day" only gates the FIRST-ever unlock of a daily-limited
         // achievement — tier_level=1 is the only tier a fresh unlock can grant, so filtering

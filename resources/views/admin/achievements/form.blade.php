@@ -46,6 +46,15 @@
             <input type="text" name="slug" id="achSlug" class="fc" value="{{ old('slug', $achievement?->slug) }}" required>
             @error('slug')<div class="err">{{ $message }}</div>@enderror
 
+            <div class="lbl">თემატიკა <span style="color:#cbd5e1;">(თუ მონიშნავ, მედალი ჩანს/მოქმედებს მხოლოდ ამ თემატიკის ბავშვებისთვის)</span></div>
+            <select name="theme_id" class="fc">
+                <option value="">ნებისმიერი თემატიკა</option>
+                @foreach($themes as $theme)
+                <option value="{{ $theme->id }}" {{ old('theme_id', $achievement?->theme_id) == $theme->id ? 'selected' : '' }}>{{ $theme->icon ?? '' }} {{ $theme->name }}</option>
+                @endforeach
+            </select>
+            @error('theme_id')<div class="err">{{ $message }}</div>@enderror
+
             <div class="lbl">აღწერა <span style="color:#cbd5e1;">({n} შეიცვლება დონის ზღვრით)</span></div>
             <input type="text" name="description" class="fc" value="{{ old('description', $achievement?->description) }}" placeholder="მაგ: დაწერე {n} ტესტი">
 

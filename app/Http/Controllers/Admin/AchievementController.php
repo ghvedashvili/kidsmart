@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Achievement;
+use App\Models\Theme;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -14,7 +15,7 @@ class AchievementController extends Controller
     public function index()
     {
         return view('admin.achievements.index', [
-            'achievements' => Achievement::with('tiers')->orderBy('name')->get(),
+            'achievements' => Achievement::with(['tiers', 'theme'])->orderBy('name')->get(),
         ]);
     }
 
@@ -24,6 +25,7 @@ class AchievementController extends Controller
             'achievement' => null,
             'conditionTypes' => Achievement::CONDITION_TYPES,
             'binaryTypes' => Achievement::BINARY_TYPES,
+            'themes' => Theme::orderBy('name')->get(),
         ]);
     }
 
@@ -47,6 +49,7 @@ class AchievementController extends Controller
             'achievement' => $achievement,
             'conditionTypes' => Achievement::CONDITION_TYPES,
             'binaryTypes' => Achievement::BINARY_TYPES,
+            'themes' => Theme::orderBy('name')->get(),
         ]);
     }
 
@@ -89,6 +92,7 @@ class AchievementController extends Controller
                 'required', 'string', 'max:60', 'alpha_dash',
                 Rule::unique('achievements', 'slug')->ignore($achievement?->id),
             ],
+            'theme_id'         => ['nullable', Rule::exists('themes', 'id')],
             'description'      => 'nullable|string|max:200',
             'condition_type'   => ['required', Rule::in(array_keys(Achievement::CONDITION_TYPES))],
             'condition_before' => 'nullable|date_format:H:i',
@@ -112,6 +116,7 @@ class AchievementController extends Controller
         return [
             'name'             => $data['name'],
             'slug'             => Str::slug($data['slug'], '_'),
+            'theme_id'         => $data['theme_id'] ?? null,
             'description'      => $data['description'] ?? null,
             'condition_type'   => $data['condition_type'],
             'condition_config' => $conditionConfig,

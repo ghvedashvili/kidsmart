@@ -48,6 +48,9 @@
             <div class="card-emoji">🏅</div>
             @endif
             <div class="card-name">{{ $ach->name }}</div>
+            @if($ach->theme)
+            <div style="font-size:0.6rem;color:#7c3aed;margin-bottom:2px;">{{ $ach->theme->icon ?? '' }} მხოლოდ {{ $ach->theme->name }}</div>
+            @endif
             <div class="card-meta">
                 {{ \App\Models\Achievement::CONDITION_TYPES[$ach->condition_type] ?? $ach->condition_type }}
                 @if($ach->tiers->count() > 1) · {{ $ach->tiers->count() }} დონე @endif
