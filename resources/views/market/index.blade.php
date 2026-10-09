@@ -212,6 +212,7 @@
     @endif
 </div>
 
+@push('modals')
 {{-- Add item modal (manual entry / templates) --}}
 <div class="m-overlay" id="addItemModal" onclick="if(event.target===this)closeAddItemModal()">
     <div class="m-box" style="max-width:480px;">
@@ -301,6 +302,7 @@
         </form>
     </div>
 </div>
+@endpush
 
 <script>
 // ── Add item modal ───────────────────────────────────

@@ -67,8 +67,12 @@
         box-shadow: 0 10px 24px rgba(108,92,231,0.25);
     }
     .parent-hero-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; width: 100%; }
+    .parent-hero-text { flex: 1; min-width: 0; }
     .parent-hero-text h2 { font-family: 'Goldman', monospace; font-size: 0.95rem; color: rgba(255,255,255,0.85); margin: 0; letter-spacing: 0.02em; }
-    .parent-hero-name { font-family: 'Goldman', monospace; font-size: 1.3rem; color: #fff; margin-top: 4px; letter-spacing: 0.02em; }
+    .parent-hero-name {
+        font-family: 'Goldman', monospace; font-size: 1.3rem; color: #fff; margin-top: 4px; letter-spacing: 0.02em;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
 
     .plan-pill {
         display: flex; align-items: center; gap: 7px; width: 100%; box-sizing: border-box;
@@ -176,6 +180,7 @@
     .cc-mstat.emerald { background: #ecfdf5; } .cc-mstat.emerald .cc-mstat-val { color: #047857; }
 
     .cc-mfull-row { display: flex; justify-content: flex-end; }
+    @media (min-width: 700px) { .cc-mfull-row { display: none; } }
     .cc-mfull-link {
         display: inline-flex; align-items: center; gap: 5px;
         font-family: 'Goldman', monospace; font-size: 0.68rem; font-weight: 700; color: var(--primary);
@@ -690,12 +695,6 @@
                         <i class="bi bi-link-45deg"></i> გაზიარება
                     </button>
                     @endif
-
-                    <div class="cc-mfull-row">
-                        <a href="{{ route('child.hub', $child) }}" class="cc-mfull-link" onclick="event.stopPropagation();">
-                            სრულად <i class="bi bi-arrow-right"></i>
-                        </a>
-                    </div>
                 </div>
 
                 <div class="cc-layout">
@@ -777,6 +776,12 @@
                     </div>
                 </div>
                 @endif
+
+                <div class="cc-mfull-row">
+                    <a href="{{ route('child.hub', $child) }}" class="cc-mfull-link">
+                        სრულად <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
 
                 @if(session('reminder_sent_' . $child->id))
                 <div style="font-family:'Goldman',monospace;font-size:0.6rem;color:#059669;margin-top:-6px;">&#10003; შეხსენება გაიგზავნა</div>
@@ -997,9 +1002,10 @@
     </div>
 </div>
 
-{{-- Edit / avatar modals (one per child) — rendered outside .dash-hero/.dash-inner (which have
-     overflow:hidden for the decorative background pattern) so their fixed-position backdrop
-     isn't clipped to that box instead of the full viewport --}}
+{{-- Edit / avatar modals (one per child) — pushed to the 'modals' stack, rendered outside both
+     .dash-hero (overflow:hidden would clip their fixed backdrop) and .container-fluid (whose
+     z-index:1 stacking context would trap them below the shared top-bar) --}}
+@push('modals')
 @if(in_array(auth()->user()->role, ['parent', 'admin']))
 @foreach($children as $child)
 @php
@@ -1093,7 +1099,9 @@
 </div>
 @endforeach
 @endif
+@endpush
 
+@push('modals')
 {{-- Remind Modal --}}
 @if(in_array(auth()->user()->role, ['parent', 'admin']))
 <div id="remindModal" class="remind-modal" onclick="if(event.target===this)closeRemind()">
@@ -1112,7 +1120,9 @@
     </div>
 </div>
 @endif
+@endpush
 
+@push('modals')
 {{-- Add Child Modal --}}
 @if(in_array(auth()->user()->role, ['parent', 'admin']))
 <div id="addChildModal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
@@ -1253,7 +1263,9 @@
     </div>
 </div>
 @endif
+@endpush
 
+@push('modals')
 {{-- Plans Modal --}}
 @if(in_array(auth()->user()->role, ['parent', 'admin']))
 <div id="plansModal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
@@ -1304,6 +1316,7 @@
     </div>
 </div>
 @endif
+@endpush
 
 <script>
 

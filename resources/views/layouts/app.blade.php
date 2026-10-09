@@ -228,6 +228,12 @@
     @yield('content')
 </div>
 
+{{-- Modals are pushed here, outside .container-fluid — that div's z-index:1
+     creates its own stacking context, which would trap any modal rendered
+     inside it below the shared top-bar (z-index:500) no matter how high the
+     modal's own z-index is set. --}}
+@stack('modals')
+
 <div id="app-loader" class="app-loader hidden">
     <div class="ks-loader">
         <div class="ks-loader-stage">

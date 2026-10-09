@@ -188,6 +188,7 @@
     </div>
 </div>
 
+@push('modals')
 <div id="remindModal" class="remind-modal" onclick="if(event.target===this)this.classList.remove('open')">
     <div class="remind-box">
         <div class="remind-title">
@@ -203,4 +204,5 @@
         </form>
     </div>
 </div>
+@endpush
 @endsection
