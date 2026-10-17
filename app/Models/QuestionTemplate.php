@@ -167,6 +167,18 @@ class QuestionTemplate extends Model
         ];
     }
 
+    /**
+     * Georgian labels for the "operator" variable type's underlying math symbol —
+     * {{X}} in template_text/hint_text shows the label ("ით მეტი"); the symbol
+     * itself ("+") is what gets substituted into correct_formula.
+     */
+    private const OPERATOR_LABELS = [
+        '+' => 'ით მეტი',
+        '-' => 'ით ნაკლები',
+        '*' => 'ჯერ მეტი',
+        '/' => 'ჯერ ნაკლები',
+    ];
+
     private function generateNumeric(Theme $theme): array
     {
         $numConf = $this->num_config ?? [];
@@ -178,17 +190,20 @@ class QuestionTemplate extends Model
         $uniqueVars = (bool) ($numConf['_unique'] ?? false);
         $baseFormula = preg_replace('/\{\{(\w+)\}\}/', '$1', $this->correct_formula);
 
-        // Split variables into randomly-rolled ones and "derived" ones — a derived
-        // variable (num_config[key] = ['derived' => 'N1+3']) is never rolled itself;
-        // it's computed from whatever vars were already resolved above it (row order),
-        // using the same evalExpr() conditions use. This keeps a relation like
-        // "N2 is always N1+3" exact instead of relying on random values happening to
-        // match it (which an '==' condition would only satisfy by chance).
-        $randomConf = [];
-        $derivedConf = [];
+        // Variables split three ways: randomly-rolled, "derived" (computed from
+        // other vars already resolved above it, same evalExpr() conditions use —
+        // keeps a relation like "N2 is always N1+3" exact instead of relying on
+        // random values happening to match it), and "operator" (its value is one
+        // of +-*/ , randomly chosen each attempt from the admin-checked subset —
+        // lets a formula like "N1 X N2" literally change which operation runs).
+        $randomConf   = [];
+        $derivedConf  = [];
+        $operatorConf = [];
         foreach ($numConf as $key => $conf) {
             if (! is_array($conf) || str_starts_with((string) $key, '_')) continue;
-            if (array_key_exists('derived', $conf)) {
+            if (! empty($conf['operator'])) {
+                $operatorConf[$key] = $conf;
+            } elseif (array_key_exists('derived', $conf)) {
                 $derivedConf[$key] = $conf;
             } else {
                 $randomConf[$key] = $conf;
@@ -205,22 +220,50 @@ class QuestionTemplate extends Model
                 $steps = (int) (($conf['max'] - $conf['min']) / $step);
                 $numVars[$key] = $conf['min'] + rand(0, $steps) * $step;
             }
+            foreach ($operatorConf as $key => $conf) {
+                $options = array_values(array_filter((array) ($conf['options'] ?? []), fn ($o) => isset(self::OPERATOR_LABELS[$o])));
+                if (! $options) $options = ['+'];
+                $numVars[$key] = $options[array_rand($options)];
+            }
             foreach ($derivedConf as $key => $conf) {
                 $numVars[$key] = $this->evalExpr((string) ($conf['derived'] ?? '0'), $numVars);
             }
-            if ($uniqueVars && count(array_unique($numVars)) !== count($numVars)) continue;
+
+            // Uniqueness only makes sense among the actual numbers — an operator
+            // variable's symbol repeating (e.g. two slots both landing on "+") is
+            // normal and not a "duplicate value" in the sense this checkbox means.
+            if ($uniqueVars) {
+                $uniqueCheck = array_diff_key($numVars, $operatorConf);
+                if (count(array_unique($uniqueCheck)) !== count($uniqueCheck)) continue;
+            }
+
             $f = $baseFormula;
             foreach ($numVars as $k => $v) {
                 $f = str_replace($k, (string) $v, $f);
             }
-            $result = @eval("return (int)({$f});");
-            if ($result === false || $result <= 0) continue;
+            $rawResult = @eval("return ({$f});");
+            // Reject non-whole results outright instead of silently truncating —
+            // matters most for an operator variable landing on "/" where the
+            // numbers don't happen to divide evenly this attempt.
+            if ($rawResult === false || ! is_numeric($rawResult) || $rawResult <= 0) continue;
+            if (floor($rawResult) != $rawResult) continue;
+            $result = (int) $rawResult;
             if (!$this->conditionsMet($conditions, $numVars)) continue;
             $correct = $result;
             break;
         }
 
-        $vars = array_merge($numVars, $theme->resolveVariables());
+        // Display values for the question text/hint — an operator variable shows
+        // its Georgian label here ("ით მეტი") instead of the raw symbol ("+") that
+        // was substituted into correct_formula above.
+        $displayVars = $numVars;
+        foreach ($operatorConf as $key => $conf) {
+            if (isset($displayVars[$key])) {
+                $displayVars[$key] = self::OPERATOR_LABELS[$displayVars[$key]] ?? $displayVars[$key];
+            }
+        }
+
+        $vars = array_merge($displayVars, $theme->resolveVariables());
 
         $text = preg_replace('/\{\{(\w+)\}(?!\})/', '{{$1}}', $this->template_text);
         foreach ($vars as $k => $v) {

@@ -425,7 +425,7 @@
                     </div>
                     <div id="ncRows"></div>
                     <button type="button" class="nc-add" onclick="addNcRow()">+ ცვლადის დამატება</button>
-                    <div style="font-size:0.62rem;color:#94a3b8;margin-top:4px;">ƒ ღილაკი ცვლადს გადააქცევს „გამოთვლილად" — მაგ. N1+3 — მის მაგივრად, რომ შემთხვევით შეირჩეს</div>
+                    <div style="font-size:0.62rem;color:#94a3b8;margin-top:4px;">ƒ/± ღილაკი ცვლის ტიპს: შემთხვევითი → „გამოთვლილი" (მაგ. N1+3) → „ოპერატორი" (ით მეტი/ნაკლები, ჯერ მეტი/ნაკლები — ფორმულაში ნიშნად, ტექსტში სიტყვად გამოჩნდება)</div>
                     <label style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:0.75rem;font-weight:700;color:#374151;cursor:pointer;">
                         <input type="checkbox" id="uniqueNumVars" onchange="syncAll();previewDebounce();">
                         ყველა ცვლადი განსხვავებული
@@ -1082,14 +1082,19 @@ function applyAutoPreviewText(ncObj, autoCfg) {
 let ncRows  = [];
 let ncIdSeq = 1;
 
-function addNcRow(name = '', min = 1, max = 9, step = 1, mode = 'random', derived = '') {
+// Georgian labels for the "operator" variable type's underlying math symbol —
+// mirrors QuestionTemplate::OPERATOR_LABELS exactly.
+const OPERATOR_LABELS = { '+': 'ით მეტი', '-': 'ით ნაკლები', '*': 'ჯერ მეტი', '/': 'ჯერ ნაკლები' };
+const NC_MODE_CYCLE = ['random', 'derived', 'operator'];
+
+function addNcRow(name = '', min = 1, max = 9, step = 1, mode = 'random', derived = '', opOptions = []) {
     if (!name) {
         const used = new Set(ncRows.map(r => r.name));
         let i = 1;
         while (used.has('N' + i)) i++;
         name = 'N' + i;
     }
-    ncRows.push({ id: ncIdSeq++, name, min, max, step, mode, derived });
+    ncRows.push({ id: ncIdSeq++, name, min, max, step, mode, derived, opOptions: opOptions.slice() });
     renderNcRows();
 }
 function removeNcRow(id) {
@@ -1099,9 +1104,22 @@ function removeNcRow(id) {
 function toggleNcMode(id) {
     const r = ncRows.find(r => r.id === id);
     if (!r) return;
-    r.mode = r.mode === 'derived' ? 'random' : 'derived';
+    const idx = NC_MODE_CYCLE.indexOf(r.mode);
+    r.mode = NC_MODE_CYCLE[(idx + 1) % NC_MODE_CYCLE.length];
+    // No default-checked box on switching to operator mode — admin must pick
+    // explicitly (matches the auto-constructor's operator checkboxes, which also
+    // start unchecked). Generation still falls back to '+' as a last resort if
+    // saved with none checked (same as the auto-constructor's own fallback).
     renderNcRows();
     previewDebounce();
+}
+function toggleOpOption(id, symbol, checked) {
+    const r = ncRows.find(r => r.id === id);
+    if (!r) return;
+    r.opOptions = r.opOptions || [];
+    if (checked && !r.opOptions.includes(symbol)) r.opOptions.push(symbol);
+    if (!checked) r.opOptions = r.opOptions.filter(s => s !== symbol);
+    syncAll(); previewDebounce();
 }
 function renderNcRows() {
     const c = document.getElementById('ncRows');
@@ -1109,15 +1127,36 @@ function renderNcRows() {
     ncRows.forEach(row => {
         const div = document.createElement('div');
         div.className = 'nc-row';
-        const isDerived = row.mode === 'derived';
-        div.innerHTML = isDerived ? `
+        if (row.mode === 'derived') {
+            div.innerHTML = `
             <input class="nc-inp nc-name" maxlength="6" placeholder="N1" value="${row.name}"
                 data-nc="${row.id}" data-nc-f="name">
             <input class="nc-inp" style="grid-column: 2 / 5;" placeholder="მაგ. N1+3" value="${row.derived || ''}"
                 data-nc="${row.id}" data-nc-f="derived">
-            <button type="button" class="nc-toggle on" title="შემთხვევით მნიშვნელობაზე დაბრუნება" onclick="toggleNcMode(${row.id})">ƒ</button>
+            <button type="button" class="nc-toggle on" title="შემთხვევით მნიშვნელობაზე გადართვა" onclick="toggleNcMode(${row.id})">ƒ</button>
             <button type="button" class="nc-del" onclick="removeNcRow(${row.id})">✕</button>
-        ` : `
+            `;
+        } else if (row.mode === 'operator') {
+            const opts = row.opOptions || [];
+            const chk = (sym) => opts.includes(sym) ? 'checked' : '';
+            div.innerHTML = `
+            <input class="nc-inp nc-name" maxlength="6" placeholder="X" value="${row.name}"
+                data-nc="${row.id}" data-nc-f="name">
+            <div style="grid-column: 2 / 5;display:flex;gap:7px;flex-wrap:wrap;align-items:center;font-size:0.6rem;color:#374151;">
+                <label style="display:flex;align-items:center;gap:3px;cursor:pointer;white-space:nowrap;">
+                    <input type="checkbox" ${chk('+')} onchange="toggleOpOption(${row.id},'+',this.checked)"> ით მეტი</label>
+                <label style="display:flex;align-items:center;gap:3px;cursor:pointer;white-space:nowrap;">
+                    <input type="checkbox" ${chk('-')} onchange="toggleOpOption(${row.id},'-',this.checked)"> ით ნაკლები</label>
+                <label style="display:flex;align-items:center;gap:3px;cursor:pointer;white-space:nowrap;">
+                    <input type="checkbox" ${chk('*')} onchange="toggleOpOption(${row.id},'*',this.checked)"> ჯერ მეტი</label>
+                <label style="display:flex;align-items:center;gap:3px;cursor:pointer;white-space:nowrap;">
+                    <input type="checkbox" ${chk('/')} onchange="toggleOpOption(${row.id},'/',this.checked)"> ჯერ ნაკლები</label>
+            </div>
+            <button type="button" class="nc-toggle on" title="შემთხვევით მნიშვნელობაზე გადართვა" onclick="toggleNcMode(${row.id})">±</button>
+            <button type="button" class="nc-del" onclick="removeNcRow(${row.id})">✕</button>
+            `;
+        } else {
+            div.innerHTML = `
             <input class="nc-inp nc-name" maxlength="6" placeholder="N1" value="${row.name}"
                 data-nc="${row.id}" data-nc-f="name">
             <input type="number" class="nc-inp" min="0" placeholder="1" value="${row.min}"
@@ -1126,9 +1165,10 @@ function renderNcRows() {
                 data-nc="${row.id}" data-nc-f="max">
             <input type="number" class="nc-inp" min="1" placeholder="1" value="${row.step}"
                 title="ნაბიჯი: 1=ნებ, 2=ლუწი, 5=მრ5" data-nc="${row.id}" data-nc-f="step">
-            <button type="button" class="nc-toggle" title="გამოთვლილ ცვლადზე გადართვა (ფორმულით)" onclick="toggleNcMode(${row.id})">ƒ</button>
+            <button type="button" class="nc-toggle" title="გამოთვლილ ცვლადზე გადართვა (ფორმულა → ოპერატორი)" onclick="toggleNcMode(${row.id})">ƒ</button>
             <button type="button" class="nc-del" onclick="removeNcRow(${row.id})">✕</button>
-        `;
+            `;
+        }
         c.appendChild(div);
     });
     syncAll();
@@ -1228,9 +1268,13 @@ function syncAll() {
     const ncObj = {};
     ncRows.forEach(r => {
         if (!r.name) return;
-        ncObj[r.name] = r.mode === 'derived'
-            ? { derived: r.derived || '0' }
-            : { min: +r.min, max: +r.max, step: +r.step || 1 };
+        if (r.mode === 'derived') {
+            ncObj[r.name] = { derived: r.derived || '0' };
+        } else if (r.mode === 'operator') {
+            ncObj[r.name] = { operator: true, options: (r.opOptions && r.opOptions.length) ? r.opOptions : ['+'] };
+        } else {
+            ncObj[r.name] = { min: +r.min, max: +r.max, step: +r.step || 1 };
+        }
     });
     const _uq = document.getElementById('uniqueNumVars');
     if (_uq && _uq.checked) ncObj['_unique'] = true;
@@ -1349,10 +1393,15 @@ function pickThemeVars() {
     });
     return result;
 }
-function pickNumVars() {
+// $extraCheck(numVars), if given, must also return true for an attempt to be
+// accepted — genPreviewNumeric() uses this to fold the formula/clean-division
+// check into the SAME retry loop as the conditions check (matching how PHP's
+// generateNumeric() retries the whole combination together, not just the vars).
+function pickNumVars(extraCheck) {
     const confRows = ncRows.filter(r => r.name);
-    const randomRows  = confRows.filter(r => r.mode !== 'derived');
-    const derivedRows = confRows.filter(r => r.mode === 'derived');
+    const randomRows   = confRows.filter(r => r.mode !== 'derived' && r.mode !== 'operator');
+    const operatorRows = confRows.filter(r => r.mode === 'operator');
+    const derivedRows  = confRows.filter(r => r.mode === 'derived');
     const unique = document.getElementById('uniqueNumVars')?.checked ?? false;
     let numVars = {}, condOk = false;
     for (let attempt = 0; attempt < 200; attempt++) {
@@ -1362,16 +1411,40 @@ function pickNumVars() {
             const steps = Math.floor((r.max - r.min) / step);
             numVars[r.name] = r.min + Math.floor(Math.random() * (steps + 1)) * step;
         });
+        // An operator variable's value is one of +-*/ , randomly picked each
+        // attempt from the admin-checked subset — same spirit as a derived var,
+        // except it isn't computed from anything, just rolled like a random one.
+        operatorRows.forEach(r => {
+            const opts = (r.opOptions && r.opOptions.length) ? r.opOptions : ['+'];
+            numVars[r.name] = opts[Math.floor(Math.random() * opts.length)];
+        });
         // Derived vars are computed (not randomly rolled) from whatever vars were
         // already resolved above them, in row order — same evaluator conditions use.
         derivedRows.forEach(r => {
             numVars[r.name] = evalExpr(r.derived || '0', numVars);
         });
-        const vals = Object.values(numVars);
-        if (unique && new Set(vals).size !== vals.length) continue;
-        if (evalConditions(numVars)) { condOk = true; break; }
+        // Uniqueness only makes sense among actual numbers — an operator symbol
+        // repeating across slots (e.g. two both landing on "+") isn't a "duplicate".
+        if (unique) {
+            const uniqueVals = randomRows.concat(derivedRows).map(r => numVars[r.name]);
+            if (new Set(uniqueVals).size !== uniqueVals.length) continue;
+        }
+        if (evalConditions(numVars) && (!extraCheck || extraCheck(numVars))) { condOk = true; break; }
     }
     return { numVars, condOk };
+}
+// Builds the display map used for template_text/hint_text substitution — an
+// operator variable shows its Georgian label ("ით მეტი") instead of the raw
+// symbol ("+") that's used when substituting into correct_formula. Mirrors
+// QuestionTemplate::OPERATOR_LABELS / the $displayVars construction in PHP.
+function buildDisplayVars(numVars, ncConfRows) {
+    const display = { ...numVars };
+    (ncConfRows || ncRows.filter(r => r.name)).forEach(r => {
+        if (r.mode === 'operator' && display[r.name] !== undefined) {
+            display[r.name] = OPERATOR_LABELS[display[r.name]] || display[r.name];
+        }
+    });
+    return display;
 }
 function clearPreview() {
     document.getElementById('prevQ').innerHTML = '<span style="color:#94a3b8;font-size:0.72rem;line-height:1.8;">③ კითხვის ტექსტი + ④ სწორი პასუხი<br>შეავსეთ preview-სთვის</span>';
@@ -1846,20 +1919,41 @@ function genPreviewNumeric(tmpl) {
     const formula = document.getElementById('correctFormula').value.trim();
     const dMin    = +document.getElementById('distMin').value || 1;
     const dMax    = +document.getElementById('distMax').value || 10;
-    const { numVars, condOk } = pickNumVars();
     const themeMap = pickThemeVars();
 
+    // The formula/clean-division check runs INSIDE the same retry loop as the
+    // conditions check (via pickNumVars()'s extraCheck) — so an operator variable
+    // landing on "/" where the numbers don't divide evenly causes that whole
+    // attempt to be retried with fresh values, not silently truncated. Mirrors
+    // QuestionTemplate::generateNumeric()'s single combined attempt loop.
+    let correct = null, substituted = '';
+    const { numVars, condOk } = pickNumVars(!formula ? null : (vars) => {
+        let f = formula;
+        Object.entries(vars).forEach(([k, v]) => { f = f.replaceAll(k, String(v)); });
+        f = f.replace(/[^0-9a-z+\-*/()\s%.]/gi, '');
+        try {
+            const round = Math.round, floor = Math.floor, ceil = Math.ceil, abs = Math.abs;
+            const raw = Function('round', 'floor', 'ceil', 'abs', 'return (' + f + ')')(round, floor, ceil, abs);
+            if (Number.isFinite(raw) && raw > 0 && Math.floor(raw) === raw) {
+                correct = raw; substituted = f; return true;
+            }
+        } catch (e) {}
+        correct = null;
+        return false;
+    });
+
+    const displayVars = buildDisplayVars(numVars);
     let text = tmpl;
-    Object.entries({...themeMap, ...numVars}).forEach(([k,v]) => { text = text.replaceAll(OB+k+CB, v); });
+    Object.entries({...themeMap, ...displayVars}).forEach(([k,v]) => { text = text.replaceAll(OB+k+CB, v); });
     text = text.replace(/\{\{\w+\}\}/g, '?');
 
     let hint = (document.getElementById('hintText').value || '').trim();
-    Object.entries({...themeMap, ...numVars}).forEach(([k,v]) => { hint = hint.replaceAll(OB+k+CB, v); });
+    Object.entries({...themeMap, ...displayVars}).forEach(([k,v]) => { hint = hint.replaceAll(OB+k+CB, v); });
     hint = hint.replace(/\{\{\w+\}\}/g, '?');
 
     document.getElementById('prevQ').innerHTML = escHtml(text);
     document.getElementById('prevHint').textContent = hint || '';
-    document.getElementById('prevWarn').innerHTML = condOk ? '' : '<span>⚠ პირობები ვერ შეხვდა 40 მცდელობაში</span>';
+    document.getElementById('prevWarn').innerHTML = condOk ? '' : '<span>⚠ პირობები/ფორმულა ვერ შეხვდა 200 მცდელობაში</span>';
 
     if (!formula) {
         document.getElementById('prevOpts').innerHTML = '<span style="font-size:0.64rem;color:#94a3b8;">④ ფორმულა ჩაწერეთ პასუხისთვის...</span>';
@@ -1868,24 +1962,14 @@ function genPreviewNumeric(tmpl) {
         return;
     }
 
-    let f = formula;
-    Object.entries(numVars).forEach(([k,v]) => { f = f.replaceAll(k, String(v)); });
-    // allow digits, basic ops, parens, space, % . and known math functions
-    f = f.replace(/[^0-9a-z+\-*/()\s%.]/gi, '');
-    let correct = null;
-    try {
-        // expose PHP-compatible aliases so round()/floor()/ceil() work as in PHP eval
-        const round = Math.round, floor = Math.floor, ceil = Math.ceil, abs = Math.abs;
-        const raw = Function('round','floor','ceil','abs', 'return (' + f + ')')(round, floor, ceil, abs);
-        if (Number.isFinite(raw) && raw > 0) correct = Math.floor(raw);
-    } catch(e) {}
-
     if (correct === null) {
         document.getElementById('prevOpts').innerHTML = '<span style="font-size:0.64rem;color:#2a2a2a;">ფორმულა ვერ გამოითვალა</span>';
         document.getElementById('prevFormula').innerHTML = '';
         document.getElementById('prevVars').innerHTML = '';
         return;
     }
+    correct = Math.floor(correct);
+    const f = substituted;
 
     const wrong = new Set();
     let tries = 0;
@@ -2010,7 +2094,9 @@ document.getElementById('condRows').addEventListener('focusin', function(e) {
         }
         Object.entries(numCfg).forEach(([name, conf]) => {
             if (name.startsWith('_') || typeof conf !== 'object' || conf === null) return;
-            if ('derived' in conf) {
+            if (conf.operator) {
+                addNcRow(name, 1, 9, 1, 'operator', '', Array.isArray(conf.options) && conf.options.length ? conf.options : ['+']);
+            } else if ('derived' in conf) {
                 addNcRow(name, 1, 9, 1, 'derived', conf.derived ?? '');
             } else {
                 addNcRow(name, conf.min ?? 1, conf.max ?? 9, conf.step ?? 1);
