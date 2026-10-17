@@ -11,7 +11,10 @@ class TopicController extends Controller
 {
     public function index()
     {
-        $topics = Topic::with(['grade', 'videos'])->withCount('questionTemplates')->orderBy('grade_id')->get();
+        $topics = Topic::with([
+            'grade', 'videos',
+            'questionTemplates' => fn ($q) => $q->orderByRaw('sequence IS NULL, sequence')->orderBy('id'),
+        ])->withCount('questionTemplates')->orderBy('grade_id')->get();
         $grades = Grade::orderBy('number')->get();
 
         $topicsJson = $topics->map(fn($t) => [

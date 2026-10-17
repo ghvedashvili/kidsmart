@@ -39,6 +39,18 @@
     .vid-id { font-size:0.6rem; color:#94a3b8; }
     .vid-add-form { display:flex; gap:6px; align-items:center; margin-top:8px; flex-wrap:wrap; }
     .vid-err { font-size:0.62rem; color:#e74c3c; margin-top:4px; }
+    .badge-btn { font-family:'Goldman',monospace; font-size:0.65rem; color:#64748b; border:1px solid #e2e8f0; border-radius:2px; padding:1px 6px; margin-left:8px; background:#fff; cursor:pointer; transition:all 0.15s; }
+    .badge-btn:hover { border-color:#6366f1; color:#6366f1; }
+    .tpl-panel { display:none; padding:10px 0 4px; border-top:1px solid #f1f5f9; }
+    .tpl-hint { font-size:0.6rem; color:#94a3b8; margin-bottom:6px; }
+    .tpl-item { display:flex; align-items:center; gap:8px; padding:4px 0; font-size:0.74rem; color:#374151; }
+    .tpl-seq { width:36px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:3px; color:#2563eb; font-family:'Goldman',monospace; font-size:0.7rem; padding:3px 4px; text-align:center; outline:none; flex-shrink:0; }
+    .tpl-seq:focus { border-color:#6366f1; }
+    .tpl-seq.saved { border-color:#86efac; }
+    .tpl-text { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .tpl-tag { font-size:0.6rem; color:#64748b; border:1px solid #e2e8f0; border-radius:2px; padding:1px 5px; white-space:nowrap; flex-shrink:0; }
+    .tpl-edit { color:#94a3b8; font-size:0.72rem; text-decoration:none; flex-shrink:0; }
+    .tpl-edit:hover { color:#6366f1; }
 
     /* add modal */
     .tp-overlay { position:fixed; inset:0; background:rgba(15,23,42,0.35); display:flex; align-items:center; justify-content:center; z-index:100000; opacity:0; pointer-events:none; transition:opacity 0.15s; }
@@ -128,7 +140,11 @@
                         @if($topic->sequence)
                         <span class="badge" style="color:#2563eb;border-color:#bfdbfe;">#{{ $topic->sequence }}</span>
                         @endif
-                        <span class="badge">{{ $topic->question_templates_count }} შაბლონი</span>
+                        @if($topic->question_templates_count)
+                        <button type="button" class="badge-btn" onclick="toggleTplPanel({{ $topic->id }})">{{ $topic->question_templates_count }} შაბლონი</button>
+                        @else
+                        <span class="badge">0 შაბლონი</span>
+                        @endif
                     </div>
                     <button type="button" class="btn-vid {{ $topic->videos->count() ? 'has' : '' }}"
                         onclick="toggleVidPanel({{ $topic->id }})">
@@ -178,6 +194,25 @@
                         <button type="submit" class="btn-save">+ ვიდეო</button>
                     </form>
                     @error('youtube_url')<div class="vid-err">{{ $message }}</div>@enderror
+                </div>
+
+                {{-- Templates panel --}}
+                <div class="tpl-panel" id="tp{{ $topic->id }}">
+                    @if($topic->questionTemplates->isEmpty())
+                    <div style="font-size:0.7rem;color:#94a3b8;padding:6px 0;">შაბლონი არ არის</div>
+                    @else
+                    <div class="tpl-hint">რიგითობა — თემის ჯერზე, ეს შაბლონები ჯერ გამოჩნდება (პატარადან დიდზე); ცარიელი = შემთხვევითი</div>
+                    @foreach($topic->questionTemplates as $tpl)
+                    <div class="tpl-item">
+                        <input type="number" class="tpl-seq" min="1" placeholder="—" value="{{ $tpl->sequence }}"
+                            data-tpl-id="{{ $tpl->id }}" onchange="saveTplSequence(this)">
+                        <div class="tpl-text" title="{{ $tpl->template_text }}">{{ Str::limit($tpl->template_text ?: '('.$tpl->question_type.')', 70) }}</div>
+                        <span class="tpl-tag">დ{{ $tpl->difficulty }}</span>
+                        @if(!$tpl->is_active)<span class="tpl-tag" style="color:#b91c1c;border-color:#fecaca;">გაჩერ.</span>@endif
+                        <a href="{{ route('admin.questions.edit', $tpl) }}" class="tpl-edit">✎</a>
+                    </div>
+                    @endforeach
+                    @endif
                 </div>
             </div>
         @empty
@@ -274,6 +309,29 @@ function cancelTopic(id) { document.getElementById('topic-row-' + id).classList.
 function toggleVidPanel(id) {
     const el = document.getElementById('vp' + id);
     el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
+
+// ── Templates panel (per-topic priority)
+function toggleTplPanel(id) {
+    const el = document.getElementById('tp' + id);
+    el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
+function saveTplSequence(input) {
+    const id = input.dataset.tplId;
+    const val = input.value.trim();
+    input.classList.remove('saved');
+    fetch(`/admin/questions/${id}/sequence`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json',
+        },
+        body: JSON.stringify({ sequence: val === '' ? null : val }),
+    })
+        .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+        .then(() => { input.classList.add('saved'); setTimeout(() => input.classList.remove('saved'), 1200); })
+        .catch(() => { alert('შეცდომა — რიგითობა არ შეინახა'); });
 }
 
 // ── Add modal

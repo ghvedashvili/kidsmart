@@ -252,6 +252,7 @@ Route::middleware(['auth', 'admin', 'role.permission'])->group(function () {
     Route::delete('/admin/questions/{question}',       [QuestionTemplateController::class, 'destroy'])->name('admin.questions.destroy');
     Route::post('/admin/questions/{id}/restore',       [QuestionTemplateController::class, 'restore'])->name('admin.questions.restore');
     Route::patch('/admin/questions/{question}/toggle-active', [QuestionTemplateController::class, 'toggleActive'])->name('admin.questions.toggle-active');
+    Route::patch('/admin/questions/{question}/sequence',      [QuestionTemplateController::class, 'updateSequence'])->name('admin.questions.update-sequence');
 
     Route::get('/admin/question-counts',                       [TestQuestionCountController::class, 'index'])->name('admin.question-counts.index');
     Route::post('/admin/question-counts',                      [TestQuestionCountController::class, 'store'])->name('admin.question-counts.store');

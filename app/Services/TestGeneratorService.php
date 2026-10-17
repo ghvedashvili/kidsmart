@@ -320,11 +320,17 @@ class TestGeneratorService
 
     /**
      * Picks one template from $topicTemplates for a single topic slot, cycling fairly
-     * across tests the same way pickTopicIdsForTest() cycles topics — a shuffled order
-     * + cursor is persisted per child *per topic* (ChildSetting.template_rotation),
-     * so every template in a topic is shown once before any of them repeats. Topic
-     * priority is unaffected: this only decides which template fills a topic slot that
+     * across tests the same way pickTopicIdsForTest() cycles topics — an order + cursor
+     * is persisted per child *per topic* (ChildSetting.template_rotation), so every
+     * template in a topic is shown once before any of them repeats. Topic priority is
+     * unaffected: this only decides which template fills a topic slot that
      * pickTopicIdsForTest() already chose.
+     *
+     * The order itself follows each template's admin-assigned `sequence` when set
+     * (ascending, ties broken by id) — templates with no sequence are shuffled and
+     * appended after the sequenced ones (buildTemplateOrder()). A signature of every
+     * template's (id, sequence) pair is stored alongside the order so it's rebuilt
+     * whenever the topic's pool OR any sequence number changes — not just on add/remove.
      *
      * The rotation always covers the topic's *whole* template pool, regardless of what's
      * already used elsewhere in this one test — $usedTemplateIds only skips ahead to the
@@ -334,24 +340,23 @@ class TestGeneratorService
      */
     private function pickTemplateFromTopic(ChildSetting $setting, int $topicId, \Illuminate\Support\Collection $topicTemplates, array $usedTemplateIds): ?QuestionTemplate
     {
-        $allIds = $topicTemplates->pluck('id')->map(fn ($id) => (int) $id)->values()->all();
-        $n = count($allIds);
+        $n = $topicTemplates->count();
         if ($n === 0) return null;
+
+        $signature = $topicTemplates
+            ->map(fn ($t) => [(int) $t->id, $t->sequence])
+            ->sortBy(fn ($pair) => $pair[0])
+            ->values()
+            ->all();
 
         $rotationAll = $setting->template_rotation ?? [];
         $rotation    = $rotationAll[$topicId] ?? [];
         $order       = $rotation['order'] ?? [];
         $cursor      = (int) ($rotation['cursor'] ?? 0);
 
-        $sortedStored    = $order;
-        sort($sortedStored);
-        $sortedAvailable = $allIds;
-        sort($sortedAvailable);
-
-        // reshuffle whenever this topic's template set changed (admin added/removed one)
-        if ($sortedStored !== $sortedAvailable) {
-            $order  = $allIds;
-            shuffle($order);
+        // rebuild whenever this topic's template set OR any sequence number changed
+        if (($rotation['signature'] ?? null) !== $signature) {
+            $order  = $this->buildTemplateOrder($topicTemplates);
             $cursor = 0;
         }
 
@@ -370,9 +375,26 @@ class TestGeneratorService
             $cursor   = ($cursor + 1) % $n;
         }
 
-        $rotationAll[$topicId] = ['order' => $order, 'cursor' => $cursor];
+        $rotationAll[$topicId] = ['order' => $order, 'cursor' => $cursor, 'signature' => $signature];
         $setting->template_rotation = $rotationAll;
 
         return $topicTemplates->first(fn ($t) => (int) $t->id === $pickedId);
+    }
+
+    /**
+     * Builds one topic's rotation order: templates with an admin-assigned `sequence`
+     * come first (ascending, ties broken by id — deterministic, not random), followed
+     * by the remaining un-sequenced templates in a freshly shuffled order.
+     */
+    private function buildTemplateOrder(\Illuminate\Support\Collection $topicTemplates): array
+    {
+        $numbered = $topicTemplates->whereNotNull('sequence')->values()->all();
+        usort($numbered, fn ($a, $b) => ($a->sequence <=> $b->sequence) ?: ($a->id <=> $b->id));
+        $numberedIds = array_map(fn ($t) => (int) $t->id, $numbered);
+
+        $unnumberedIds = $topicTemplates->whereNull('sequence')->pluck('id')->map(fn ($id) => (int) $id)->all();
+        shuffle($unnumberedIds);
+
+        return array_merge($numberedIds, $unnumberedIds);
     }
 }

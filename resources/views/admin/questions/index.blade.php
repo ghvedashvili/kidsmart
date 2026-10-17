@@ -21,6 +21,9 @@
     .q-regen:hover { color: #64748b; }
     .q-meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
     .q-tag { font-size: 0.65rem; color: #64748b; border: 1px solid #e2e8f0; border-radius: 2px; padding: 1px 7px; }
+    .q-seq { width: 34px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 2px; color: #2563eb; font-family: 'Goldman', monospace; font-size: 0.65rem; padding: 2px 3px; text-align: center; outline: none; }
+    .q-seq:focus { border-color: #6366f1; }
+    .q-seq.saved { border-color: #86efac; }
     .diff { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
     .msg { font-size: 0.75rem; color: #059669; margin-bottom: 16px; }
     .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
@@ -120,6 +123,10 @@
             <div class="q-meta">
                 <span class="q-tag">{{ $tpl->topic->grade->name }}</span>
                 <span class="q-tag">{{ $tpl->topic->name }}</span>
+                @unless($showTrashed)
+                <input type="number" class="q-seq" min="1" placeholder="—" value="{{ $tpl->sequence }}"
+                    data-tpl-id="{{ $tpl->id }}" onchange="saveQSequence(this)" title="რიგითობა თემაში">
+                @endunless
                 @if($tpl->theme)
                 <span class="q-tag" style="color:#7c3aed;border-color:#e9d5ff;">{{ $tpl->theme->icon ?? '' }} {{ $tpl->theme->name }}</span>
                 @endif
@@ -229,6 +236,24 @@ function renderPreview(el) {
 function regenPreview(btn) {
     const el = btn.closest('.q-row').querySelector('.q-preview');
     if (el) renderPreview(el);
+}
+
+function saveQSequence(input) {
+    const id = input.dataset.tplId;
+    const val = input.value.trim();
+    input.classList.remove('saved');
+    fetch(`/admin/questions/${id}/sequence`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json',
+        },
+        body: JSON.stringify({ sequence: val === '' ? null : val }),
+    })
+        .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+        .then(() => { input.classList.add('saved'); setTimeout(() => input.classList.remove('saved'), 1200); })
+        .catch(() => { alert('შეცდომა — რიგითობა არ შეინახა'); });
 }
 
 @endverbatim

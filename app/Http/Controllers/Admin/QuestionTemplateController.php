@@ -135,6 +135,24 @@ class QuestionTemplateController extends Controller
         return back();
     }
 
+    /**
+     * Sets (or clears) a template's priority within its topic's rotation — used
+     * from the topics page's expandable template list. Called via fetch(), so it
+     * responds with JSON rather than redirecting.
+     */
+    public function updateSequence(Request $request, QuestionTemplate $question)
+    {
+        $data = $request->validate([
+            'sequence' => 'nullable|integer|min:1',
+        ]);
+        // "nullable" only skips the other rules for an empty string — it does not
+        // turn it into an actual null, so a cleared input would otherwise try to
+        // save '' into this integer column and fail at the DB layer.
+        $sequence = $data['sequence'] ?? null;
+        $question->update(['sequence' => $sequence === '' ? null : $sequence]);
+        return response()->json(['success' => true, 'sequence' => $question->sequence]);
+    }
+
     private function allThemesData(): array
     {
         $themes = Theme::with(['varGroups.variables', 'variables' => fn($q) => $q->whereNull('group_id')])->get();
@@ -212,6 +230,7 @@ class QuestionTemplateController extends Controller
             'difficulty'      => 'required|integer|min:1|max:5',
             'is_olympiad'     => 'nullable|boolean',
             'is_active'       => 'nullable|boolean',
+            'sequence'        => 'nullable|integer|min:1',
             'question_type'   => 'required|in:multiple_choice,pyramid,code,crossword',
             'answer_type'     => $isSpecial ? 'nullable' : 'required|in:numeric,text',
             'template_text'   => $isSpecial ? 'nullable|string' : 'required|string',
@@ -231,6 +250,7 @@ class QuestionTemplateController extends Controller
 
         $isOlympiad = $request->boolean('is_olympiad');
         $isActive   = $request->boolean('is_active', true);
+        $sequence   = $raw['sequence'] ?? null;
 
         $grade = Topic::find($raw['topic_id'])?->grade;
         if (! $isOlympiad && $grade && $raw['difficulty'] > $grade->max_level) {
@@ -249,6 +269,7 @@ class QuestionTemplateController extends Controller
                 'difficulty'      => $raw['difficulty'],
                 'is_olympiad'     => $isOlympiad,
                 'is_active'       => $isActive,
+                'sequence'        => $sequence,
                 'question_type'   => 'pyramid',
                 'answer_type'     => 'numeric',
                 'template_text'   => "პირამიდა {$pyrHeight}-ძირი · {$pyrHide} ცარიელი",
@@ -275,6 +296,7 @@ class QuestionTemplateController extends Controller
                 'difficulty'      => $raw['difficulty'],
                 'is_olympiad'     => $isOlympiad,
                 'is_active'       => $isActive,
+                'sequence'        => $sequence,
                 'question_type'   => 'crossword',
                 'answer_type'     => 'numeric',
                 'template_text'   => "კროსვორდი {$rows}×{$cols} {$minVal}-{$maxVal} {$opsStr}" . ($revealedCount ? " ({$revealedCount}✓)" : ''),
@@ -308,6 +330,7 @@ class QuestionTemplateController extends Controller
                 'difficulty'      => $raw['difficulty'],
                 'is_olympiad'     => $isOlympiad,
                 'is_active'       => $isActive,
+                'sequence'        => $sequence,
                 'question_type'   => 'code',
                 'answer_type'     => 'numeric',
                 'template_text'   => implode(' · ', $descParts),
@@ -343,6 +366,7 @@ class QuestionTemplateController extends Controller
             'difficulty'      => $raw['difficulty'],
             'is_olympiad'     => $isOlympiad,
             'is_active'       => $isActive,
+            'sequence'        => $sequence,
             'question_type'   => 'multiple_choice',
             'answer_type'     => $raw['answer_type'],
             'template_text'   => $raw['template_text'],

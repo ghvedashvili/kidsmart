@@ -192,6 +192,11 @@
                         onclick="toggleOlympiad()">🏆 ოლიმპიადა</button>
                     <button type="button" id="activeBtn" class="diff-btn {{ old('is_active', $template?->is_active ?? true) ? 'sel' : '' }}" style="width:auto;padding:7px 14px;"
                         onclick="toggleActive()">✓ აქტიური</button>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span style="font-size:0.68rem;color:#94a3b8;">რიგითობა თემაში</span>
+                        <input type="number" name="sequence" class="fc" style="width:70px;padding:7px 8px;"
+                            min="1" placeholder="—" value="{{ old('sequence', $template?->sequence) }}">
+                    </div>
                 </div>
                 <input type="hidden" name="is_olympiad" id="isOlympiadInput"
                     value="{{ old('is_olympiad', $template?->is_olympiad ? 1 : 0) }}">
