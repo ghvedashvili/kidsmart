@@ -375,7 +375,7 @@
                             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
                                 <div>
                                     <div class="lbl">ცვლადების რაოდენობა</div>
-                                    <select class="pyr-inp" id="autoVarCount">
+                                    <select class="pyr-inp" id="autoVarCount" onchange="applyAutoBuild()">
                                         @php $autoCfg = ($template?->num_config ?? [])['_auto'] ?? []; $autoVarCount = count(array_filter($template?->num_config ?? [], fn($k) => !str_starts_with($k, '_'), ARRAY_FILTER_USE_KEY)) ?: 2; @endphp
                                         @foreach([2,3,4,5] as $n)
                                         <option value="{{ $n }}" {{ $autoVarCount == $n ? 'selected' : '' }}>{{ $n }} ცვლადი</option>
@@ -404,6 +404,11 @@
                                 <input type="checkbox" id="autoNoNegSteps" onchange="syncAll();previewDebounce();"
                                     {{ !array_key_exists('no_negative_steps', $autoCfg) || $autoCfg['no_negative_steps'] ? 'checked' : '' }}>
                                 არ დავუშვათ უარყოფითი შუალედური მნიშვნელობა (მიმდევრობით ანგარიშისას)
+                            </label>
+                            <label style="display:flex;align-items:center;gap:7px;font-size:0.74rem;font-weight:700;color:#374151;cursor:pointer;margin-bottom:10px;">
+                                <input type="checkbox" id="autoMixBlank" onchange="syncAll();previewDebounce();"
+                                    {{ !array_key_exists('mix_blank', $autoCfg) || $autoCfg['mix_blank'] ? 'checked' : '' }}>
+                                ცვლადი დავმალოთ შედეგის მაგივრად — მაგ. 4 + ? = 9 (გამორთული = ყოველთვის "...= ?")
                             </label>
                             <button type="button" class="nc-add" onclick="applyAutoBuild()">⚡ ცვლადების შექმნა</button>
                             <div style="font-size:0.62rem;color:#4b8a63;margin-top:6px;">აწყობს ქვემოთ ცვლადების მწკრივებს (N1, N2, ...) — თქვენ მხოლოდ min/max/ნაბიჯი დააზუსტეთ.</div>
@@ -1221,6 +1226,7 @@ function syncAll() {
             operators: aOps.length ? aOps : ['+'],
             parens: document.getElementById('autoParens').checked,
             no_negative_steps: document.getElementById('autoNoNegSteps').checked,
+            mix_blank: document.getElementById('autoMixBlank').checked,
         };
         applyAutoPreviewText(ncObj, ncObj['_auto']);
     }
@@ -1663,6 +1669,7 @@ function genPreviewAuto() {
     const operators = ops.length ? ops : ['+'];
     const useParens = document.getElementById('autoParens').checked;
     const noNegSteps = document.getElementById('autoNoNegSteps').checked;
+    const mixBlank = document.getElementById('autoMixBlank').checked;
     if (!ncRows.filter(r => r.name).length) { clearPreview(); return; }
 
     // Same two-tier approach as the PHP generator: try with every constraint as
@@ -1685,14 +1692,32 @@ function genPreviewAuto() {
     }
     const n = names.length;
 
+    // When mixBlank is on, the hidden slot is always one of the operands (never
+    // the result) — "4 + ? = 9" instead of "4 + 5 = ?". When it's off, the result
+    // is always what's hidden (the classic style). Operand slots inside the paren
+    // pair are excluded (an extra algebra step a child hasn't been shown). Mirrors
+    // QuestionTemplate::generateAutoArithmetic().
+    let blankPos = null;
+    if (mixBlank) {
+        let blankCandidates = Array.from({ length: n }, (_, i) => i);
+        if (parenStart !== null) {
+            blankCandidates = blankCandidates.filter(i => i !== parenStart && i !== parenStart + 1);
+        }
+        if (blankCandidates.length) {
+            blankPos = blankCandidates[Math.floor(Math.random() * blankCandidates.length)];
+        }
+    }
+    const answer = blankPos === null ? correct : numVars[names[blankPos]];
+
     let display = '';
     for (let i = 0; i < n; i++) {
         if (parenStart !== null && i === parenStart) display += '(';
-        display += numVars[names[i]];
+        display += (i === blankPos) ? '?' : numVars[names[i]];
         if (parenStart !== null && i === parenStart + 1) display += ')';
         if (i < n - 1) display += ' ' + chosenOps[i] + ' ';
     }
-    document.getElementById('prevQ').innerHTML = escHtml(display + ' = ?');
+    display += blankPos === null ? ' = ?' : ' = ' + correct;
+    document.getElementById('prevQ').innerHTML = escHtml(display);
     document.getElementById('prevHint').textContent = (document.getElementById('hintText').value || '').trim();
     document.getElementById('prevWarn').innerHTML = '';
 
@@ -1700,16 +1725,16 @@ function genPreviewAuto() {
     const dMax = +document.getElementById('distMax').value || 10;
     const wrong = [];
     let attempts = 0;
-    while (wrong.length < 4 && attempts < 100) {
+    while (wrong.length < 3 && attempts < 100) {
         attempts++;
         const delta = dMin + Math.floor(Math.random() * (dMax - dMin + 1));
-        const candidate = correct + (Math.random() < 0.5 ? delta : -delta);
-        if (candidate > 0 && candidate !== correct && !wrong.includes(candidate)) wrong.push(candidate);
+        const candidate = answer + (Math.random() < 0.5 ? delta : -delta);
+        if (candidate > 0 && candidate !== answer && !wrong.includes(candidate)) wrong.push(candidate);
     }
-    const opts = [...wrong, correct];
+    const opts = [...wrong, answer];
     for (let i = opts.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [opts[i], opts[j]] = [opts[j], opts[i]]; }
-    document.getElementById('prevOpts').innerHTML = opts.map(o => `<div class="preview-opt ${o===correct?'c':''}">${o}</div>`).join('');
-    document.getElementById('prevFormula').innerHTML = `სწ. პასუხი: <span style="color:#2a7a2a;">${correct}</span>`;
+    document.getElementById('prevOpts').innerHTML = opts.map(o => `<div class="preview-opt ${o===answer?'c':''}">${o}</div>`).join('');
+    document.getElementById('prevFormula').innerHTML = `სწ. პასუხი: <span style="color:#2a7a2a;">${answer}</span>`;
     document.getElementById('prevVars').innerHTML = names.map(k => `${k}=${numVars[k]}`).join(' · ');
 }
 

@@ -249,7 +249,7 @@ class QuestionTemplate extends Model
 
         $wrong = [];
         $attempts = 0;
-        $wrongCount = $noneCorrect ? 3 : 4;
+        $wrongCount = 3;
         while (count($wrong) < $wrongCount && $attempts < 100) {
             $attempts++;
             $delta     = rand($dMin, $dMax);
@@ -290,6 +290,7 @@ class QuestionTemplate extends Model
         if (! $operators) $operators = ['+'];
         $useParens   = (bool) ($auto['parens'] ?? false);
         $noNegSteps  = array_key_exists('no_negative_steps', $auto) ? (bool) $auto['no_negative_steps'] : true;
+        $mixBlank    = array_key_exists('mix_blank', $auto) ? (bool) $auto['mix_blank'] : true;
 
         $varConfigs = [];
         foreach ($numConf as $key => $conf) {
@@ -329,14 +330,36 @@ class QuestionTemplate extends Model
             $correct = (int) array_sum($values);
         }
 
-        $displayExpr = $this->buildArithmeticExpr($varNames, $values, $opsChosen, $parenStart);
-        $text = $displayExpr . ' = ?';
+        // When $mixBlank is on, the hidden slot is always one of the operands
+        // (never the result) — "4 + ? = 9" instead of "4 + 5 = ?". When it's off,
+        // the result is always what's hidden (the classic style). Operand slots
+        // inside the chosen paren pair are excluded from the random pick, since
+        // solving for a blank a layer deep inside parens would need an extra
+        // algebra step a child hasn't been shown.
+        $blankPos = null;
+        if ($mixBlank) {
+            $blankCandidates = range(0, $n - 1);
+            if ($parenStart !== null) {
+                $blankCandidates = array_values(array_diff($blankCandidates, [$parenStart, $parenStart + 1]));
+            }
+            if ($blankCandidates) {
+                $blankPos = $blankCandidates[array_rand($blankCandidates)];
+            }
+        }
+
+        if ($blankPos === null) {
+            $text = $this->buildArithmeticExpr($varNames, $values, $opsChosen, $parenStart) . ' = ?';
+            $answer = $correct;
+        } else {
+            $text = $this->buildArithmeticExpr($varNames, $values, $opsChosen, $parenStart, $blankPos) . ' = ' . $correct;
+            $answer = (int) $values[$varNames[$blankPos]];
+        }
 
         $hint = $this->hint_text ?: null;
 
         return array_merge(
             ['question_text' => $text, 'hint_text' => $hint],
-            $this->buildMcOptions($correct)
+            $this->buildMcOptions($answer)
         );
     }
 
@@ -456,14 +479,17 @@ class QuestionTemplate extends Model
     /**
      * Builds the display string (× ÷ shown as-is, for what the child actually sees)
      * from the same ordered variable names/values/operators used for evaluation.
+     * $blankPos, if given, replaces that one operand's value with "?" instead of
+     * showing it (used for the "4 + ? = 9" style, as opposed to the classic
+     * "4 + 5 = ?" where the result itself is hidden).
      */
-    private function buildArithmeticExpr(array $varNames, array $values, array $opsChosen, ?int $parenStart): string
+    private function buildArithmeticExpr(array $varNames, array $values, array $opsChosen, ?int $parenStart, ?int $blankPos = null): string
     {
         $n = count($varNames);
         $parts = [];
         for ($i = 0; $i < $n; $i++) {
             if ($parenStart !== null && $i === $parenStart) $parts[] = '(';
-            $parts[] = (string) $values[$varNames[$i]];
+            $parts[] = $i === $blankPos ? '?' : (string) $values[$varNames[$i]];
             if ($parenStart !== null && $i === $parenStart + 1) $parts[] = ')';
             if ($i < $n - 1) $parts[] = ' ' . $opsChosen[$i] . ' ';
         }

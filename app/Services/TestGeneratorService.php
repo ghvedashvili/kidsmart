@@ -66,22 +66,19 @@ class TestGeneratorService
 
         $topicPicks = $this->pickTopicIdsForTest($setting, $availableTopicIds, $questionsNeeded);
 
-        // For each picked topic occurrence, draw one template from that topic's own pool,
-        // avoiding reusing the same template twice within this test where possible.
+        // For each picked topic occurrence, draw one template from that topic's own pool —
+        // cycling fairly across tests the same way topics themselves do (pickTemplateFromTopic()),
+        // while still avoiding reusing the same template twice within this one test.
         $usedTemplateIds = [];
         $selectedTemplates = collect();
 
         foreach ($topicPicks as $topicId) {
-            $candidates = $templatesByTopic->get($topicId, collect())
-                ->reject(fn ($t) => in_array($t->id, $usedTemplateIds, true));
+            $topicTemplates = $templatesByTopic->get($topicId, collect());
+            if ($topicTemplates->isEmpty()) continue;
 
-            if ($candidates->isEmpty()) {
-                // topic's pool exhausted within this test — reuse is unavoidable
-                $candidates = $templatesByTopic->get($topicId, collect());
-            }
-            if ($candidates->isEmpty()) continue;
+            $picked = $this->pickTemplateFromTopic($setting, $topicId, $topicTemplates, $usedTemplateIds);
+            if (! $picked) continue;
 
-            $picked = $candidates->random();
             $usedTemplateIds[] = $picked->id;
             $selectedTemplates->push($picked);
         }
@@ -110,7 +107,7 @@ class TestGeneratorService
             ]);
         }
 
-        $setting->save(); // persist the topic_rotation state updated by pickTopicIdsForTest()
+        $setting->save(); // persist the topic_rotation/template_rotation state updated above
 
         return ['test' => $test];
     }
@@ -289,5 +286,63 @@ class TestGeneratorService
         ];
 
         return $picked;
+    }
+
+    /**
+     * Picks one template from $topicTemplates for a single topic slot, cycling fairly
+     * across tests the same way pickTopicIdsForTest() cycles topics — a shuffled order
+     * + cursor is persisted per child *per topic* (ChildSetting.template_rotation),
+     * so every template in a topic is shown once before any of them repeats. Topic
+     * priority is unaffected: this only decides which template fills a topic slot that
+     * pickTopicIdsForTest() already chose.
+     *
+     * The rotation always covers the topic's *whole* template pool, regardless of what's
+     * already used elsewhere in this one test — $usedTemplateIds only skips ahead to the
+     * next not-yet-used-this-test template without disturbing the persisted cursor logic,
+     * falling back to the next-in-line template (reuse unavoidable) if the topic's entire
+     * pool has already appeared in this test.
+     */
+    private function pickTemplateFromTopic(ChildSetting $setting, int $topicId, \Illuminate\Support\Collection $topicTemplates, array $usedTemplateIds): ?QuestionTemplate
+    {
+        $allIds = $topicTemplates->pluck('id')->map(fn ($id) => (int) $id)->values()->all();
+        $n = count($allIds);
+        if ($n === 0) return null;
+
+        $rotationAll = $setting->template_rotation ?? [];
+        $rotation    = $rotationAll[$topicId] ?? [];
+        $order       = $rotation['order'] ?? [];
+        $cursor      = (int) ($rotation['cursor'] ?? 0);
+
+        $sortedStored    = $order;
+        sort($sortedStored);
+        $sortedAvailable = $allIds;
+        sort($sortedAvailable);
+
+        // reshuffle whenever this topic's template set changed (admin added/removed one)
+        if ($sortedStored !== $sortedAvailable) {
+            $order  = $allIds;
+            shuffle($order);
+            $cursor = 0;
+        }
+
+        $pickedId = null;
+        for ($i = 0; $i < $n; $i++) {
+            $candidateId = $order[($cursor + $i) % $n];
+            if (! in_array($candidateId, $usedTemplateIds, true)) {
+                $pickedId = $candidateId;
+                $cursor   = ($cursor + $i + 1) % $n;
+                break;
+            }
+        }
+        if ($pickedId === null) {
+            // the topic's whole pool already appeared in this test — reuse unavoidable
+            $pickedId = $order[$cursor % $n];
+            $cursor   = ($cursor + 1) % $n;
+        }
+
+        $rotationAll[$topicId] = ['order' => $order, 'cursor' => $cursor];
+        $setting->template_rotation = $rotationAll;
+
+        return $topicTemplates->first(fn ($t) => (int) $t->id === $pickedId);
     }
 }
