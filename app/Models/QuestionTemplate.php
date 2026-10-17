@@ -173,16 +173,35 @@ class QuestionTemplate extends Model
         $uniqueVars = (bool) ($numConf['_unique'] ?? false);
         $baseFormula = preg_replace('/\{\{(\w+)\}\}/', '$1', $this->correct_formula);
 
+        // Split variables into randomly-rolled ones and "derived" ones — a derived
+        // variable (num_config[key] = ['derived' => 'N1+3']) is never rolled itself;
+        // it's computed from whatever vars were already resolved above it (row order),
+        // using the same evalExpr() conditions use. This keeps a relation like
+        // "N2 is always N1+3" exact instead of relying on random values happening to
+        // match it (which an '==' condition would only satisfy by chance).
+        $randomConf = [];
+        $derivedConf = [];
+        foreach ($numConf as $key => $conf) {
+            if (! is_array($conf) || str_starts_with((string) $key, '_')) continue;
+            if (array_key_exists('derived', $conf)) {
+                $derivedConf[$key] = $conf;
+            } else {
+                $randomConf[$key] = $conf;
+            }
+        }
+
         $conditions = $this->conditions ?? [];
         $numVars = [];
         $correct = 0;
         for ($attempt = 0; $attempt < 200; $attempt++) {
             $numVars = [];
-            foreach ($numConf as $key => $conf) {
-                if (! is_array($conf)) continue;
+            foreach ($randomConf as $key => $conf) {
                 $step = max(1, (int) ($conf['step'] ?? 1));
                 $steps = (int) (($conf['max'] - $conf['min']) / $step);
                 $numVars[$key] = $conf['min'] + rand(0, $steps) * $step;
+            }
+            foreach ($derivedConf as $key => $conf) {
+                $numVars[$key] = $this->evalExpr((string) ($conf['derived'] ?? '0'), $numVars);
             }
             if ($uniqueVars && count(array_unique($numVars)) !== count($numVars)) continue;
             $f = $baseFormula;
@@ -322,22 +341,23 @@ class QuestionTemplate extends Model
     }
 
     /**
-     * Randomly rolls values/operators/parens up to $maxAttempts times, keeping the
-     * first roll that produces a positive whole-number result (and, if $noNegSteps,
-     * never dips negative along the way). Returns null if nothing qualified.
+     * Picks an operator combo (and paren position), then retries only the random
+     * VALUES against that fixed combo before giving up on it and picking a new one.
+     * Operators are deliberately NOT re-rolled on every value attempt: if they were,
+     * whichever operator is statistically easier to satisfy (e.g. '+', which is
+     * always a valid positive result) would win the "first success" race far more
+     * often than a harder one (e.g. '-', which needs the running total to stay
+     * positive) — silently skewing the output even when both are equally selected
+     * by the admin. Holding operators fixed for a batch of value attempts gives each
+     * chosen combo a fair shot at succeeding on its own, so the actual distribution
+     * of generated operators matches what was selected instead of what's "easiest".
      */
     private function attemptArithmetic(array $varConfigs, array $varNames, int $n, array $operators, bool $useParens, bool $noNegSteps, int $maxAttempts): ?array
     {
-        for ($attempt = 0; $attempt < $maxAttempts; $attempt++) {
-            $values = [];
-            foreach ($varConfigs as $name => $conf) {
-                $step  = max(1, (int) ($conf['step'] ?? 1));
-                $min   = (int) ($conf['min'] ?? 1);
-                $max   = (int) ($conf['max'] ?? 9);
-                $steps = max(0, intdiv(max($min, $max) - $min, $step));
-                $values[$name] = $min + rand(0, $steps) * $step;
-            }
+        $outerAttempts = min(10, $maxAttempts);
+        $innerAttempts = max(1, intdiv($maxAttempts, $outerAttempts));
 
+        for ($opAttempt = 0; $opAttempt < $outerAttempts; $opAttempt++) {
             $opsChosen = [];
             for ($i = 0; $i < $n - 1; $i++) {
                 $opsChosen[] = $operators[array_rand($operators)];
@@ -347,12 +367,23 @@ class QuestionTemplate extends Model
             // *where* they land (which adjacent pair) is randomized.
             $parenStart = ($useParens && $n >= 3) ? rand(0, $n - 2) : null;
 
-            $evaluated = $this->evalArithmeticSteps($varNames, $values, $opsChosen, $parenStart);
-            if ($evaluated === null) continue;
-            if ($evaluated['result'] <= 0 || floor($evaluated['result']) != $evaluated['result']) continue;
-            if ($noNegSteps && ! $evaluated['no_negative']) continue;
+            for ($valAttempt = 0; $valAttempt < $innerAttempts; $valAttempt++) {
+                $values = [];
+                foreach ($varConfigs as $name => $conf) {
+                    $step  = max(1, (int) ($conf['step'] ?? 1));
+                    $min   = (int) ($conf['min'] ?? 1);
+                    $max   = (int) ($conf['max'] ?? 9);
+                    $steps = max(0, intdiv(max($min, $max) - $min, $step));
+                    $values[$name] = $min + rand(0, $steps) * $step;
+                }
 
-            return ['values' => $values, 'ops' => $opsChosen, 'paren' => $parenStart, 'correct' => (int) $evaluated['result']];
+                $evaluated = $this->evalArithmeticSteps($varNames, $values, $opsChosen, $parenStart);
+                if ($evaluated === null) continue;
+                if ($evaluated['result'] <= 0 || floor($evaluated['result']) != $evaluated['result']) continue;
+                if ($noNegSteps && ! $evaluated['no_negative']) continue;
+
+                return ['values' => $values, 'ops' => $opsChosen, 'paren' => $parenStart, 'correct' => (int) $evaluated['result']];
+            }
         }
 
         return null;

@@ -12,8 +12,8 @@
     @media (max-width: 640px) {
         .aw { padding: 12px 8px 48px; }
         .card { padding: 14px; }
-        .nc-hdr { grid-template-columns: 56px 1fr 1fr 50px 20px; }
-        .nc-row { grid-template-columns: 56px 1fr 1fr 50px 20px; }
+        .nc-hdr { grid-template-columns: 56px 1fr 1fr 50px 20px 20px; }
+        .nc-row { grid-template-columns: 56px 1fr 1fr 50px 20px 20px; }
         .cond-row { grid-template-columns: 1fr 80px 1fr 20px; }
         .diff-btn { width: 34px; font-size: 0.62rem; padding: 6px 0; }
         .chips { gap: 3px; }
@@ -44,15 +44,18 @@
     .chip-op { background: #eff6ff; border: 1px solid #bfdbfe; color: #3b82f6; min-width: 28px; text-align: center; }
     .chip-op:hover { border-color: #93c5fd; color: #1d4ed8; }
 
-    .nc-hdr { display: grid; grid-template-columns: 68px 1fr 1fr 64px 22px; gap: 5px; margin-bottom: 4px; }
+    .nc-hdr { display: grid; grid-template-columns: 68px 1fr 1fr 64px 22px 22px; gap: 5px; margin-bottom: 4px; }
     .nc-hdr span { font-size: 0.54rem; color: #cbd5e1; letter-spacing: 0.1em; text-transform: uppercase; text-align: center; }
     .nc-hdr span:first-child { text-align: left; padding-left: 2px; }
-    .nc-row { display: grid; grid-template-columns: 68px 1fr 1fr 64px 22px; gap: 5px; align-items: center; margin-bottom: 5px; }
+    .nc-row { display: grid; grid-template-columns: 68px 1fr 1fr 64px 22px 22px; gap: 5px; align-items: center; margin-bottom: 5px; }
     .nc-inp { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 3px; color: #374151; font-family: 'Goldman', monospace; font-size: 0.74rem; padding: 6px 8px; outline: none; box-sizing: border-box; width: 100%; transition: border-color 0.15s; }
     .nc-inp:focus { border-color: #94a3b8; }
     .nc-name { color: #059669; text-transform: uppercase; text-align: center; }
     .nc-del { background: none; border: none; color: #cbd5e1; cursor: pointer; padding: 0; font-size: 0.75rem; text-align: center; transition: color 0.15s; line-height: 1; }
     .nc-del:hover { color: #ef4444; }
+    .nc-toggle { background: none; border: none; color: #94a3b8; cursor: pointer; padding: 0; font-size: 0.78rem; text-align: center; transition: color 0.15s; line-height: 1; }
+    .nc-toggle:hover { color: #2563eb; }
+    .nc-toggle.on { color: #2563eb; }
     .nc-add { background: none; border: 1px dashed #cbd5e1; color: #94a3b8; font-family: 'Goldman', monospace; font-size: 0.6rem; letter-spacing: 0.08em; padding: 5px 14px; border-radius: 3px; cursor: pointer; transition: all 0.15s; margin-top: 4px; }
     .nc-add:hover { border-color: #64748b; color: #374151; }
 
@@ -408,10 +411,11 @@
                     </div>
 
                     <div class="nc-hdr" style="margin-top:4px;">
-                        <span>სახელი</span><span>min</span><span>max</span><span>ნაბიჯი</span><span></span>
+                        <span>სახელი</span><span>min</span><span>max</span><span>ნაბიჯი</span><span></span><span></span>
                     </div>
                     <div id="ncRows"></div>
                     <button type="button" class="nc-add" onclick="addNcRow()">+ ცვლადის დამატება</button>
+                    <div style="font-size:0.62rem;color:#94a3b8;margin-top:4px;">ƒ ღილაკი ცვლადს გადააქცევს „გამოთვლილად" — მაგ. N1+3 — მის მაგივრად, რომ შემთხვევით შეირჩეს</div>
                     <label style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:0.75rem;font-weight:700;color:#374151;cursor:pointer;">
                         <input type="checkbox" id="uniqueNumVars" onchange="syncAll();previewDebounce();">
                         ყველა ცვლადი განსხვავებული
@@ -1051,19 +1055,26 @@ function applyAutoPreviewText(ncObj, autoCfg) {
 let ncRows  = [];
 let ncIdSeq = 1;
 
-function addNcRow(name = '', min = 1, max = 9, step = 1) {
+function addNcRow(name = '', min = 1, max = 9, step = 1, mode = 'random', derived = '') {
     if (!name) {
         const used = new Set(ncRows.map(r => r.name));
         let i = 1;
         while (used.has('N' + i)) i++;
         name = 'N' + i;
     }
-    ncRows.push({ id: ncIdSeq++, name, min, max, step });
+    ncRows.push({ id: ncIdSeq++, name, min, max, step, mode, derived });
     renderNcRows();
 }
 function removeNcRow(id) {
     ncRows = ncRows.filter(r => r.id !== id);
     renderNcRows();
+}
+function toggleNcMode(id) {
+    const r = ncRows.find(r => r.id === id);
+    if (!r) return;
+    r.mode = r.mode === 'derived' ? 'random' : 'derived';
+    renderNcRows();
+    previewDebounce();
 }
 function renderNcRows() {
     const c = document.getElementById('ncRows');
@@ -1071,7 +1082,15 @@ function renderNcRows() {
     ncRows.forEach(row => {
         const div = document.createElement('div');
         div.className = 'nc-row';
-        div.innerHTML = `
+        const isDerived = row.mode === 'derived';
+        div.innerHTML = isDerived ? `
+            <input class="nc-inp nc-name" maxlength="6" placeholder="N1" value="${row.name}"
+                data-nc="${row.id}" data-nc-f="name">
+            <input class="nc-inp" style="grid-column: 2 / 5;" placeholder="მაგ. N1+3" value="${row.derived || ''}"
+                data-nc="${row.id}" data-nc-f="derived">
+            <button type="button" class="nc-toggle on" title="შემთხვევით მნიშვნელობაზე დაბრუნება" onclick="toggleNcMode(${row.id})">ƒ</button>
+            <button type="button" class="nc-del" onclick="removeNcRow(${row.id})">✕</button>
+        ` : `
             <input class="nc-inp nc-name" maxlength="6" placeholder="N1" value="${row.name}"
                 data-nc="${row.id}" data-nc-f="name">
             <input type="number" class="nc-inp" min="0" placeholder="1" value="${row.min}"
@@ -1080,6 +1099,7 @@ function renderNcRows() {
                 data-nc="${row.id}" data-nc-f="max">
             <input type="number" class="nc-inp" min="1" placeholder="1" value="${row.step}"
                 title="ნაბიჯი: 1=ნებ, 2=ლუწი, 5=მრ5" data-nc="${row.id}" data-nc-f="step">
+            <button type="button" class="nc-toggle" title="გამოთვლილ ცვლადზე გადართვა (ფორმულით)" onclick="toggleNcMode(${row.id})">ƒ</button>
             <button type="button" class="nc-del" onclick="removeNcRow(${row.id})">✕</button>
         `;
         c.appendChild(div);
@@ -1180,7 +1200,10 @@ function syncAll() {
     if (_qt === 'crossword') { syncCwConfig();    return; }
     const ncObj = {};
     ncRows.forEach(r => {
-        if (r.name) ncObj[r.name] = { min: +r.min, max: +r.max, step: +r.step || 1 };
+        if (!r.name) return;
+        ncObj[r.name] = r.mode === 'derived'
+            ? { derived: r.derived || '0' }
+            : { min: +r.min, max: +r.max, step: +r.step || 1 };
     });
     const _uq = document.getElementById('uniqueNumVars');
     if (_uq && _uq.checked) ncObj['_unique'] = true;
@@ -1300,14 +1323,21 @@ function pickThemeVars() {
 }
 function pickNumVars() {
     const confRows = ncRows.filter(r => r.name);
+    const randomRows  = confRows.filter(r => r.mode !== 'derived');
+    const derivedRows = confRows.filter(r => r.mode === 'derived');
     const unique = document.getElementById('uniqueNumVars')?.checked ?? false;
     let numVars = {}, condOk = false;
     for (let attempt = 0; attempt < 200; attempt++) {
         numVars = {};
-        confRows.forEach(r => {
+        randomRows.forEach(r => {
             const step = Math.max(1, r.step || 1);
             const steps = Math.floor((r.max - r.min) / step);
             numVars[r.name] = r.min + Math.floor(Math.random() * (steps + 1)) * step;
+        });
+        // Derived vars are computed (not randomly rolled) from whatever vars were
+        // already resolved above them, in row order — same evaluator conditions use.
+        derivedRows.forEach(r => {
+            numVars[r.name] = evalExpr(r.derived || '0', numVars);
         });
         const vals = Object.values(numVars);
         if (unique && new Set(vals).size !== vals.length) continue;
@@ -1588,32 +1618,38 @@ function evalArithmeticStepsJs(names, numVars, chosenOps, parenStart) {
     return { result: running, noNegative };
 }
 
-// Mirrors QuestionTemplate::attemptArithmetic() — random operators/parens each try,
-// keeping the first roll that's a positive whole number (and, if noNegSteps, never
-// dips negative along the way). Returns null if nothing qualified within maxAttempts.
-// Re-rolls BOTH the variable values (via pickNumVars(), same as the real generator
-// re-rolls on every attempt) and the operators/parens on every try — a fixed single
-// set of numbers (e.g. one where the first variable happens to be smaller than the
-// rest) can make '-' mathematically impossible no matter how operators are ordered,
-// even though a different roll of numbers would have worked fine.
+// Mirrors QuestionTemplate::attemptArithmetic() — picks an operator combo (and paren
+// position) once, then retries only the random VALUES (via pickNumVars(), re-rolled
+// every inner try — a fixed set of numbers can make '-' impossible no matter how
+// operators are ordered, even though a different roll would work) against that fixed
+// combo before giving up on it and picking a new one. Operators are deliberately NOT
+// re-rolled on every value attempt: doing so would let whichever operator is
+// statistically easier (e.g. '+', always a valid positive result) win the "first
+// success" race far more often than a harder one (e.g. '-'), skewing the output even
+// when both are equally selected. Returns null if nothing qualified within maxAttempts.
 function attemptArithmeticJs(operators, useParens, noNegSteps, maxAttempts) {
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-        const { numVars } = pickNumVars();
-        const names = Object.keys(numVars);
-        const n = names.length;
-        if (n < 2) return null;
+    const names = ncRows.filter(r => r.name).map(r => r.name);
+    const n = names.length;
+    if (n < 2) return null;
 
+    const outerAttempts = Math.min(10, maxAttempts);
+    const innerAttempts = Math.max(1, Math.floor(maxAttempts / outerAttempts));
+
+    for (let opAttempt = 0; opAttempt < outerAttempts; opAttempt++) {
         const chosenOps = [];
         for (let i = 0; i < n - 1; i++) chosenOps.push(operators[Math.floor(Math.random() * operators.length)]);
         // Parens are always applied once enabled — only *where* they land varies.
         const parenStart = (useParens && n >= 3) ? Math.floor(Math.random() * (n - 1)) : null;
 
-        const evaluated = evalArithmeticStepsJs(names, numVars, chosenOps, parenStart);
-        if (!evaluated) continue;
-        if (evaluated.result <= 0 || Math.floor(evaluated.result) !== evaluated.result) continue;
-        if (noNegSteps && !evaluated.noNegative) continue;
+        for (let valAttempt = 0; valAttempt < innerAttempts; valAttempt++) {
+            const { numVars } = pickNumVars();
+            const evaluated = evalArithmeticStepsJs(names, numVars, chosenOps, parenStart);
+            if (!evaluated) continue;
+            if (evaluated.result <= 0 || Math.floor(evaluated.result) !== evaluated.result) continue;
+            if (noNegSteps && !evaluated.noNegative) continue;
 
-        return { correct: evaluated.result, chosenOps, parenStart, numVars, names };
+            return { correct: evaluated.result, chosenOps, parenStart, numVars, names };
+        }
     }
     return null;
 }
@@ -1801,9 +1837,10 @@ function genPreviewNumeric(tmpl) {
 document.getElementById('ncRows').addEventListener('input', function(e) {
     const el = e.target, id = +el.dataset.nc, field = el.dataset.ncF;
     if (!id || !field) return;
-    let val = field === 'name'
-        ? (el.value = el.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))
-        : +el.value;
+    let val;
+    if (field === 'name') val = (el.value = el.value.toUpperCase().replace(/[^A-Z0-9]/g, ''));
+    else if (field === 'derived') val = el.value;
+    else val = +el.value;
     updNc(id, field, val);
 });
 
@@ -1890,7 +1927,11 @@ document.getElementById('condRows').addEventListener('focusin', function(e) {
         }
         Object.entries(numCfg).forEach(([name, conf]) => {
             if (name.startsWith('_') || typeof conf !== 'object' || conf === null) return;
-            addNcRow(name, conf.min ?? 1, conf.max ?? 9, conf.step ?? 1);
+            if ('derived' in conf) {
+                addNcRow(name, 1, 9, 1, 'derived', conf.derived ?? '');
+            } else {
+                addNcRow(name, conf.min ?? 1, conf.max ?? 9, conf.step ?? 1);
+            }
         });
         if (numCfg['_auto'] && numCfg['_auto'].enabled) {
             document.getElementById('autoBuildFields').style.display = '';
