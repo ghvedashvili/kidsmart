@@ -361,6 +361,7 @@
                     placeholder="@{{PLAYER}}-მ @{{N1}} გოლი გაიტანა პირველ ტაიმში, @{{N2}} — მეორეში. სულ?"
                     oninput="onTemplateInput()">{{ old('template_text', $template?->template_text) }}</textarea>
                 @error('template_text')<div class="err">{{ $message }}</div>@enderror
+                <div class="hint" id="exprHint" style="display:none;margin-top:2px;">⚡ ავტომატურ კონსტრუქტორში ჩასვით <code>@{{EXPR}}</code> იმ ადგილზე, სადაც გენერირებული გამოსახულება გამოჩნდება (მაგ. "ამოხსენი: @{{EXPR}}") — ცარიელი ველი ან @{{EXPR}}-ის გარეშე ტექსტი ნაგულისხმევ "... = ?" სტილს გამოაჩენს ტექსტის ბოლოში.</div>
             </div>
 
             {{-- 2+4: Numeric vars & Formula side by side --}}
@@ -1038,9 +1039,10 @@ function toggleNoneCorrect() {
 function toggleAutoBuild() {
     const on = document.getElementById('autoBuildEnabled').checked;
     document.getElementById('autoBuildFields').style.display = on ? '' : 'none';
-    document.getElementById('templateText').readOnly = on;
+    // template_text stays editable — admins can wrap the auto-generated equation in
+    // their own instruction text via the {{EXPR}} placeholder (see exprHint below).
     document.getElementById('correctFormula').readOnly = on;
-    document.getElementById('templateText').style.background = on ? '#f8fafc' : '';
+    document.getElementById('exprHint').style.display = on ? '' : 'none';
     document.getElementById('correctFormula').style.background = on ? '#f8fafc' : '';
     if (!on) previewDebounce();
     syncAll(); previewDebounce();
@@ -1064,7 +1066,12 @@ function applyAutoPreviewText(ncObj, autoCfg) {
             names.slice(2).map(n => ' ' + op + ' ' + OB + n + CB).join('');
         formula = '(' + names[0] + formulaOp + names[1] + ')' + names.slice(2).map(n => formulaOp + n).join('');
     }
-    document.getElementById('templateText').value = text;
+    // Only fill template_text when it's empty — admins can type their own
+    // instruction text (with an {{EXPR}} placeholder) and it must never be
+    // clobbered by this cosmetic default.
+    if (!document.getElementById('templateText').value.trim()) {
+        document.getElementById('templateText').value = text;
+    }
     document.getElementById('correctFormula').value = formula;
 }
 
@@ -1681,8 +1688,16 @@ function genPreviewAuto() {
     const operators = ops.length ? ops : ['+'];
     const useParens = document.getElementById('autoParens').checked;
     const noNegSteps = document.getElementById('autoNoNegSteps').checked;
-    const mixBlank = document.getElementById('autoMixBlank').checked;
     if (!ncRows.filter(r => r.name).length) { clearPreview(); return; }
+
+    // mix_blank's "sometimes hide an operand instead of the result" relies on
+    // {{EXPR}} to correctly render either "...= ?" or "...= <result>" depending on
+    // which was hidden. If the admin wrote their own text without that token (e.g.
+    // raw {{N1}}/{{N2}} placeholders with a hand-written "= ?" at the end), force
+    // the classic result-hidden style. Mirrors QuestionTemplate::generateAutoArithmetic().
+    const customText = (document.getElementById('templateText').value || '').trim();
+    const hasExprToken = customText.includes('{{EXPR}}');
+    const mixBlank = document.getElementById('autoMixBlank').checked && (!customText || hasExprToken);
 
     // Same two-tier approach as the PHP generator: try with every constraint as
     // configured first; if the ranges make that impossible (e.g. only '-' with no
@@ -1728,10 +1743,38 @@ function genPreviewAuto() {
         if (parenStart !== null && i === parenStart + 1) display += ')';
         if (i < n - 1) display += ' ' + chosenOps[i] + ' ';
     }
-    display += blankPos === null ? ' = ?' : ' = ' + correct;
-    document.getElementById('prevQ').innerHTML = escHtml(display);
+    const equation = display + (blankPos === null ? ' = ?' : ' = ' + correct);
+
+    // Admin can wrap the generated equation in their own instruction text (e.g.
+    // "ამოხსენი: {{EXPR}}"). {{EXPR}} is replaced with the full equation; any
+    // {{N1}}, {{N2}}... placeholder is also replaced with that variable's rolled
+    // value (shown as "?" if it's the one hidden this round). The equation is
+    // appended at the end ONLY if the text references neither {{EXPR}} nor any
+    // variable directly — otherwise the admin is already placing the numbers
+    // themselves (e.g. "{{N1}} + {{N2}} = ?"), and appending it again would
+    // duplicate it. Falls back to the bare equation when the field is empty.
+    const hasVarToken = names.some(name => customText.includes(OB + name + CB));
+    let text;
+    if (!customText) {
+        text = equation;
+    } else {
+        const displayValues = { ...numVars };
+        if (blankPos !== null) displayValues[names[blankPos]] = '?';
+        text = hasExprToken ? customText.split('{{EXPR}}').join(equation) : customText;
+        Object.entries(displayValues).forEach(([k, v]) => { text = text.split(OB + k + CB).join(String(v)); });
+        text = text.replace(/\{\{\w+\}\}/g, '?');
+        if (!hasExprToken && !hasVarToken) text += ' ' + equation;
+    }
+    document.getElementById('prevQ').innerHTML = escHtml(text);
     document.getElementById('prevHint').textContent = (document.getElementById('hintText').value || '').trim();
-    document.getElementById('prevWarn').innerHTML = '';
+    // A literal operator symbol (e.g. a hand-typed "+") typed next to raw {{N1}}/
+    // {{N2}} placeholders can never change — only {{EXPR}} carries the real,
+    // per-generation operator/parens. With more than one operator selected, that
+    // mismatch would show a wrong-looking sign while the graded answer still uses
+    // whichever operator was actually rolled underneath.
+    document.getElementById('prevWarn').innerHTML = (hasVarToken && !hasExprToken && operators.length > 1)
+        ? '<span>⚠ ტექსტში ოპერატორი ფიქსირებულია — სწორი ასახვისთვის გამოიყენეთ {{EXPR}} {{N1}}/{{N2}}-ის მაგივრად</span>'
+        : '';
 
     const dMin = +document.getElementById('distMin').value || 1;
     const dMax = +document.getElementById('distMax').value || 10;
@@ -1972,9 +2015,8 @@ document.getElementById('condRows').addEventListener('focusin', function(e) {
         });
         if (numCfg['_auto'] && numCfg['_auto'].enabled) {
             document.getElementById('autoBuildFields').style.display = '';
-            document.getElementById('templateText').readOnly = true;
             document.getElementById('correctFormula').readOnly = true;
-            document.getElementById('templateText').style.background = '#f8fafc';
+            document.getElementById('exprHint').style.display = '';
             document.getElementById('correctFormula').style.background = '#f8fafc';
         }
     } else if (!isTxtInit) {

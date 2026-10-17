@@ -295,6 +295,16 @@ class QuestionTemplate extends Model
         $noNegSteps  = array_key_exists('no_negative_steps', $auto) ? (bool) $auto['no_negative_steps'] : true;
         $mixBlank    = array_key_exists('mix_blank', $auto) ? (bool) $auto['mix_blank'] : true;
 
+        // mix_blank's "sometimes hide an operand instead of the result" relies on
+        // {{EXPR}} to correctly render either "...= ?" or "...= <result>" depending
+        // on which was hidden. If the admin wrote their own text without that token
+        // (e.g. raw {{N1}}/{{N2}} placeholders with a hand-written "= ?" at the end),
+        // force the classic result-hidden style so a hidden operand never collides
+        // with a hardcoded, now-misleading "= ?".
+        $customText   = trim((string) $this->template_text);
+        $hasExprToken = str_contains($customText, '{{EXPR}}');
+        $mixBlank     = $mixBlank && ($customText === '' || $hasExprToken);
+
         $varConfigs = [];
         foreach ($numConf as $key => $conf) {
             if (! is_array($conf) || str_starts_with((string) $key, '_')) continue;
@@ -351,11 +361,40 @@ class QuestionTemplate extends Model
         }
 
         if ($blankPos === null) {
-            $text = $this->buildArithmeticExpr($varNames, $values, $opsChosen, $parenStart) . ' = ?';
+            $equation = $this->buildArithmeticExpr($varNames, $values, $opsChosen, $parenStart) . ' = ?';
             $answer = $correct;
         } else {
-            $text = $this->buildArithmeticExpr($varNames, $values, $opsChosen, $parenStart, $blankPos) . ' = ' . $correct;
+            $equation = $this->buildArithmeticExpr($varNames, $values, $opsChosen, $parenStart, $blankPos) . ' = ' . $correct;
             $answer = (int) $values[$varNames[$blankPos]];
+        }
+
+        // Admin can wrap the generated equation in their own instruction text (e.g.
+        // "ამოხსენი: {{EXPR}}"). {{EXPR}} is replaced with the full equation; any
+        // {{N1}}, {{N2}}... placeholder is also replaced with that variable's rolled
+        // value (shown as "?" if it's the one hidden this round) — same {{var}}
+        // syntax every other template type already uses. The equation is appended
+        // at the end ONLY if the text references neither {{EXPR}} nor any variable
+        // directly — otherwise the admin is already placing the numbers themselves
+        // (e.g. "{{N1}} + {{N2}} = ?"), and appending it again would duplicate it.
+        if ($customText === '') {
+            $text = $equation;
+        } else {
+            $hasVarToken = false;
+            foreach ($varNames as $vn) {
+                if (str_contains($customText, "{{{$vn}}}")) { $hasVarToken = true; break; }
+            }
+            $displayValues = $values;
+            if ($blankPos !== null) {
+                $displayValues[$varNames[$blankPos]] = '?';
+            }
+            $text = $hasExprToken ? str_replace('{{EXPR}}', $equation, $customText) : $customText;
+            foreach ($displayValues as $k => $v) {
+                $text = str_replace("{{{$k}}}", (string) $v, $text);
+            }
+            $text = preg_replace('/\{\{\w+\}\}/', '?', $text);
+            if (! $hasExprToken && ! $hasVarToken) {
+                $text .= ' ' . $equation;
+            }
         }
 
         $hint = $this->hint_text ?: null;
