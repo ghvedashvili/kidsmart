@@ -15,12 +15,15 @@ class CrosswordService
         $ops = array_values(array_filter($operators));
         if (empty($ops)) $ops = ['+'];
 
-        for ($attempt = 0; $attempt < 300; $attempt++) {
-            $cells = [];
-            for ($i = 0; $i < $rows * $cols; $i++) {
-                $cells[$i] = rand($minVal, $maxVal);
-            }
-
+        // Operators are picked ONCE per outer attempt, then only the cell VALUES
+        // are retried for a batch of inner attempts before giving up on that combo
+        // and picking new operators. Re-rolling operators on every single value
+        // attempt (as before) let whichever operator is statistically easier to
+        // satisfy (e.g. '+', which is valid as long as both numbers are positive)
+        // win the "first success" race far more often than a harder one (e.g. '-',
+        // which needs the first number to stay bigger), skewing the output even
+        // when both were equally checked by the admin.
+        for ($opAttempt = 0; $opAttempt < 10; $opAttempt++) {
             $rowOps = [];
             $colOps = [];
             for ($r = 0; $r < $rows; $r++) {
@@ -30,53 +33,60 @@ class CrosswordService
                 $colOps[$c] = $ops[array_rand($ops)];
             }
 
-            $rowResults = [];
-            $valid = true;
-            for ($r = 0; $r < $rows; $r++) {
-                $rowCells = array_slice($cells, $r * $cols, $cols);
-                $result   = self::calcChain($rowCells, $rowOps[$r]);
-                if ($result === null || $result <= 0) { $valid = false; break; }
-                $rowResults[$r] = $result;
-            }
-            if (! $valid) continue;
-
-            $colResults = [];
-            for ($c = 0; $c < $cols; $c++) {
-                $colCells = [];
-                for ($r = 0; $r < $rows; $r++) {
-                    $colCells[] = $cells[$r * $cols + $c];
+            for ($attempt = 0; $attempt < 30; $attempt++) {
+                $cells = [];
+                for ($i = 0; $i < $rows * $cols; $i++) {
+                    $cells[$i] = rand($minVal, $maxVal);
                 }
-                $result = self::calcChain($colCells, $colOps[$c]);
-                if ($result === null || $result <= 0) { $valid = false; break; }
-                $colResults[$c] = $result;
+
+                $rowResults = [];
+                $valid = true;
+                for ($r = 0; $r < $rows; $r++) {
+                    $rowCells = array_slice($cells, $r * $cols, $cols);
+                    $result   = self::calcChain($rowCells, $rowOps[$r]);
+                    if ($result === null || $result <= 0) { $valid = false; break; }
+                    $rowResults[$r] = $result;
+                }
+                if (! $valid) continue;
+
+                $colResults = [];
+                for ($c = 0; $c < $cols; $c++) {
+                    $colCells = [];
+                    for ($r = 0; $r < $rows; $r++) {
+                        $colCells[] = $cells[$r * $cols + $c];
+                    }
+                    $result = self::calcChain($colCells, $colOps[$c]);
+                    if ($result === null || $result <= 0) { $valid = false; break; }
+                    $colResults[$c] = $result;
+                }
+                if (! $valid) continue;
+
+                $revealed = self::pickRevealed(
+                    $cells, $rowOps, $colOps, $rowResults, $colResults, $rows, $cols,
+                    max(0, min($rows * $cols - 1, $revealedCount))
+                );
+
+                $correctAnswer = [];
+                for ($i = 0; $i < $rows * $cols; $i++) {
+                    $correctAnswer[(string) $i] = $cells[$i];
+                }
+
+                return [
+                    'question_text'  => json_encode([
+                        'type'        => 'crossword',
+                        'rows'        => $rows,
+                        'cols'        => $cols,
+                        'row_ops'     => $rowOps,
+                        'col_ops'     => $colOps,
+                        'row_results' => $rowResults,
+                        'col_results' => $colResults,
+                        'revealed'    => $revealed,
+                    ]),
+                    'correct_answer' => json_encode($correctAnswer),
+                    'hint_text'      => null,
+                    'options'        => null,
+                ];
             }
-            if (! $valid) continue;
-
-            $revealed = self::pickRevealed(
-                $cells, $rowOps, $colOps, $rowResults, $colResults, $rows, $cols,
-                max(0, min($rows * $cols - 1, $revealedCount))
-            );
-
-            $correctAnswer = [];
-            for ($i = 0; $i < $rows * $cols; $i++) {
-                $correctAnswer[(string) $i] = $cells[$i];
-            }
-
-            return [
-                'question_text'  => json_encode([
-                    'type'        => 'crossword',
-                    'rows'        => $rows,
-                    'cols'        => $cols,
-                    'row_ops'     => $rowOps,
-                    'col_ops'     => $colOps,
-                    'row_results' => $rowResults,
-                    'col_results' => $colResults,
-                    'revealed'    => $revealed,
-                ]),
-                'correct_answer' => json_encode($correctAnswer),
-                'hint_text'      => null,
-                'options'        => null,
-            ];
         }
 
         // fallback: pure addition

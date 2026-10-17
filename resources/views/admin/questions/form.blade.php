@@ -825,26 +825,35 @@ function genPreviewCw() {
         return r > 0 ? r : null;
     }
 
-    let cells, rowOps, colOps, rowResults, colResults, valid;
-    for (let attempt = 0; attempt < 300; attempt++) {
-        cells = Array.from({length: R*C}, () => minV + Math.floor(Math.random()*(maxV-minV+1)));
+    // Operators are picked ONCE per outer attempt, then only the cell VALUES are
+    // retried for a batch of inner attempts before giving up on that combo and
+    // picking new operators — re-rolling operators on every single value attempt
+    // let whichever operator is statistically easier (e.g. '+', always valid for
+    // positive numbers) win the "first success" race far more often than a harder
+    // one (e.g. '-', which needs the first number to stay bigger). Mirrors
+    // CrosswordService::build()'s outer/inner split.
+    let cells, rowOps, colOps, rowResults, colResults, valid = false;
+    outer: for (let opAttempt = 0; opAttempt < 10; opAttempt++) {
         rowOps = Array.from({length: R}, () => ops[Math.floor(Math.random()*ops.length)]);
         colOps = Array.from({length: C}, () => ops[Math.floor(Math.random()*ops.length)]);
-        rowResults = []; colResults = []; valid = true;
-        for (let r = 0; r < R && valid; r++) {
-            const rc = cells.slice(r*C, r*C+C);
-            const res = cwCalcChain(rc, rowOps[r]);
-            if (!res) { valid=false; break; }
-            rowResults[r] = res;
+        for (let attempt = 0; attempt < 30; attempt++) {
+            cells = Array.from({length: R*C}, () => minV + Math.floor(Math.random()*(maxV-minV+1)));
+            rowResults = []; colResults = []; valid = true;
+            for (let r = 0; r < R && valid; r++) {
+                const rc = cells.slice(r*C, r*C+C);
+                const res = cwCalcChain(rc, rowOps[r]);
+                if (!res) { valid=false; break; }
+                rowResults[r] = res;
+            }
+            if (!valid) continue;
+            for (let c = 0; c < C && valid; c++) {
+                const cc = Array.from({length: R}, (_,r) => cells[r*C+c]);
+                const res = cwCalcChain(cc, colOps[c]);
+                if (!res) { valid=false; break; }
+                colResults[c] = res;
+            }
+            if (valid) break outer;
         }
-        if (!valid) continue;
-        for (let c = 0; c < C && valid; c++) {
-            const cc = Array.from({length: R}, (_,r) => cells[r*C+c]);
-            const res = cwCalcChain(cc, colOps[c]);
-            if (!res) { valid=false; break; }
-            colResults[c] = res;
-        }
-        if (valid) break;
     }
     if (!valid) { rowOps=Array(R).fill('+');colOps=Array(C).fill('+');
         rowResults=[];colResults=[];
