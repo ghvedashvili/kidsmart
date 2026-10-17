@@ -75,7 +75,7 @@ class QuestionTemplate extends Model
         $cfg  = $this->num_config ?? [];
         $rows = in_array((int)($cfg['rows'] ?? 2), [2, 3]) ? (int)$cfg['rows'] : 2;
         $cols = in_array((int)($cfg['cols'] ?? 2), [2, 3]) ? (int)$cfg['cols'] : 2;
-        return \App\Services\CrosswordService::build(
+        $result = \App\Services\CrosswordService::build(
             (int)  ($cfg['min_val']      ?? 1),
             (int)  ($cfg['max_val']      ?? 10),
             (array)($cfg['operators']    ?? ['+']),
@@ -83,12 +83,13 @@ class QuestionTemplate extends Model
             $cols,
             (int)  ($cfg['revealed_count'] ?? 0)
         );
+        return array_merge($result, ['hint_text' => $this->hint_text ?: null]);
     }
 
     public function generateCode(): array
     {
         $cfg = $this->num_config ?? [];
-        return \App\Services\CodeService::build(
+        $result = \App\Services\CodeService::build(
             (int)  ($cfg['symbol_count']  ?? 3),
             (int)  ($cfg['min_val']       ?? 1),
             (int)  ($cfg['max_val']       ?? 9),
@@ -96,6 +97,7 @@ class QuestionTemplate extends Model
             (int)  ($cfg['vars_per_eq']   ?? 2),
             (bool) ($cfg['unique_values'] ?? false)
         );
+        return array_merge($result, ['hint_text' => $this->hint_text ?: null]);
     }
 
     public function generatePyramid(): array
@@ -113,7 +115,7 @@ class QuestionTemplate extends Model
             'solutions'      => $result['solutions'],
             'question_text'  => json_encode($result['rows']),
             'correct_answer' => json_encode($result['solutions']),
-            'hint_text'      => null,
+            'hint_text'      => $this->hint_text ?: null,
             'options'        => null,
         ];
     }

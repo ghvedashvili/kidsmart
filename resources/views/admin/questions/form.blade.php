@@ -510,14 +510,17 @@
                         value="{{ old('correct_formula', $template?->correct_formula) }}">
                     <input type="hidden" name="distractors" id="distractorsJson">
                     @error('distractors')<div class="err">{{ $message }}</div>@enderror
-
-                    <div class="lbl" style="margin-top:10px;">მინიშნება <span style="color:#94a3b8;font-size:0.6rem;">(გამოჩნდება კითხვის ქვეშ)</span></div>
-                    <textarea name="hint_text" id="hintText" class="fc" rows="2"
-                        placeholder="მინიშნება..."
-                        oninput="previewDebounce()">{{ old('hint_text', $template?->hint_text) }}</textarea>
                 </div>
             </div>
             </div>{{-- /mcSections --}}
+
+            {{-- Hint — shown under the question regardless of type (pyramid/code/crossword too) --}}
+            <div class="card">
+                <div class="lbl">მინიშნება <span style="color:#94a3b8;font-size:0.6rem;">(გამოჩნდება კითხვის ქვეშ)</span></div>
+                <textarea name="hint_text" id="hintText" class="fc" rows="2"
+                    placeholder="მინიშნება..."
+                    oninput="previewDebounce()">{{ old('hint_text', $template?->hint_text) }}</textarea>
+            </div>
 
 <div class="form-actions">
                 <button type="submit" class="btn-save">{{ $template ? '↺ განახლება' : '✓ შენახვა' }}</button>

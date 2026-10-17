@@ -180,6 +180,7 @@ body {
         @if($qType === 'pyramid')
         @php $pyrRows = json_decode($q->question_text, true) ?? []; @endphp
         <div class="q-text" style="margin-bottom:16px;">შეავსე ცარიელი უჯრები</div>
+        @if($q->hint_text)<div class="q-hint">{{ $q->hint_text }}</div>@endif
         <div style="display:flex;flex-direction:column;align-items:center;gap:6px;" id="pyr_{{ $q->id }}">
             @foreach($pyrRows as $r => $row)
             <div style="display:flex;gap:6px;">
@@ -202,6 +203,7 @@ body {
         @elseif($qType === 'code')
         @php $codeQ = json_decode($q->question_text, true) ?? []; @endphp
         <div class="q-text" style="margin-bottom:12px;">🕵️ გაშიფრე კოდი</div>
+        @if($q->hint_text)<div class="q-hint">{{ $q->hint_text }}</div>@endif
         <div class="code-eq-box">
             @foreach($codeQ['equations'] ?? [] as $eq)
             <div class="code-eq">{{ $eq }}</div>
@@ -247,6 +249,7 @@ body {
             $cwCorrect  = json_decode($q->correct_answer, true) ?? [];
         @endphp
         <div class="q-text" style="margin-bottom:14px;">🧮 შეავსე კროსვორდი</div>
+        @if($q->hint_text)<div class="q-hint">{{ $q->hint_text }}</div>@endif
         <div style="display:grid;grid-template-columns:{{ implode(' ',$cwTpl) }};grid-template-rows:{{ implode(' ',$cwRTpl) }};gap:5px;align-items:center;justify-items:center;margin:0 auto 8px;max-width:max-content;">
         @for($cwDr=0;$cwDr<=2*$cwR;$cwDr++)
         @for($cwDc=0;$cwDc<=2*$cwC;$cwDc++)

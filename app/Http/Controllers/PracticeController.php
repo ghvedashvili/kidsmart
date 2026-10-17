@@ -132,7 +132,7 @@ class PracticeController extends Controller
             $key  = "pq_{$child->id}_{$topic->id}_" . uniqid();
             $data = $template->generatePyramid();
             cache()->put($key, ['topic_id' => $topic->id, 'qtype' => 'pyramid', 'data' => $data['solutions'], 'prompt' => "🔺 პირამიდა — {$topic->name}"], now()->addMinutes(20));
-            return response()->json(array_merge(['type' => 'pyramid', 'key' => $key, 'rows' => $data['rows'], 'height' => count($data['rows'])], $meta));
+            return response()->json(array_merge(['type' => 'pyramid', 'key' => $key, 'rows' => $data['rows'], 'height' => count($data['rows']), 'hint' => $data['hint_text'] ?? null], $meta));
         }
 
         if ($template->isCode()) {
@@ -146,6 +146,7 @@ class PracticeController extends Controller
                 'symbols'   => $q['symbols'],
                 'equations' => $q['equations'],
                 'target'    => $q['target'],
+                'hint'      => $data['hint_text'] ?? null,
             ], $meta));
         }
 
@@ -171,6 +172,7 @@ class PracticeController extends Controller
                 'col_results'    => $q['col_results'] ?? [],
                 'revealed'       => $revealed,
                 'revealed_values'=> $revealedVals,
+                'hint'           => $data['hint_text'] ?? null,
             ], $meta));
         }
 

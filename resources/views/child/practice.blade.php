@@ -153,11 +153,11 @@
 
     <div class="q-card" id="qCard" style="display:none;">
         <div class="q-label" id="qLabel">კითხვა</div>
+        <div class="q-hint" id="qHint" style="display:none;"></div>
 
         {{-- MC question --}}
         <div id="mcArea" style="display:none;">
             <div class="q-text" id="qText"></div>
-            <div class="q-hint" id="qHint" style="display:none;"></div>
             <div class="opts" id="optsGrid"></div>
         </div>
 
@@ -234,14 +234,14 @@ function renderQuestion(q) {
     document.getElementById('codeArea').style.display = 'none';
     document.getElementById('cwArea').style.display   = 'none';
 
+    const hintEl = document.getElementById('qHint');
+    if (q.hint) { hintEl.textContent = q.hint; hintEl.style.display = 'block'; }
+    else         { hintEl.style.display = 'none'; }
+
     if (q.type === 'mc') {
         document.getElementById('mcArea').style.display  = 'block';
         document.getElementById('qLabel').textContent = 'კითხვა';
         document.getElementById('qText').textContent  = q.question;
-
-        const hintEl = document.getElementById('qHint');
-        if (q.hint) { hintEl.textContent = q.hint; hintEl.style.display = 'block'; }
-        else         { hintEl.style.display = 'none'; }
 
         const grid = document.getElementById('optsGrid');
         grid.innerHTML = '';

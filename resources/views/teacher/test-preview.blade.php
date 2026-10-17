@@ -129,6 +129,7 @@
             $pyrSols  = json_decode($q['correct_answer'], true) ?? [];
         @endphp
         <div class="q-text" style="margin-bottom:12px;">🔺 მათემატიკური პირამიდა</div>
+        @if(!empty($q['hint_text']))<div class="hint">{{ $q['hint_text'] }}</div>@endif
         <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
             @foreach($pyrRows as $r => $row)
             <div style="display:flex;gap:5px;">
@@ -159,6 +160,7 @@
             $cwAns = json_decode($q['correct_answer'], true) ?? [];
         @endphp
         <div class="q-text" style="margin-bottom:10px;">🧮 კროსვორდი</div>
+        @if(!empty($q['hint_text']))<div class="hint">{{ $q['hint_text'] }}</div>@endif
         @php
         $_rops=$cwQ['row_ops']??[];$_cops=$cwQ['col_ops']??[];
         $_rres=$cwQ['row_results']??[];$_cres=$cwQ['col_results']??[];
@@ -212,6 +214,7 @@
             $codeAns = json_decode($q['correct_answer'], true) ?? [];
         @endphp
         <div class="q-text" style="margin-bottom:10px;">🕵️ კოდის გაშიფვრა</div>
+        @if(!empty($q['hint_text']))<div class="hint">{{ $q['hint_text'] }}</div>@endif
         <div style="background:#fff8e7;border-radius:8px;padding:8px 12px;margin-bottom:10px;border:1.5px dashed #ffe194;font-size:0.82rem;font-weight:700;color:#374151;">
             @foreach($codeQ['equations'] ?? [] as $eq)
             <div>{{ $eq }}</div>
