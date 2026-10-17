@@ -361,6 +361,52 @@
                 {{-- 2. Numeric vars --}}
                 <div class="card">
                     <div class="sec-title">② რიცხვის ცვლადები <span style="color:#94a3b8;font-size:0.54rem;letter-spacing:0.06em;">(სახელი · min · max · ნაბიჯი)</span></div>
+
+                    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:10px;margin-bottom:12px;">
+                        <label style="display:flex;align-items:center;gap:6px;font-size:0.76rem;font-weight:700;color:#166534;cursor:pointer;margin-bottom:0;">
+                            <input type="checkbox" id="autoBuildEnabled" onchange="toggleAutoBuild()"
+                                {{ !empty(($template?->num_config ?? [])['_auto']['enabled'] ?? null) ? 'checked' : '' }}>
+                            ⚡ ავტომატური კონსტრუქტორი <span style="font-weight:600;color:#4b8a63;">(მოქმედება შემთხვევით შეირჩევა ყოველ გენერაციაზე)</span>
+                        </label>
+                        <div id="autoBuildFields" style="display:none;margin-top:10px;">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+                                <div>
+                                    <div class="lbl">ცვლადების რაოდენობა</div>
+                                    <select class="pyr-inp" id="autoVarCount">
+                                        @php $autoCfg = ($template?->num_config ?? [])['_auto'] ?? []; $autoVarCount = count(array_filter($template?->num_config ?? [], fn($k) => !str_starts_with($k, '_'), ARRAY_FILTER_USE_KEY)) ?: 2; @endphp
+                                        @foreach([2,3,4,5] as $n)
+                                        <option value="{{ $n }}" {{ $autoVarCount == $n ? 'selected' : '' }}>{{ $n }} ცვლადი</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div style="display:flex;align-items:flex-end;padding-bottom:4px;">
+                                    <label style="display:flex;align-items:center;gap:7px;font-size:0.78rem;font-weight:700;color:#374151;cursor:pointer;">
+                                        <input type="checkbox" id="autoParens" onchange="syncAll();previewDebounce();" {{ !empty($autoCfg['parens']) ? 'checked' : '' }}>
+                                        ფრჩხილები
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="lbl">მოქმედებები</div>
+                            <div class="op-check" style="margin-bottom:10px;">
+                                <label><input type="checkbox" id="autoOpPlus" onchange="syncAll();previewDebounce();"
+                                    {{ in_array('+', $autoCfg['operators'] ?? ['+']) ? 'checked' : '' }}> +</label>
+                                <label><input type="checkbox" id="autoOpMinus" onchange="syncAll();previewDebounce();"
+                                    {{ in_array('-', $autoCfg['operators'] ?? []) ? 'checked' : '' }}> −</label>
+                                <label><input type="checkbox" id="autoOpMul" onchange="syncAll();previewDebounce();"
+                                    {{ in_array('×', $autoCfg['operators'] ?? []) ? 'checked' : '' }}> ×</label>
+                                <label><input type="checkbox" id="autoOpDiv" onchange="syncAll();previewDebounce();"
+                                    {{ in_array('÷', $autoCfg['operators'] ?? []) ? 'checked' : '' }}> ÷</label>
+                            </div>
+                            <label style="display:flex;align-items:center;gap:7px;font-size:0.74rem;font-weight:700;color:#374151;cursor:pointer;margin-bottom:10px;">
+                                <input type="checkbox" id="autoNoNegSteps" onchange="syncAll();previewDebounce();"
+                                    {{ !array_key_exists('no_negative_steps', $autoCfg) || $autoCfg['no_negative_steps'] ? 'checked' : '' }}>
+                                არ დავუშვათ უარყოფითი შუალედური მნიშვნელობა (მიმდევრობით ანგარიშისას)
+                            </label>
+                            <button type="button" class="nc-add" onclick="applyAutoBuild()">⚡ ცვლადების შექმნა</button>
+                            <div style="font-size:0.62rem;color:#4b8a63;margin-top:6px;">აწყობს ქვემოთ ცვლადების მწკრივებს (N1, N2, ...) — თქვენ მხოლოდ min/max/ნაბიჯი დააზუსტეთ.</div>
+                        </div>
+                    </div>
+
                     <div class="nc-hdr" style="margin-top:4px;">
                         <span>სახელი</span><span>min</span><span>max</span><span>ნაბიჯი</span><span></span>
                     </div>
@@ -967,6 +1013,40 @@ function toggleNoneCorrect() {
     syncAll(); previewDebounce();
 }
 
+// ── Auto-build constructor (random operators/parens re-rolled server-side on every generation)
+function toggleAutoBuild() {
+    const on = document.getElementById('autoBuildEnabled').checked;
+    document.getElementById('autoBuildFields').style.display = on ? '' : 'none';
+    document.getElementById('templateText').readOnly = on;
+    document.getElementById('correctFormula').readOnly = on;
+    document.getElementById('templateText').style.background = on ? '#f8fafc' : '';
+    document.getElementById('correctFormula').style.background = on ? '#f8fafc' : '';
+    if (!on) previewDebounce();
+    syncAll(); previewDebounce();
+}
+function applyAutoBuild() {
+    const count = parseInt(document.getElementById('autoVarCount').value) || 2;
+    ncRows = [];
+    for (let i = 1; i <= count; i++) addNcRow('N' + i, 1, 9, 1);
+    renderNcRows();
+    syncAll(); previewDebounce();
+}
+function applyAutoPreviewText(ncObj, autoCfg) {
+    const names = Object.keys(ncObj).filter(k => !k.startsWith('_'));
+    if (!names.length) return;
+    const op = autoCfg.operators[0];
+    const formulaOp = op === '×' ? '*' : (op === '÷' ? '/' : op);
+    let text = names.map(n => OB + n + CB).join(' ' + op + ' ') + ' = ?';
+    let formula = names.join(formulaOp);
+    if (autoCfg.parens && names.length >= 3) {
+        text = '(' + OB + names[0] + CB + ' ' + op + ' ' + OB + names[1] + CB + ')' +
+            names.slice(2).map(n => ' ' + op + ' ' + OB + n + CB).join('');
+        formula = '(' + names[0] + formulaOp + names[1] + ')' + names.slice(2).map(n => formulaOp + n).join('');
+    }
+    document.getElementById('templateText').value = text;
+    document.getElementById('correctFormula').value = formula;
+}
+
 // ── num_config rows
 let ncRows  = [];
 let ncIdSeq = 1;
@@ -1104,6 +1184,23 @@ function syncAll() {
     });
     const _uq = document.getElementById('uniqueNumVars');
     if (_uq && _uq.checked) ncObj['_unique'] = true;
+
+    const autoEl = document.getElementById('autoBuildEnabled');
+    const autoOn = autoEl && autoEl.checked;
+    if (autoOn) {
+        const aOps = [];
+        if (document.getElementById('autoOpPlus').checked)  aOps.push('+');
+        if (document.getElementById('autoOpMinus').checked) aOps.push('-');
+        if (document.getElementById('autoOpMul').checked)   aOps.push('×');
+        if (document.getElementById('autoOpDiv').checked)   aOps.push('÷');
+        ncObj['_auto'] = {
+            enabled: true,
+            operators: aOps.length ? aOps : ['+'],
+            parens: document.getElementById('autoParens').checked,
+            no_negative_steps: document.getElementById('autoNoNegSteps').checked,
+        };
+        applyAutoPreviewText(ncObj, ncObj['_auto']);
+    }
     document.getElementById('numConfigJson').value = JSON.stringify(ncObj);
 
     const names = Object.keys(ncObj);
@@ -1434,10 +1531,150 @@ function genPreview() {
     if (qt === 'pyramid')   { genPreviewPyramid(); return; }
     if (qt === 'code')      { genPreviewCode();     return; }
     if (qt === 'crossword') { genPreviewCw();       return; }
+    const autoEl = document.getElementById('autoBuildEnabled');
+    if (autoEl && autoEl.checked) { genPreviewAuto(); return; }
     const tmpl = document.getElementById('templateText').value;
     if (!tmpl) { clearPreview(); return; }
     const isTxt = document.getElementById('answerTypeInput').value === 'text';
     isTxt ? genPreviewText(tmpl) : genPreviewNumeric(tmpl);
+}
+
+// Mirrors QuestionTemplate::evalArithmeticSteps() in PHP: parens first, then × ÷
+// left-to-right collapsing each factor chain, then the +/- chain left-to-right —
+// tracking whether that final walk (including the first term) ever dips below 0.
+function evalArithmeticStepsJs(names, numVars, chosenOps, parenStart) {
+    const applyOp = (a, op, b) => {
+        if (op === '+') return a + b;
+        if (op === '-') return a - b;
+        if (op === '×') return a * b;
+        if (op === '÷') return (b !== 0 && a % b === 0) ? a / b : null;
+        return null;
+    };
+    let terms = names.map((name, i) => ({ val: numVars[name], op: i === 0 ? null : chosenOps[i - 1] }));
+
+    // Tracks whether ANY sub-step — inside the parens, inside a ×÷ chain, or in the
+    // outer +/- walk — ever produced a negative value a child would have had to
+    // compute along the way, even if it's later cancelled out by what follows.
+    let noNegative = true;
+
+    if (parenStart !== null) {
+        const a = terms[parenStart], b = terms[parenStart + 1];
+        const combined = applyOp(a.val, b.op, b.val);
+        if (combined === null) return null;
+        if (combined < 0) noNegative = false;
+        terms.splice(parenStart, 2, { val: combined, op: a.op });
+    }
+
+    const reduced = [];
+    for (const t of terms) {
+        if (t.op === '×' || t.op === '÷') {
+            const prev = reduced.pop();
+            const combined = applyOp(prev.val, t.op, t.val);
+            if (combined === null) return null;
+            if (combined < 0) noNegative = false;
+            reduced.push({ val: combined, op: prev.op });
+        } else {
+            reduced.push(t);
+        }
+    }
+
+    let running = reduced[0].val;
+    if (running < 0) noNegative = false;
+    for (let i = 1; i < reduced.length; i++) {
+        running = applyOp(running, reduced[i].op, reduced[i].val);
+        if (running === null) return null;
+        if (running < 0) noNegative = false;
+    }
+    return { result: running, noNegative };
+}
+
+// Mirrors QuestionTemplate::attemptArithmetic() — random operators/parens each try,
+// keeping the first roll that's a positive whole number (and, if noNegSteps, never
+// dips negative along the way). Returns null if nothing qualified within maxAttempts.
+// Re-rolls BOTH the variable values (via pickNumVars(), same as the real generator
+// re-rolls on every attempt) and the operators/parens on every try — a fixed single
+// set of numbers (e.g. one where the first variable happens to be smaller than the
+// rest) can make '-' mathematically impossible no matter how operators are ordered,
+// even though a different roll of numbers would have worked fine.
+function attemptArithmeticJs(operators, useParens, noNegSteps, maxAttempts) {
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        const { numVars } = pickNumVars();
+        const names = Object.keys(numVars);
+        const n = names.length;
+        if (n < 2) return null;
+
+        const chosenOps = [];
+        for (let i = 0; i < n - 1; i++) chosenOps.push(operators[Math.floor(Math.random() * operators.length)]);
+        // Parens are always applied once enabled — only *where* they land varies.
+        const parenStart = (useParens && n >= 3) ? Math.floor(Math.random() * (n - 1)) : null;
+
+        const evaluated = evalArithmeticStepsJs(names, numVars, chosenOps, parenStart);
+        if (!evaluated) continue;
+        if (evaluated.result <= 0 || Math.floor(evaluated.result) !== evaluated.result) continue;
+        if (noNegSteps && !evaluated.noNegative) continue;
+
+        return { correct: evaluated.result, chosenOps, parenStart, numVars, names };
+    }
+    return null;
+}
+
+function genPreviewAuto() {
+    const ops = [];
+    if (document.getElementById('autoOpPlus').checked)  ops.push('+');
+    if (document.getElementById('autoOpMinus').checked) ops.push('-');
+    if (document.getElementById('autoOpMul').checked)   ops.push('×');
+    if (document.getElementById('autoOpDiv').checked)   ops.push('÷');
+    const operators = ops.length ? ops : ['+'];
+    const useParens = document.getElementById('autoParens').checked;
+    const noNegSteps = document.getElementById('autoNoNegSteps').checked;
+    if (!ncRows.filter(r => r.name).length) { clearPreview(); return; }
+
+    // Same two-tier approach as the PHP generator: try with every constraint as
+    // configured first; if the ranges make that impossible (e.g. only '-' with no
+    // room to stay non-negative), relax the no-negative-intermediate check before
+    // giving up on the chosen operators — only fall back to '+' as a last resort.
+    let found = attemptArithmeticJs(operators, useParens, noNegSteps, 400);
+    if (!found && noNegSteps) found = attemptArithmeticJs(operators, useParens, false, 400);
+
+    let correct, chosenOps, parenStart, numVars, names;
+    if (found) {
+        ({ correct, chosenOps, parenStart, numVars, names } = found);
+    } else {
+        ({ numVars } = pickNumVars());
+        names = Object.keys(numVars);
+        const n = names.length;
+        if (n < 2) { clearPreview(); return; }
+        chosenOps = Array(n - 1).fill('+'); parenStart = null;
+        correct = names.reduce((s, k) => s + numVars[k], 0);
+    }
+    const n = names.length;
+
+    let display = '';
+    for (let i = 0; i < n; i++) {
+        if (parenStart !== null && i === parenStart) display += '(';
+        display += numVars[names[i]];
+        if (parenStart !== null && i === parenStart + 1) display += ')';
+        if (i < n - 1) display += ' ' + chosenOps[i] + ' ';
+    }
+    document.getElementById('prevQ').innerHTML = escHtml(display + ' = ?');
+    document.getElementById('prevHint').textContent = (document.getElementById('hintText').value || '').trim();
+    document.getElementById('prevWarn').innerHTML = '';
+
+    const dMin = +document.getElementById('distMin').value || 1;
+    const dMax = +document.getElementById('distMax').value || 10;
+    const wrong = [];
+    let attempts = 0;
+    while (wrong.length < 4 && attempts < 100) {
+        attempts++;
+        const delta = dMin + Math.floor(Math.random() * (dMax - dMin + 1));
+        const candidate = correct + (Math.random() < 0.5 ? delta : -delta);
+        if (candidate > 0 && candidate !== correct && !wrong.includes(candidate)) wrong.push(candidate);
+    }
+    const opts = [...wrong, correct];
+    for (let i = opts.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [opts[i], opts[j]] = [opts[j], opts[i]]; }
+    document.getElementById('prevOpts').innerHTML = opts.map(o => `<div class="preview-opt ${o===correct?'c':''}">${o}</div>`).join('');
+    document.getElementById('prevFormula').innerHTML = `სწ. პასუხი: <span style="color:#2a7a2a;">${correct}</span>`;
+    document.getElementById('prevVars').innerHTML = names.map(k => `${k}=${numVars[k]}`).join(' · ');
 }
 
 function escHtml(str) {
@@ -1652,9 +1889,16 @@ document.getElementById('condRows').addEventListener('focusin', function(e) {
             if (cb) cb.checked = true;
         }
         Object.entries(numCfg).forEach(([name, conf]) => {
-            if (typeof conf !== 'object' || conf === null) return;
+            if (name.startsWith('_') || typeof conf !== 'object' || conf === null) return;
             addNcRow(name, conf.min ?? 1, conf.max ?? 9, conf.step ?? 1);
         });
+        if (numCfg['_auto'] && numCfg['_auto'].enabled) {
+            document.getElementById('autoBuildFields').style.display = '';
+            document.getElementById('templateText').readOnly = true;
+            document.getElementById('correctFormula').readOnly = true;
+            document.getElementById('templateText').style.background = '#f8fafc';
+            document.getElementById('correctFormula').style.background = '#f8fafc';
+        }
     } else if (!isTxtInit) {
         addNcRow('N1', 1, 9, 1);
         addNcRow('N2', 1, 9, 1);

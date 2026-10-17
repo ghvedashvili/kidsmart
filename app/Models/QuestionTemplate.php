@@ -164,7 +164,12 @@ class QuestionTemplate extends Model
 
     private function generateNumeric(Theme $theme): array
     {
-        $numConf    = $this->num_config ?? [];
+        $numConf = $this->num_config ?? [];
+
+        if (! empty($numConf['_auto']['enabled'])) {
+            return $this->generateAutoArithmetic($theme);
+        }
+
         $uniqueVars = (bool) ($numConf['_unique'] ?? false);
         $baseFormula = preg_replace('/\{\{(\w+)\}\}/', '$1', $this->correct_formula);
 
@@ -199,6 +204,25 @@ class QuestionTemplate extends Model
         }
         $text = preg_replace('/\{\{\w+\}\}/', '?', $text);
 
+        $hintRaw = preg_replace('/\{\{(\w+)\}\}(?!\})/', '{{$1}}', $this->hint_text ?? '');
+        foreach ($vars as $k => $v) {
+            $hintRaw = str_replace("{{{$k}}}", (string) $v, $hintRaw);
+        }
+        $hint = trim(preg_replace('/\{\{\w+\}\}/', '?', $hintRaw)) ?: null;
+
+        return array_merge(
+            ['question_text' => $text, 'hint_text' => $hint],
+            $this->buildMcOptions($correct)
+        );
+    }
+
+    /**
+     * Builds the multiple-choice options array (correct value + distractors,
+     * or distractors + "none correct") from $this->distractors config.
+     * Shared by the manual-formula and auto-built arithmetic generators.
+     */
+    private function buildMcOptions(int $correct): array
+    {
         $dist        = $this->distractors;
         $dMin        = max(1, (int) ($dist['min'] ?? 1));
         $dMax        = max($dMin, (int) ($dist['max'] ?? 10));
@@ -228,17 +252,190 @@ class QuestionTemplate extends Model
             $correctAnswer = (string) $correct;
         }
 
-        $hintRaw = preg_replace('/\{\{(\w+)\}\}(?!\})/', '{{$1}}', $this->hint_text ?? '');
-        foreach ($vars as $k => $v) {
-            $hintRaw = str_replace("{{{$k}}}", (string) $v, $hintRaw);
-        }
-        $hint = trim(preg_replace('/\{\{\w+\}\}/', '?', $hintRaw)) ?: null;
+        return ['options' => array_map('strval', $options), 'correct_answer' => $correctAnswer];
+    }
 
-        return [
-            'question_text'  => $text,
-            'hint_text'      => $hint,
-            'options'        => array_map('strval', $options),
-            'correct_answer' => $correctAnswer,
-        ];
+    /**
+     * Auto-built arithmetic: $this->num_config holds per-variable ranges (N1, N2, ...)
+     * the same way the manual-formula mode does, plus a reserved '_auto' key with
+     * ['enabled'=>true, 'operators'=>['+','-',...], 'parens'=>bool]. Operators (and,
+     * if enabled, a pair of adjacent terms to wrap in parentheses) are re-rolled on
+     * every generation instead of being fixed in a stored template_text/correct_formula,
+     * so one template produces visibly different-looking questions each time.
+     */
+    private function generateAutoArithmetic(Theme $theme): array
+    {
+        $numConf = $this->num_config ?? [];
+        $auto      = $numConf['_auto'] ?? [];
+        $operators = array_values(array_filter((array) ($auto['operators'] ?? ['+']), fn ($o) => in_array($o, ['+', '-', '×', '÷'], true)));
+        if (! $operators) $operators = ['+'];
+        $useParens   = (bool) ($auto['parens'] ?? false);
+        $noNegSteps  = array_key_exists('no_negative_steps', $auto) ? (bool) $auto['no_negative_steps'] : true;
+
+        $varConfigs = [];
+        foreach ($numConf as $key => $conf) {
+            if (! is_array($conf) || str_starts_with((string) $key, '_')) continue;
+            $varConfigs[$key] = $conf;
+        }
+        if (count($varConfigs) < 2) {
+            $varConfigs = ['N1' => ['min' => 1, 'max' => 9, 'step' => 1], 'N2' => ['min' => 1, 'max' => 9, 'step' => 1]];
+        }
+        $varNames = array_keys($varConfigs);
+        $n = count($varNames);
+
+        // Try with every constraint as configured first; if the ranges make that
+        // combination impossible (e.g. only '-' with no room to stay non-negative),
+        // relax the no-negative-intermediate check before giving up on the chosen
+        // operators entirely — only fall back to a plain '+' chain as a last resort.
+        $found = $this->attemptArithmetic($varConfigs, $varNames, $n, $operators, $useParens, $noNegSteps, 400);
+        if ($found === null && $noNegSteps) {
+            $found = $this->attemptArithmetic($varConfigs, $varNames, $n, $operators, $useParens, false, 400);
+        }
+
+        if ($found !== null) {
+            ['values' => $values, 'ops' => $opsChosen, 'paren' => $parenStart, 'correct' => $correct] = $found;
+        } else {
+            // Exhausted attempts with the chosen operators under any setting —
+            // fall back to a plain left-to-right '+' chain, which always resolves.
+            $values = [];
+            foreach ($varConfigs as $name => $conf) {
+                $step  = max(1, (int) ($conf['step'] ?? 1));
+                $min   = (int) ($conf['min'] ?? 1);
+                $max   = (int) ($conf['max'] ?? 9);
+                $steps = max(0, intdiv(max($min, $max) - $min, $step));
+                $values[$name] = $min + rand(0, $steps) * $step;
+            }
+            $opsChosen = array_fill(0, $n - 1, '+');
+            $parenStart = null;
+            $correct = (int) array_sum($values);
+        }
+
+        $displayExpr = $this->buildArithmeticExpr($varNames, $values, $opsChosen, $parenStart);
+        $text = $displayExpr . ' = ?';
+
+        $hint = $this->hint_text ?: null;
+
+        return array_merge(
+            ['question_text' => $text, 'hint_text' => $hint],
+            $this->buildMcOptions($correct)
+        );
+    }
+
+    /**
+     * Randomly rolls values/operators/parens up to $maxAttempts times, keeping the
+     * first roll that produces a positive whole-number result (and, if $noNegSteps,
+     * never dips negative along the way). Returns null if nothing qualified.
+     */
+    private function attemptArithmetic(array $varConfigs, array $varNames, int $n, array $operators, bool $useParens, bool $noNegSteps, int $maxAttempts): ?array
+    {
+        for ($attempt = 0; $attempt < $maxAttempts; $attempt++) {
+            $values = [];
+            foreach ($varConfigs as $name => $conf) {
+                $step  = max(1, (int) ($conf['step'] ?? 1));
+                $min   = (int) ($conf['min'] ?? 1);
+                $max   = (int) ($conf['max'] ?? 9);
+                $steps = max(0, intdiv(max($min, $max) - $min, $step));
+                $values[$name] = $min + rand(0, $steps) * $step;
+            }
+
+            $opsChosen = [];
+            for ($i = 0; $i < $n - 1; $i++) {
+                $opsChosen[] = $operators[array_rand($operators)];
+            }
+
+            // Parentheses are always applied once the admin enables them — only
+            // *where* they land (which adjacent pair) is randomized.
+            $parenStart = ($useParens && $n >= 3) ? rand(0, $n - 2) : null;
+
+            $evaluated = $this->evalArithmeticSteps($varNames, $values, $opsChosen, $parenStart);
+            if ($evaluated === null) continue;
+            if ($evaluated['result'] <= 0 || floor($evaluated['result']) != $evaluated['result']) continue;
+            if ($noNegSteps && ! $evaluated['no_negative']) continue;
+
+            return ['values' => $values, 'ops' => $opsChosen, 'paren' => $parenStart, 'correct' => (int) $evaluated['result']];
+        }
+
+        return null;
+    }
+
+    /**
+     * Evaluates the N1 op N2 op N3 ... chain (with an optional parenthesized adjacent
+     * pair) the way a child would solve it on paper: parens first, then × and ÷ left
+     * to right collapsing each factor chain into one term, then the remaining +/- chain
+     * left to right. Returns the final result plus whether every step of that final
+     * +/- walk (including the very first term) stayed >= 0 — or null if a division
+     * along the way didn't come out to a whole number (so it's not usable either way).
+     */
+    private function evalArithmeticSteps(array $varNames, array $values, array $opsChosen, ?int $parenStart): ?array
+    {
+        $terms = [];
+        foreach ($varNames as $i => $name) {
+            $terms[] = ['val' => (float) $values[$name], 'op' => $i === 0 ? null : $opsChosen[$i - 1]];
+        }
+
+        // Tracks whether ANY sub-step — inside the parens, inside a ×÷ chain, or in
+        // the outer +/- walk — ever produced a negative value a child would have had
+        // to compute along the way, even if it's later cancelled out by what follows.
+        $noNegative = true;
+
+        if ($parenStart !== null) {
+            $a = $terms[$parenStart];
+            $b = $terms[$parenStart + 1];
+            $combined = $this->applyArithmeticOp($a['val'], $b['op'], $b['val']);
+            if ($combined === null) return null;
+            if ($combined < 0) $noNegative = false;
+            array_splice($terms, $parenStart, 2, [['val' => $combined, 'op' => $a['op']]]);
+        }
+
+        $reduced = [];
+        foreach ($terms as $t) {
+            if ($t['op'] === '×' || $t['op'] === '÷') {
+                $prev = array_pop($reduced);
+                $combined = $this->applyArithmeticOp($prev['val'], $t['op'], $t['val']);
+                if ($combined === null) return null;
+                if ($combined < 0) $noNegative = false;
+                $reduced[] = ['val' => $combined, 'op' => $prev['op']];
+            } else {
+                $reduced[] = $t;
+            }
+        }
+
+        $running = $reduced[0]['val'];
+        if ($running < 0) $noNegative = false;
+        for ($i = 1; $i < count($reduced); $i++) {
+            $running = $this->applyArithmeticOp($running, $reduced[$i]['op'], $reduced[$i]['val']);
+            if ($running === null) return null;
+            if ($running < 0) $noNegative = false;
+        }
+
+        return ['result' => $running, 'no_negative' => $noNegative];
+    }
+
+    private function applyArithmeticOp(float $a, string $op, float $b): ?float
+    {
+        return match ($op) {
+            '+' => $a + $b,
+            '-' => $a - $b,
+            '×' => $a * $b,
+            '÷' => ($b != 0 && fmod($a, $b) == 0) ? $a / $b : null,
+            default => null,
+        };
+    }
+
+    /**
+     * Builds the display string (× ÷ shown as-is, for what the child actually sees)
+     * from the same ordered variable names/values/operators used for evaluation.
+     */
+    private function buildArithmeticExpr(array $varNames, array $values, array $opsChosen, ?int $parenStart): string
+    {
+        $n = count($varNames);
+        $parts = [];
+        for ($i = 0; $i < $n; $i++) {
+            if ($parenStart !== null && $i === $parenStart) $parts[] = '(';
+            $parts[] = (string) $values[$varNames[$i]];
+            if ($parenStart !== null && $i === $parenStart + 1) $parts[] = ')';
+            if ($i < $n - 1) $parts[] = ' ' . $opsChosen[$i] . ' ';
+        }
+        return implode('', $parts);
     }
 }
