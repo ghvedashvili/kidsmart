@@ -125,6 +125,9 @@
                 <div style="display:flex;align-items:center;gap:4px;">
                     <div class="row-view" style="flex:1;">
                         <span>{{ $topic->name }}</span>
+                        @if($topic->sequence)
+                        <span class="badge" style="color:#2563eb;border-color:#bfdbfe;">#{{ $topic->sequence }}</span>
+                        @endif
                         <span class="badge">{{ $topic->question_templates_count }} შაბლონი</span>
                     </div>
                     <button type="button" class="btn-vid {{ $topic->videos->count() ? 'has' : '' }}"
@@ -147,6 +150,7 @@
                                 @endforeach
                             </select>
                             <input type="text" name="name" class="fc-inline" style="flex:1;" value="{{ $topic->name }}" required maxlength="100">
+                            <input type="number" name="sequence" class="fc-inline" style="width:56px;" min="1" placeholder="—" value="{{ $topic->sequence }}" title="მიმდევრობა">
                             <button type="submit" class="btn-save">შენახვა</button>
                         </form>
                         <button type="button" class="btn-cancel-row" onclick="cancelTopic({{ $topic->id }})">✕</button>
@@ -197,6 +201,8 @@
             </select>
             <div class="tp-lbl">თემის სახელი</div>
             <input type="text" name="name" id="tpNameInput" class="tp-fc" placeholder="მაგ: გამრავლება" maxlength="100" required value="{{ old('name') }}">
+            <div class="tp-lbl">მიმდევრობა <span style="text-transform:none;letter-spacing:0;color:#94a3b8;">(სურვილისამებრ — ტესტში რიგითობის პრიორიტეტი)</span></div>
+            <input type="number" name="sequence" class="tp-fc" min="1" placeholder="— შემთხვევითი რიგი —" value="{{ old('sequence') }}">
             <div class="tp-actions">
                 <button type="submit" class="tp-btn-add">+ დამატება</button>
                 <button type="button" class="tp-btn-cancel" onclick="closeAddModal()">გაუქმება</button>

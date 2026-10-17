@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Topic extends Model
 {
-    protected $fillable = ['grade_id', 'name'];
+    protected $fillable = ['grade_id', 'name', 'sequence'];
+
+    protected $casts = ['sequence' => 'integer'];
 
     public function grade(): BelongsTo
     {

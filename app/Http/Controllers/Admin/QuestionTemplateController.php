@@ -15,7 +15,11 @@ class QuestionTemplateController extends Controller
 {
     public function index(Request $request)
     {
-        $query = QuestionTemplate::with('topic.grade', 'theme');
+        $showTrashed = $request->boolean('trashed');
+
+        $query = $showTrashed
+            ? QuestionTemplate::onlyTrashed()->with('topic.grade', 'theme')
+            : QuestionTemplate::with('topic.grade', 'theme');
 
         if ($request->filled('grade_id')) {
             $query->whereHas('topic', fn($q) => $q->where('grade_id', $request->grade_id));
@@ -41,6 +45,7 @@ class QuestionTemplateController extends Controller
             'themes'      => Theme::orderBy('name')->get(),
             'filters'     => $request->only('grade_id', 'topic_id', 'theme_id', 'difficulty'),
             'themeVarMap' => $this->themeVarMap(),
+            'showTrashed' => $showTrashed,
         ]);
     }
 
@@ -114,7 +119,20 @@ class QuestionTemplateController extends Controller
     public function destroy(QuestionTemplate $question)
     {
         $question->delete();
-        return back()->with('success', 'წაიშალა');
+        return back()->with('success', 'წაიშალა (აღდგენა შესაძლებელია "წაშლილების" სიიდან)');
+    }
+
+    public function restore(int $id)
+    {
+        $question = QuestionTemplate::onlyTrashed()->findOrFail($id);
+        $question->restore();
+        return back()->with('success', 'აღდგენილია');
+    }
+
+    public function toggleActive(QuestionTemplate $question)
+    {
+        $question->update(['is_active' => ! $question->is_active]);
+        return back();
     }
 
     private function allThemesData(): array
@@ -193,6 +211,7 @@ class QuestionTemplateController extends Controller
             'theme_id'        => 'nullable|exists:themes,id',
             'difficulty'      => 'required|integer|min:1|max:5',
             'is_olympiad'     => 'nullable|boolean',
+            'is_active'       => 'nullable|boolean',
             'question_type'   => 'required|in:multiple_choice,pyramid,code,crossword',
             'answer_type'     => $isSpecial ? 'nullable' : 'required|in:numeric,text',
             'template_text'   => $isSpecial ? 'nullable|string' : 'required|string',
@@ -211,6 +230,7 @@ class QuestionTemplateController extends Controller
         }
 
         $isOlympiad = $request->boolean('is_olympiad');
+        $isActive   = $request->boolean('is_active', true);
 
         $grade = Topic::find($raw['topic_id'])?->grade;
         if (! $isOlympiad && $grade && $raw['difficulty'] > $grade->max_level) {
@@ -228,6 +248,7 @@ class QuestionTemplateController extends Controller
                 'theme_id'        => null,
                 'difficulty'      => $raw['difficulty'],
                 'is_olympiad'     => $isOlympiad,
+                'is_active'       => $isActive,
                 'question_type'   => 'pyramid',
                 'answer_type'     => 'numeric',
                 'template_text'   => "პირამიდა {$pyrHeight}-ძირი · {$pyrHide} ცარიელი",
@@ -253,6 +274,7 @@ class QuestionTemplateController extends Controller
                 'theme_id'        => null,
                 'difficulty'      => $raw['difficulty'],
                 'is_olympiad'     => $isOlympiad,
+                'is_active'       => $isActive,
                 'question_type'   => 'crossword',
                 'answer_type'     => 'numeric',
                 'template_text'   => "კროსვორდი {$rows}×{$cols} {$minVal}-{$maxVal} {$opsStr}" . ($revealedCount ? " ({$revealedCount}✓)" : ''),
@@ -285,6 +307,7 @@ class QuestionTemplateController extends Controller
                 'theme_id'        => null,
                 'difficulty'      => $raw['difficulty'],
                 'is_olympiad'     => $isOlympiad,
+                'is_active'       => $isActive,
                 'question_type'   => 'code',
                 'answer_type'     => 'numeric',
                 'template_text'   => implode(' · ', $descParts),
@@ -319,6 +342,7 @@ class QuestionTemplateController extends Controller
             'theme_id'        => $raw['theme_id'] ?? null,
             'difficulty'      => $raw['difficulty'],
             'is_olympiad'     => $isOlympiad,
+            'is_active'       => $isActive,
             'question_type'   => 'multiple_choice',
             'answer_type'     => $raw['answer_type'],
             'template_text'   => $raw['template_text'],

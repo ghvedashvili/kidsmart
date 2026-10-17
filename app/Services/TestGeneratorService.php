@@ -7,6 +7,7 @@ use App\Models\Test;
 use App\Models\TestQuestion;
 use App\Models\TestQuestionCount;
 use App\Models\Theme;
+use App\Models\Topic;
 use App\Models\QuestionTemplate;
 use App\Models\User;
 
@@ -24,6 +25,7 @@ class TestGeneratorService
 
         $baseQuery = fn () => QuestionTemplate::where('difficulty', $setting->difficulty)
             ->where('is_olympiad', false)
+            ->where('is_active', true)
             ->whereHas('topic', fn ($q) => $q->where('grade_id', $setting->grade_id))
             ->when(! empty($childTopicIds), fn ($q) => $q->whereIn('topic_id', $childTopicIds));
 
@@ -83,7 +85,15 @@ class TestGeneratorService
             $selectedTemplates->push($picked);
         }
 
-        $selectedTemplates = $selectedTemplates->shuffle()->values();
+        // Final question order follows each question's topic sequence (ascending,
+        // admin-assigned priority) — topics with no sequence are shuffled among
+        // themselves and appended after the sequenced ones, same policy as the
+        // topic/template rotations above. `topic` is already eager-loaded above.
+        $sequenced   = $selectedTemplates->filter(fn ($t) => $t->topic && $t->topic->sequence !== null)
+            ->sortBy(fn ($t) => $t->topic->sequence)->values();
+        $unsequenced = $selectedTemplates->filter(fn ($t) => ! $t->topic || $t->topic->sequence === null)
+            ->shuffle()->values();
+        $selectedTemplates = $sequenced->concat($unsequenced)->values();
 
         $test = Test::create([
             'child_id'        => $child->id,
@@ -130,6 +140,7 @@ class TestGeneratorService
         $childTopicIds = $child->topics()->pluck('id')->toArray();
 
         $baseQuery = fn () => QuestionTemplate::where('is_olympiad', true)
+            ->where('is_active', true)
             ->whereHas('topic', fn ($q) => $q->where('grade_id', $setting->grade_id))
             ->when(! empty($childTopicIds), fn ($q) => $q->whereIn('topic_id', $childTopicIds));
 
@@ -219,11 +230,14 @@ class TestGeneratorService
 
     /**
      * Pick $count topic ids from $availableTopicIds for one test, cycling fairly across
-     * tests (a shuffled order is persisted per child and consumed with a moving cursor).
-     * If $count exceeds the number of available topics, every topic is used at least
-     * once and the extra picks ("repeats") rotate too — the topic that repeated in the
-     * previous test is pushed to the back of the repeat queue so a different topic
-     * repeats next time.
+     * tests (an order is persisted per child and consumed with a moving cursor) so no
+     * topic repeats while any other still hasn't been seen. The order itself follows
+     * each topic's admin-assigned `sequence` when set (ascending, ties broken by id) —
+     * topics with no sequence are shuffled and appended after the sequenced ones
+     * (buildTopicOrder()). If $count exceeds the number of available topics, every
+     * topic is used at least once and the extra picks ("repeats") rotate too — the
+     * topic that repeated in the previous test is pushed to the back of the repeat
+     * queue so a different topic repeats next time.
      */
     private function pickTopicIdsForTest(ChildSetting $setting, array $availableTopicIds, int $count): array
     {
@@ -231,21 +245,20 @@ class TestGeneratorService
         $n = count($availableTopicIds);
         if ($n === 0) return [];
 
+        $sequenceById = Topic::whereIn('id', $availableTopicIds)->pluck('sequence', 'id')->all();
+        $signature = $availableTopicIds;
+        sort($signature);
+        $signature = array_map(fn ($id) => [$id, $sequenceById[$id] ?? null], $signature);
+
         $rotation     = $setting->topic_rotation ?? [];
         $order        = $rotation['order'] ?? [];
         $cursor       = (int) ($rotation['cursor'] ?? 0);
         $lastRepeated = $rotation['last_repeated_topic_id'] ?? null;
 
-        $sortedStored    = $order;
-        sort($sortedStored);
-        $sortedAvailable = $availableTopicIds;
-        sort($sortedAvailable);
-
-        // reshuffle whenever the available topic set has changed (new/removed topics,
-        // grade change, admin edits, etc.) so the rotation always covers exactly what's there
-        if ($sortedStored !== $sortedAvailable) {
-            $order = $availableTopicIds;
-            shuffle($order);
+        // rebuild whenever the available topic set OR any sequence number changed —
+        // not just on add/remove — so a newly-assigned sequence takes effect right away
+        if (($rotation['signature'] ?? null) !== $signature) {
+            $order  = $this->buildTopicOrder($availableTopicIds, $sequenceById);
             $cursor = 0;
         }
 
@@ -283,9 +296,26 @@ class TestGeneratorService
             'order'                  => $order,
             'cursor'                 => $cursor,
             'last_repeated_topic_id' => $lastRepeated,
+            'signature'              => $signature,
         ];
 
         return $picked;
+    }
+
+    /**
+     * Builds the topic rotation order: topics with an admin-assigned `sequence` come
+     * first (ascending, ties broken by id — deterministic, not random), followed by
+     * the remaining un-sequenced topics in a freshly shuffled order.
+     */
+    private function buildTopicOrder(array $availableTopicIds, array $sequenceById): array
+    {
+        $numbered = array_values(array_filter($availableTopicIds, fn ($id) => ($sequenceById[$id] ?? null) !== null));
+        usort($numbered, fn ($a, $b) => ($sequenceById[$a] <=> $sequenceById[$b]) ?: ($a <=> $b));
+
+        $unnumbered = array_values(array_diff($availableTopicIds, $numbered));
+        shuffle($unnumbered);
+
+        return array_merge($numbered, $unnumbered);
     }
 
     /**

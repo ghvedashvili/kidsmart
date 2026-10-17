@@ -117,9 +117,10 @@ class PracticeController extends Controller
 
         $template = QuestionTemplate::where('topic_id', $topic->id)
             ->where('difficulty', $diff)
+            ->where('is_active', true)
             ->inRandomOrder()
             ->first()
-            ?? QuestionTemplate::where('topic_id', $topic->id)->inRandomOrder()->first();
+            ?? QuestionTemplate::where('topic_id', $topic->id)->where('is_active', true)->inRandomOrder()->first();
 
         if (! $template) {
             return response()->json(['error' => 'კითხვები ვერ მოიძებნა'], 404);

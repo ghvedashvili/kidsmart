@@ -38,6 +38,7 @@ class TopicController extends Controller
         $data = $request->validate([
             'grade_id' => 'required|exists:grades,id',
             'name'     => 'required|string|max:100',
+            'sequence' => 'nullable|integer|min:1',
         ]);
         Topic::create($data);
         return back()->with('success', 'თოპიქი დაემატა');
@@ -48,6 +49,7 @@ class TopicController extends Controller
         $data = $request->validate([
             'grade_id' => 'required|exists:grades,id',
             'name'     => 'required|string|max:100',
+            'sequence' => 'nullable|integer|min:1',
         ]);
         $topic->update($data);
         return back()->with('success', '«' . $topic->name . '» განახლდა');

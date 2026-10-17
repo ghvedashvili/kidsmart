@@ -187,12 +187,16 @@
                 <input type="hidden" name="difficulty" id="diffInput"
                     value="{{ old('difficulty', $template?->difficulty ?? 1) }}">
 
-                <div style="margin-top:6px;">
+                <div style="margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                     <button type="button" id="olyBtn" class="diff-btn {{ old('is_olympiad', $template?->is_olympiad) ? 'sel' : '' }}" style="width:auto;padding:7px 14px;"
                         onclick="toggleOlympiad()">🏆 ოლიმპიადა</button>
+                    <button type="button" id="activeBtn" class="diff-btn {{ old('is_active', $template?->is_active ?? true) ? 'sel' : '' }}" style="width:auto;padding:7px 14px;"
+                        onclick="toggleActive()">✓ აქტიური</button>
                 </div>
                 <input type="hidden" name="is_olympiad" id="isOlympiadInput"
                     value="{{ old('is_olympiad', $template?->is_olympiad ? 1 : 0) }}">
+                <input type="hidden" name="is_active" id="isActiveInput"
+                    value="{{ old('is_active', ($template?->is_active ?? true) ? 1 : 0) }}">
 
                 {{-- Pyramid config (shown only for pyramid type) --}}
                 <div id="pyrFields" style="display:none;margin-top:14px;border-top:1px solid #f1f5f9;padding-top:14px;">
@@ -954,6 +958,14 @@ function toggleOlympiad() {
         b.style.opacity = active ? '0.35' : '';
         b.style.pointerEvents = active ? 'none' : '';
     });
+}
+
+// ── Active/inactive — inactive templates are skipped by test generation entirely
+function toggleActive() {
+    const input = document.getElementById('isActiveInput');
+    const active = input.value !== '1';
+    input.value = active ? '1' : '0';
+    document.getElementById('activeBtn').classList.toggle('sel', active);
 }
 
 // ── Insert at cursor (template text)

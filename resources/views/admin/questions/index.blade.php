@@ -53,12 +53,21 @@
     <div class="msg">{{ session('success') }}</div>
     @endif
 
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
         <div style="display:flex;align-items:center;gap:10px;">
+            @unless($showTrashed)
             <input type="checkbox" id="checkAll" class="q-check" title="ყველა მონიშვნა">
+            @endunless
             <div style="color:#555;font-size:0.78rem;">სულ: {{ $templates->total() }} შაბლონი</div>
         </div>
-        <a href="{{ route('admin.questions.create') }}" class="btn">+ ახალი შაბლონი</a>
+        <div style="display:flex;gap:8px;">
+            @if($showTrashed)
+            <a href="{{ route('admin.questions.index', request()->except('trashed', 'page')) }}" class="btn">← აქტიურები</a>
+            @else
+            <a href="{{ route('admin.questions.index', array_merge(request()->except('page'), ['trashed' => 1])) }}" class="btn">🗑 წაშლილები</a>
+            <a href="{{ route('admin.questions.create') }}" class="btn">+ ახალი შაბლონი</a>
+            @endif
+        </div>
     </div>
 
     <form method="GET" class="filters" id="filterForm">
@@ -100,8 +109,10 @@
 
     <div class="card-dark">
         @forelse($templates as $tpl)
-        <div class="q-row" style="display:flex;gap:10px;align-items:flex-start;">
+        <div class="q-row" style="display:flex;gap:10px;align-items:flex-start;{{ (!$showTrashed && !$tpl->is_active) ? 'opacity:0.45;' : '' }}">
+            @unless($showTrashed)
             <input type="checkbox" class="q-check q-item" value="{{ $tpl->id }}" style="margin-top:3px;" onchange="updateBar()">
+            @endunless
             <div style="flex:1;">
             <div class="q-text q-preview"
                 data-tpl="{{ $tpl->template_text }}"
@@ -120,11 +131,22 @@
                 <span class="q-tag" style="color:#888;">= {{ $tpl->correct_formula }}</span>
                 <button type="button" class="q-regen" onclick="regenPreview(this)" title="ახალი მაგალითი">↺</button>
                 <div style="flex:1;"></div>
+                @if($showTrashed)
+                <form method="POST" action="{{ route('admin.questions.restore', $tpl->id) }}" style="display:inline;">
+                    @csrf
+                    <button type="submit" style="color:#059669;font-size:0.7rem;background:none;border:1px solid #059669;border-radius:2px;padding:2px 8px;cursor:pointer;">↺ აღდგენა</button>
+                </form>
+                @else
+                <form method="POST" action="{{ route('admin.questions.toggle-active', $tpl) }}" style="display:inline;">
+                    @csrf @method('PATCH')
+                    <button type="submit" style="color:{{ $tpl->is_active ? '#059669' : '#b91c1c' }};font-size:0.7rem;background:none;border:none;cursor:pointer;padding:2px 4px;" title="{{ $tpl->is_active ? 'გაჩერება' : 'გააქტიურება' }}">{{ $tpl->is_active ? '✓ აქტიური' : '⏸ გაჩერებული' }}</button>
+                </form>
                 <a href="{{ route('admin.questions.edit', $tpl) }}" style="color:#555;font-size:0.7rem;text-decoration:none;padding:2px 8px;border:1px solid #222;border-radius:2px;">რედ.</a>
                 <form method="POST" action="{{ route('admin.questions.destroy', $tpl) }}" style="display:inline;">
                     @csrf @method('DELETE')
                     <button type="submit" class="btn-del" onclick="return confirm('წაიშალოს?')">✕</button>
                 </form>
+                @endif
             </div>
             </div>
         </div>

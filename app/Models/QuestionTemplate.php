@@ -4,12 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class QuestionTemplate extends Model
 {
-    protected $fillable = ['topic_id', 'theme_id', 'difficulty', 'is_olympiad', 'answer_type', 'question_type', 'template_text', 'hint_text', 'correct_formula', 'num_config', 'distractors', 'conditions'];
+    use SoftDeletes;
 
-    protected $casts = ['num_config' => 'array', 'distractors' => 'array', 'conditions' => 'array', 'is_olympiad' => 'boolean'];
+    protected $fillable = ['topic_id', 'theme_id', 'difficulty', 'is_olympiad', 'is_active', 'answer_type', 'question_type', 'template_text', 'hint_text', 'correct_formula', 'num_config', 'distractors', 'conditions'];
+
+    protected $casts = ['num_config' => 'array', 'distractors' => 'array', 'conditions' => 'array', 'is_olympiad' => 'boolean', 'is_active' => 'boolean'];
 
     private function evalExpr(string $expr, array $vars): int
     {
