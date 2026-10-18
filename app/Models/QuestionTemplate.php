@@ -120,14 +120,26 @@ class QuestionTemplate extends Model
         ];
     }
 
+    /**
+     * Text-answer templates can now also declare num_config variables (random,
+     * derived, operator) the same way numeric ones do — so a question can compare
+     * computed quantities and pick a THEME variable (a text answer) based on that
+     * comparison. {{N1}}, {{X}}, etc. render in the text/hint exactly as the numeric
+     * generator does (operator vars show their Georgian label); "correct_formula"
+     * can then be either a plain variable name (existing behavior, unchanged) or a
+     * conditional formula — see resolveTextFormula().
+     */
     private function generateText(Theme $theme): array
     {
-        $vars = $theme->resolveVariables();
-        $vars['__ALL__']  = 'ყველა პასუხი სწორეა';
-        $vars['__NONE__'] = 'არცერთი სწორი არ არის';
+        $themeVars = $theme->resolveVariables();
+        $themeVars['__ALL__']   = 'ყველა პასუხი სწორეა';
+        $themeVars['__NONE__']  = 'არცერთი სწორი არ არის';
+        $themeVars['__EQUAL__'] = 'თანაბარია';
 
-        $correctVarName = $this->correct_formula;
-        $correct = $vars[$correctVarName] ?? '?';
+        ['numVars' => $numVars, 'displayVars' => $displayNumVars] = $this->resolveNumConfigVars();
+        $vars = array_merge($displayNumVars, $themeVars);
+
+        $correct = $this->resolveTextFormula(trim((string) $this->correct_formula), $numVars, $themeVars);
 
         $dist = $this->distractors ?? [];
         $optionVarNames = $dist['vars'] ?? [];
@@ -168,6 +180,136 @@ class QuestionTemplate extends Model
     }
 
     /**
+     * Rolls num_config's variables (random, derived, operator) up to 200 times,
+     * retrying until `conditions` and (if set) uniqueness are satisfied — the same
+     * variable-resolution rules generateNumeric() uses, factored out so text-answer
+     * templates can use num_config too without duplicating a numeric correct_formula
+     * check they don't need (there's no formula to validate here, just variables).
+     */
+    private function resolveNumConfigVars(): array
+    {
+        $numConf = $this->num_config ?? [];
+        $uniqueVars = (bool) ($numConf['_unique'] ?? false);
+
+        $randomConf      = [];
+        $derivedConf     = [];
+        $operatorConf    = [];
+        $conditionalConf = [];
+        foreach ($numConf as $key => $conf) {
+            if (! is_array($conf) || str_starts_with((string) $key, '_')) continue;
+            if (! empty($conf['operator'])) {
+                $operatorConf[$key] = $conf;
+            } elseif (array_key_exists('derived', $conf)) {
+                $derivedConf[$key] = $conf;
+            } elseif (array_key_exists('conditional', $conf)) {
+                $conditionalConf[$key] = $conf;
+            } else {
+                $randomConf[$key] = $conf;
+            }
+        }
+
+        $conditions = $this->conditions ?? [];
+        $numVars = [];
+        for ($attempt = 0; $attempt < 200; $attempt++) {
+            $numVars = [];
+            foreach ($randomConf as $key => $conf) {
+                $step  = max(1, (int) ($conf['step'] ?? 1));
+                $steps = (int) (($conf['max'] - $conf['min']) / $step);
+                $numVars[$key] = $conf['min'] + rand(0, $steps) * $step;
+            }
+            foreach ($operatorConf as $key => $conf) {
+                $options = array_values(array_filter((array) ($conf['options'] ?? []), fn ($o) => isset(self::OPERATOR_LABELS[$o])));
+                if (! $options) $options = ['+'];
+                $numVars[$key] = $options[array_rand($options)];
+            }
+            foreach ($derivedConf as $key => $conf) {
+                $numVars[$key] = $this->evalExpr((string) ($conf['derived'] ?? '0'), $numVars);
+            }
+            foreach ($conditionalConf as $key => $conf) {
+                $numVars[$key] = $this->resolveTextFormula((string) ($conf['conditional'] ?? ''), $numVars, []);
+            }
+
+            if ($uniqueVars) {
+                $uniqueCheck = array_diff_key($numVars, $operatorConf, $conditionalConf);
+                if (count(array_unique($uniqueCheck)) !== count($uniqueCheck)) continue;
+            }
+            if ($this->conditionsMet($conditions, $numVars)) break;
+        }
+
+        $displayVars = $numVars;
+        foreach ($operatorConf as $key => $conf) {
+            if (isset($displayVars[$key])) {
+                $displayVars[$key] = self::OPERATOR_LABELS[$displayVars[$key]] ?? $displayVars[$key];
+            }
+        }
+
+        return ['numVars' => $numVars, 'displayVars' => $displayVars];
+    }
+
+    /**
+     * Resolves a text-answer "correct_formula". Two forms:
+     *   - a plain variable name (existing behavior) — looked up directly;
+     *   - a conditional formula "COND?IFTRUE:IFFALSE", where COND compares two
+     *     num_config expressions (>,<,>=,<=,==,!=) and IFTRUE/IFFALSE are each
+     *     either a variable name or, recursively, another conditional formula —
+     *     so chains like "A>B?X:C>D?Y:Z" work without extra syntax. A branch that
+     *     isn't itself conditional falls through to the same plain-variable lookup
+     *     as the base case, final result falls back to the branch text itself if
+     *     no variable matches (lets an admin write a literal word directly).
+     */
+    private function resolveTextFormula(string $formula, array $numVars, array $themeVars): string
+    {
+        $vars = array_merge($numVars, $themeVars);
+        $qPos = $this->findTopLevelChar($formula, '?');
+        if ($qPos === null) {
+            return $vars[$formula] ?? ($formula !== '' ? $formula : '?');
+        }
+
+        $condStr = trim(substr($formula, 0, $qPos));
+        $restStr = substr($formula, $qPos + 1);
+        $cPos = $this->findTopLevelChar($restStr, ':');
+        if ($cPos === null) return '?';
+
+        $ifTrueStr  = trim(substr($restStr, 0, $cPos));
+        $ifFalseStr = trim(substr($restStr, $cPos + 1));
+
+        $parts = $this->splitConditionExpr($condStr);
+        if ($parts === null) return '?';
+        [$left, $op, $right] = $parts;
+        $condTrue = $this->conditionsMet([['left' => $left, 'op' => $op, 'right' => $right]], $numVars);
+
+        return $this->resolveTextFormula($condTrue ? $ifTrueStr : $ifFalseStr, $numVars, $themeVars);
+    }
+
+    /** First top-level (paren-depth 0) index of $char in $str, or null. */
+    private function findTopLevelChar(string $str, string $char): ?int
+    {
+        $depth = 0;
+        for ($i = 0; $i < strlen($str); $i++) {
+            $c = $str[$i];
+            if ($c === '(') $depth++;
+            elseif ($c === ')') $depth--;
+            elseif ($depth === 0 && $c === $char) return $i;
+        }
+        return null;
+    }
+
+    /** Splits "LEFT op RIGHT" on the first comparison operator found (checking
+     *  2-char operators before 1-char ones so ">=" isn't mis-split as ">"). */
+    private function splitConditionExpr(string $cond): ?array
+    {
+        foreach (['>=', '<=', '==', '!='] as $op) {
+            $pos = strpos($cond, $op);
+            if ($pos !== false) return [trim(substr($cond, 0, $pos)), $op, trim(substr($cond, $pos + 2))];
+        }
+        foreach (['>', '<'] as $op) {
+            $pos = strpos($cond, $op);
+            if ($pos !== false) return [trim(substr($cond, 0, $pos)), $op, trim(substr($cond, $pos + 1))];
+        }
+        return null;
+    }
+
+    /**
      * Georgian labels for the "operator" variable type's underlying math symbol —
      * {{X}} in template_text/hint_text shows the label ("ით მეტი"); the symbol
      * itself ("+") is what gets substituted into correct_formula.
@@ -190,21 +332,28 @@ class QuestionTemplate extends Model
         $uniqueVars = (bool) ($numConf['_unique'] ?? false);
         $baseFormula = preg_replace('/\{\{(\w+)\}\}/', '$1', $this->correct_formula);
 
-        // Variables split three ways: randomly-rolled, "derived" (computed from
+        // Variables split four ways: randomly-rolled, "derived" (computed from
         // other vars already resolved above it, same evalExpr() conditions use —
         // keeps a relation like "N2 is always N1+3" exact instead of relying on
-        // random values happening to match it), and "operator" (its value is one
-        // of +-*/ , randomly chosen each attempt from the admin-checked subset —
-        // lets a formula like "N1 X N2" literally change which operation runs).
-        $randomConf   = [];
-        $derivedConf  = [];
-        $operatorConf = [];
+        // random values happening to match it), "operator" (its value is one of
+        // +-*/ , randomly chosen each attempt from the admin-checked subset — lets
+        // a formula like "N1 X N2" literally change which operation runs), and
+        // "conditional" (a text label picked via a comparison — e.g.
+        // "TOTAL1>TOTAL2?ჯერ მეტი:ჯერ ნაკლები" — resolved with the same engine
+        // the text-answer correct_formula uses, so a derived comparison's result
+        // can be shown as a word instead of just driving which MC option is correct).
+        $randomConf      = [];
+        $derivedConf     = [];
+        $operatorConf    = [];
+        $conditionalConf = [];
         foreach ($numConf as $key => $conf) {
             if (! is_array($conf) || str_starts_with((string) $key, '_')) continue;
             if (! empty($conf['operator'])) {
                 $operatorConf[$key] = $conf;
             } elseif (array_key_exists('derived', $conf)) {
                 $derivedConf[$key] = $conf;
+            } elseif (array_key_exists('conditional', $conf)) {
+                $conditionalConf[$key] = $conf;
             } else {
                 $randomConf[$key] = $conf;
             }
@@ -228,12 +377,15 @@ class QuestionTemplate extends Model
             foreach ($derivedConf as $key => $conf) {
                 $numVars[$key] = $this->evalExpr((string) ($conf['derived'] ?? '0'), $numVars);
             }
+            foreach ($conditionalConf as $key => $conf) {
+                $numVars[$key] = $this->resolveTextFormula((string) ($conf['conditional'] ?? ''), $numVars, []);
+            }
 
             // Uniqueness only makes sense among the actual numbers — an operator
-            // variable's symbol repeating (e.g. two slots both landing on "+") is
-            // normal and not a "duplicate value" in the sense this checkbox means.
+            // symbol or a conditional label repeating isn't a "duplicate value"
+            // in the sense this checkbox means.
             if ($uniqueVars) {
-                $uniqueCheck = array_diff_key($numVars, $operatorConf);
+                $uniqueCheck = array_diff_key($numVars, $operatorConf, $conditionalConf);
                 if (count(array_unique($uniqueCheck)) !== count($uniqueCheck)) continue;
             }
 

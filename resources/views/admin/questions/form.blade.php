@@ -517,11 +517,22 @@
 
                     {{-- Text UI --}}
                     <div id="txtAnsUi" style="display:none;">
-                        <div class="lbl">სწორი პასუხი — ცვლადი</div>
+                        <div class="lbl" style="display:flex;justify-content:space-between;align-items:center;">
+                            <span>სწორი პასუხი — ცვლადი</span>
+                            <button type="button" id="textCondToggle" class="nc-toggle" style="font-size:0.56rem;" onclick="toggleTextCondMode()" title="გადართვა პირობითი ფორმულაზე">⚡ პირობითი</button>
+                        </div>
                         <select id="textCorrectVar" class="fc" onchange="syncAll();previewDebounce();">
                             <option value="">— ცვლადი —</option>
                         </select>
                         <div id="noVarsHint" style="display:none;font-size:0.6rem;color:#94a3b8;margin-top:-6px;margin-bottom:10px;">სტრიქონის ცვლადები არ არის — თემატიკაში დაამატეთ</div>
+
+                        {{-- Conditional formula (hidden unless toggled on) --}}
+                        <div id="textCondWrap" style="display:none;">
+                            <input type="text" id="textCondFormula" class="fc" placeholder="მაგ: TOTAL1>TOTAL2?CITY1:CITY2"
+                                oninput="syncAll();previewDebounce();">
+                            <div class="chips" id="textCondChips"></div>
+                            <div class="hint">პირობა რიცხვით ცვლადებზე (&gt;, &lt;, &gt;=, &lt;=, ==, !=), მერე ? და : შორის — თითო მხარეს ცვლადის სახელი ან ტექსტი. ჯაჭვურადაც შეიძლება: A&gt;B?X:C&gt;D?Y:Z</div>
+                        </div>
 
                         <div class="lbl" style="margin-top:4px;">ვარიანტების ცვლადები <span style="color:#94a3b8;font-size:0.6rem;">(კლიკით)</span></div>
                         <div id="textOptChips"></div>
@@ -586,7 +597,7 @@ const _KS = {
 @verbatim
 <script>
 const OB = '{' + '{', CB = '}' + '}';
-const SPEC = { '__ALL__': 'ყველა სწორეა', '__NONE__': 'არცერთი სწორია' };
+const SPEC = { '__ALL__': 'ყველა სწორეა', '__NONE__': 'არცერთი სწორია', '__EQUAL__': 'თანაბარია' };
 
 function getUsedTemplateVars() {
     const tmpl = document.getElementById('templateText').value;
@@ -1035,6 +1046,102 @@ function toggleTextOpt(el) {
     syncAll(); previewDebounce();
 }
 
+// ── Text answer: plain-variable dropdown vs conditional formula ("A>B?X:Y").
+// The hidden `correct_formula` field carries whichever mode is active — the
+// backend's resolveTextFormula() treats a plain name and a conditional formula
+// as two forms of the same field, so no separate column/flag is needed.
+let textCondMode = false;
+function toggleTextCondMode() {
+    textCondMode = !textCondMode;
+    document.getElementById('textCorrectVar').style.display = textCondMode ? 'none' : '';
+    document.getElementById('textCondWrap').style.display = textCondMode ? '' : 'none';
+    document.getElementById('textCondToggle').classList.toggle('on', textCondMode);
+    document.getElementById('textCondToggle').textContent = textCondMode ? '🔗 ცვლადი' : '⚡ პირობითი';
+    renderTextCondChips();
+    syncAll(); previewDebounce();
+}
+function insertIntoTextCond(text) {
+    const inp = document.getElementById('textCondFormula');
+    const s = inp.selectionStart ?? inp.value.length;
+    const e = inp.selectionEnd ?? inp.value.length;
+    inp.value = inp.value.slice(0, s) + text + inp.value.slice(e);
+    inp.selectionStart = inp.selectionEnd = s + text.length;
+    inp.focus();
+    syncAll(); previewDebounce();
+}
+function renderTextCondChips() {
+    const bar = document.getElementById('textCondChips');
+    if (!bar) return;
+    bar.innerHTML = '';
+    const numNames = ncRows.filter(r => r.name).map(r => r.name);
+    const themeVarEls = document.querySelectorAll('.text-opt-chip');
+    const themeNames = [...new Set([...themeVarEls].map(c => c.dataset.varname))];
+    [...numNames, ...themeNames].forEach(n => {
+        const c = document.createElement('span');
+        c.className = 'cond-chip'; c.textContent = n;
+        c.onclick = () => insertIntoTextCond(n); bar.appendChild(c);
+    });
+    ['>', '<', '>=', '<=', '==', '!=', '?', ':'].forEach(s => {
+        const c = document.createElement('span');
+        c.className = 'cond-chip cond-op-chip'; c.textContent = s;
+        c.onclick = () => insertIntoTextCond(s); bar.appendChild(c);
+    });
+}
+
+// ── Mirrors QuestionTemplate's findTopLevelChar/splitConditionExpr/resolveTextFormula
+function findTopLevelCharJs(str, char) {
+    let depth = 0;
+    for (let i = 0; i < str.length; i++) {
+        const c = str[i];
+        if (c === '(') depth++;
+        else if (c === ')') depth--;
+        else if (depth === 0 && c === char) return i;
+    }
+    return null;
+}
+function splitConditionExprJs(cond) {
+    for (const op of ['>=', '<=', '==', '!=']) {
+        const pos = cond.indexOf(op);
+        if (pos !== -1) return [cond.slice(0, pos).trim(), op, cond.slice(pos + 2).trim()];
+    }
+    for (const op of ['>', '<']) {
+        const pos = cond.indexOf(op);
+        if (pos !== -1) return [cond.slice(0, pos).trim(), op, cond.slice(pos + 1).trim()];
+    }
+    return null;
+}
+function condTrueJs(left, op, right, numVars) {
+    const l = evalExpr(left, numVars), r = evalExpr(right, numVars);
+    switch (op) {
+        case '>':  return l > r;
+        case '<':  return l < r;
+        case '>=': return l >= r;
+        case '<=': return l <= r;
+        case '==': return l === r;
+        case '!=': return l !== r;
+        default:   return false;
+    }
+}
+function resolveTextFormulaJs(formula, numVars, themeVars) {
+    formula = (formula || '').trim();
+    const vars = { ...numVars, ...themeVars };
+    const qPos = findTopLevelCharJs(formula, '?');
+    if (qPos === null) return (formula in vars) ? vars[formula] : (formula || '?');
+
+    const condStr = formula.slice(0, qPos).trim();
+    const restStr = formula.slice(qPos + 1);
+    const cPos = findTopLevelCharJs(restStr, ':');
+    if (cPos === null) return '?';
+    const ifTrueStr  = restStr.slice(0, cPos).trim();
+    const ifFalseStr = restStr.slice(cPos + 1).trim();
+
+    const parts = splitConditionExprJs(condStr);
+    if (!parts) return '?';
+    const [left, op, right] = parts;
+    const chosen = condTrueJs(left, op, right, numVars) ? ifTrueStr : ifFalseStr;
+    return resolveTextFormulaJs(chosen, numVars, themeVars);
+}
+
 // ── Insert function at cursor — places cursor inside parens
 function insertFormulaFn(name) {
     const inp = document.getElementById('correctFormula');
@@ -1116,16 +1223,16 @@ let ncIdSeq = 1;
 // Georgian labels for the "operator" variable type's underlying math symbol —
 // mirrors QuestionTemplate::OPERATOR_LABELS exactly.
 const OPERATOR_LABELS = { '+': 'ით მეტი', '-': 'ით ნაკლები', '*': 'ჯერ მეტი', '/': 'ჯერ ნაკლები' };
-const NC_MODE_CYCLE = ['random', 'derived', 'operator'];
+const NC_MODE_CYCLE = ['random', 'derived', 'operator', 'conditional'];
 
-function addNcRow(name = '', min = 1, max = 9, step = 1, mode = 'random', derived = '', opOptions = []) {
+function addNcRow(name = '', min = 1, max = 9, step = 1, mode = 'random', derived = '', opOptions = [], conditional = '') {
     if (!name) {
         const used = new Set(ncRows.map(r => r.name));
         let i = 1;
         while (used.has('N' + i)) i++;
         name = 'N' + i;
     }
-    ncRows.push({ id: ncIdSeq++, name, min, max, step, mode, derived, opOptions: opOptions.slice() });
+    ncRows.push({ id: ncIdSeq++, name, min, max, step, mode, derived, opOptions: opOptions.slice(), conditional });
     renderNcRows();
 }
 function removeNcRow(id) {
@@ -1164,7 +1271,16 @@ function renderNcRows() {
                 data-nc="${row.id}" data-nc-f="name">
             <input class="nc-inp" style="grid-column: 2 / 5;" placeholder="მაგ. N1+3" value="${row.derived || ''}"
                 data-nc="${row.id}" data-nc-f="derived">
-            <button type="button" class="nc-toggle on" title="შემთხვევით მნიშვნელობაზე გადართვა" onclick="toggleNcMode(${row.id})">ƒ</button>
+            <button type="button" class="nc-toggle on" title="ოპერატორ ცვლადზე გადართვა" onclick="toggleNcMode(${row.id})">ƒ</button>
+            <button type="button" class="nc-del" onclick="removeNcRow(${row.id})">✕</button>
+            `;
+        } else if (row.mode === 'conditional') {
+            div.innerHTML = `
+            <input class="nc-inp nc-name" maxlength="6" placeholder="RELATION" value="${row.name}"
+                data-nc="${row.id}" data-nc-f="name">
+            <input class="nc-inp" style="grid-column: 2 / 5;" placeholder="მაგ. TOTAL1>TOTAL2?ჯერ მეტი:ჯერ ნაკლები" value="${row.conditional || ''}"
+                data-nc="${row.id}" data-nc-f="conditional">
+            <button type="button" class="nc-toggle on" title="შემთხვევით მნიშვნელობაზე გადართვა" onclick="toggleNcMode(${row.id})">⚖</button>
             <button type="button" class="nc-del" onclick="removeNcRow(${row.id})">✕</button>
             `;
         } else if (row.mode === 'operator') {
@@ -1183,7 +1299,7 @@ function renderNcRows() {
                 <label style="display:flex;align-items:center;gap:3px;cursor:pointer;white-space:nowrap;">
                     <input type="checkbox" ${chk('/')} onchange="toggleOpOption(${row.id},'/',this.checked)"> ჯერ ნაკლები</label>
             </div>
-            <button type="button" class="nc-toggle on" title="შემთხვევით მნიშვნელობაზე გადართვა" onclick="toggleNcMode(${row.id})">±</button>
+            <button type="button" class="nc-toggle on" title="პირობით ცვლადზე გადართვა" onclick="toggleNcMode(${row.id})">±</button>
             <button type="button" class="nc-del" onclick="removeNcRow(${row.id})">✕</button>
             `;
         } else {
@@ -1196,7 +1312,7 @@ function renderNcRows() {
                 data-nc="${row.id}" data-nc-f="max">
             <input type="number" class="nc-inp" min="1" placeholder="1" value="${row.step}"
                 title="ნაბიჯი: 1=ნებ, 2=ლუწი, 5=მრ5" data-nc="${row.id}" data-nc-f="step">
-            <button type="button" class="nc-toggle" title="გამოთვლილ ცვლადზე გადართვა (ფორმულა → ოპერატორი)" onclick="toggleNcMode(${row.id})">ƒ</button>
+            <button type="button" class="nc-toggle" title="გამოთვლილ ცვლადზე გადართვა (ƒ → ოპერატორი → პირობითი)" onclick="toggleNcMode(${row.id})">ƒ</button>
             <button type="button" class="nc-del" onclick="removeNcRow(${row.id})">✕</button>
             `;
         }
@@ -1303,6 +1419,8 @@ function syncAll() {
             ncObj[r.name] = { derived: r.derived || '0' };
         } else if (r.mode === 'operator') {
             ncObj[r.name] = { operator: true, options: (r.opOptions && r.opOptions.length) ? r.opOptions : ['+'] };
+        } else if (r.mode === 'conditional') {
+            ncObj[r.name] = { conditional: r.conditional || '' };
         } else {
             ncObj[r.name] = { min: +r.min, max: +r.max, step: +r.step || 1 };
         }
@@ -1360,8 +1478,9 @@ function syncAll() {
 
     const isTxt = document.getElementById('answerTypeInput').value === 'text';
     if (isTxt) {
-        const selVar = document.getElementById('textCorrectVar').value;
-        document.getElementById('correctFormulaHidden').value = selVar;
+        document.getElementById('correctFormulaHidden').value = textCondMode
+            ? document.getElementById('textCondFormula').value.trim()
+            : document.getElementById('textCorrectVar').value;
         const optVars = [...document.querySelectorAll('.text-opt-chip.sel')].map(c => c.dataset.varname);
         document.getElementById('distractorsJson').value = JSON.stringify({ vars: optVars });
     } else {
@@ -1430,9 +1549,11 @@ function pickThemeVars() {
 // generateNumeric() retries the whole combination together, not just the vars).
 function pickNumVars(extraCheck) {
     const confRows = ncRows.filter(r => r.name);
-    const randomRows   = confRows.filter(r => r.mode !== 'derived' && r.mode !== 'operator');
-    const operatorRows = confRows.filter(r => r.mode === 'operator');
-    const derivedRows  = confRows.filter(r => r.mode === 'derived');
+    const specialModes  = ['derived', 'operator', 'conditional'];
+    const randomRows      = confRows.filter(r => !specialModes.includes(r.mode));
+    const operatorRows    = confRows.filter(r => r.mode === 'operator');
+    const derivedRows     = confRows.filter(r => r.mode === 'derived');
+    const conditionalRows = confRows.filter(r => r.mode === 'conditional');
     const unique = document.getElementById('uniqueNumVars')?.checked ?? false;
     let numVars = {}, condOk = false;
     for (let attempt = 0; attempt < 200; attempt++) {
@@ -1454,8 +1575,14 @@ function pickNumVars(extraCheck) {
         derivedRows.forEach(r => {
             numVars[r.name] = evalExpr(r.derived || '0', numVars);
         });
-        // Uniqueness only makes sense among actual numbers — an operator symbol
-        // repeating across slots (e.g. two both landing on "+") isn't a "duplicate".
+        // Conditional vars are a text label picked via a comparison (e.g.
+        // "TOTAL1>TOTAL2?ჯერ მეტი:ჯერ ნაკლები") — same ternary engine the
+        // text-answer correct_formula uses, with no theme vars in scope.
+        conditionalRows.forEach(r => {
+            numVars[r.name] = resolveTextFormulaJs(r.conditional || '', numVars, {});
+        });
+        // Uniqueness only makes sense among actual numbers — an operator symbol or
+        // conditional label repeating across slots isn't a "duplicate".
         if (unique) {
             const uniqueVals = randomRows.concat(derivedRows).map(r => numVars[r.name]);
             if (new Set(uniqueVals).size !== uniqueVals.length) continue;
@@ -1909,7 +2036,8 @@ function escHtml(str) {
 function genPreviewText(tmpl) {
     const themeMap = pickThemeVars();
     const { numVars } = pickNumVars();
-    const allVars = {...themeMap, ...numVars};
+    const displayVars = buildDisplayVars(numVars);
+    const allVars = {...themeMap, ...displayVars};
 
     let text = tmpl;
     Object.entries(allVars).forEach(([k,v]) => { text = text.replaceAll(OB+k+CB, v); });
@@ -1918,15 +2046,18 @@ function genPreviewText(tmpl) {
     document.getElementById('prevHint').textContent = '';
     document.getElementById('prevWarn').innerHTML = '';
 
-    const correctVar = document.getElementById('textCorrectVar').value;
-    if (!correctVar) {
+    const formula = textCondMode
+        ? document.getElementById('textCondFormula').value.trim()
+        : document.getElementById('textCorrectVar').value;
+    if (!formula) {
         document.getElementById('prevOpts').innerHTML = '<span style="font-size:0.64rem;color:#94a3b8;">სწორი პასუხის ცვლადი აირჩიეთ...</span>';
         document.getElementById('prevFormula').innerHTML = '';
         document.getElementById('prevVars').innerHTML = Object.entries(themeMap).map(([k,v]) => `${k}=${v}`).join(' · ');
         return;
     }
 
-    const correct = SPEC[correctVar] || themeMap[correctVar] || '?';
+    const themeAndSpecial = { ...themeMap, ...SPEC };
+    const correct = resolveTextFormulaJs(formula, numVars, themeAndSpecial);
     const optVarNames = [...document.querySelectorAll('.text-opt-chip.sel')].map(c => c.dataset.varname);
     const seen = new Set();
     const opts = [];
@@ -1942,8 +2073,8 @@ function genPreviewText(tmpl) {
     document.getElementById('prevOpts').innerHTML = opts.map(o =>
         `<div class="preview-opt ${o.c?'c':''}">${o.v}</div>`).join('');
     document.getElementById('prevFormula').innerHTML =
-        `სწ. პასუხი: <span style="color:#2a7a2a;">${correct}</span> <span style="color:#94a3b8;">(${correctVar})</span>`;
-    document.getElementById('prevVars').innerHTML = Object.entries(themeMap).map(([k,v]) => `${k}=${v}`).join(' · ');
+        `სწ. პასუხი: <span style="color:#2a7a2a;">${correct}</span> <span style="color:#94a3b8;">(${formula})</span>`;
+    document.getElementById('prevVars').innerHTML = Object.entries({...themeMap, ...numVars}).map(([k,v]) => `${k}=${v}`).join(' · ');
 }
 
 function genPreviewNumeric(tmpl) {
@@ -2037,7 +2168,7 @@ document.getElementById('ncRows').addEventListener('input', function(e) {
     if (!id || !field) return;
     let val;
     if (field === 'name') val = (el.value = el.value.toUpperCase().replace(/[^A-Z0-9]/g, ''));
-    else if (field === 'derived') val = el.value;
+    else if (field === 'derived' || field === 'conditional') val = el.value;
     else val = +el.value;
     updNc(id, field, val);
 });
@@ -2167,6 +2298,8 @@ function loadIntoForm(data) {
                 addNcRow(name, 1, 9, 1, 'operator', '', Array.isArray(conf.options) && conf.options.length ? conf.options : ['+']);
             } else if ('derived' in conf) {
                 addNcRow(name, 1, 9, 1, 'derived', conf.derived ?? '');
+            } else if ('conditional' in conf) {
+                addNcRow(name, 1, 9, 1, 'conditional', '', [], conf.conditional ?? '');
             } else {
                 addNcRow(name, conf.min ?? 1, conf.max ?? 9, conf.step ?? 1);
             }
@@ -2205,7 +2338,14 @@ function loadIntoForm(data) {
 
     // Distractors (numeric) / text correct-var + option chips
     if (data.answer_type === 'text') {
-        if (data.correct_formula) document.getElementById('textCorrectVar').value = data.correct_formula;
+        const cf = data.correct_formula || '';
+        if (cf.includes('?') && cf.includes(':')) {
+            if (!textCondMode) toggleTextCondMode();
+            document.getElementById('textCondFormula').value = cf;
+        } else {
+            if (textCondMode) toggleTextCondMode();
+            if (cf) document.getElementById('textCorrectVar').value = cf;
+        }
         document.querySelectorAll('.text-opt-chip.sel').forEach(c => c.classList.remove('sel'));
         if (data.distractors && Array.isArray(data.distractors.vars)) {
             data.distractors.vars.forEach(v => {
@@ -2213,6 +2353,7 @@ function loadIntoForm(data) {
                 if (chip) chip.classList.add('sel');
             });
         }
+        renderTextCondChips();
     } else {
         const dist = data.distractors || {};
         const dMinEl = document.getElementById('distMin'), dMaxEl = document.getElementById('distMax');
@@ -2275,10 +2416,19 @@ function array_key_exists_js(key, obj) { return obj && Object.prototype.hasOwnPr
     document.getElementById('atBtnNum').classList.toggle('at-sel', !isTxtInit);
     document.getElementById('atBtnTxt').classList.toggle('at-sel', isTxtInit);
 
-    // For text mode: restore correct var + selected option vars
+    // For text mode: restore correct var (plain) or conditional formula + selected option vars
     if (isTxtInit) {
         if (_KS.editCorrectFormula) {
-            document.getElementById('textCorrectVar').value = _KS.editCorrectFormula;
+            if (_KS.editCorrectFormula.includes('?') && _KS.editCorrectFormula.includes(':')) {
+                textCondMode = true;
+                document.getElementById('textCorrectVar').style.display = 'none';
+                document.getElementById('textCondWrap').style.display = '';
+                document.getElementById('textCondToggle').classList.add('on');
+                document.getElementById('textCondToggle').textContent = '🔗 ცვლადი';
+                document.getElementById('textCondFormula').value = _KS.editCorrectFormula;
+            } else {
+                document.getElementById('textCorrectVar').value = _KS.editCorrectFormula;
+            }
         }
         if (_KS.distractors && Array.isArray(_KS.distractors.vars)) {
             _KS.distractors.vars.forEach(function(varName) {
@@ -2300,6 +2450,8 @@ function array_key_exists_js(key, obj) { return obj && Object.prototype.hasOwnPr
                 addNcRow(name, 1, 9, 1, 'operator', '', Array.isArray(conf.options) && conf.options.length ? conf.options : ['+']);
             } else if ('derived' in conf) {
                 addNcRow(name, 1, 9, 1, 'derived', conf.derived ?? '');
+            } else if ('conditional' in conf) {
+                addNcRow(name, 1, 9, 1, 'conditional', '', [], conf.conditional ?? '');
             } else {
                 addNcRow(name, conf.min ?? 1, conf.max ?? 9, conf.step ?? 1);
             }
@@ -2318,6 +2470,7 @@ function array_key_exists_js(key, obj) { return obj && Object.prototype.hasOwnPr
     if (Array.isArray(conds)) {
         conds.forEach(c => addCond(c.left, c.op, c.right, true));
     }
+    if (isTxtInit) renderTextCondChips();
     syncAll();
     setTimeout(genPreview, 120);
 })();
