@@ -45,14 +45,14 @@
         </div>
         <form method="POST" action="{{ route('admin.point-rules.store') }}">
             @csrf
-            <select name="grade_id" class="fc">
+            <select name="grade_id" id="prGrade" class="fc" onchange="prApplyGradeMaxLevel(this.value)">
                 <option value="">ყველა კლასი</option>
                 @foreach($grades as $grade)
-                <option value="{{ $grade->id }}" {{ old('grade_id') == $grade->id ? 'selected' : '' }}>{{ $grade->name }}</option>
+                <option value="{{ $grade->id }}" data-max-level="{{ $grade->max_level }}" {{ old('grade_id') == $grade->id ? 'selected' : '' }}>{{ $grade->name }}</option>
                 @endforeach
             </select>
 
-            <select name="difficulty" class="fc">
+            <select name="difficulty" id="prDifficulty" class="fc">
                 <option value="">ყველა დონე</option>
                 @for($i = 1; $i <= 5; $i++)
                 <option value="{{ $i }}" {{ old('difficulty') == $i ? 'selected' : '' }}>დონე {{ $i }}</option>
@@ -118,5 +118,23 @@ function prCancel(id) {
     document.getElementById('pd' + id).style.display = 'flex';
     document.getElementById('pe' + id).style.display = 'none';
 }
+
+// ── Cap the difficulty options to the selected grade's max_level (does not hide
+// "ყველა დონე", which always applies regardless of grade)
+function prApplyGradeMaxLevel(gradeId) {
+    const gradeSelect = document.getElementById('prGrade');
+    const opt = gradeSelect.querySelector('option[value="' + gradeId + '"]');
+    const max = gradeId && opt ? (+opt.dataset.maxLevel || 5) : 5;
+
+    const diffSelect = document.getElementById('prDifficulty');
+    Array.from(diffSelect.options).forEach(o => {
+        if (o.value === '') { o.hidden = false; return; }
+        o.hidden = (+o.value) > max;
+    });
+    if (diffSelect.value && (+diffSelect.value) > max) {
+        diffSelect.value = '';
+    }
+}
+prApplyGradeMaxLevel(document.getElementById('prGrade').value);
 </script>
 @endsection

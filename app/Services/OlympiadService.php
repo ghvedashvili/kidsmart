@@ -53,8 +53,13 @@ class OlympiadService
             return $base + ['eligible_today' => false, 'reason' => 'მშობელმა ჯერ კლასი არ დააყენა'];
         }
 
-        if (! $rule['olympiad_date'] || ! $rule['olympiad_date']->isToday()) {
-            return $base + ['eligible_today' => false, 'reason' => 'ოლიმპიადა დღეს არ იმართება'];
+        if (! $rule['olympiad_date']) {
+            return $base + ['eligible_today' => false, 'reason' => 'ოლიმპიადის თარიღი ჯერ არ არის დანიშნული'];
+        }
+
+        if (! $rule['olympiad_date']->isToday()) {
+            return $base + ['eligible_today' => false,
+                'reason' => 'ოლიმპიადა ' . ($rule['olympiad_date']->isFuture() ? 'იმართება' : 'ჩატარდა') . ' ' . $rule['olympiad_date']->format('d.m.Y')];
         }
 
         if (! $levelMet) {

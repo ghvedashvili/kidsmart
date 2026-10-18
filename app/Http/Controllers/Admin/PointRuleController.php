@@ -32,6 +32,13 @@ class PointRuleController extends Controller
             'points_per_correct'  => 'required|numeric|min:0|max:100',
         ]);
 
+        if (! empty($data['grade_id']) && ! empty($data['difficulty'])) {
+            $grade = Grade::find($data['grade_id']);
+            if ($grade && $data['difficulty'] > $grade->max_level) {
+                return back()->withErrors(['difficulty' => "ამ კლასს მაქსიმუმ {$grade->max_level} დონე აქვს"])->withInput();
+            }
+        }
+
         $exists = PointRule::where('grade_id', $data['grade_id'] ?? null)
             ->where('difficulty', $data['difficulty'] ?? null)
             ->where('context', $data['context'])
