@@ -24,12 +24,14 @@ body {
     padding-bottom: 60px !important;
 }
 
-/* Sticky header sits below the fixed nav (56 px) */
+/* Sticky to the viewport top — child/parent pages render .child-top-bar instead
+   of the fixed main nav, and that bar isn't pinned (it scrolls away normally),
+   so nothing sits above this header once scrolled past it. */
 .hdr {
     background: linear-gradient(135deg, var(--green), #0f5c2a);
     padding: 10px 20px;
     position: sticky;
-    top: 56px;
+    top: 0;
     z-index: 50;
     box-shadow: 0 2px 12px rgba(10,60,25,0.3);
     overflow: visible;
@@ -85,11 +87,10 @@ body {
 .q-card:nth-child(3n+2) .q-badge { background: #c89800; }
 .q-card:nth-child(3n+3) .q-badge { background: var(--orange); }
 
-.q-icon { font-size: 1.8rem; margin-bottom: 8px; display: block; }
 .q-text { font-size: clamp(0.95rem, 3.2vw, 1.08rem); font-weight: 800; color: var(--dark); line-height: 1.7; margin-bottom: 6px; }
 .q-hint { font-size: 0.78rem; color: #64748b; font-style: italic; margin-bottom: 14px; line-height: 1.5; }
 
-.opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
 .opt-lbl { position: relative; cursor: pointer; display: block; }
 .opt-lbl input { position: absolute; opacity: 0; width: 0; height: 0; }
 .opt-btn {
@@ -158,12 +159,11 @@ body {
 </div>
 
 <div class="wrap">
-    @php $icons = ['⚽','🏆','🥅','🧤','🎽','🏟️','⭐','🥇','🎯','🏅','🔥','💪']; @endphp
+    @php $themeIcon = ($test->theme && $test->theme->name !== 'სტანდარტი') ? $test->theme->icon : null; @endphp
     @foreach($questions as $i => $q)
     <div class="q-card" id="card-{{ $i }}">
-        <div class="q-badge">⚽ {{ $i + 1 }}</div>
+        <div class="q-badge">{{ $themeIcon ? $themeIcon.' ' : '' }}{{ $i + 1 }}</div>
         <div class="check-mark">✓</div>
-        <span class="q-icon">{{ $icons[$i % count($icons)] }}</span>
         @php
             $qType = $q->question_type ?? 'multiple_choice';
             if ($qType === 'multiple_choice' && str_starts_with((string)$q->correct_answer, '{')) {
