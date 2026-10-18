@@ -117,6 +117,23 @@
             @csrf
             @if($template) @method('PUT') @endif
 
+            @unless($template)
+            {{-- Load an existing template as a starting point --}}
+            <div class="card" style="background:#fafaff;border-color:#e0e7ff;">
+                <div class="sec-title">⚡ შაბლონის ჩატვირთვა <span style="color:#94a3b8;font-size:0.54rem;letter-spacing:0.06em;">(სურვილისამებრ)</span></div>
+                <div style="display:flex;gap:8px;">
+                    <select id="loadTplSelect" class="fc" style="margin-bottom:0;flex:1;">
+                        <option value="">— აირჩიეთ არსებული შაბლონი —</option>
+                        @foreach($loadableTemplates as $t)
+                        <option value="{{ $t->id }}">{{ $t->topic->grade->name }} / {{ $t->topic->name }} — {{ Str::limit($t->template_text ?: '('.$t->question_type.')', 50) }}</option>
+                        @endforeach
+                    </select>
+                    <button type="button" class="nc-add" onclick="loadSelectedTemplate()" style="white-space:nowrap;">ჩატვირთვა</button>
+                </div>
+                <div style="font-size:0.6rem;color:#94a3b8;margin-top:4px;">აკოპირებს არჩეული შაბლონის ყველა პარამეტრს — თემა, ტიპი, ტექსტი, ფორმულა, ცვლადები — თქვენ შეასწორებთ და შეინახავთ როგორც ახალს.</div>
+            </div>
+            @endunless
+
             {{-- 1. Context --}}
             <div class="card">
                 <div class="sec-title">① კონტექსტი</div>
@@ -2039,6 +2056,177 @@ document.getElementById('condRows').addEventListener('focusin', function(e) {
     const el = e.target, id = +el.dataset.ci, field = el.dataset.cf;
     if (id && field && field !== 'op') condFocus = { id, field };
 });
+
+// ── Load an existing template as a starting point (create page only) — fetches
+// the full record, then applies it the same way an edit page's own template
+// would have been server-rendered, but driven by JS since this is a *different*
+// template than the one the page originally loaded with.
+function loadSelectedTemplate() {
+    const id = document.getElementById('loadTplSelect').value;
+    if (!id) return;
+    fetch(`/admin/questions/${id}/data`, { headers: { 'Accept': 'application/json' } })
+        .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+        .then(data => loadIntoForm(data))
+        .catch(() => alert('შაბლონის ჩატვირთვა ვერ მოხერხდა'));
+}
+function loadIntoForm(data) {
+    // Topic (+ keep the grade filter dropdown in sync for display purposes)
+    let placed = false;
+    for (const [gId, topics] of Object.entries(_KS.topicsByGrade)) {
+        if (topics.some(t => t.id === data.topic_id)) {
+            document.getElementById('gradeFilter').value = gId;
+            const sel = document.getElementById('topicSelect');
+            sel.innerHTML = '<option value="">— აირჩიე —</option>';
+            topics.forEach(t => {
+                const opt = new Option(t.name, t.id);
+                if (t.id === data.topic_id) opt.selected = true;
+                sel.add(opt);
+            });
+            applyGradeMaxLevel(gId);
+            placed = true;
+            break;
+        }
+    }
+    if (!placed) document.getElementById('topicSelect').value = data.topic_id;
+
+    // Difficulty / olympiad
+    if (data.is_olympiad) {
+        if (document.getElementById('isOlympiadInput').value !== '1') toggleOlympiad();
+    } else {
+        if (document.getElementById('isOlympiadInput').value === '1') toggleOlympiad();
+        setDiff(data.difficulty || 1);
+    }
+
+    // Active / sequence
+    const wantActive = data.is_active !== false;
+    document.getElementById('isActiveInput').value = wantActive ? '1' : '0';
+    document.getElementById('activeBtn').classList.toggle('sel', wantActive);
+    const seqInput = document.querySelector('input[name="sequence"]');
+    if (seqInput) seqInput.value = data.sequence ?? '';
+
+    // Question type (shows/hides pyr/code/cw fields + mcSections)
+    setQType(data.question_type || 'multiple_choice');
+
+    // template_text must be set BEFORE onThemeChange() runs — renderTextCorrectVar()/
+    // renderTextOptChips() (which onThemeChange triggers) filter the variable list by
+    // getUsedTemplateVars(), which reads directly from #templateText's current value.
+    // Calling onThemeChange() first would filter against the still-empty field and
+    // find nothing to select, silently losing the saved text-answer selection.
+    document.getElementById('templateText').value = data.template_text || '';
+    document.getElementById('hintText').value = data.hint_text || '';
+    document.getElementById('correctFormula').value = (data.answer_type === 'text') ? '' : (data.correct_formula || '');
+
+    // Theme + answer type (MC only)
+    if (data.question_type === 'multiple_choice' || !data.question_type) {
+        const themeSel = document.getElementById('themeSelect');
+        themeSel.value = data.theme_id || '';
+        onThemeChange(themeSel.value);
+        setAnswerType(data.answer_type || 'numeric');
+    }
+
+    const numCfg = data.num_config || {};
+
+    if (data.question_type === 'pyramid') {
+        document.getElementById('pyrHeight').value = numCfg.height || 3;
+        document.getElementById('pyrMax').value = numCfg.max_base || 9;
+        document.getElementById('pyrHide').value = numCfg.hidden_count || 2;
+        syncPyrConfig();
+    } else if (data.question_type === 'code') {
+        document.getElementById('codeSymCount').value = numCfg.symbol_count || 3;
+        document.getElementById('codeMinVal').value = numCfg.min_val || 1;
+        document.getElementById('codeMaxVal').value = numCfg.max_val || 9;
+        const cops = numCfg.operators || ['+'];
+        document.getElementById('codeOpPlus').checked  = cops.includes('+');
+        document.getElementById('codeOpMinus').checked = cops.includes('-');
+        document.getElementById('codeOpMul').checked   = cops.includes('×');
+        document.getElementById('codeOpDiv').checked   = cops.includes('÷');
+        document.getElementById('codeVarsPerEq').value = numCfg.vars_per_eq || 2;
+        document.getElementById('codeUniqueVals').checked = !!numCfg.unique_values;
+        syncCodeConfig();
+    } else if (data.question_type === 'crossword') {
+        const gridEl = document.getElementById('cwGrid' + (numCfg.rows || 2) + (numCfg.cols || 2));
+        if (gridEl) gridEl.checked = true;
+        document.getElementById('cwMinVal').value = numCfg.min_val || 1;
+        document.getElementById('cwMaxVal').value = numCfg.max_val || 10;
+        const wops = numCfg.operators || ['+'];
+        document.getElementById('cwOpPlus').checked  = wops.includes('+');
+        document.getElementById('cwOpMinus').checked = wops.includes('-');
+        document.getElementById('cwOpMul').checked   = wops.includes('×');
+        document.getElementById('cwOpDiv').checked   = wops.includes('÷');
+        document.getElementById('cwRevealedCount').value = numCfg.revealed_count || 0;
+        syncCwConfig();
+    } else if (data.answer_type !== 'text') {
+        // multiple_choice, numeric — rebuild ncRows from num_config the same way
+        // the page-load restore does, then separately restore _unique/_auto.
+        ncRows = [];
+        const uq = document.getElementById('uniqueNumVars');
+        if (uq) uq.checked = !!numCfg['_unique'];
+        Object.entries(numCfg).forEach(([name, conf]) => {
+            if (name.startsWith('_') || typeof conf !== 'object' || conf === null) return;
+            if (conf.operator) {
+                addNcRow(name, 1, 9, 1, 'operator', '', Array.isArray(conf.options) && conf.options.length ? conf.options : ['+']);
+            } else if ('derived' in conf) {
+                addNcRow(name, 1, 9, 1, 'derived', conf.derived ?? '');
+            } else {
+                addNcRow(name, conf.min ?? 1, conf.max ?? 9, conf.step ?? 1);
+            }
+        });
+        if (!Object.keys(numCfg).filter(k => !k.startsWith('_')).length) {
+            addNcRow('N1', 1, 9, 1);
+            addNcRow('N2', 1, 9, 1);
+        }
+        const autoCfg = numCfg['_auto'];
+        const autoEl = document.getElementById('autoBuildEnabled');
+        if (autoCfg && autoCfg.enabled) {
+            autoEl.checked = true;
+            document.getElementById('autoVarCount').value = Math.min(5, Math.max(2,
+                Object.keys(numCfg).filter(k => !k.startsWith('_')).length || 2));
+            document.getElementById('autoParens').checked = !!autoCfg.parens;
+            const aops = autoCfg.operators || ['+'];
+            document.getElementById('autoOpPlus').checked  = aops.includes('+');
+            document.getElementById('autoOpMinus').checked = aops.includes('-');
+            document.getElementById('autoOpMul').checked   = aops.includes('×');
+            document.getElementById('autoOpDiv').checked   = aops.includes('÷');
+            document.getElementById('autoNoNegSteps').checked = !array_key_exists_js('no_negative_steps', autoCfg) || !!autoCfg.no_negative_steps;
+            document.getElementById('autoMixBlank').checked   = !array_key_exists_js('mix_blank', autoCfg) || !!autoCfg.mix_blank;
+        } else {
+            autoEl.checked = false;
+        }
+        toggleAutoBuild();
+    }
+
+    // Conditions
+    conditions = [];
+    if (Array.isArray(data.conditions)) {
+        data.conditions.forEach(c => addCond(c.left, c.op, c.right, true));
+    } else {
+        renderConds();
+    }
+
+    // Distractors (numeric) / text correct-var + option chips
+    if (data.answer_type === 'text') {
+        if (data.correct_formula) document.getElementById('textCorrectVar').value = data.correct_formula;
+        document.querySelectorAll('.text-opt-chip.sel').forEach(c => c.classList.remove('sel'));
+        if (data.distractors && Array.isArray(data.distractors.vars)) {
+            data.distractors.vars.forEach(v => {
+                const chip = document.querySelector('.text-opt-chip[data-varname="' + v + '"]');
+                if (chip) chip.classList.add('sel');
+            });
+        }
+    } else {
+        const dist = data.distractors || {};
+        const dMinEl = document.getElementById('distMin'), dMaxEl = document.getElementById('distMax');
+        if (dMinEl) dMinEl.value = dist.min ?? 1;
+        if (dMaxEl) dMaxEl.value = dist.max ?? 10;
+        noneCorrect = !!dist.none_correct;
+        const btn = document.getElementById('noneCorrectBtn');
+        if (btn) { btn.classList.toggle('at-sel', noneCorrect); btn.textContent = noneCorrect ? '☑ არცერთი სწორეა' : '☐ არცერთი სწორეა'; }
+    }
+
+    syncAll();
+    genPreview();
+}
+function array_key_exists_js(key, obj) { return obj && Object.prototype.hasOwnProperty.call(obj, key); }
 
 // ── Init
 (function init() {

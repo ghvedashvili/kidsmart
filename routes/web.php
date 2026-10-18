@@ -245,6 +245,7 @@ Route::middleware(['auth', 'admin', 'role.permission'])->group(function () {
     // კითხვების შაბლონები
     Route::get('/admin/questions',                     [QuestionTemplateController::class, 'index'])->name('admin.questions.index');
     Route::get('/admin/questions/create',              [QuestionTemplateController::class, 'create'])->name('admin.questions.create');
+    Route::get('/admin/questions/{question}/data',     [QuestionTemplateController::class, 'data'])->name('admin.questions.data');
     Route::post('/admin/questions',                    [QuestionTemplateController::class, 'store'])->name('admin.questions.store');
     Route::post('/admin/questions/pdf',                [QuestionTemplateController::class, 'exportPdf'])->name('admin.questions.pdf');
     Route::get('/admin/questions/{question}/edit',     [QuestionTemplateController::class, 'edit'])->name('admin.questions.edit');

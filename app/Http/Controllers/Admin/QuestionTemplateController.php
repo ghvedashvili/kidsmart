@@ -59,7 +59,24 @@ class QuestionTemplateController extends Controller
             'themeVarMap'    => $this->themeVarMap(),
             'allThemesData'  => $this->allThemesData(),
             'defaultThemeId' => Theme::where('name', 'სტანდარტი')->value('id'),
+            'loadableTemplates' => QuestionTemplate::with('topic.grade')
+                ->orderBy('topic_id')->orderBy('id')
+                ->get(['id', 'topic_id', 'question_type', 'template_text']),
         ]);
+    }
+
+    /**
+     * Full data for one template, used by the create page's "load an existing
+     * template as a starting point" picker (fetched on demand, not embedded for
+     * every row, since only the short label is needed until one is picked).
+     */
+    public function data(QuestionTemplate $question)
+    {
+        return response()->json($question->only([
+            'topic_id', 'theme_id', 'difficulty', 'is_olympiad', 'is_active', 'sequence',
+            'question_type', 'answer_type', 'template_text', 'hint_text', 'correct_formula',
+            'num_config', 'distractors', 'conditions',
+        ]));
     }
 
     public function store(Request $request)
