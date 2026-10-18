@@ -211,7 +211,7 @@
     <div class="nav-grid" style="min-height:52px;">
         <div class="nav-left">
             <a class="navbar-brand mb-0" href="{{ url('/') }}">
-                <img src="/img/logo.png" alt="KidSmart" style="height:55px;width:auto;">
+                <img src="/img/logo.png" alt="KidSmart" style="height:34px;width:auto;">
             </a>
         </div>
         @auth

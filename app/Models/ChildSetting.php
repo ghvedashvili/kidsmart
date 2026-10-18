@@ -16,6 +16,7 @@ class ChildSetting extends Model
         'topic_rotation'          => 'array',
         'practice_topic_rotation' => 'array',
         'template_rotation'       => 'array',
+        'coins'                   => 'float',
     ];
 
     public function user(): BelongsTo

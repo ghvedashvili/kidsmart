@@ -29,7 +29,7 @@ class PointRuleController extends Controller
             'grade_id'            => 'nullable|exists:grades,id',
             'difficulty'          => 'nullable|integer|min:1|max:5',
             'context'             => 'required|in:' . implode(',', PointRule::CONTEXTS),
-            'points_per_correct'  => 'required|integer|min:0|max:100',
+            'points_per_correct'  => 'required|numeric|min:0|max:100',
         ]);
 
         $exists = PointRule::where('grade_id', $data['grade_id'] ?? null)
@@ -49,7 +49,7 @@ class PointRuleController extends Controller
     public function update(Request $request, PointRule $pointRule)
     {
         $data = $request->validate([
-            'points_per_correct' => 'required|integer|min:0|max:100',
+            'points_per_correct' => 'required|numeric|min:0|max:100',
         ]);
 
         $pointRule->update($data);

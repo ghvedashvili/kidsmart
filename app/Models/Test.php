@@ -14,6 +14,7 @@ class Test extends Model
         'scheduled_at' => 'datetime',
         'completed_at' => 'datetime',
         'is_olympiad'  => 'boolean',
+        'coins_earned' => 'float',
     ];
 
     public function child(): BelongsTo

@@ -68,7 +68,7 @@
             @error('context')<div class="err">{{ $message }}</div>@enderror
 
             <div class="fl">ქულა თითო სწორ პასუხზე</div>
-            <input type="number" name="points_per_correct" class="fc" min="0" max="100" value="{{ old('points_per_correct', \App\Models\PointRule::DEFAULT_POINTS) }}" required>
+            <input type="number" name="points_per_correct" class="fc" min="0" max="100" step="0.01" value="{{ old('points_per_correct', \App\Models\PointRule::DEFAULT_POINTS) }}" required>
 
             <button type="submit" class="btn">+ დამატება</button>
         </form>
@@ -98,7 +98,7 @@
             <div class="row-edit" id="pe{{ $row->id }}">
                 <form method="POST" action="{{ route('admin.point-rules.update', $row) }}" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;width:100%;">
                     @csrf @method('PUT')
-                    <input type="number" name="points_per_correct" class="fc" value="{{ $row->points_per_correct }}" min="0" max="100" style="flex:1;min-width:90px;margin-bottom:0;" required>
+                    <input type="number" name="points_per_correct" class="fc" value="{{ $row->points_per_correct }}" min="0" max="100" step="0.01" style="flex:1;min-width:90px;margin-bottom:0;" required>
                     <button type="submit" class="btn">შენახვა</button>
                     <button type="button" class="btn-del" onclick="prCancel({{ $row->id }})">✕</button>
                 </form>
