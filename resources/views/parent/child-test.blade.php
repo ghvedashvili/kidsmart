@@ -59,11 +59,10 @@
     .q-card:nth-child(3n+2) .q-badge { background: #c89800; }
     .q-card:nth-child(3n+3) .q-badge { background: var(--orange); }
 
-    .q-icon { font-size: 1.8rem; margin-bottom: 8px; display: block; }
     .q-text { font-size: clamp(0.95rem, 3vw, 1.05rem); font-weight: 800; color: var(--dark); line-height: 1.7; margin-bottom: 6px; }
     .q-hint { font-size: 0.78rem; color: #64748b; font-style: italic; margin-bottom: 14px; line-height: 1.5; }
 
-    .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+    .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 20px; }
     .opt-row {
         display: flex; align-items: center; justify-content: center; gap: 6px;
         padding: 12px 10px; border-radius: 14px; border: 2.5px solid #e2e8f0;
@@ -114,7 +113,7 @@
 
     <div class="pitch-strip"></div>
 
-    @php $icons = ['⚽','🏆','🥅','🧤','🎽','🏟️','⭐','🥇','🎯','🏅','🔥','💪']; @endphp
+    @php $themeIcon = ($test->theme && $test->theme->name !== 'სტანდარტი') ? $test->theme->icon : null; @endphp
     @foreach($questions as $i => $q)
     @php
         $answer   = $answers->get($q->id);
@@ -132,8 +131,7 @@
         }
     @endphp
     <div class="q-card">
-        <div class="q-badge">⚽ {{ $i + 1 }}</div>
-        <span class="q-icon">{{ $icons[$i % count($icons)] }}</span>
+        <div class="q-badge">{{ $themeIcon ? $themeIcon.' ' : '' }}{{ $i + 1 }}</div>
 
         @if($qType === 'pyramid')
         @php
