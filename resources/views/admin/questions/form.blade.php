@@ -121,11 +121,20 @@
             {{-- Load an existing template as a starting point --}}
             <div class="card" style="background:#fafaff;border-color:#e0e7ff;">
                 <div class="sec-title">⚡ შაბლონის ჩატვირთვა <span style="color:#94a3b8;font-size:0.54rem;letter-spacing:0.06em;">(სურვილისამებრ)</span></div>
-                <div style="display:flex;gap:8px;">
-                    <select id="loadTplSelect" class="fc" style="margin-bottom:0;flex:1;">
-                        <option value="">— აირჩიეთ არსებული შაბლონი —</option>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <select id="loadGradeSelect" class="fc" style="margin-bottom:0;flex:1;min-width:110px;" onchange="onLoadGradeChange(this.value)">
+                        <option value="">— კლასი —</option>
+                        @foreach($grades as $grade)
+                        <option value="{{ $grade->id }}">{{ $grade->name }}</option>
+                        @endforeach
+                    </select>
+                    <select id="loadTopicSelect" class="fc" style="margin-bottom:0;flex:1;min-width:130px;" onchange="onLoadTopicChange(this.value)" disabled>
+                        <option value="">— თემა —</option>
+                    </select>
+                    <select id="loadTplSelect" class="fc" style="margin-bottom:0;flex:2;min-width:200px;" disabled>
+                        <option value="">— შაბლონი —</option>
                         @foreach($loadableTemplates as $t)
-                        <option value="{{ $t->id }}">{{ $t->topic->grade->name }} / {{ $t->topic->name }} — {{ Str::limit($t->template_text ?: '('.$t->question_type.')', 50) }}</option>
+                        <option value="{{ $t->id }}" data-topic="{{ $t->topic_id }}" hidden>{{ Str::limit($t->template_text ?: '('.$t->question_type.')', 60) }}</option>
                         @endforeach
                     </select>
                     <button type="button" class="nc-add" onclick="loadSelectedTemplate()" style="white-space:nowrap;">ჩატვირთვა</button>
@@ -2187,6 +2196,25 @@ document.getElementById('condRows').addEventListener('focusin', function(e) {
     const el = e.target, id = +el.dataset.ci, field = el.dataset.cf;
     if (id && field && field !== 'op') condFocus = { id, field };
 });
+
+// ── "⚡ შაბლონის ჩატვირთვა" picker cascade: grade → topic → template
+function onLoadGradeChange(gradeId) {
+    const topicSel = document.getElementById('loadTopicSelect');
+    topicSel.innerHTML = '<option value="">— თემა —</option>';
+    const list = gradeId ? (_KS.topicsByGrade[gradeId] || []) : [];
+    list.forEach(t => topicSel.add(new Option(t.name, t.id)));
+    topicSel.disabled = !gradeId;
+    onLoadTopicChange('');
+}
+function onLoadTopicChange(topicId) {
+    const tplSel = document.getElementById('loadTplSelect');
+    tplSel.value = '';
+    Array.from(tplSel.options).forEach(o => {
+        if (!o.value) return;
+        o.hidden = String(o.dataset.topic) !== String(topicId);
+    });
+    tplSel.disabled = !topicId;
+}
 
 // ── Load an existing template as a starting point (create page only) — fetches
 // the full record, then applies it the same way an edit page's own template

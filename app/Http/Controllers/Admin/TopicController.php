@@ -14,6 +14,7 @@ class TopicController extends Controller
         $topics = Topic::with([
             'grade', 'videos',
             'questionTemplates' => fn ($q) => $q->orderByRaw('sequence IS NULL, sequence')->orderBy('id'),
+            'questionTemplates.theme',
         ])->withCount('questionTemplates')->orderBy('grade_id')->get();
         $grades = Grade::orderBy('number')->get();
 

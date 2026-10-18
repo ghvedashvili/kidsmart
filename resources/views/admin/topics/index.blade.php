@@ -207,6 +207,9 @@
                         <input type="number" class="tpl-seq" min="1" placeholder="—" value="{{ $tpl->sequence }}"
                             data-tpl-id="{{ $tpl->id }}" onchange="saveTplSequence(this)">
                         <div class="tpl-text" title="{{ $tpl->template_text }}">{{ Str::limit($tpl->template_text ?: '('.$tpl->question_type.')', 70) }}</div>
+                        @if($tpl->theme)
+                        <span class="tpl-tag" style="color:#4f46e5;border-color:#c7d2fe;">{{ $tpl->theme->icon ?? '' }} {{ $tpl->theme->name }}</span>
+                        @endif
                         <span class="tpl-tag">დ{{ $tpl->difficulty }}</span>
                         @if(!$tpl->is_active)<span class="tpl-tag" style="color:#b91c1c;border-color:#fecaca;">გაჩერ.</span>@endif
                         <a href="{{ route('admin.questions.edit', $tpl) }}" class="tpl-edit">✎</a>
