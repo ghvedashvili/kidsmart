@@ -230,10 +230,17 @@
             </div>
             @endforeach
         </div>
+        @elseif(empty($q['options']))
+        <div class="q-text">{!! nl2br(e($q['question_text'])) !!}</div>
+        <div style="margin-top:8px;font-size:0.85rem;font-weight:800;color:#15803d;">✍️ სწორი პასუხი: {{ $q['correct_answer'] }}</div>
+        @if(!empty($q['hint_text']))
+        <div class="hint">{{ $q['hint_text'] }}</div>
+        @endif
+
         @else
         <div class="q-text">{!! nl2br(e($q['question_text'])) !!}</div>
         <div class="opts">
-            @foreach($q['options'] as $opt)
+            @foreach($q['options'] ?? [] as $opt)
             <span class="opt {{ $opt === $q['correct_answer'] ? 'correct' : '' }}">
                 {{ $opt }}{{ $opt === $q['correct_answer'] ? ' ✓' : '' }}
             </span>

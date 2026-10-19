@@ -469,9 +469,15 @@ class QuestionTemplate extends Model
      * Builds the multiple-choice options array (correct value + distractors,
      * or distractors + "none correct") from $this->distractors config.
      * Shared by the manual-formula and auto-built arithmetic generators.
+     * For answer_type "numeric_input" there are no options at all — the child
+     * types the number in directly — so distractor generation is skipped.
      */
     private function buildMcOptions(int $correct): array
     {
+        if ($this->answer_type === 'numeric_input') {
+            return ['options' => null, 'correct_answer' => (string) $correct];
+        }
+
         $dist        = $this->distractors;
         $dMin        = max(1, (int) ($dist['min'] ?? 1));
         $dMax        = max($dMin, (int) ($dist['max'] ?? 10));

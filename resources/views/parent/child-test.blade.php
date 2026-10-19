@@ -308,11 +308,33 @@
         <div class="no-ans">⚠️ პასუხი არ გაუცია</div>
         @endif
 
+        @elseif(empty($q->options))
+        <div class="q-text">{!! nl2br(e($q->question_text)) !!}</div>
+        @if($q->hint_text)<div class="q-hint">{{ $q->hint_text }}</div>@endif
+        @php $numOk = $answer?->is_correct; @endphp
+        <div style="display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap;">
+            @if($selected !== null)
+            <div style="font-size:0.68rem;color:#94a3b8;">პასუხი:</div>
+            <div style="font-weight:900;font-size:1rem;color:{{ $numOk ? '#16a34a' : '#ef4444' }};">{{ $selected }}</div>
+            @endif
+            @if(!$numOk)
+            <div style="font-size:0.68rem;color:#94a3b8;">სწორი:</div>
+            <div style="font-weight:900;font-size:1rem;color:#16a34a;">{{ $correct }}</div>
+            @endif
+        </div>
+        @if($numOk)
+        <div style="color:#16a34a;font-size:0.8rem;font-weight:700;margin-top:8px;">✅ სწორი</div>
+        @elseif($selected !== null)
+        <div style="color:#ef4444;font-size:0.8rem;font-weight:700;margin-top:8px;">❌ არასწორი</div>
+        @else
+        <div class="no-ans">⚠️ პასუხი არ გაუცია</div>
+        @endif
+
         @else
         <div class="q-text">{!! nl2br(e($q->question_text)) !!}</div>
         @if($q->hint_text)<div class="q-hint">{{ $q->hint_text }}</div>@endif
         <div class="opts">
-            @foreach($q->options as $opt)
+            @foreach($q->options ?? [] as $opt)
             @php
                 $isCor = $opt === $correct;
                 $isSel = $opt === $selected;

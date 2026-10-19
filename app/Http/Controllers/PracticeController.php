@@ -179,11 +179,15 @@ class PracticeController extends Controller
         $theme     = $template->theme ?? Theme::first();
         $generated = $template->generate($theme);
 
+        // "numeric_input" (⌨️ child types the number) has no options — same cached
+        // shape as "mc" otherwise, just a different `type` so the frontend renders
+        // a free-number field instead of option buttons.
+        $isInput = empty($generated['options']);
         $key = "pq_{$child->id}_{$topic->id}_" . uniqid();
-        cache()->put($key, ['topic_id' => $topic->id, 'qtype' => 'mc', 'data' => ['type' => 'mc', 'correct' => $generated['correct_answer']], 'prompt' => $generated['question_text']], now()->addMinutes(20));
+        cache()->put($key, ['topic_id' => $topic->id, 'qtype' => $isInput ? 'input' : 'mc', 'data' => ['type' => $isInput ? 'input' : 'mc', 'correct' => $generated['correct_answer']], 'prompt' => $generated['question_text']], now()->addMinutes(20));
 
         return response()->json(array_merge([
-            'type'     => 'mc',
+            'type'     => $isInput ? 'input' : 'mc',
             'key'      => $key,
             'question' => $generated['question_text'],
             'options'  => $generated['options'],
@@ -217,6 +221,15 @@ class PracticeController extends Controller
             $feedback  = ['correct_answer' => $payload['correct']];
             $given     = (string) $request->input('answer');
             $correct   = (string) $payload['correct'];
+        } elseif (isset($payload['type']) && $payload['type'] === 'input') {
+            // Numeric-aware compare (trimmed, leading zeros / "8.0" vs "8" both match)
+            // since the child typed this in freely rather than picking a rendered option.
+            $given     = trim((string) $request->input('answer'));
+            $correct   = (string) $payload['correct'];
+            $isCorrect = $given !== '' && is_numeric($given) && is_numeric($correct)
+                ? (float) $given === (float) $correct
+                : $given === $correct;
+            $feedback  = ['correct_answer' => $correct];
         } elseif ($request->has('code_answers')) {
             // code: payload = [pos => value]
             $codeAnswers = $request->input('code_answers', []);

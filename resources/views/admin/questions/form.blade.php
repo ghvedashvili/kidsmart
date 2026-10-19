@@ -478,7 +478,8 @@
                     <div class="sec-title">④ სწორი პასუხი</div>
 
                     <div class="at-row">
-                        <button type="button" id="atBtnNum" class="at-btn" onclick="setAnswerType('numeric')">🔢 რიცხვი</button>
+                        <button type="button" id="atBtnNum" class="at-btn" onclick="setAnswerType('numeric')">🔢 რიცხვი (არჩევანი)</button>
+                        <button type="button" id="atBtnInput" class="at-btn" onclick="setAnswerType('numeric_input')">⌨️ რიცხვი (ჩაწერა)</button>
                         <button type="button" id="atBtnTxt" class="at-btn" onclick="setAnswerType('text')">🔤 ტექსტი</button>
                     </div>
                     <input type="hidden" name="answer_type" id="answerTypeInput"
@@ -510,17 +511,21 @@
                         <div class="hint">მაგ: N1+N2 &nbsp;·&nbsp; (N1+N2)*N3 &nbsp;·&nbsp; N1*N2-N3 &nbsp;·&nbsp; N1%N2</div>
                         @error('correct_formula')<div class="err">{{ $message }}</div>@enderror
 
-                        <div class="lbl" style="margin-top:10px;">მცდარი პასუხების დიაპაზონი <span style="color:#94a3b8;font-size:0.6rem;">±</span></div>
-                        <div style="display:flex;gap:10px;align-items:center;">
-                            <div class="lbl" style="margin:0;white-space:nowrap;">min</div>
-                            <input type="number" id="distMin" class="nc-inp" style="width:76px;" min="1"
-                                value="{{ $template?->answer_type !== 'text' ? ($template?->distractors['min'] ?? 1) : 1 }}" oninput="previewDebounce()">
-                            <div class="lbl" style="margin:0;white-space:nowrap;">max</div>
-                            <input type="number" id="distMax" class="nc-inp" style="width:76px;" min="1"
-                                value="{{ $template?->answer_type !== 'text' ? ($template?->distractors['max'] ?? 10) : 10 }}" oninput="previewDebounce()">
-                        </div>
-                        <div style="margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9;">
-                            <button type="button" id="noneCorrectBtn" class="at-btn" onclick="toggleNoneCorrect()">☐ არცერთი სწორეა</button>
+                        {{-- Only "numeric" (multiple-choice) needs distractors — "numeric_input"
+                             (⌨️ child types the number) has no options to build. --}}
+                        <div id="distractorSection">
+                            <div class="lbl" style="margin-top:10px;">მცდარი პასუხების დიაპაზონი <span style="color:#94a3b8;font-size:0.6rem;">±</span></div>
+                            <div style="display:flex;gap:10px;align-items:center;">
+                                <div class="lbl" style="margin:0;white-space:nowrap;">min</div>
+                                <input type="number" id="distMin" class="nc-inp" style="width:76px;" min="1"
+                                    value="{{ $template?->answer_type !== 'text' ? ($template?->distractors['min'] ?? 1) : 1 }}" oninput="previewDebounce()">
+                                <div class="lbl" style="margin:0;white-space:nowrap;">max</div>
+                                <input type="number" id="distMax" class="nc-inp" style="width:76px;" min="1"
+                                    value="{{ $template?->answer_type !== 'text' ? ($template?->distractors['max'] ?? 10) : 10 }}" oninput="previewDebounce()">
+                            </div>
+                            <div style="margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9;">
+                                <button type="button" id="noneCorrectBtn" class="at-btn" onclick="toggleNoneCorrect()">☐ არცერთი სწორეა</button>
+                            </div>
                         </div>
                     </div>
 
@@ -1057,10 +1062,13 @@ function insertTextOp(str) {
 // ── Answer type toggle
 function setAnswerType(type) {
     document.getElementById('answerTypeInput').value = type;
-    const isTxt = type === 'text';
+    const isTxt   = type === 'text';
+    const isInput = type === 'numeric_input';
     document.getElementById('numAnsUi').style.display = isTxt ? 'none' : '';
     document.getElementById('txtAnsUi').style.display = isTxt ? '' : 'none';
-    document.getElementById('atBtnNum').classList.toggle('at-sel', !isTxt);
+    document.getElementById('distractorSection').style.display = isInput ? 'none' : '';
+    document.getElementById('atBtnNum').classList.toggle('at-sel', type === 'numeric');
+    document.getElementById('atBtnInput').classList.toggle('at-sel', isInput);
     document.getElementById('atBtnTxt').classList.toggle('at-sel', isTxt);
     syncAll(); previewDebounce();
 }
@@ -2184,6 +2192,19 @@ function genPreviewNumeric(tmpl) {
         return;
     }
     correct = Math.floor(correct);
+
+    // "numeric_input" (⌨️ child types the number) has no options to build —
+    // show the computed answer directly instead of distractors.
+    if (document.getElementById('answerTypeInput').value === 'numeric_input') {
+        document.getElementById('prevOpts').innerHTML =
+            `<div class="preview-opt c" style="cursor:default;">✍️ ${correct}</div>
+             <div style="font-size:0.6rem;color:#94a3b8;margin-top:4px;">(მოსწავლე თავად ჩაწერს რიცხვს — ვარიანტები არ გენერირდება)</div>`;
+        document.getElementById('prevFormula').innerHTML =
+            `სწ. პასუხი: <span style="color:#2a7a2a;">${correct}</span>&nbsp;·&nbsp;<span style="color:#1e1e1e;">${formula} = ${substituted} = ${correct}</span>`;
+        document.getElementById('prevVars').innerHTML = Object.entries(numVars).map(([k,v]) => `${k}=${v}`).join(' · ') || '';
+        return;
+    }
+
     const f = substituted;
 
     const wrong = new Set();
@@ -2482,10 +2503,13 @@ function array_key_exists_js(key, obj) { return obj && Object.prototype.hasOwnPr
     // Restore answer type toggle
     const initType = _KS.answerType || 'numeric';
     document.getElementById('answerTypeInput').value = initType;
-    const isTxtInit = initType === 'text';
+    const isTxtInit   = initType === 'text';
+    const isInputInit = initType === 'numeric_input';
     document.getElementById('numAnsUi').style.display = isTxtInit ? 'none' : '';
     document.getElementById('txtAnsUi').style.display = isTxtInit ? '' : 'none';
-    document.getElementById('atBtnNum').classList.toggle('at-sel', !isTxtInit);
+    document.getElementById('distractorSection').style.display = isInputInit ? 'none' : '';
+    document.getElementById('atBtnNum').classList.toggle('at-sel', initType === 'numeric');
+    document.getElementById('atBtnInput').classList.toggle('at-sel', isInputInit);
     document.getElementById('atBtnTxt').classList.toggle('at-sel', isTxtInit);
 
     // For text mode: restore correct var (plain) or conditional formula + selected option vars

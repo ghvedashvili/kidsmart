@@ -106,6 +106,15 @@ class TestController extends Controller
                 $result     = \App\Services\CrosswordService::check($q->correct_answer, $userInputs);
                 $isCorrect  = $result['ok'];
                 $selected   = json_encode($userInputs);
+            } elseif (empty($q->options)) {
+                // "numeric_input" (⌨️ child types the number) — no MC options were
+                // generated, so compare numerically (trimmed, leading zeros / "8.0"
+                // vs "8" all count as a match) rather than requiring an exact string.
+                $raw      = $answers[$q->id] ?? null;
+                $selected = $raw !== null ? trim((string) $raw) : null;
+                $isCorrect = $selected !== null && $selected !== '' && is_numeric($selected) && is_numeric($q->correct_answer)
+                    ? (float) $selected === (float) $q->correct_answer
+                    : $selected === $q->correct_answer;
             } else {
                 $selected  = $answers[$q->id] ?? null;
                 $isCorrect = $selected !== null && $selected === $q->correct_answer;

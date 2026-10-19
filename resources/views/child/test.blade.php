@@ -146,6 +146,11 @@ body {
 .cw-op { font-family:'Fredoka One',cursive;font-size:1.1rem;color:#64748b;text-align:center; }
 .cw-eq { font-family:'Fredoka One',cursive;font-size:1rem;color:#94a3b8;text-align:center; }
 .cw-res { width:100%;height:100%;border-radius:10px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:1rem;color:#374151;font-weight:700; }
+.num-ans-wrap { display:flex; justify-content:center; margin-top:20px; }
+.num-ans-inp { width:140px; height:56px; border-radius:14px; border:2.5px solid #c5e8d0; background:#f0faf4; color:#3a7a50; font-family:'Fredoka One',cursive; font-size:1.3rem; text-align:center; outline:none; padding:0 10px; transition:all 0.15s; }
+.num-ans-inp:focus { border-color:var(--green); box-shadow:0 4px 16px rgba(26,122,60,0.25); }
+.q-card:nth-child(3n+2) .num-ans-inp { background:#fffbea; border-color:#f0d960; color:#7a6000; }
+.q-card:nth-child(3n+3) .num-ans-inp { background:#fff5f0; border-color:#ffc4a0; color:#7a3010; }
 </style>
 
 <form method="POST" action="{{ route('test.submit', $test) }}" id="testForm">
@@ -277,6 +282,15 @@ body {
         </div>
         <input type="hidden" name="answers[{{ $q->id }}]" value="crossword_submitted">
 
+        @elseif(empty($q->options))
+        <div class="q-text">{!! nl2br(e($q->question_text)) !!}</div>
+        @if($q->hint_text)<div class="q-hint">{{ $q->hint_text }}</div>@endif
+        <div class="num-ans-wrap">
+            <input type="number" inputmode="numeric" class="num-ans-inp" name="answers[{{ $q->id }}]"
+                data-qid="{{ $q->id }}" data-idx="{{ $i }}" placeholder="?"
+                oninput="if(this.value.trim()!=='') onAnswer({{ $i }}, {{ $q->id }}, this.value)">
+        </div>
+
         @else
         <div class="q-text">{!! nl2br(e($q->question_text)) !!}</div>
         @if($q->hint_text)<div class="q-hint">{{ $q->hint_text }}</div>@endif
@@ -386,6 +400,17 @@ function onAnswer(i, qid, val) {
         if (radio) {
             radio.checked = true;
             const idx = parseInt(radio.dataset.idx);
+            if (!answeredSet.has(idx)) {
+                answeredSet.add(idx);
+                answeredCount++;
+                document.getElementById('card-' + idx).classList.add('answered');
+            }
+            return;
+        }
+        const numInp = document.querySelector('.num-ans-inp[data-qid="' + qid + '"]');
+        if (numInp) {
+            numInp.value = val;
+            const idx = parseInt(numInp.dataset.idx);
             if (!answeredSet.has(idx)) {
                 answeredSet.add(idx);
                 answeredCount++;

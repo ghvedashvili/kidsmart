@@ -249,7 +249,7 @@ class QuestionTemplateController extends Controller
             'is_active'       => 'nullable|boolean',
             'sequence'        => 'nullable|integer|min:1',
             'question_type'   => 'required|in:multiple_choice,pyramid,code,crossword',
-            'answer_type'     => $isSpecial ? 'nullable' : 'required|in:numeric,text',
+            'answer_type'     => $isSpecial ? 'nullable' : 'required|in:numeric,text,numeric_input',
             'template_text'   => $isSpecial ? 'nullable|string' : 'required|string',
             'hint_text'       => 'nullable|string',
             'correct_formula' => $isSpecial ? 'nullable|string' : 'required|string|max:200',

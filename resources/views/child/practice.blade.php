@@ -182,6 +182,14 @@
             <div id="cwGrid" style="display:grid;gap:4px;align-items:center;justify-items:center;margin:0 auto;max-width:max-content;">
             </div>
         </div>
+
+        {{-- Free-number-input question --}}
+        <div id="inputArea" style="display:none;">
+            <div class="q-text" id="inputQText"></div>
+            <div style="display:flex;justify-content:center;margin-top:16px;">
+                <input type="number" id="inputAnswerField" class="code-inp" style="width:110px;height:56px;font-size:1.3rem;">
+            </div>
+        </div>
     </div>
 
     <div class="feedback" id="feedback"></div>
@@ -233,6 +241,7 @@ function renderQuestion(q) {
     document.getElementById('pyrArea').style.display  = 'none';
     document.getElementById('codeArea').style.display = 'none';
     document.getElementById('cwArea').style.display   = 'none';
+    document.getElementById('inputArea').style.display = 'none';
 
     const hintEl = document.getElementById('qHint');
     if (q.hint) { hintEl.textContent = q.hint; hintEl.style.display = 'block'; }
@@ -266,6 +275,14 @@ function renderQuestion(q) {
         document.getElementById('cwArea').style.display   = 'block';
         document.getElementById('qLabel').textContent     = '🧮 კროსვორდი';
         renderCrossword(q);
+        document.getElementById('checkBtn').style.display = 'block';
+    } else if (q.type === 'input') {
+        document.getElementById('inputArea').style.display = 'block';
+        document.getElementById('qLabel').textContent      = 'კითხვა';
+        document.getElementById('inputQText').textContent  = q.question;
+        const field = document.getElementById('inputAnswerField');
+        field.value = '';
+        field.classList.remove('correct-inp', 'wrong-inp');
         document.getElementById('checkBtn').style.display = 'block';
     }
 }
@@ -404,9 +421,25 @@ function checkAnswer() {
         checkCode();
     } else if (currentQ && currentQ.type === 'crossword') {
         checkCrossword();
+    } else if (currentQ && currentQ.type === 'input') {
+        checkInput();
     } else {
         checkPyramid();
     }
+}
+
+// ── Free-number-input check ─────────────────────────────────────────────
+async function checkInput() {
+    const field = document.getElementById('inputAnswerField');
+    document.getElementById('checkBtn').disabled = true;
+    const r    = await postAnswer({ answer: field.value });
+    const data = await r.json();
+
+    field.classList.add(data.correct ? 'correct-inp' : 'wrong-inp');
+    if (!data.correct && data.correct_answer !== undefined) field.value = data.correct_answer;
+
+    showFeedback(data);
+    document.getElementById('checkBtn').style.display = 'none';
 }
 
 // ── Pyramid check ────────────────────────────────────────────────────────
