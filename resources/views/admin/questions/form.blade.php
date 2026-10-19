@@ -873,6 +873,20 @@ function genPreviewCw() {
     outer: for (let opAttempt = 0; opAttempt < 10; opAttempt++) {
         rowOps = Array.from({length: R}, () => ops[Math.floor(Math.random()*ops.length)]);
         colOps = Array.from({length: C}, () => ops[Math.floor(Math.random()*ops.length)]);
+        // If multiple operators were selected but every slot collapsed to the same
+        // one by chance, force one slot to differ (mirrors CrosswordService::build()).
+        if (ops.length > 1) {
+            const combined = rowOps.concat(colOps);
+            if (combined.length > 1 && new Set(combined).size < 2) {
+                let alt = combined[0];
+                while (alt === combined[0]) alt = ops[Math.floor(Math.random()*ops.length)];
+                if (rowOps.length && (!colOps.length || Math.random() < 0.5)) {
+                    rowOps[Math.floor(Math.random()*rowOps.length)] = alt;
+                } else {
+                    colOps[Math.floor(Math.random()*colOps.length)] = alt;
+                }
+            }
+        }
         for (let attempt = 0; attempt < 30; attempt++) {
             cells = Array.from({length: R*C}, () => minV + Math.floor(Math.random()*(maxV-minV+1)));
             rowResults = []; colResults = []; valid = true;
@@ -1752,8 +1766,16 @@ function genPreviewCode() {
     }
 
     // Chain equations
+    const chainOps = Array.from({length: count - 1}, () => ops[Math.floor(Math.random() * ops.length)]);
+    // If multiple operators were selected but every chain link collapsed to the same
+    // one by chance, force one link to differ (mirrors CodeService::build()).
+    if (ops.length > 1 && chainOps.length > 1 && new Set(chainOps).size < 2) {
+        let alt = chainOps[0];
+        while (alt === chainOps[0]) alt = ops[Math.floor(Math.random() * ops.length)];
+        chainOps[Math.floor(Math.random() * chainOps.length)] = alt;
+    }
     for (let i = 1; i < count; i++) {
-        let op = ops[Math.floor(Math.random() * ops.length)];
+        let op = chainOps[i - 1];
         let eq;
         if (varsPerEq === 3) {
             // Pattern: S(i-1) op S(i) op S(i) = result
@@ -1906,6 +1928,13 @@ function attemptArithmeticJs(operators, useParens, noNegSteps, maxAttempts) {
     for (let opAttempt = 0; opAttempt < outerAttempts; opAttempt++) {
         const chosenOps = [];
         for (let i = 0; i < n - 1; i++) chosenOps.push(operators[Math.floor(Math.random() * operators.length)]);
+        // If multiple operators were selected but every slot collapsed to the same
+        // one by chance, force one slot to differ (mirrors QuestionTemplate::attemptArithmetic()).
+        if (operators.length > 1 && chosenOps.length > 1 && new Set(chosenOps).size < 2) {
+            let alt = chosenOps[0];
+            while (alt === chosenOps[0]) alt = operators[Math.floor(Math.random() * operators.length)];
+            chosenOps[Math.floor(Math.random() * chosenOps.length)] = alt;
+        }
         // Parens are always applied once enabled — only *where* they land varies.
         const parenStart = (useParens && n >= 3) ? Math.floor(Math.random() * (n - 1)) : null;
 

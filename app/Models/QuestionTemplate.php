@@ -625,6 +625,15 @@ class QuestionTemplate extends Model
                 $opsChosen[] = $operators[array_rand($operators)];
             }
 
+            // If multiple operators were selected but every slot collapsed to the same
+            // one by chance, force one slot to differ — otherwise a 3+ variable chain
+            // could render as "N1 + N2 + N3" even though '-' was selected alongside '+'.
+            if (count($operators) > 1 && count($opsChosen) > 1 && count(array_unique($opsChosen)) < 2) {
+                $alt = $operators[array_rand($operators)];
+                while ($alt === $opsChosen[0]) $alt = $operators[array_rand($operators)];
+                $opsChosen[array_rand($opsChosen)] = $alt;
+            }
+
             // Parentheses are always applied once the admin enables them — only
             // *where* they land (which adjacent pair) is randomized.
             $parenStart = ($useParens && $n >= 3) ? rand(0, $n - 2) : null;

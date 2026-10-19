@@ -47,9 +47,22 @@ class CodeService
         $equations[] = self::anchorEquation($symbols[0], $values[0], $varsPerEq);
 
         // Chain: each equation introduces one new symbol S(i), solvable from S(i-1)
+        $chainOps = [];
         for ($i = 1; $i < $symbolCount; $i++) {
-            $op = $operators[array_rand($operators)];
-            $equations[] = self::chainEquation($symbols[$i - 1], $values[$i - 1], $symbols[$i], $values[$i], $op, $varsPerEq, $minVal, $maxVal, $values);
+            $chainOps[$i] = $operators[array_rand($operators)];
+        }
+        // If multiple operators were selected but every chain link collapsed to the
+        // same one by chance, force one link to differ — otherwise e.g. '+' and '-'
+        // both selected could still render as an all-'+' chain by pure luck.
+        if (count($operators) > 1 && count($chainOps) > 1 && count(array_unique($chainOps)) < 2) {
+            $keys = array_keys($chainOps);
+            $idx  = $keys[array_rand($keys)];
+            $alt  = $operators[array_rand($operators)];
+            while ($alt === $chainOps[$idx]) $alt = $operators[array_rand($operators)];
+            $chainOps[$idx] = $alt;
+        }
+        for ($i = 1; $i < $symbolCount; $i++) {
+            $equations[] = self::chainEquation($symbols[$i - 1], $values[$i - 1], $symbols[$i], $values[$i], $chainOps[$i], $varsPerEq, $minVal, $maxVal, $values);
         }
 
         // ── Target (reverse order for variety) ───────────────────────────

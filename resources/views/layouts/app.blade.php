@@ -15,6 +15,63 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        html {
+            background-color: #fdf8f0;
+            background-image:
+                linear-gradient(rgba(173,200,222,0.55) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(173,200,222,0.55) 1px, transparent 1px);
+            background-size: 32px 32px;
+            overscroll-behavior: none;
+            scroll-behavior: smooth;
+        }
+        body { background: transparent; overscroll-behavior: none; padding-top: {{ (auth()->check() && in_array(auth()->user()->role, ['child', 'parent'])) ? '0' : '56px' }}; }
+
+        #page-loader {
+            position: fixed; inset: 0; background: #080808;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 999999; transition: opacity 0.3s ease;
+        }
+        #page-loader.fade-out { opacity: 0; pointer-events: none; }
+
+        .app-loader {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(4px); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 99999;
+        }
+        .app-loader.hidden { display: none; }
+
+        /* ── themed loader: cycling math symbols ── */
+        .ks-loader { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+        .ks-loader-stage { position: relative; width: 68px; height: 68px; }
+        .ks-loader-ring {
+            position: absolute; inset: -8px; border-radius: 50%;
+            border: 3px solid rgba(108,92,231,0.28);
+            animation: ksRing 2.4s ease-in-out infinite;
+        }
+        .ks-loader-symbol {
+            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+            font-family: 'Fredoka One', cursive; font-size: 2.3rem; line-height: 1;
+            opacity: 0; transform: scale(0.4) rotate(-15deg);
+            animation: ksSym 2.4s cubic-bezier(0.34,1.56,0.64,1) infinite;
+        }
+        .ks-loader-symbol:nth-child(2) { color: #fdcb6e; animation-delay: 0s; }
+        .ks-loader-symbol:nth-child(3) { color: #ff7675; animation-delay: 0.6s; }
+        .ks-loader-symbol:nth-child(4) { color: #55efc4; animation-delay: 1.2s; }
+        .ks-loader-symbol:nth-child(5) { color: #74b9ff; animation-delay: 1.8s; }
+        @keyframes ksSym {
+            0%   { opacity: 0; transform: scale(0.4) rotate(-15deg); }
+            12%  { opacity: 1; transform: scale(1.15) rotate(4deg); }
+            22%  { opacity: 1; transform: scale(1) rotate(0deg); }
+            32%  { opacity: 0; transform: scale(0.6) rotate(10deg); }
+            100% { opacity: 0; }
+        }
+        @keyframes ksRing {
+            0%, 100% { transform: scale(0.85); opacity: 0.3; }
+            50%      { transform: scale(1.08); opacity: 0.75; }
+        }
+        .loader-text { font-family: 'Nunito', sans-serif; font-weight: 800; color: #fff; font-size: 0.82rem; opacity: 0.85; letter-spacing: 0.02em; }
+    </style>
     @stack('head')
 </head>
 <body class="@yield('bodyClass')">
@@ -163,64 +220,6 @@
 </div>
 
 @include('layouts.navigation')
-
-<style>
-    html {
-        background-color: #fdf8f0;
-        background-image:
-            linear-gradient(rgba(173,200,222,0.55) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(173,200,222,0.55) 1px, transparent 1px);
-        background-size: 32px 32px;
-        overscroll-behavior: none;
-        scroll-behavior: smooth;
-    }
-    body { background: transparent; overscroll-behavior: none; padding-top: {{ (auth()->check() && in_array(auth()->user()->role, ['child', 'parent'])) ? '0' : '56px' }}; }
-
-    #page-loader {
-        position: fixed; inset: 0; background: #080808;
-        display: flex; align-items: center; justify-content: center;
-        z-index: 999999; transition: opacity 0.3s ease;
-    }
-    #page-loader.fade-out { opacity: 0; pointer-events: none; }
-
-    .app-loader {
-        position: fixed; inset: 0; background: rgba(0,0,0,0.65);
-        backdrop-filter: blur(4px); display: flex; flex-direction: column;
-        align-items: center; justify-content: center; z-index: 99999;
-    }
-    .app-loader.hidden { display: none; }
-
-    /* ── themed loader: cycling math symbols ── */
-    .ks-loader { display: flex; flex-direction: column; align-items: center; gap: 16px; }
-    .ks-loader-stage { position: relative; width: 68px; height: 68px; }
-    .ks-loader-ring {
-        position: absolute; inset: -8px; border-radius: 50%;
-        border: 3px solid rgba(108,92,231,0.28);
-        animation: ksRing 2.4s ease-in-out infinite;
-    }
-    .ks-loader-symbol {
-        position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-        font-family: 'Fredoka One', cursive; font-size: 2.3rem; line-height: 1;
-        opacity: 0; transform: scale(0.4) rotate(-15deg);
-        animation: ksSym 2.4s cubic-bezier(0.34,1.56,0.64,1) infinite;
-    }
-    .ks-loader-symbol:nth-child(2) { color: #fdcb6e; animation-delay: 0s; }
-    .ks-loader-symbol:nth-child(3) { color: #ff7675; animation-delay: 0.6s; }
-    .ks-loader-symbol:nth-child(4) { color: #55efc4; animation-delay: 1.2s; }
-    .ks-loader-symbol:nth-child(5) { color: #74b9ff; animation-delay: 1.8s; }
-    @keyframes ksSym {
-        0%   { opacity: 0; transform: scale(0.4) rotate(-15deg); }
-        12%  { opacity: 1; transform: scale(1.15) rotate(4deg); }
-        22%  { opacity: 1; transform: scale(1) rotate(0deg); }
-        32%  { opacity: 0; transform: scale(0.6) rotate(10deg); }
-        100% { opacity: 0; }
-    }
-    @keyframes ksRing {
-        0%, 100% { transform: scale(0.85); opacity: 0.3; }
-        50%      { transform: scale(1.08); opacity: 0.75; }
-    }
-    .loader-text { font-family: 'Nunito', sans-serif; font-weight: 800; color: #fff; font-size: 0.82rem; opacity: 0.85; letter-spacing: 0.02em; }
-</style>
 
 @stack('toasts')
 

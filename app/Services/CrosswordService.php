@@ -33,6 +33,22 @@ class CrosswordService
                 $colOps[$c] = $ops[array_rand($ops)];
             }
 
+            // If multiple operators were selected but every row/col slot collapsed to
+            // the same one by chance, force one slot to differ — otherwise a 2x2 grid
+            // with both '+' and '-' selected has a 1-in-8 chance of rendering as all '+'.
+            if (count($ops) > 1) {
+                $combined = array_merge($rowOps, $colOps);
+                if (count($combined) > 1 && count(array_unique($combined)) < 2) {
+                    $alt = $combined[0];
+                    while ($alt === $combined[0]) $alt = $ops[array_rand($ops)];
+                    if (! empty($rowOps) && (empty($colOps) || mt_rand(0, 1) === 0)) {
+                        $rowOps[array_rand($rowOps)] = $alt;
+                    } else {
+                        $colOps[array_rand($colOps)] = $alt;
+                    }
+                }
+            }
+
             for ($attempt = 0; $attempt < 30; $attempt++) {
                 $cells = [];
                 for ($i = 0; $i < $rows * $cols; $i++) {
