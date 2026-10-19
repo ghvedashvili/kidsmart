@@ -259,22 +259,34 @@ class QuestionTemplate extends Model
     }
 
     /**
-     * Resolves a text-answer "correct_formula". Two forms:
+     * Resolves a text-answer "correct_formula". Three forms:
      *   - a plain variable name (existing behavior) — looked up directly;
      *   - a conditional formula "COND?IFTRUE:IFFALSE", where COND compares two
      *     num_config expressions (>,<,>=,<=,==,!=) and IFTRUE/IFFALSE are each
      *     either a variable name or, recursively, another conditional formula —
      *     so chains like "A>B?X:C>D?Y:Z" work without extra syntax. A branch that
      *     isn't itself conditional falls through to the same plain-variable lookup
-     *     as the base case, final result falls back to the branch text itself if
-     *     no variable matches (lets an admin write a literal word directly).
+     *     as the base case;
+     *   - literal text containing one or more "{{VAR}}" tokens (e.g. "{{DEL1}},{{DEL2}}")
+     *     — each token is substituted with that variable's value, so two otherwise-
+     *     unrelated variables can be combined into one answer string. Final fallback
+     *     if nothing matches: the branch text itself (lets an admin write a literal
+     *     word directly).
      */
     private function resolveTextFormula(string $formula, array $numVars, array $themeVars): string
     {
         $vars = array_merge($numVars, $themeVars);
         $qPos = $this->findTopLevelChar($formula, '?');
         if ($qPos === null) {
-            return $vars[$formula] ?? ($formula !== '' ? $formula : '?');
+            if (isset($vars[$formula])) return (string) $vars[$formula];
+            if (str_contains($formula, '{{')) {
+                return preg_replace_callback(
+                    '/\{\{(\w+)\}\}/',
+                    fn ($m) => isset($vars[$m[1]]) ? (string) $vars[$m[1]] : $m[0],
+                    $formula
+                );
+            }
+            return $formula !== '' ? $formula : '?';
         }
 
         $condStr = trim(substr($formula, 0, $qPos));

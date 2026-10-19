@@ -1157,7 +1157,13 @@ function resolveTextFormulaJs(formula, numVars, themeVars) {
     formula = (formula || '').trim();
     const vars = { ...numVars, ...themeVars };
     const qPos = findTopLevelCharJs(formula, '?');
-    if (qPos === null) return (formula in vars) ? vars[formula] : (formula || '?');
+    if (qPos === null) {
+        if (formula in vars) return vars[formula];
+        if (formula.includes('{{')) {
+            return formula.replace(/\{\{(\w+)\}\}/g, (m, name) => (name in vars) ? vars[name] : m);
+        }
+        return formula || '?';
+    }
 
     const condStr = formula.slice(0, qPos).trim();
     const restStr = formula.slice(qPos + 1);
