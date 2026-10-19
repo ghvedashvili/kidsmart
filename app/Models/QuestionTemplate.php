@@ -275,6 +275,7 @@ class QuestionTemplate extends Model
      */
     private function resolveTextFormula(string $formula, array $numVars, array $themeVars): string
     {
+        $formula = $this->stripWrappingParens(trim($formula));
         $vars = array_merge($numVars, $themeVars);
         $qPos = $this->findTopLevelChar($formula, '?');
         if ($qPos === null) {
@@ -303,6 +304,33 @@ class QuestionTemplate extends Model
         $condTrue = $this->conditionsMet([['left' => $left, 'op' => $op, 'right' => $right]], $numVars);
 
         return $this->resolveTextFormula($condTrue ? $ifTrueStr : $ifFalseStr, $numVars, $themeVars);
+    }
+
+    /**
+     * Strips a single outer paren pair that wraps the ENTIRE string (e.g.
+     * "(A>B?X:Y)" -> "A>B?X:Y"), repeating for multiple layers. Without this,
+     * a parenthesized ternary branch like "COND?(A>B?X:Y):Z" would have its
+     * chosen branch "(A>B?X:Y)" returned unevaluated — the outer parens shift
+     * every character one paren-depth deeper, so findTopLevelChar never finds
+     * the inner "?" at depth 0. Does NOT strip "(A)+(B)"-style pairs that don't
+     * wrap the whole string, since the first "(" there closes before the end.
+     */
+    private function stripWrappingParens(string $s): string
+    {
+        while (strlen($s) >= 2 && $s[0] === '(' && substr($s, -1) === ')') {
+            $depth = 0;
+            $wrapsWhole = true;
+            for ($i = 0, $len = strlen($s); $i < $len; $i++) {
+                if ($s[$i] === '(') $depth++;
+                elseif ($s[$i] === ')') {
+                    $depth--;
+                    if ($depth === 0 && $i !== $len - 1) { $wrapsWhole = false; break; }
+                }
+            }
+            if (! $wrapsWhole) break;
+            $s = trim(substr($s, 1, -1));
+        }
+        return $s;
     }
 
     /** First top-level (paren-depth 0) index of $char in $str, or null. */

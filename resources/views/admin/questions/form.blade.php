@@ -1120,6 +1120,21 @@ function renderTextCondChips() {
 }
 
 // ── Mirrors QuestionTemplate's findTopLevelChar/splitConditionExpr/resolveTextFormula
+function stripWrappingParensJs(s) {
+    while (s.length >= 2 && s[0] === '(' && s[s.length - 1] === ')') {
+        let depth = 0, wrapsWhole = true;
+        for (let i = 0; i < s.length; i++) {
+            if (s[i] === '(') depth++;
+            else if (s[i] === ')') {
+                depth--;
+                if (depth === 0 && i !== s.length - 1) { wrapsWhole = false; break; }
+            }
+        }
+        if (!wrapsWhole) break;
+        s = s.slice(1, -1).trim();
+    }
+    return s;
+}
 function findTopLevelCharJs(str, char) {
     let depth = 0;
     for (let i = 0; i < str.length; i++) {
@@ -1154,7 +1169,7 @@ function condTrueJs(left, op, right, numVars) {
     }
 }
 function resolveTextFormulaJs(formula, numVars, themeVars) {
-    formula = (formula || '').trim();
+    formula = stripWrappingParensJs((formula || '').trim());
     const vars = { ...numVars, ...themeVars };
     const qPos = findTopLevelCharJs(formula, '?');
     if (qPos === null) {
