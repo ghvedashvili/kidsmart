@@ -210,30 +210,42 @@ class QuestionTemplate extends Model
 
         $conditions = $this->conditions ?? [];
         $numVars = [];
-        for ($attempt = 0; $attempt < 200; $attempt++) {
-            $numVars = [];
-            foreach ($randomConf as $key => $conf) {
-                $step  = max(1, (int) ($conf['step'] ?? 1));
-                $steps = (int) (($conf['max'] - $conf['min']) / $step);
-                $numVars[$key] = $conf['min'] + rand(0, $steps) * $step;
-            }
+
+        // Operator variables are picked ONCE per outer attempt, then only the random
+        // values are retried for a batch of inner attempts — see generateNumeric()'s
+        // matching comment for why re-rolling the operator on every attempt would
+        // skew its distribution toward whichever option is easier to satisfy.
+        $outerAttempts = 10;
+        $innerAttempts = 20;
+        $solved = false;
+        for ($opAttempt = 0; $opAttempt < $outerAttempts && ! $solved; $opAttempt++) {
+            $opVars = [];
             foreach ($operatorConf as $key => $conf) {
                 $options = array_values(array_filter((array) ($conf['options'] ?? []), fn ($o) => isset(self::OPERATOR_LABELS[$o])));
                 if (! $options) $options = ['+'];
-                $numVars[$key] = $options[array_rand($options)];
-            }
-            foreach ($derivedConf as $key => $conf) {
-                $numVars[$key] = $this->evalExpr((string) ($conf['derived'] ?? '0'), $numVars);
-            }
-            foreach ($conditionalConf as $key => $conf) {
-                $numVars[$key] = $this->resolveTextFormula((string) ($conf['conditional'] ?? ''), $numVars, []);
+                $opVars[$key] = $options[array_rand($options)];
             }
 
-            if ($uniqueVars) {
-                $uniqueCheck = array_diff_key($numVars, $operatorConf, $conditionalConf);
-                if (count(array_unique($uniqueCheck)) !== count($uniqueCheck)) continue;
+            for ($attempt = 0; $attempt < $innerAttempts; $attempt++) {
+                $numVars = $opVars;
+                foreach ($randomConf as $key => $conf) {
+                    $step  = max(1, (int) ($conf['step'] ?? 1));
+                    $steps = (int) (($conf['max'] - $conf['min']) / $step);
+                    $numVars[$key] = $conf['min'] + rand(0, $steps) * $step;
+                }
+                foreach ($derivedConf as $key => $conf) {
+                    $numVars[$key] = $this->evalExpr((string) ($conf['derived'] ?? '0'), $numVars);
+                }
+                foreach ($conditionalConf as $key => $conf) {
+                    $numVars[$key] = $this->resolveTextFormula((string) ($conf['conditional'] ?? ''), $numVars, []);
+                }
+
+                if ($uniqueVars) {
+                    $uniqueCheck = array_diff_key($numVars, $operatorConf, $conditionalConf);
+                    if (count(array_unique($uniqueCheck)) !== count($uniqueCheck)) continue;
+                }
+                if ($this->conditionsMet($conditions, $numVars)) { $solved = true; break; }
             }
-            if ($this->conditionsMet($conditions, $numVars)) break;
         }
 
         $displayVars = $numVars;
@@ -362,47 +374,65 @@ class QuestionTemplate extends Model
         $conditions = $this->conditions ?? [];
         $numVars = [];
         $correct = 0;
-        for ($attempt = 0; $attempt < 200; $attempt++) {
-            $numVars = [];
-            foreach ($randomConf as $key => $conf) {
-                $step = max(1, (int) ($conf['step'] ?? 1));
-                $steps = (int) (($conf['max'] - $conf['min']) / $step);
-                $numVars[$key] = $conf['min'] + rand(0, $steps) * $step;
-            }
+
+        // Operator variables are picked ONCE per outer attempt, then only the random
+        // values are retried for a batch of inner attempts before giving up on that
+        // operator combo and picking new ones. Re-rolling the operator on every single
+        // attempt (as before) let whichever option is statistically easier to satisfy
+        // (e.g. '+', almost always a valid positive whole result) win the "first
+        // success" race far more often than a harder one (e.g. '-', which needs N1 >
+        // N2, or '/', which needs clean division) — skewing the output even when both
+        // were equally selected by the admin. Mirrors CodeService/CrosswordService's
+        // outer/inner split.
+        $outerAttempts = 10;
+        $innerAttempts = 20;
+        $solved = false;
+        for ($opAttempt = 0; $opAttempt < $outerAttempts && ! $solved; $opAttempt++) {
+            $opVars = [];
             foreach ($operatorConf as $key => $conf) {
                 $options = array_values(array_filter((array) ($conf['options'] ?? []), fn ($o) => isset(self::OPERATOR_LABELS[$o])));
                 if (! $options) $options = ['+'];
-                $numVars[$key] = $options[array_rand($options)];
-            }
-            foreach ($derivedConf as $key => $conf) {
-                $numVars[$key] = $this->evalExpr((string) ($conf['derived'] ?? '0'), $numVars);
-            }
-            foreach ($conditionalConf as $key => $conf) {
-                $numVars[$key] = $this->resolveTextFormula((string) ($conf['conditional'] ?? ''), $numVars, []);
+                $opVars[$key] = $options[array_rand($options)];
             }
 
-            // Uniqueness only makes sense among the actual numbers — an operator
-            // symbol or a conditional label repeating isn't a "duplicate value"
-            // in the sense this checkbox means.
-            if ($uniqueVars) {
-                $uniqueCheck = array_diff_key($numVars, $operatorConf, $conditionalConf);
-                if (count(array_unique($uniqueCheck)) !== count($uniqueCheck)) continue;
-            }
+            for ($attempt = 0; $attempt < $innerAttempts; $attempt++) {
+                $numVars = $opVars;
+                foreach ($randomConf as $key => $conf) {
+                    $step = max(1, (int) ($conf['step'] ?? 1));
+                    $steps = (int) (($conf['max'] - $conf['min']) / $step);
+                    $numVars[$key] = $conf['min'] + rand(0, $steps) * $step;
+                }
+                foreach ($derivedConf as $key => $conf) {
+                    $numVars[$key] = $this->evalExpr((string) ($conf['derived'] ?? '0'), $numVars);
+                }
+                foreach ($conditionalConf as $key => $conf) {
+                    $numVars[$key] = $this->resolveTextFormula((string) ($conf['conditional'] ?? ''), $numVars, []);
+                }
 
-            $f = $baseFormula;
-            foreach ($numVars as $k => $v) {
-                $f = str_replace($k, (string) $v, $f);
+                // Uniqueness only makes sense among the actual numbers — an operator
+                // symbol or a conditional label repeating isn't a "duplicate value"
+                // in the sense this checkbox means.
+                if ($uniqueVars) {
+                    $uniqueCheck = array_diff_key($numVars, $operatorConf, $conditionalConf);
+                    if (count(array_unique($uniqueCheck)) !== count($uniqueCheck)) continue;
+                }
+
+                $f = $baseFormula;
+                foreach ($numVars as $k => $v) {
+                    $f = str_replace($k, (string) $v, $f);
+                }
+                $rawResult = @eval("return ({$f});");
+                // Reject non-whole results outright instead of silently truncating —
+                // matters most for an operator variable landing on "/" where the
+                // numbers don't happen to divide evenly this attempt.
+                if ($rawResult === false || ! is_numeric($rawResult) || $rawResult <= 0) continue;
+                if (floor($rawResult) != $rawResult) continue;
+                $result = (int) $rawResult;
+                if (!$this->conditionsMet($conditions, $numVars)) continue;
+                $correct = $result;
+                $solved = true;
+                break;
             }
-            $rawResult = @eval("return ({$f});");
-            // Reject non-whole results outright instead of silently truncating —
-            // matters most for an operator variable landing on "/" where the
-            // numbers don't happen to divide evenly this attempt.
-            if ($rawResult === false || ! is_numeric($rawResult) || $rawResult <= 0) continue;
-            if (floor($rawResult) != $rawResult) continue;
-            $result = (int) $rawResult;
-            if (!$this->conditionsMet($conditions, $numVars)) continue;
-            $correct = $result;
-            break;
         }
 
         // Display values for the question text/hint — an operator variable shows

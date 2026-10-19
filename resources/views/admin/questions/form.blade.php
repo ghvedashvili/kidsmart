@@ -1578,39 +1578,54 @@ function pickNumVars(extraCheck) {
     const derivedRows     = confRows.filter(r => r.mode === 'derived');
     const conditionalRows = confRows.filter(r => r.mode === 'conditional');
     const unique = document.getElementById('uniqueNumVars')?.checked ?? false;
+
+    // Operator variables are picked ONCE per outer attempt, then only the random
+    // values are retried for a batch of inner attempts before giving up on that
+    // operator combo and picking new ones. Re-rolling the operator on every single
+    // attempt (as before) let whichever option is statistically easier to satisfy
+    // the formula/conditions check (passed in via extraCheck — e.g. '+', almost
+    // always a valid positive whole result) win the "first success" race far more
+    // often than a harder one (e.g. '/', which needs clean division) — skewing the
+    // output even when both were equally selected. Mirrors
+    // QuestionTemplate::generateNumeric()'s outer/inner split.
+    const outerAttempts = 10, innerAttempts = 20;
     let numVars = {}, condOk = false;
-    for (let attempt = 0; attempt < 200; attempt++) {
-        numVars = {};
-        randomRows.forEach(r => {
-            const step = Math.max(1, r.step || 1);
-            const steps = Math.floor((r.max - r.min) / step);
-            numVars[r.name] = r.min + Math.floor(Math.random() * (steps + 1)) * step;
-        });
-        // An operator variable's value is one of +-*/ , randomly picked each
+    outer: for (let opAttempt = 0; opAttempt < outerAttempts; opAttempt++) {
+        // An operator variable's value is one of +-*/ , randomly picked each outer
         // attempt from the admin-checked subset — same spirit as a derived var,
         // except it isn't computed from anything, just rolled like a random one.
+        const opVars = {};
         operatorRows.forEach(r => {
             const opts = (r.opOptions && r.opOptions.length) ? r.opOptions : ['+'];
-            numVars[r.name] = opts[Math.floor(Math.random() * opts.length)];
+            opVars[r.name] = opts[Math.floor(Math.random() * opts.length)];
         });
-        // Derived vars are computed (not randomly rolled) from whatever vars were
-        // already resolved above them, in row order — same evaluator conditions use.
-        derivedRows.forEach(r => {
-            numVars[r.name] = evalExpr(r.derived || '0', numVars);
-        });
-        // Conditional vars are a text label picked via a comparison (e.g.
-        // "TOTAL1>TOTAL2?ჯერ მეტი:ჯერ ნაკლები") — same ternary engine the
-        // text-answer correct_formula uses, with no theme vars in scope.
-        conditionalRows.forEach(r => {
-            numVars[r.name] = resolveTextFormulaJs(r.conditional || '', numVars, {});
-        });
-        // Uniqueness only makes sense among actual numbers — an operator symbol or
-        // conditional label repeating across slots isn't a "duplicate".
-        if (unique) {
-            const uniqueVals = randomRows.concat(derivedRows).map(r => numVars[r.name]);
-            if (new Set(uniqueVals).size !== uniqueVals.length) continue;
+
+        for (let attempt = 0; attempt < innerAttempts; attempt++) {
+            numVars = { ...opVars };
+            randomRows.forEach(r => {
+                const step = Math.max(1, r.step || 1);
+                const steps = Math.floor((r.max - r.min) / step);
+                numVars[r.name] = r.min + Math.floor(Math.random() * (steps + 1)) * step;
+            });
+            // Derived vars are computed (not randomly rolled) from whatever vars were
+            // already resolved above them, in row order — same evaluator conditions use.
+            derivedRows.forEach(r => {
+                numVars[r.name] = evalExpr(r.derived || '0', numVars);
+            });
+            // Conditional vars are a text label picked via a comparison (e.g.
+            // "TOTAL1>TOTAL2?ჯერ მეტი:ჯერ ნაკლები") — same ternary engine the
+            // text-answer correct_formula uses, with no theme vars in scope.
+            conditionalRows.forEach(r => {
+                numVars[r.name] = resolveTextFormulaJs(r.conditional || '', numVars, {});
+            });
+            // Uniqueness only makes sense among actual numbers — an operator symbol or
+            // conditional label repeating across slots isn't a "duplicate".
+            if (unique) {
+                const uniqueVals = randomRows.concat(derivedRows).map(r => numVars[r.name]);
+                if (new Set(uniqueVals).size !== uniqueVals.length) continue;
+            }
+            if (evalConditions(numVars) && (!extraCheck || extraCheck(numVars))) { condOk = true; break outer; }
         }
-        if (evalConditions(numVars) && (!extraCheck || extraCheck(numVars))) { condOk = true; break; }
     }
     return { numVars, condOk };
 }
