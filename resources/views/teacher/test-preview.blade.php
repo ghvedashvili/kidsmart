@@ -49,6 +49,15 @@
     .result-meta { font-family:'Goldman',monospace; font-size:0.66rem; color:#94a3b8; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:12px; }
     .theme-tag { color:#374151; }
 
+    /* child search dropdown */
+    .child-search-wrap { position: relative; flex: 1; min-width: 220px; }
+    .child-search-results { display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 200; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; box-shadow: 0 6px 20px rgba(0,0,0,0.1); max-height: 260px; overflow-y: auto; margin-top: 2px; }
+    .child-search-item { padding: 8px 12px; font-size: 0.74rem; color: #374151; cursor: pointer; border-bottom: 1px solid #f1f5f9; }
+    .child-search-item:last-child { border-bottom: none; }
+    .child-search-item:hover { background: #eef2ff; }
+    .child-search-empty { padding: 10px 12px; font-size: 0.72rem; color: #94a3b8; }
+    .child-selected-badge { display: none; font-size: 0.68rem; color: #4f46e5; background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 4px; padding: 4px 10px; margin-top: 6px; }
+
     @media (max-width: 640px) {
         .aw { padding: 14px 10px 48px; }
         .card-filter { padding: 12px 14px; }
@@ -102,16 +111,32 @@
 
     <div class="card-filter">
         <form method="GET" action="{{ route('test.preview') }}" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-            <select name="child_id" class="fc-sm" style="flex:1;min-width:160px;">
+            <div class="child-search-wrap">
+                <input type="text" id="childSearchInput" class="fc-sm" style="width:100%;box-sizing:border-box;" autocomplete="off"
+                    placeholder="🔍 ძებნა სახელით, კოდით, კლასით..." oninput="onChildSearchInput()"
+                    onfocus="onChildSearchInput()" onblur="setTimeout(hideChildSearchResults, 150)">
+                <div id="childSearchResults" class="child-search-results"></div>
+            </div>
+            <select name="child_id" id="childSelect" class="fc-sm" style="flex:1;min-width:160px;">
                 <option value="">— ბავშვი —</option>
                 @foreach($children as $c)
-                <option value="{{ $c->id }}" {{ (string) $selectedChildId === (string) $c->id ? 'selected' : '' }}>
-                    {{ $c->name }} ({{ $c->childSetting?->grade?->name ?? 'კლასი არ არის' }})
+                @php
+                    $gradeName = $c->childSetting?->grade?->name ?? 'კლასი არ არის';
+                    $diffLabel = $c->childSetting?->difficulty ? ('დონე ' . $c->childSetting->difficulty) : null;
+                    $themeNames = $c->themes->pluck('name')->implode(', ');
+                    $metaParts = array_filter([$gradeName, $diffLabel, $themeNames ?: null]);
+                    $label = $c->name . ' (' . implode(', ', $metaParts) . ')' . ($c->child_code ? ' — კოდი: ' . $c->child_code : '');
+                    $searchStr = Str::lower($c->name . ' ' . $c->child_code . ' ' . $gradeName . ' ' . $themeNames);
+                @endphp
+                <option value="{{ $c->id }}" data-search="{{ $searchStr }}"
+                    {{ (string) $selectedChildId === (string) $c->id ? 'selected' : '' }}>
+                    {{ $label }}
                 </option>
                 @endforeach
             </select>
             <button type="submit" class="btn-gen" style="margin-left:0;">👶 ბავშვის ტესტის ნახვა →</button>
         </form>
+        <div id="childSelectedBadge" class="child-selected-badge"></div>
         <div style="font-size:0.6rem;color:#94a3b8;margin-top:6px;">აჩვენებს ზუსტად იმას, რასაც ეს ბავშვი ახლა ტესტის დაწყებისას მიიღებდა — არაფერი არ ინახება, ბავშვის ისტორია/rotation არ ეცვლება.</div>
     </div>
 
@@ -387,6 +412,47 @@ document.addEventListener('DOMContentLoaded', function () {
         if (inp) inp.checked = true;
     }
 });
+
+// ── Child search dropdown — shows which children actually match (by name,
+// login code, or grade) as a visible, clickable list, mirroring the
+// template-search dropdown on the question-create page.
+function escHtmlCp(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function onChildSearchInput() {
+    renderChildSearchResults();
+}
+function renderChildSearchResults() {
+    const box = document.getElementById('childSearchResults');
+    const search = (document.getElementById('childSearchInput').value || '').trim().toLowerCase();
+    if (!search) { box.style.display = 'none'; box.innerHTML = ''; return; }
+
+    const sel = document.getElementById('childSelect');
+    const matches = Array.from(sel.options)
+        .filter(o => o.value && (o.dataset.search || '').includes(search))
+        .slice(0, 40);
+
+    box.innerHTML = matches.length
+        ? matches.map(o =>
+            `<div class="child-search-item" onclick="pickChildSearchResult(${o.value})">${escHtmlCp(o.textContent.trim())}</div>`
+          ).join('')
+        : '<div class="child-search-empty">არაფერი ვერ მოიძებნა</div>';
+    box.style.display = 'block';
+}
+function hideChildSearchResults() {
+    document.getElementById('childSearchResults').style.display = 'none';
+}
+function pickChildSearchResult(id) {
+    const sel = document.getElementById('childSelect');
+    const opt = Array.from(sel.options).find(o => String(o.value) === String(id));
+    if (!opt) return;
+    sel.value = String(id);
+    document.getElementById('childSearchInput').value = '';
+    hideChildSearchResults();
+    const badge = document.getElementById('childSelectedBadge');
+    badge.textContent = '✓ არჩეულია: ' + opt.textContent.trim();
+    badge.style.display = 'block';
+}
 </script>
 @endverbatim
 @endsection

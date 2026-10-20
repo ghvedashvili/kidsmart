@@ -25,7 +25,7 @@ class TestPreviewController extends Controller
         $themes = Theme::orderBy('name')->get();
         $topics = Topic::orderBy('grade_id')->orderBy('name')->get();
         $children = User::where('role', 'child')
-            ->with('childSetting.grade')
+            ->with('childSetting.grade', 'themes')
             ->orderBy('name')
             ->get();
 
