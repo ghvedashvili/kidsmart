@@ -234,6 +234,38 @@ class QuestionTemplateController extends Controller
         return response()->json(['success' => true]);
     }
 
+    /**
+     * Clones this template into a different grade (via topic)/topic/theme/
+     * difficulty, leaving the original exactly where it was — for reusing a
+     * question across topics/grades instead of retyping it.
+     */
+    public function duplicate(Request $request, QuestionTemplate $question)
+    {
+        $data = $request->validate([
+            'topic_id'   => 'required|exists:topics,id',
+            'theme_id'   => 'nullable|exists:themes,id',
+            'difficulty' => 'required|integer|min:1|max:5',
+        ]);
+
+        $grade = Topic::find($data['topic_id'])?->grade;
+        if (! $question->is_olympiad && $grade && $data['difficulty'] > $grade->max_level) {
+            return response()->json(['error' => "ამ კლასს მაქსიმუმ {$grade->max_level} დონე აქვს"], 422);
+        }
+
+        if (in_array($question->question_type, ['pyramid', 'code', 'crossword'], true)) {
+            $data['theme_id'] = null;
+        }
+
+        $copy = $question->replicate();
+        $copy->topic_id   = $data['topic_id'];
+        $copy->theme_id   = $data['theme_id'];
+        $copy->difficulty = $data['difficulty'];
+        $copy->sequence   = null;
+        $copy->save();
+
+        return response()->json(['success' => true, 'id' => $copy->id]);
+    }
+
     private function allThemesData(): array
     {
         $themes = Theme::with(['varGroups.variables', 'variables' => fn($q) => $q->whereNull('group_id')])->get();

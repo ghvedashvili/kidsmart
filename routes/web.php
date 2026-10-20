@@ -256,6 +256,7 @@ Route::middleware(['auth', 'admin', 'role.permission'])->group(function () {
     Route::patch('/admin/questions/{question}/toggle-active', [QuestionTemplateController::class, 'toggleActive'])->name('admin.questions.toggle-active');
     Route::patch('/admin/questions/{question}/sequence',      [QuestionTemplateController::class, 'updateSequence'])->name('admin.questions.update-sequence');
     Route::patch('/admin/questions/{question}/reassign',      [QuestionTemplateController::class, 'reassign'])->name('admin.questions.reassign');
+    Route::post('/admin/questions/{question}/duplicate',      [QuestionTemplateController::class, 'duplicate'])->name('admin.questions.duplicate');
 
     Route::get('/admin/question-counts',                       [TestQuestionCountController::class, 'index'])->name('admin.question-counts.index');
     Route::post('/admin/question-counts',                      [TestQuestionCountController::class, 'store'])->name('admin.question-counts.store');

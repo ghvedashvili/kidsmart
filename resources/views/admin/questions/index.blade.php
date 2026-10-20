@@ -3,7 +3,6 @@
 <style>
     body { background: transparent !important; }
     .aw { max-width: 860px; margin: 0 auto; padding: 32px 16px 64px; font-family: 'Goldman', monospace; }
-    .card-dark { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
     .card-label { font-size: 0.68rem; color: #94a3b8; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px; }
     .fc { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; color: #374151; font-family: 'Goldman', monospace; font-size: 0.82rem; padding: 9px 13px; outline: none; box-sizing: border-box; }
     .fc:focus { border-color: #94a3b8; }
@@ -12,18 +11,34 @@
     .btn:hover { border-color: #94a3b8; color: #1e293b; }
     .btn-del { background: none; border: none; color: #cbd5e1; font-size: 0.72rem; cursor: pointer; padding: 0 4px; transition: color 0.2s; }
     .btn-del:hover { color: #ef4444; }
-    .q-row { padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
-    .q-row:last-child { border-bottom: none; }
-    .q-text { color: #374151; font-size: 0.8rem; line-height: 1.5; margin-bottom: 6px; }
+    .q-list { display: flex; flex-direction: column; gap: 12px; }
+    .q-row { padding: 14px; border-radius: 8px; background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: border-color 0.15s, box-shadow 0.15s; }
+    .q-row:hover { border-color: #cbd5e1; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .q-row.trashed-row:hover { border-color: #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .q-title { font-weight: 700; color: #1e293b; font-size: 0.8rem; margin-bottom: 3px; }
+    .q-text { color: #374151; font-size: 0.8rem; line-height: 1.5; margin-bottom: 0; }
     .var-num { color: #2563eb; font-weight: 700; background: #eff6ff; border-radius: 3px; padding: 0 4px; }
     .var-str { color: #7c3aed; }
-    .q-regen { background: none; border: none; color: #cbd5e1; font-size: 0.7rem; cursor: pointer; padding: 0; margin-left: 4px; transition: color 0.15s; }
-    .q-regen:hover { color: #64748b; }
-    .q-meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .q-meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
     .q-tag { font-size: 0.65rem; color: #64748b; border: 1px solid #e2e8f0; border-radius: 2px; padding: 1px 7px; }
-    .q-seq { width: 34px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 2px; color: #2563eb; font-family: 'Goldman', monospace; font-size: 0.65rem; padding: 2px 3px; text-align: center; outline: none; }
+    .q-tag.muted { color: #94a3b8; }
+    .q-tag.theme { color: #7c3aed; border-color: #e9d5ff; }
+    .q-tag.oly { color: #b45309; border-color: #fde68a; }
+    .q-seq { width: 40px; height: 28px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; color: #2563eb; font-family: 'Goldman', monospace; font-size: 0.68rem; padding: 2px 3px; text-align: center; outline: none; box-sizing: border-box; }
     .q-seq:focus { border-color: #6366f1; }
     .q-seq.saved { border-color: #86efac; }
+    .q-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #f1f5f9; flex-wrap: wrap; }
+    .q-actions-left, .q-actions-right { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+    .q-action-btn { background: #f8fafc; border: 1px solid #e2e8f0; color: #64748b; font-size: 0.76rem; width: 28px; height: 28px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.15s; padding: 0; line-height: 1; }
+    .q-action-btn:hover { border-color: #94a3b8; color: #1e293b; background: #fff; }
+    .q-status-btn { font-family: 'Goldman', monospace; font-size: 0.68rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 11px; cursor: pointer; color: #64748b; text-decoration: none; display: inline-flex; align-items: center; gap: 3px; transition: all 0.15s; line-height: 1; }
+    .q-status-btn:hover { border-color: #94a3b8; color: #1e293b; }
+    .q-status-btn.active { color: #059669; border-color: #bbf7d0; background: #f0fdf4; }
+    .q-status-btn.active:hover { border-color: #059669; }
+    .q-status-btn.inactive { color: #b91c1c; border-color: #fecaca; background: #fef2f2; }
+    .q-status-btn.danger { color: #cbd5e1; border: none; background: none; padding: 6px 7px; }
+    .q-status-btn.danger:hover { color: #ef4444; }
+    .q-status-btn.restore { color: #059669; border-color: #86efac; background: #f0fdf4; }
     .diff { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
     .msg { font-size: 0.75rem; color: #059669; margin-bottom: 16px; }
     .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
@@ -78,7 +93,7 @@
         .aw { padding: 14px 10px 48px; }
         .filters { gap: 6px; }
         .filters select, .filters input { font-size: 0.7rem; padding: 6px 8px; }
-        .card-dark { padding: 14px; }
+        .q-row { padding: 10px; }
         .q-text { font-size: 0.75rem; }
         .pdf-bar { width: calc(100% - 24px); left: 12px; transform: none; bottom: 70px; flex-wrap: wrap; gap: 8px; padding: 10px 14px; }
     }
@@ -145,71 +160,84 @@
         @endif
     </form>
 
-    <div class="card-dark">
+    <div class="q-list">
         @forelse($templates as $tpl)
-        <div class="q-row" style="display:flex;gap:10px;align-items:flex-start;{{ (!$showTrashed && !$tpl->is_active) ? 'opacity:0.45;' : '' }}">
+        <div class="q-row {{ $showTrashed ? 'trashed-row' : '' }}" style="display:flex;gap:10px;align-items:flex-start;{{ (!$showTrashed && !$tpl->is_active) ? 'opacity:0.5;' : '' }}">
             @unless($showTrashed)
             <input type="checkbox" class="q-check q-item" value="{{ $tpl->id }}" style="margin-top:3px;" onchange="updateBar()">
             @endunless
-            <div style="flex:1;">
+            <div style="flex:1;min-width:0;">
             @if($tpl->title)
-            <div style="font-weight:700;color:#1e293b;font-size:0.8rem;margin-bottom:3px;">★ {{ $tpl->title }}</div>
+            <div class="q-title">★ {{ $tpl->title }}</div>
             @endif
             <div class="q-text q-preview"
                 data-tpl="{{ $tpl->template_text }}"
                 data-nc='@json($tpl->num_config ?? [])'>{{ $tpl->template_text }}</div>
+
             <div class="q-meta">
-                <span class="q-tag" style="color:#94a3b8;">#{{ $tpl->id }}</span>
+                <span class="q-tag muted">#{{ $tpl->id }}</span>
                 <span class="q-tag">{{ $tpl->topic->grade->name }}</span>
                 <span class="q-tag">{{ $tpl->topic->name }}</span>
-                @unless($showTrashed)
-                <input type="number" class="q-seq" min="1" placeholder="—" value="{{ $tpl->sequence }}"
-                    data-tpl-id="{{ $tpl->id }}" onchange="saveQSequence(this)" title="რიგითობა თემაში">
-                @endunless
                 @if($tpl->theme)
-                <span class="q-tag" style="color:#7c3aed;border-color:#e9d5ff;">{{ $tpl->theme->icon ?? '' }} {{ $tpl->theme->name }}</span>
+                <span class="q-tag theme">{{ $tpl->theme->icon ?? '' }} {{ $tpl->theme->name }}</span>
                 @endif
                 @if($tpl->is_olympiad)
-                <span class="q-tag" style="color:#b45309;border-color:#fde68a;">🏆 ოლიმპიადა</span>
+                <span class="q-tag oly">🏆 ოლიმპიადა</span>
                 @else
                 <span class="q-tag">დონე {{ $tpl->difficulty }}</span>
                 @endif
-                <span class="q-tag" style="color:#888;">= {{ $tpl->correct_formula }}</span>
-                <button type="button" class="q-regen" onclick="regenPreview(this)" title="ახალი მაგალითი">↺</button>
-                <button type="button" class="q-regen" onclick="openLivePreview({{ $tpl->id }})" title="ლაივ პრევიუ">👁</button>
-                @unless($showTrashed)
-                <button type="button" class="q-regen"
-                    data-id="{{ $tpl->id }}"
-                    data-grade="{{ $tpl->topic->grade_id }}"
-                    data-topic="{{ $tpl->topic_id }}"
-                    data-theme="{{ $tpl->theme_id }}"
-                    data-difficulty="{{ $tpl->difficulty }}"
-                    data-qtype="{{ $tpl->question_type }}"
-                    data-olympiad="{{ $tpl->is_olympiad ? 1 : 0 }}"
-                    onclick="openReassign(this)" title="კლასის/თემის/თემატიკის/დონის შეცვლა">⇄</button>
-                @endunless
-                <div style="flex:1;"></div>
-                @if($showTrashed)
-                <form method="POST" action="{{ route('admin.questions.restore', $tpl->id) }}" style="display:inline;">
-                    @csrf
-                    <button type="submit" style="color:#059669;font-size:0.7rem;background:none;border:1px solid #059669;border-radius:2px;padding:2px 8px;cursor:pointer;">↺ აღდგენა</button>
-                </form>
-                @else
-                <form method="POST" action="{{ route('admin.questions.toggle-active', $tpl) }}" style="display:inline;">
-                    @csrf @method('PATCH')
-                    <button type="submit" style="color:{{ $tpl->is_active ? '#059669' : '#b91c1c' }};font-size:0.7rem;background:none;border:none;cursor:pointer;padding:2px 4px;" title="{{ $tpl->is_active ? 'გაჩერება' : 'გააქტიურება' }}">{{ $tpl->is_active ? '✓ აქტიური' : '⏸ გაჩერებული' }}</button>
-                </form>
-                <a href="{{ route('admin.questions.edit', $tpl) }}" style="color:#555;font-size:0.7rem;text-decoration:none;padding:2px 8px;border:1px solid #222;border-radius:2px;">რედ.</a>
-                <form method="POST" action="{{ route('admin.questions.destroy', $tpl) }}" style="display:inline;">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="btn-del" onclick="return confirm('წაიშალოს?')">✕</button>
-                </form>
-                @endif
+                <span class="q-tag muted">= {{ $tpl->correct_formula }}</span>
+            </div>
+
+            <div class="q-actions">
+                <div class="q-actions-left">
+                    @unless($showTrashed)
+                    <input type="number" class="q-seq" min="1" placeholder="—" value="{{ $tpl->sequence }}"
+                        data-tpl-id="{{ $tpl->id }}" onchange="saveQSequence(this)" title="რიგითობა თემაში">
+                    @endunless
+                    <button type="button" class="q-action-btn" onclick="regenPreview(this)" title="ახალი მაგალითი">↺</button>
+                    <button type="button" class="q-action-btn" onclick="openLivePreview({{ $tpl->id }})" title="ლაივ პრევიუ">👁</button>
+                    @unless($showTrashed)
+                    @php
+                        $rsData = [
+                            'data-id'         => $tpl->id,
+                            'data-grade'      => $tpl->topic->grade_id,
+                            'data-topic'      => $tpl->topic_id,
+                            'data-theme'      => $tpl->theme_id,
+                            'data-difficulty' => $tpl->difficulty,
+                            'data-qtype'      => $tpl->question_type,
+                            'data-olympiad'   => $tpl->is_olympiad ? 1 : 0,
+                        ];
+                    @endphp
+                    <button type="button" class="q-action-btn" @foreach($rsData as $k => $v) {{ $k }}="{{ $v }}" @endforeach
+                        onclick="openReassign(this,'move')" title="კლასის/თემის/თემატიკის/დონის შეცვლა">⇄</button>
+                    <button type="button" class="q-action-btn" @foreach($rsData as $k => $v) {{ $k }}="{{ $v }}" @endforeach
+                        onclick="openReassign(this,'copy')" title="დუბლირება სხვა კლასში/თემაში">⎘</button>
+                    @endunless
+                </div>
+                <div class="q-actions-right">
+                    @if($showTrashed)
+                    <form method="POST" action="{{ route('admin.questions.restore', $tpl->id) }}">
+                        @csrf
+                        <button type="submit" class="q-status-btn restore">↺ აღდგენა</button>
+                    </form>
+                    @else
+                    <form method="POST" action="{{ route('admin.questions.toggle-active', $tpl) }}">
+                        @csrf @method('PATCH')
+                        <button type="submit" class="q-status-btn {{ $tpl->is_active ? 'active' : 'inactive' }}" title="{{ $tpl->is_active ? 'გაჩერება' : 'გააქტიურება' }}">{{ $tpl->is_active ? '✓ აქტიური' : '⏸ გაჩერებული' }}</button>
+                    </form>
+                    <a href="{{ route('admin.questions.edit', $tpl) }}" class="q-status-btn">✎ რედ.</a>
+                    <form method="POST" action="{{ route('admin.questions.destroy', $tpl) }}">
+                        @csrf @method('DELETE')
+                        <button type="button" class="q-status-btn danger" onclick="confirmDeleteQuestion(this)">✕</button>
+                    </form>
+                    @endif
+                </div>
             </div>
             </div>
         </div>
         @empty
-        <div style="color:#444;font-size:0.78rem;">შაბლონი არ არის</div>
+        <div class="q-row" style="color:#94a3b8;font-size:0.78rem;">შაბლონი არ არის</div>
         @endforelse
     </div>
 
@@ -247,7 +275,7 @@
 <div class="lp-overlay" id="rsOverlay" onclick="rsOverlayClick(event)">
     <div class="lp-box">
         <div class="lp-head">
-            <span>კლასი · თემა · თემატიკა · დონე</span>
+            <span id="rsTitle">კლასი · თემა · თემატიკა · დონე</span>
             <button type="button" class="lp-close" onclick="closeReassign()">✕</button>
         </div>
         <div class="lp-body">
@@ -276,7 +304,7 @@
             <div class="rs-err" id="rsErr"></div>
         </div>
         <div class="lp-foot" style="display:flex;gap:8px;">
-            <button type="button" class="btn" onclick="saveReassign()">შენახვა</button>
+            <button type="button" class="btn" id="rsSaveBtn" onclick="saveReassign()">შენახვა</button>
             <button type="button" class="btn" onclick="closeReassign()">გაუქმება</button>
         </div>
     </div>
@@ -458,6 +486,22 @@ function saveQSequence(input) {
         .catch(() => { alert('შეცდომა — რიგითობა არ შეინახა'); });
 }
 
+function confirmDeleteQuestion(btn) {
+    const form = btn.closest('form');
+    Swal.fire({
+        title: 'შაბლონის წაშლა?',
+        html: '<span style="font-size:0.9rem;color:#555;">აღდგენა შესაძლებელია „წაშლილების" სიიდან.</span>',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#c0392b',
+        cancelButtonColor: '#aaa',
+        confirmButtonText: 'დიახ, წავშალო',
+        cancelButtonText: 'გაუქმება',
+    }).then(result => {
+        if (result.isConfirmed) form.submit();
+    });
+}
+
 // ── Live preview modal — fetches the REAL server-side generate() result for
 // this exact template id, so it's never out of sync with what a child gets.
 let lpCurrentId = null;
@@ -477,10 +521,11 @@ function lpOverlayClick(e) {
 // ── Reassign modal — change grade (via topic)/topic/theme/difficulty from the
 // list without opening the full edit form. Reuses _topicsByGrade already built
 // above for the filter bar's grade→topic cascade.
-let rsId = null, rsDiff = 1, rsIsOlympiad = false, rsQType = 'multiple_choice';
+let rsId = null, rsDiff = 1, rsIsOlympiad = false, rsQType = 'multiple_choice', rsMode = 'move';
 
-function openReassign(btn) {
+function openReassign(btn, mode) {
     rsId         = btn.dataset.id;
+    rsMode       = mode || 'move';
     rsDiff       = +btn.dataset.difficulty || 1;
     rsIsOlympiad = btn.dataset.olympiad === '1';
     rsQType      = btn.dataset.qtype;
@@ -498,6 +543,11 @@ function openReassign(btn) {
     themeSel.disabled = isSpecial;
     document.getElementById('rsThemeWrap').style.opacity = isSpecial ? '0.4' : '1';
     themeSel.value = isSpecial ? '' : (themeId || '');
+
+    document.getElementById('rsTitle').textContent = rsMode === 'copy'
+        ? '⎘ დუბლირება სხვაგან'
+        : '⇄ კლასი · თემა · თემატიკა · დონე';
+    document.getElementById('rsSaveBtn').textContent = rsMode === 'copy' ? 'დუბლირება' : 'შენახვა';
 
     document.getElementById('rsErr').style.display = 'none';
     document.getElementById('rsOverlay').classList.add('open');
@@ -554,8 +604,11 @@ async function saveReassign() {
         return;
     }
     try {
-        const r = await fetch(`/admin/questions/${rsId}/reassign`, {
-            method: 'PATCH',
+        const url = rsMode === 'copy'
+            ? `/admin/questions/${rsId}/duplicate`
+            : `/admin/questions/${rsId}/reassign`;
+        const r = await fetch(url, {
+            method: rsMode === 'copy' ? 'POST' : 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
