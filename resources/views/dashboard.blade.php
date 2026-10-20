@@ -878,7 +878,7 @@
             $required      = $setting?->tests_per_week ?? 0;
             $todayCount    = auth()->user()->tests()->where('is_olympiad', false)->whereNotNull('completed_at')->whereDate('completed_at', today())->count();
             $olympiadStatus = (new \App\Services\OlympiadService())->statusFor(auth()->user());
-            $doneToday     = $required > 0 && $todayCount >= $required && !$activeTest;
+            $doneToday     = $required > 0 && $todayCount >= $required && !$activeTest && !$setting?->unlimited_tests;
             $coins         = $setting?->coins ?? 0;
             $achCount      = auth()->user()->achievements()->count();
             $totalTestsCount = auth()->user()->tests()->whereNotNull('completed_at')->count();

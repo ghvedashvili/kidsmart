@@ -22,7 +22,7 @@
     .pkg-free    { background: #dcfce7; color: #166534; }
     .pkg-paid    { background: #dbeafe; color: #1e40af; }
     .pkg-expired { background: #fee2e2; color: #991b1b; }
-    .sub-btn { background: none; border: 1px solid #e2e8f0; color: #64748b; font-family: 'Goldman', monospace; font-size: 0.62rem; padding: 2px 8px; border-radius: 3px; cursor: pointer; white-space: nowrap; }
+    .sub-btn { background: none; border: 1px solid #e2e8f0; color: #64748b; font-family: 'Goldman', monospace; font-size: 0.62rem; padding: 2px 8px; border-radius: 3px; cursor: pointer; white-space: nowrap; text-decoration: none; display: inline-block; }
     .sub-btn:hover { border-color: #94a3b8; color: #1e293b; }
     .pagination-wrap { margin-top: 16px; display: flex; gap: 6px; flex-wrap: wrap; }
     .pagination-wrap a, .pagination-wrap span { font-family: 'Goldman', monospace; font-size: 0.68rem; color: #64748b; border: 1px solid #e2e8f0; border-radius: 3px; padding: 4px 10px; text-decoration: none; }
@@ -42,6 +42,17 @@
     .history-item { padding: 5px 0; border-bottom: 1px solid #f1f5f9; color: #374151; }
     .history-item:last-child { border-bottom: none; }
     .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .filter-banner { background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 6px; padding: 8px 12px; font-size: 0.74rem; color: #3730a3; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .filter-banner a { color: #3730a3; text-decoration: underline; }
+    .cm-diff-row { display: flex; gap: 6px; margin: 2px 0 4px; }
+    .cm-diff-btn { background: #f8fafc; border: 1px solid #e2e8f0; color: #94a3b8; font-family: 'Goldman', monospace; font-size: 0.74rem; padding: 6px 12px; border-radius: 4px; cursor: pointer; transition: all 0.15s; }
+    .cm-diff-btn.sel { border-color: #4f46e5; color: #4f46e5; background: #eef2ff; }
+    .cm-unlimited-row { margin-top: 12px; display: flex; align-items: center; gap: 8px; }
+    .cm-unlimited-row label { font-size: 0.72rem; color: #374151; cursor: pointer; }
+    .cm-err { font-size: 0.72rem; color: #ef4444; margin-top: 8px; display: none; }
+    .cm-reset-wrap { margin-top: 14px; border-top: 1px solid #f1f5f9; padding-top: 12px; }
+    .btn-warn { background: #fffbeb; border: 1px solid #fde68a; color: #b45309; font-family: 'Goldman', monospace; font-size: 0.74rem; padding: 8px 14px; border-radius: 4px; cursor: pointer; width: 100%; }
+    .btn-warn:hover { border-color: #d97706; }
     @media (max-width: 640px) {
         .aw { padding: 14px 10px 48px; }
         .filters { flex-direction: column; align-items: stretch; }
@@ -58,6 +69,18 @@
     <a href="javascript:history.back()" style="font-family:'Goldman',monospace;font-size:0.72rem;color:#999;letter-spacing:0.06em;text-decoration:none;display:inline-block;margin-bottom:24px;">← back</a>
 
     @if(session('success'))<div class="msg">{{ session('success') }}</div>@endif
+
+    @if($filterParentsOf)
+    <div class="filter-banner">
+        <span>👪 ვაჩვენებ <b>{{ $filterParentsOf->name }}</b>-ის მშობლებს</span>
+        <a href="{{ route('admin.users.index') }}">გასუფთავება ×</a>
+    </div>
+    @elseif($filterChildrenOf)
+    <div class="filter-banner">
+        <span>🧒 ვაჩვენებ <b>{{ $filterChildrenOf->name }}</b>-ის შვილებს</span>
+        <a href="{{ route('admin.users.index') }}">გასუფთავება ×</a>
+    </div>
+    @endif
 
     <form method="GET" class="filters">
         <input type="text" name="search" class="fc" placeholder="სახელი ან email" value="{{ $filters['search'] ?? '' }}" style="width:210px;">
@@ -125,11 +148,26 @@
                     @endif
                 </td>
                 <td style="color:#94a3b8;font-size:0.68rem;">{{ $user->created_at->format('d.m.Y') }}</td>
-                <td>
+                <td style="white-space:nowrap;">
                     <button type="button" class="sub-btn"
                         onclick="openSubModal({{ $user->id }}, '{{ addslashes($user->name) }}')">
                         📦 პაკეტი
                     </button>
+                    @if($user->role === 'child')
+                    <button type="button" class="sub-btn"
+                        onclick="openChildModal({{ $user->id }}, '{{ addslashes($user->name) }}', {{ $user->childSetting?->grade_id ?? 'null' }}, {{ $user->childSetting?->difficulty ?? 1 }}, {{ $user->childSetting?->tests_per_week ?? 3 }}, {{ $user->childSetting?->unlimited_tests ? 'true' : 'false' }}, {{ $user->themes->pluck('id') }})">
+                        ⚙ მართვა
+                    </button>
+                    @if($user->parents_count)
+                    <a href="{{ route('admin.users.index', ['parents_of' => $user->id]) }}" class="sub-btn">
+                        👪 მშობლები ({{ $user->parents_count }})
+                    </a>
+                    @endif
+                    @elseif($user->role === 'parent' && $user->children_count)
+                    <a href="{{ route('admin.users.index', ['children_of' => $user->id]) }}" class="sub-btn">
+                        🧒 შვილები ({{ $user->children_count }})
+                    </a>
+                    @endif
                 </td>
             </tr>
             @empty
@@ -182,6 +220,55 @@
         <div class="sub-box-actions">
             <button class="btn-primary" onclick="saveSubscription()">✓ შენახვა</button>
             <button class="btn-cancel" onclick="closeModal()">გაუქმება</button>
+        </div>
+    </div>
+</div>
+
+{{-- Child management modal (admin-only) --}}
+<div class="modal-bg" id="childModal">
+    <div class="sub-box">
+        <div class="sub-box-title" id="childModalTitle">ბავშვის მართვა</div>
+
+        <div class="lbl">კლასი</div>
+        <select class="fc" id="cmGrade" onchange="onCmGradeChange()">
+            <option value="">— კლასი არ არის —</option>
+            @foreach($grades as $grade)
+            <option value="{{ $grade->id }}" data-max-level="{{ $grade->max_level }}">{{ $grade->name }}</option>
+            @endforeach
+        </select>
+
+        <div class="lbl">დონე</div>
+        <div class="cm-diff-row" id="cmDiffRow">
+            @for($i = 1; $i <= 5; $i++)
+            <button type="button" class="cm-diff-btn" data-d="{{ $i }}" onclick="setCmDiff({{ $i }})">{{ $i }}</button>
+            @endfor
+        </div>
+        <div id="cmMaxHint" style="font-size:0.62rem;color:#94a3b8;margin:-2px 0 8px;display:none;"></div>
+
+        <div class="lbl">თემატიკები</div>
+        <select class="fc" id="cmThemes" multiple style="height:96px;">
+            @foreach($themes as $theme)
+            <option value="{{ $theme->id }}">{{ $theme->icon ?? '' }} {{ $theme->name }}</option>
+            @endforeach
+        </select>
+
+        <div class="lbl">ტესტი დღეში (მაქს.)</div>
+        <input type="number" class="fc" id="cmTestsPerWeek" min="1" max="7">
+
+        <div class="cm-unlimited-row">
+            <input type="checkbox" id="cmUnlimited" style="width:16px;height:16px;cursor:pointer;">
+            <label for="cmUnlimited">♾ ულიმიტო ტესტი დღეში (ტესტირებისთვის)</label>
+        </div>
+
+        <div class="cm-err" id="cmErr"></div>
+
+        <div class="sub-box-actions">
+            <button class="btn-primary" onclick="saveChildSettings()">✓ შენახვა</button>
+            <button class="btn-cancel" onclick="closeChildModal()">გაუქმება</button>
+        </div>
+
+        <div class="cm-reset-wrap">
+            <button type="button" class="btn-warn" onclick="confirmResetProgress()">🔄 პროგრესის განულება</button>
         </div>
     </div>
 </div>
@@ -289,6 +376,108 @@ document.querySelectorAll('.role-sel').forEach(sel => {
             }
         } catch (e) { this.value = this.dataset.orig; }
     });
+});
+
+// ── Child management modal (admin-only) ────────────────────────────────────
+let currentChildId = null, cmDiff = 1;
+
+function openChildModal(id, name, gradeId, difficulty, testsPerWeek, unlimited, themeIds) {
+    currentChildId = id;
+    document.getElementById('childModalTitle').textContent = 'ბავშვის მართვა — ' + name;
+    document.getElementById('cmErr').style.display = 'none';
+
+    const gradeSel = document.getElementById('cmGrade');
+    gradeSel.value = gradeId ?? '';
+    applyCmMaxLevel(gradeId);
+    setCmDiff(difficulty || 1);
+
+    document.getElementById('cmTestsPerWeek').value = testsPerWeek || 3;
+    document.getElementById('cmUnlimited').checked = !!unlimited;
+
+    const themeSel = document.getElementById('cmThemes');
+    Array.from(themeSel.options).forEach(o => { o.selected = themeIds.includes(+o.value); });
+
+    document.getElementById('childModal').classList.add('open');
+}
+function closeChildModal() {
+    document.getElementById('childModal').classList.remove('open');
+    currentChildId = null;
+}
+function onCmGradeChange() {
+    applyCmMaxLevel(document.getElementById('cmGrade').value);
+}
+function applyCmMaxLevel(gradeId) {
+    const opt = document.querySelector('#cmGrade option[value="' + gradeId + '"]');
+    const max = (gradeId && opt) ? (+opt.dataset.maxLevel || 5) : 5;
+    document.querySelectorAll('#cmDiffRow .cm-diff-btn').forEach(b => {
+        b.style.display = (+b.dataset.d) <= max ? '' : 'none';
+    });
+    const hint = document.getElementById('cmMaxHint');
+    if (gradeId && max < 5) {
+        hint.textContent = 'ამ კლასს მაქსიმუმ ' + max + ' დონე აქვს';
+        hint.style.display = 'block';
+    } else {
+        hint.style.display = 'none';
+    }
+    if (cmDiff > max) setCmDiff(max);
+}
+function setCmDiff(d) {
+    cmDiff = d;
+    document.querySelectorAll('#cmDiffRow .cm-diff-btn').forEach(b => {
+        b.classList.toggle('sel', +b.dataset.d === d);
+    });
+}
+async function saveChildSettings() {
+    const errEl = document.getElementById('cmErr');
+    errEl.style.display = 'none';
+    const themeIds = Array.from(document.getElementById('cmThemes').selectedOptions).map(o => +o.value);
+    try {
+        const res = await fetch(`/admin/users/${currentChildId}/child-settings`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+            body: JSON.stringify({
+                grade_id:         document.getElementById('cmGrade').value || null,
+                difficulty:       cmDiff,
+                tests_per_week:   +document.getElementById('cmTestsPerWeek').value || 3,
+                unlimited_tests:  document.getElementById('cmUnlimited').checked,
+                theme_ids:        themeIds,
+            }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            errEl.textContent = data.error || 'შეცდომა — არ შეინახა';
+            errEl.style.display = 'block';
+            return;
+        }
+        location.reload();
+    } catch (e) {
+        errEl.textContent = 'დაკავშირების შეცდომა';
+        errEl.style.display = 'block';
+    }
+}
+function confirmResetProgress() {
+    Swal.fire({
+        title: 'პროგრესის განულება?',
+        html: '<span style="font-size:0.9rem;color:#555;">დონე დაუბრუნდება 1-ზე, მონეტები და ტესტების მთვლელი განულდება.<br>ტესტების/ვარჯიშის ისტორია არ წაიშლება.</span>',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d97706',
+        cancelButtonColor: '#aaa',
+        confirmButtonText: 'დიახ, განულდეს',
+        cancelButtonText: 'გაუქმება',
+    }).then(result => {
+        if (result.isConfirmed) resetProgress();
+    });
+}
+async function resetProgress() {
+    const res = await fetch(`/admin/users/${currentChildId}/reset-progress`, {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+    });
+    if (res.ok) location.reload();
+}
+document.getElementById('childModal').addEventListener('click', function(e) {
+    if (e.target === this) closeChildModal();
 });
 </script>
 @endsection

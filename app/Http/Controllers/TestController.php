@@ -28,7 +28,7 @@ class TestController extends Controller
         $setting  = $child->childSetting;
         $required = $setting?->tests_per_week ?? 0;
 
-        if ($required > 0) {
+        if ($required > 0 && ! $setting?->unlimited_tests) {
             $todayCount = Test::where('child_id', $child->id)
                 ->where('is_olympiad', false)
                 ->whereNotNull('completed_at')

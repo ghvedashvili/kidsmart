@@ -197,6 +197,8 @@ Route::middleware(['auth', 'admin', 'role.permission'])->group(function () {
 
     Route::get('/admin/users',                    [UserController::class, 'index'])->name('admin.users.index');
     Route::post('/admin/users/{user}/role',       [UserController::class, 'updateRole'])->name('admin.updateRole');
+    Route::patch('/admin/users/{child}/child-settings', [UserController::class, 'updateChildSettings'])->name('admin.users.child-settings');
+    Route::post('/admin/users/{child}/reset-progress',  [UserController::class, 'resetChildProgress'])->name('admin.users.reset-progress');
     Route::get('/admin/permissions',              [RolePermissionController::class, 'index'])->name('admin.permissions.index');
     Route::post('/admin/permissions',             [RolePermissionController::class, 'update'])->name('admin.permissions.update');
 

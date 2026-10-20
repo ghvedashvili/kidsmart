@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ChildSetting extends Model
 {
     protected $fillable = [
-        'user_id', 'grade_id', 'difficulty', 'tests_per_week', 'coins', 'difficulty_streak',
+        'user_id', 'grade_id', 'difficulty', 'tests_per_week', 'unlimited_tests', 'coins', 'difficulty_streak',
         'topic_rotation', 'tests_since_level_review', 'practice_topic_rotation', 'template_rotation',
     ];
 
@@ -17,6 +17,7 @@ class ChildSetting extends Model
         'practice_topic_rotation' => 'array',
         'template_rotation'       => 'array',
         'coins'                   => 'float',
+        'unlimited_tests'         => 'boolean',
     ];
 
     public function user(): BelongsTo
