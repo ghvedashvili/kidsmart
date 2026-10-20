@@ -53,6 +53,14 @@
     .lp-loading, .lp-err { font-size:0.78rem; color:#94a3b8; padding:20px 0; text-align:center; }
     .lp-err { color:#ef4444; }
     .lp-q { font-size:0.88rem; color:#1e293b; line-height:1.55; margin-bottom:12px; }
+
+    /* reassign modal */
+    .rs-lbl { font-size:0.6rem; color:#94a3b8; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:5px; }
+    .rs-diff-row { display:flex; gap:6px; margin-bottom:4px; }
+    .rs-diff-btn { background:#f8fafc; border:1px solid #e2e8f0; color:#94a3b8; font-family:'Goldman',monospace; font-size:0.78rem; padding:7px 14px; border-radius:4px; cursor:pointer; transition:all 0.15s; }
+    .rs-diff-btn.sel { border-color:#4f46e5; color:#4f46e5; background:#eef2ff; }
+    .rs-err { font-size:0.72rem; color:#ef4444; margin-bottom:8px; display:none; }
+    .rs-hint { font-size:0.62rem; color:#94a3b8; margin:-4px 0 10px; display:none; }
     .lp-hint { font-size:0.72rem; color:#64748b; border-left:2px solid #e2e8f0; padding-left:9px; margin-bottom:12px; }
     .lp-opts { display:flex; flex-wrap:wrap; gap:7px; }
     .lp-opt { font-size:0.78rem; padding:6px 14px; border-radius:4px; border:1px solid #e2e8f0; color:#374151; background:#fff; }
@@ -169,6 +177,17 @@
                 <span class="q-tag" style="color:#888;">= {{ $tpl->correct_formula }}</span>
                 <button type="button" class="q-regen" onclick="regenPreview(this)" title="ახალი მაგალითი">↺</button>
                 <button type="button" class="q-regen" onclick="openLivePreview({{ $tpl->id }})" title="ლაივ პრევიუ">👁</button>
+                @unless($showTrashed)
+                <button type="button" class="q-regen"
+                    data-id="{{ $tpl->id }}"
+                    data-grade="{{ $tpl->topic->grade_id }}"
+                    data-topic="{{ $tpl->topic_id }}"
+                    data-theme="{{ $tpl->theme_id }}"
+                    data-difficulty="{{ $tpl->difficulty }}"
+                    data-qtype="{{ $tpl->question_type }}"
+                    data-olympiad="{{ $tpl->is_olympiad ? 1 : 0 }}"
+                    onclick="openReassign(this)" title="კლასის/თემის/თემატიკის/დონის შეცვლა">⇄</button>
+                @endunless
                 <div style="flex:1;"></div>
                 @if($showTrashed)
                 <form method="POST" action="{{ route('admin.questions.restore', $tpl->id) }}" style="display:inline;">
@@ -220,6 +239,45 @@
         <div class="lp-body" id="lpBody"></div>
         <div class="lp-foot">
             <button type="button" class="btn" onclick="regenLivePreview()">↺ ახალი თაობა</button>
+        </div>
+    </div>
+</div>
+
+{{-- Reassign modal: change grade/topic/theme/difficulty without opening the full edit form --}}
+<div class="lp-overlay" id="rsOverlay" onclick="rsOverlayClick(event)">
+    <div class="lp-box">
+        <div class="lp-head">
+            <span>კლასი · თემა · თემატიკა · დონე</span>
+            <button type="button" class="lp-close" onclick="closeReassign()">✕</button>
+        </div>
+        <div class="lp-body">
+            <div class="rs-lbl">კლასი</div>
+            <select id="rsGrade" class="fc" style="margin-bottom:10px;width:100%;" onchange="onRsGradeChange()">
+                @foreach($grades as $grade)
+                <option value="{{ $grade->id }}" data-max-level="{{ $grade->max_level }}">{{ $grade->name }}</option>
+                @endforeach
+            </select>
+            <div class="rs-lbl">თემა</div>
+            <select id="rsTopic" class="fc" style="margin-bottom:10px;width:100%;"></select>
+            <div class="rs-lbl" id="rsThemeWrap">თემატიკა</div>
+            <select id="rsTheme" class="fc" style="margin-bottom:10px;width:100%;">
+                <option value="">— არავითარი —</option>
+                @foreach($themes as $theme)
+                <option value="{{ $theme->id }}">{{ $theme->icon ?? '' }} {{ $theme->name }}</option>
+                @endforeach
+            </select>
+            <div class="rs-lbl">დონე</div>
+            <div class="rs-diff-row" id="rsDiffRow">
+                @for($i = 1; $i <= 5; $i++)
+                <button type="button" class="rs-diff-btn" data-d="{{ $i }}" onclick="setRsDiff({{ $i }})">{{ $i }}</button>
+                @endfor
+            </div>
+            <div class="rs-hint" id="rsMaxHint"></div>
+            <div class="rs-err" id="rsErr"></div>
+        </div>
+        <div class="lp-foot" style="display:flex;gap:8px;">
+            <button type="button" class="btn" onclick="saveReassign()">შენახვა</button>
+            <button type="button" class="btn" onclick="closeReassign()">გაუქმება</button>
         </div>
     </div>
 </div>
@@ -414,6 +472,108 @@ function closeLivePreview() {
 }
 function lpOverlayClick(e) {
     if (e.target === document.getElementById('lpOverlay')) closeLivePreview();
+}
+
+// ── Reassign modal — change grade (via topic)/topic/theme/difficulty from the
+// list without opening the full edit form. Reuses _topicsByGrade already built
+// above for the filter bar's grade→topic cascade.
+let rsId = null, rsDiff = 1, rsIsOlympiad = false, rsQType = 'multiple_choice';
+
+function openReassign(btn) {
+    rsId         = btn.dataset.id;
+    rsDiff       = +btn.dataset.difficulty || 1;
+    rsIsOlympiad = btn.dataset.olympiad === '1';
+    rsQType      = btn.dataset.qtype;
+    const gradeId = btn.dataset.grade;
+    const topicId = btn.dataset.topic;
+    const themeId = btn.dataset.theme;
+
+    document.getElementById('rsGrade').value = gradeId;
+    rebuildRsTopics(gradeId, topicId);
+    applyRsMaxLevel(gradeId);
+    setRsDiff(rsDiff);
+
+    const themeSel = document.getElementById('rsTheme');
+    const isSpecial = ['pyramid', 'code', 'crossword'].includes(rsQType);
+    themeSel.disabled = isSpecial;
+    document.getElementById('rsThemeWrap').style.opacity = isSpecial ? '0.4' : '1';
+    themeSel.value = isSpecial ? '' : (themeId || '');
+
+    document.getElementById('rsErr').style.display = 'none';
+    document.getElementById('rsOverlay').classList.add('open');
+}
+function closeReassign() {
+    document.getElementById('rsOverlay').classList.remove('open');
+}
+function rsOverlayClick(e) {
+    if (e.target === document.getElementById('rsOverlay')) closeReassign();
+}
+function onRsGradeChange() {
+    const gradeId = document.getElementById('rsGrade').value;
+    rebuildRsTopics(gradeId, null);
+    applyRsMaxLevel(gradeId);
+}
+function rebuildRsTopics(gradeId, keepTopicId) {
+    const sel = document.getElementById('rsTopic');
+    sel.innerHTML = '';
+    (_topicsByGrade[gradeId] || []).forEach(t => {
+        const opt = new Option(t.name, t.id);
+        if (keepTopicId && String(t.id) === String(keepTopicId)) opt.selected = true;
+        sel.add(opt);
+    });
+}
+function applyRsMaxLevel(gradeId) {
+    const opt = document.querySelector('#rsGrade option[value="' + gradeId + '"]');
+    const max = rsIsOlympiad ? 5 : (opt ? (+opt.dataset.maxLevel || 5) : 5);
+    document.querySelectorAll('#rsDiffRow .rs-diff-btn').forEach(b => {
+        b.style.display = (+b.dataset.d) <= max ? '' : 'none';
+    });
+    const hint = document.getElementById('rsMaxHint');
+    if (!rsIsOlympiad && max < 5) {
+        hint.textContent = 'ამ კლასს მაქსიმუმ ' + max + ' დონე აქვს';
+        hint.style.display = 'block';
+    } else {
+        hint.style.display = 'none';
+    }
+    if (rsDiff > max) setRsDiff(max);
+}
+function setRsDiff(d) {
+    rsDiff = d;
+    document.querySelectorAll('#rsDiffRow .rs-diff-btn').forEach(b => {
+        b.classList.toggle('sel', +b.dataset.d === d);
+    });
+}
+async function saveReassign() {
+    const topicId = document.getElementById('rsTopic').value;
+    const themeVal = document.getElementById('rsTheme').value;
+    const errEl = document.getElementById('rsErr');
+    errEl.style.display = 'none';
+    if (!topicId) {
+        errEl.textContent = 'აირჩიე თემა';
+        errEl.style.display = 'block';
+        return;
+    }
+    try {
+        const r = await fetch(`/admin/questions/${rsId}/reassign`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ topic_id: topicId, theme_id: themeVal || null, difficulty: rsDiff }),
+        });
+        const data = await r.json();
+        if (!r.ok) {
+            errEl.textContent = data.error || 'შეცდომა — არ შეინახა';
+            errEl.style.display = 'block';
+            return;
+        }
+        window.location.reload();
+    } catch (e) {
+        errEl.textContent = 'დაკავშირების შეცდომა';
+        errEl.style.display = 'block';
+    }
 }
 
 async function regenLivePreview() {

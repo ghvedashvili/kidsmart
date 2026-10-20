@@ -204,6 +204,36 @@ class QuestionTemplateController extends Controller
         return response()->json(['success' => true, 'sequence' => $question->sequence]);
     }
 
+    /**
+     * Quick "move" action from the questions list — lets an admin re-home a
+     * question to a different grade (via topic), topic, theme, or difficulty
+     * without opening the full edit form. Grade itself isn't a column on this
+     * model; picking a new grade just means picking a topic that belongs to it.
+     */
+    public function reassign(Request $request, QuestionTemplate $question)
+    {
+        $data = $request->validate([
+            'topic_id'   => 'required|exists:topics,id',
+            'theme_id'   => 'nullable|exists:themes,id',
+            'difficulty' => 'required|integer|min:1|max:5',
+        ]);
+
+        $grade = Topic::find($data['topic_id'])?->grade;
+        if (! $question->is_olympiad && $grade && $data['difficulty'] > $grade->max_level) {
+            return response()->json(['error' => "ამ კლასს მაქსიმუმ {$grade->max_level} დონე აქვს"], 422);
+        }
+
+        // pyramid/code/crossword never use a theme — keep that invariant regardless
+        // of what the modal happened to send.
+        if (in_array($question->question_type, ['pyramid', 'code', 'crossword'], true)) {
+            $data['theme_id'] = null;
+        }
+
+        $question->update($data);
+
+        return response()->json(['success' => true]);
+    }
+
     private function allThemesData(): array
     {
         $themes = Theme::with(['varGroups.variables', 'variables' => fn($q) => $q->whereNull('group_id')])->get();
