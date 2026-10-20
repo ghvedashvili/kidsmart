@@ -61,7 +61,7 @@ class QuestionTemplateController extends Controller
             'defaultThemeId' => Theme::where('name', 'სტანდარტი')->value('id'),
             'loadableTemplates' => QuestionTemplate::with('topic.grade')
                 ->orderBy('topic_id')->orderBy('id')
-                ->get(['id', 'topic_id', 'question_type', 'template_text']),
+                ->get(['id', 'topic_id', 'question_type', 'title', 'template_text']),
         ]);
     }
 
@@ -74,7 +74,7 @@ class QuestionTemplateController extends Controller
     {
         return response()->json($question->only([
             'topic_id', 'theme_id', 'difficulty', 'is_olympiad', 'is_active', 'sequence',
-            'question_type', 'answer_type', 'template_text', 'hint_text', 'correct_formula',
+            'question_type', 'answer_type', 'title', 'template_text', 'hint_text', 'correct_formula',
             'num_config', 'distractors', 'conditions',
         ]));
     }
@@ -284,6 +284,7 @@ class QuestionTemplateController extends Controller
             'sequence'        => 'nullable|integer|min:1',
             'question_type'   => 'required|in:multiple_choice,pyramid,code,crossword',
             'answer_type'     => $isSpecial ? 'nullable' : 'required|in:numeric,text,numeric_input',
+            'title'           => 'nullable|string|max:150',
             'template_text'   => $isSpecial ? 'nullable|string' : 'required|string',
             'hint_text'       => 'nullable|string',
             'correct_formula' => $isSpecial ? 'nullable|string' : 'required|string|max:200',
@@ -323,6 +324,7 @@ class QuestionTemplateController extends Controller
                 'sequence'        => $sequence,
                 'question_type'   => 'pyramid',
                 'answer_type'     => 'numeric',
+                'title'           => $raw['title'] ?? null,
                 'template_text'   => "პირამიდა {$pyrHeight}-ძირი · {$pyrHide} ცარიელი",
                 'hint_text'       => $raw['hint_text'] ?? null,
                 'correct_formula' => '',
@@ -350,6 +352,7 @@ class QuestionTemplateController extends Controller
                 'sequence'        => $sequence,
                 'question_type'   => 'crossword',
                 'answer_type'     => 'numeric',
+                'title'           => $raw['title'] ?? null,
                 'template_text'   => "კროსვორდი {$rows}×{$cols} {$minVal}-{$maxVal} {$opsStr}" . ($revealedCount ? " ({$revealedCount}✓)" : ''),
                 'hint_text'       => $raw['hint_text'] ?? null,
                 'correct_formula' => '',
@@ -384,6 +387,7 @@ class QuestionTemplateController extends Controller
                 'sequence'        => $sequence,
                 'question_type'   => 'code',
                 'answer_type'     => 'numeric',
+                'title'           => $raw['title'] ?? null,
                 'template_text'   => implode(' · ', $descParts),
                 'hint_text'       => $raw['hint_text'] ?? null,
                 'correct_formula' => '',
@@ -420,6 +424,7 @@ class QuestionTemplateController extends Controller
             'sequence'        => $sequence,
             'question_type'   => 'multiple_choice',
             'answer_type'     => $raw['answer_type'],
+            'title'           => $raw['title'] ?? null,
             'template_text'   => $raw['template_text'],
             'hint_text'       => $raw['hint_text'] ?? null,
             'correct_formula' => $raw['correct_formula'],

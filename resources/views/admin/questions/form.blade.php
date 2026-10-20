@@ -103,6 +103,13 @@
     .code-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:10px; }
     .op-check { display:flex; gap:12px; margin-bottom:6px; align-items:center; }
     .op-check label { font-family:'Goldman',monospace; font-size:0.72rem; color:#374151; display:flex; align-items:center; gap:5px; cursor:pointer; }
+    .load-search-wrap { position:relative; }
+    .load-search-results { display:none; position:absolute; top:100%; left:0; right:0; z-index:200; background:#fff; border:1px solid #e2e8f0; border-radius:6px; box-shadow:0 6px 20px rgba(0,0,0,0.1); max-height:240px; overflow-y:auto; margin-top:2px; }
+    .load-search-item { padding:8px 12px; font-size:0.74rem; color:#374151; cursor:pointer; border-bottom:1px solid #f1f5f9; }
+    .load-search-item:last-child { border-bottom:none; }
+    .load-search-item:hover, .load-search-item.hi { background:#eef2ff; }
+    .load-search-empty { padding:10px 12px; font-size:0.72rem; color:#94a3b8; }
+    .load-selected-badge { display:none; font-size:0.68rem; color:#4f46e5; background:#eef2ff; border:1px solid #c7d2fe; border-radius:4px; padding:4px 10px; margin-top:6px; }
 </style>
 
 <div class="aw">
@@ -121,7 +128,14 @@
             {{-- Load an existing template as a starting point --}}
             <div class="card" style="background:#fafaff;border-color:#e0e7ff;">
                 <div class="sec-title">⚡ შაბლონის ჩატვირთვა <span style="color:#94a3b8;font-size:0.54rem;letter-spacing:0.06em;">(სურვილისამებრ)</span></div>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <div class="load-search-wrap">
+                    <input type="text" id="loadSearchInput" class="fc" style="margin-bottom:0;" autocomplete="off"
+                        placeholder="🔍 ძებნა სათაურით ან ID-ით..." oninput="onLoadSearchInput()"
+                        onfocus="onLoadSearchInput()" onblur="setTimeout(hideLoadSearchResults, 150)">
+                    <div id="loadSearchResults" class="load-search-results"></div>
+                </div>
+                <div id="loadSelectedBadge" class="load-selected-badge"></div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
                     <select id="loadGradeSelect" class="fc" style="margin-bottom:0;flex:1;min-width:110px;" onchange="onLoadGradeChange(this.value)">
                         <option value="">— კლასი —</option>
                         @foreach($grades as $grade)
@@ -134,7 +148,9 @@
                     <select id="loadTplSelect" class="fc" style="margin-bottom:0;flex:2;min-width:200px;" disabled>
                         <option value="">— შაბლონი —</option>
                         @foreach($loadableTemplates as $t)
-                        <option value="{{ $t->id }}" data-topic="{{ $t->topic_id }}" hidden>{{ Str::limit($t->template_text ?: '('.$t->question_type.')', 60) }}</option>
+                        <option value="{{ $t->id }}" data-topic="{{ $t->topic_id }}"
+                            data-search="{{ strtolower(($t->title ? $t->title.' ' : '').$t->id.' '.strip_tags($t->template_text ?: $t->question_type)) }}"
+                            hidden>{{ $t->title ? '★ '.$t->title : Str::limit($t->template_text ?: '('.$t->question_type.')', 60) }} (#{{ $t->id }})</option>
                         @endforeach
                     </select>
                     <button type="button" class="nc-add" onclick="loadSelectedTemplate()" style="white-space:nowrap;">ჩატვირთვა</button>
@@ -155,6 +171,11 @@
                     $codeCfg = ($existingQType === 'code') ? ($template->num_config ?? []) : [];
                     $cwCfg   = ($existingQType === 'crossword') ? ($template->num_config ?? []) : [];
                 @endphp
+
+                <div class="lbl">სათაური <span style="color:#94a3b8;font-size:0.6rem;">(მხოლოდ ადმინისთვის — ტესტში ბავშვს არ გამოუჩნდება)</span></div>
+                <input type="text" name="title" id="titleInput" class="fc" maxlength="150"
+                    placeholder="მაგ: ორნიშნა რიცხვის პოვნა — 2 ციფრის წაშლა"
+                    value="{{ old('title', $template?->title) }}">
 
                 <div class="lbl">კითხვის ტიპი</div>
                 <div class="qt-row">
@@ -2290,16 +2311,68 @@ function onLoadGradeChange(gradeId) {
     const list = gradeId ? (_KS.topicsByGrade[gradeId] || []) : [];
     list.forEach(t => topicSel.add(new Option(t.name, t.id)));
     topicSel.disabled = !gradeId;
-    onLoadTopicChange('');
+    updateLoadTplVisibility();
 }
-function onLoadTopicChange(topicId) {
+function onLoadTopicChange() {
+    updateLoadTplVisibility();
+}
+// Browsing via the grade→topic→template selects (no search typed) — unrelated
+// to the search dropdown below, just hides options outside the chosen topic.
+function updateLoadTplVisibility() {
     const tplSel = document.getElementById('loadTplSelect');
+    const topicId = document.getElementById('loadTopicSelect').value;
     tplSel.value = '';
     Array.from(tplSel.options).forEach(o => {
         if (!o.value) return;
         o.hidden = String(o.dataset.topic) !== String(topicId);
     });
     tplSel.disabled = !topicId;
+    clearLoadSelectedBadge();
+}
+
+// ── Search-as-you-type dropdown — shows which templates actually match
+// (by title or id) as a visible, clickable list, since you might not
+// remember the exact title or id to pick blindly from a <select>.
+function onLoadSearchInput() {
+    renderLoadSearchResults();
+}
+function renderLoadSearchResults() {
+    const box = document.getElementById('loadSearchResults');
+    const search = (document.getElementById('loadSearchInput').value || '').trim().toLowerCase();
+    if (!search) { box.style.display = 'none'; box.innerHTML = ''; return; }
+
+    const tplSel = document.getElementById('loadTplSelect');
+    const matches = Array.from(tplSel.options)
+        .filter(o => o.value && (o.dataset.search || '').includes(search))
+        .slice(0, 40);
+
+    box.innerHTML = matches.length
+        ? matches.map(o =>
+            `<div class="load-search-item" onclick="pickLoadSearchResult(${o.value})">${escHtml(o.textContent)}</div>`
+          ).join('')
+        : '<div class="load-search-empty">არაფერი ვერ მოიძებნა</div>';
+    box.style.display = 'block';
+}
+function hideLoadSearchResults() {
+    document.getElementById('loadSearchResults').style.display = 'none';
+}
+function pickLoadSearchResult(id) {
+    const tplSel = document.getElementById('loadTplSelect');
+    const opt = Array.from(tplSel.options).find(o => String(o.value) === String(id));
+    if (!opt) return;
+    opt.hidden = false;
+    tplSel.value = String(id);
+    tplSel.disabled = false;
+    document.getElementById('loadSearchInput').value = '';
+    hideLoadSearchResults();
+    const badge = document.getElementById('loadSelectedBadge');
+    badge.textContent = '✓ არჩეულია: ' + opt.textContent.trim();
+    badge.style.display = 'block';
+}
+function clearLoadSelectedBadge() {
+    const badge = document.getElementById('loadSelectedBadge');
+    badge.style.display = 'none';
+    badge.textContent = '';
 }
 
 // ── Load an existing template as a starting point (create page only) — fetches
@@ -2315,6 +2388,8 @@ function loadSelectedTemplate() {
         .catch(() => alert('შაბლონის ჩატვირთვა ვერ მოხერხდა'));
 }
 function loadIntoForm(data) {
+    document.getElementById('titleInput').value = data.title || '';
+
     // Topic (+ keep the grade filter dropdown in sync for display purposes)
     let placed = false;
     for (const [gId, topics] of Object.entries(_KS.topicsByGrade)) {

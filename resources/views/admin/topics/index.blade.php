@@ -206,7 +206,7 @@
                     <div class="tpl-item">
                         <input type="number" class="tpl-seq" min="1" placeholder="—" value="{{ $tpl->sequence }}"
                             data-tpl-id="{{ $tpl->id }}" onchange="saveTplSequence(this)">
-                        <div class="tpl-text" title="{{ $tpl->template_text }}">{{ Str::limit($tpl->template_text ?: '('.$tpl->question_type.')', 70) }}</div>
+                        <div class="tpl-text" title="{{ $tpl->template_text }}">{{ $tpl->title ? '★ '.$tpl->title : Str::limit($tpl->template_text ?: '('.$tpl->question_type.')', 70) }}</div>
                         <span class="tpl-tag" style="color:#94a3b8;">#{{ $tpl->id }}</span>
                         @if($tpl->theme)
                         <span class="tpl-tag" style="color:#4f46e5;border-color:#c7d2fe;">{{ $tpl->theme->icon ?? '' }} {{ $tpl->theme->name }}</span>

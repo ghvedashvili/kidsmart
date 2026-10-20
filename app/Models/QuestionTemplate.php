@@ -10,7 +10,7 @@ class QuestionTemplate extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['topic_id', 'theme_id', 'difficulty', 'is_olympiad', 'is_active', 'sequence', 'answer_type', 'question_type', 'template_text', 'hint_text', 'correct_formula', 'num_config', 'distractors', 'conditions'];
+    protected $fillable = ['topic_id', 'theme_id', 'difficulty', 'is_olympiad', 'is_active', 'sequence', 'answer_type', 'question_type', 'title', 'template_text', 'hint_text', 'correct_formula', 'num_config', 'distractors', 'conditions'];
 
     protected $casts = ['num_config' => 'array', 'distractors' => 'array', 'conditions' => 'array', 'is_olympiad' => 'boolean', 'is_active' => 'boolean', 'sequence' => 'integer'];
 

@@ -144,6 +144,9 @@
             <input type="checkbox" class="q-check q-item" value="{{ $tpl->id }}" style="margin-top:3px;" onchange="updateBar()">
             @endunless
             <div style="flex:1;">
+            @if($tpl->title)
+            <div style="font-weight:700;color:#1e293b;font-size:0.8rem;margin-bottom:3px;">★ {{ $tpl->title }}</div>
+            @endif
             <div class="q-text q-preview"
                 data-tpl="{{ $tpl->template_text }}"
                 data-nc='@json($tpl->num_config ?? [])'>{{ $tpl->template_text }}</div>
