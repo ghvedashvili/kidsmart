@@ -100,13 +100,52 @@
         </form>
     </div>
 
+    <div class="card-filter">
+        <form method="GET" action="{{ route('test.preview') }}" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <select name="child_id" class="fc-sm" style="flex:1;min-width:160px;">
+                <option value="">— ბავშვი —</option>
+                @foreach($children as $c)
+                <option value="{{ $c->id }}" {{ (string) $selectedChildId === (string) $c->id ? 'selected' : '' }}>
+                    {{ $c->name }} ({{ $c->childSetting?->grade?->name ?? 'კლასი არ არის' }})
+                </option>
+                @endforeach
+            </select>
+            <button type="submit" class="btn-gen" style="margin-left:0;">👶 ბავშვის ტესტის ნახვა →</button>
+        </form>
+        <div style="font-size:0.6rem;color:#94a3b8;margin-top:6px;">აჩვენებს ზუსტად იმას, რასაც ეს ბავშვი ახლა ტესტის დაწყებისას მიიღებდა — არაფერი არ ინახება, ბავშვის ისტორია/rotation არ ეცვლება.</div>
+    </div>
+
+    <div class="card-filter" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div style="font-size:0.72rem;color:#64748b;">შეამოწმე ყველა აქტიური შაბლონი — თუ რომელიმეს ფორმულა ვერ გამოითვლება, აქ გამოჩნდება</div>
+        <form method="GET" action="{{ route('test.preview') }}">
+            <input type="hidden" name="check_templates" value="1">
+            <button type="submit" class="btn-gen" style="margin-left:0;">🔍 ყველა შაბლონის შემოწმება</button>
+        </form>
+    </div>
+
     @if($error)
     <div class="err">{{ $error }}</div>
     @endif
 
+    @if($brokenTemplates !== null)
+    <div class="card-dark">
+        <div class="result-meta">🔍 შემოწმებულია ყველა აქტიური შაბლონი — {{ count($brokenTemplates) }} გატყდომილი</div>
+        @forelse($brokenTemplates as $b)
+        <div class="q-card" style="border-color:#fecaca;background:#fff5f5;">
+            <div class="q-num">#{{ $b['template']->id }} <span class="q-topic">{{ $b['template']->topic->grade->name ?? '' }} / {{ $b['template']->topic->name ?? '' }}</span></div>
+            <div class="q-text">{{ $b['template']->template_text ?: '(' . $b['template']->question_type . ')' }}</div>
+            <div style="font-size:0.72rem;color:#ef4444;margin-bottom:8px;">⚠ {{ $b['error'] }}</div>
+            <a href="{{ route('admin.questions.edit', $b['template']) }}" class="btn-gen" style="display:inline-block;text-decoration:none;">✎ გასწორება</a>
+        </div>
+        @empty
+        <div style="color:#16a34a;font-size:0.82rem;">✅ ყველა აქტიური შაბლონი წესრიგშია</div>
+        @endforelse
+    </div>
+    @endif
+
     @if($questions)
     <div class="result-meta">
-        @if($selectedTheme)<span class="theme-tag">🎨 {{ $selectedTheme->name }} · </span>@endif{{ $questions->count() }} კითხვა
+        @if($selectedChild)<span class="theme-tag">👶 {{ $selectedChild->name }} · </span>@elseif($selectedTheme)<span class="theme-tag">🎨 {{ $selectedTheme->name }} · </span>@endif{{ $questions->count() }} კითხვა
     </div>
     @foreach($questions as $i => $q)
     @php

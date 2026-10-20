@@ -176,8 +176,31 @@ class PracticeController extends Controller
             ], $meta));
         }
 
-        $theme     = $template->theme ?? Theme::first();
-        $generated = $template->generate($theme);
+        // A broken template (formula never resolves) must never reach the child —
+        // try a few other MC/numeric templates from the same topic before giving up.
+        $theme = $template->theme ?? Theme::first();
+        $excludedIds = [];
+        $generated = null;
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            try {
+                $generated = $template->generate($theme);
+                break;
+            } catch (\App\Exceptions\QuestionGenerationException $e) {
+                \Illuminate\Support\Facades\Log::error('PracticeController: skipping broken template', ['template_id' => $template->id, 'error' => $e->getMessage()]);
+                $excludedIds[] = $template->id;
+                $template = QuestionTemplate::where('topic_id', $topic->id)
+                    ->where('is_active', true)
+                    ->whereNotIn('question_type', ['pyramid', 'code', 'crossword'])
+                    ->whereNotIn('id', $excludedIds)
+                    ->inRandomOrder()
+                    ->first();
+                if (! $template) break;
+                $theme = $template->theme ?? Theme::first();
+            }
+        }
+        if ($generated === null) {
+            return response()->json(['error' => 'კითხვა ვერ მოიძებნა — სცადე თავიდან'], 404);
+        }
 
         // "numeric_input" (⌨️ child types the number) has no options — same cached
         // shape as "mc" otherwise, just a different `type` so the frontend renders

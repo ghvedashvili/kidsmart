@@ -119,11 +119,22 @@ class QuestionTemplateController extends Controller
         $theme->setRelation('variables', \App\Models\ThemeVariable::all());
 
         $questions = $templates->map(function ($tpl, $i) use ($theme) {
-            $generated = $tpl->generate($theme);
+            // A broken template (formula never resolves) shouldn't take down the
+            // whole PDF export — note it instead of silently dropping or crashing,
+            // since the admin explicitly picked this exact set of templates.
+            try {
+                $generated = $tpl->generate($theme);
+                $text   = $generated['question_text'];
+                $answer = $generated['correct_answer'];
+            } catch (\App\Exceptions\QuestionGenerationException $e) {
+                \Illuminate\Support\Facades\Log::error('QuestionTemplateController::exportPdf: broken template', ['template_id' => $tpl->id, 'error' => $e->getMessage()]);
+                $text   = "⚠ შაბლონი #{$tpl->id} ვერ დააგენერირდა — შეამოწმეთ ფორმულა";
+                $answer = '—';
+            }
             return [
                 'num'        => $i + 1,
-                'text'       => $generated['question_text'],
-                'answer'     => $generated['correct_answer'],
+                'text'       => $text,
+                'answer'     => $answer,
                 'grade'      => $tpl->topic->grade->name,
                 'topic'      => $tpl->topic->name,
                 'difficulty' => $tpl->difficulty,

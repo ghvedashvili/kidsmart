@@ -21,7 +21,15 @@ class QuestionTemplate extends Model
             $e = str_replace($k, (string) $v, $e);
         }
         $e = preg_replace('/[^0-9+\-*\/()\s%]/', '', $e);
-        $result = @eval("return (int)({$e});");
+        // @ only suppresses warnings — malformed input (e.g. an unresolved variable
+        // name leaving stray tokens, or two numbers left adjacent with no operator
+        // between them) makes eval() throw a real ParseError/Error, which @ does NOT
+        // catch. Without this try/catch, one bad formula crashes the whole request.
+        try {
+            $result = @eval("return (int)({$e});");
+        } catch (\Throwable $ex) {
+            $result = false;
+        }
         return ($result === false || !is_numeric($result)) ? 0 : (int) $result;
     }
 
@@ -461,7 +469,19 @@ class QuestionTemplate extends Model
                 foreach ($numVars as $k => $v) {
                     $f = str_replace($k, (string) $v, $f);
                 }
-                $rawResult = @eval("return ({$f});");
+                // Strip anything left over that isn't a valid arithmetic character —
+                // an unresolved variable reference (typo, or one that depends on a
+                // row added after it) would otherwise reach eval() as bare text.
+                $f = preg_replace('/[^0-9+\-*\/()\s%.]/', '', $f);
+                // @ only suppresses warnings — malformed input makes eval() throw a
+                // real ParseError/Error, which @ does NOT catch. Without this
+                // try/catch, one bad formula crashes the whole request instead of
+                // just being treated as an invalid attempt to retry.
+                try {
+                    $rawResult = @eval("return ({$f});");
+                } catch (\Throwable $e) {
+                    $rawResult = false;
+                }
                 // Reject non-whole results outright instead of silently truncating —
                 // matters most for an operator variable landing on "/" where the
                 // numbers don't happen to divide evenly this attempt.
@@ -473,6 +493,20 @@ class QuestionTemplate extends Model
                 $solved = true;
                 break;
             }
+        }
+
+        // A broken formula (typo, stale variable reference) must never silently
+        // degrade to correct_answer=0 — that would hand a child a question with a
+        // meaningless "correct" answer. Throw so the caller can skip this template
+        // and pick another one instead of serving it.
+        if (! $solved) {
+            \Illuminate\Support\Facades\Log::warning('QuestionTemplate: correct_formula never resolved after 200 attempts', [
+                'template_id' => $this->id,
+                'correct_formula' => $baseFormula,
+            ]);
+            throw new \App\Exceptions\QuestionGenerationException(
+                "Template #{$this->id}: correct_formula '{$baseFormula}' never resolved"
+            );
         }
 
         // Display values for the question text/hint — an operator variable shows

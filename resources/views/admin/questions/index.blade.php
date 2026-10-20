@@ -121,6 +121,7 @@
                 data-tpl="{{ $tpl->template_text }}"
                 data-nc='@json($tpl->num_config ?? [])'>{{ $tpl->template_text }}</div>
             <div class="q-meta">
+                <span class="q-tag" style="color:#94a3b8;">#{{ $tpl->id }}</span>
                 <span class="q-tag">{{ $tpl->topic->grade->name }}</span>
                 <span class="q-tag">{{ $tpl->topic->name }}</span>
                 @unless($showTrashed)

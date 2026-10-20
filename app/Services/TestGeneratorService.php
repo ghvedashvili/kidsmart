@@ -10,10 +10,18 @@ use App\Models\Theme;
 use App\Models\Topic;
 use App\Models\QuestionTemplate;
 use App\Models\User;
+use App\Exceptions\QuestionGenerationException;
+use Illuminate\Support\Facades\Log;
 
 class TestGeneratorService
 {
-    public function generate(User $child): array
+    /**
+     * @param bool $persist When false (admin "what would this child get right now"
+     *     preview), nothing is written to the database — no Test/TestQuestion rows,
+     *     and the child's topic/template rotation cursors are left untouched — the
+     *     returned 'test'/'questions' are unsaved in-memory instances for display only.
+     */
+    public function generate(User $child, bool $persist = true): array
     {
         $setting = $child->childSetting;
 
@@ -95,31 +103,58 @@ class TestGeneratorService
             ->shuffle()->values();
         $selectedTemplates = $sequenced->concat($unsequenced)->values();
 
-        $test = Test::create([
+        $testAttrs = [
             'child_id'        => $child->id,
             'theme_id'        => $theme?->id,
             'grade_id'        => $setting->grade_id,
             'scheduled_at'    => now(),
             'total_questions' => $selectedTemplates->count(),
-        ]);
+        ];
+        $test = $persist ? Test::create($testAttrs) : new Test($testAttrs);
 
-        foreach ($selectedTemplates as $i => $template) {
-            $generated = $template->generate($theme);
-            TestQuestion::create([
-                'test_id'        => $test->id,
+        $order = 0;
+        $questions = collect();
+        foreach ($selectedTemplates as $template) {
+            // A template whose formula never resolves (typo, stale variable
+            // reference) must never reach the child as a question with a
+            // meaningless "correct" answer — skip it and shrink the test instead.
+            try {
+                $generated = $template->generate($theme);
+            } catch (QuestionGenerationException $e) {
+                Log::error('TestGeneratorService: skipping broken template', ['template_id' => $template->id, 'error' => $e->getMessage()]);
+                if ($persist) {
+                    $test->decrement('total_questions');
+                } else {
+                    $test->total_questions--;
+                }
+                continue;
+            }
+            $order++;
+            $tqAttrs = [
+                'test_id'        => $persist ? $test->id : null,
                 'template_id'    => $template->id,
                 'question_type'  => $template->question_type ?? 'multiple_choice',
                 'question_text'  => $generated['question_text'],
                 'hint_text'      => $generated['hint_text'] ?? null,
                 'options'        => $generated['options'],
                 'correct_answer' => $generated['correct_answer'],
-                'order'          => $i + 1,
-            ]);
+                'order'          => $order,
+            ];
+            if ($persist) {
+                TestQuestion::create($tqAttrs);
+            } else {
+                $tq = new TestQuestion($tqAttrs);
+                $tq->setRelation('template', $template);
+                $questions->push($tq);
+            }
         }
 
-        $setting->save(); // persist the topic_rotation/template_rotation state updated above
+        if ($persist) {
+            $setting->save(); // persist the topic_rotation/template_rotation state updated above
+            return ['test' => $test];
+        }
 
-        return ['test' => $test];
+        return ['test' => $test, 'questions' => $questions];
     }
 
     /**
@@ -211,8 +246,16 @@ class TestGeneratorService
             'is_olympiad'     => true,
         ]);
 
-        foreach ($selectedTemplates as $i => $template) {
-            $generated = $template->generate($theme);
+        $order = 0;
+        foreach ($selectedTemplates as $template) {
+            try {
+                $generated = $template->generate($theme);
+            } catch (QuestionGenerationException $e) {
+                Log::error('TestGeneratorService: skipping broken template (olympiad)', ['template_id' => $template->id, 'error' => $e->getMessage()]);
+                $test->decrement('total_questions');
+                continue;
+            }
+            $order++;
             TestQuestion::create([
                 'test_id'        => $test->id,
                 'template_id'    => $template->id,
@@ -221,7 +264,7 @@ class TestGeneratorService
                 'hint_text'      => $generated['hint_text'] ?? null,
                 'options'        => $generated['options'],
                 'correct_answer' => $generated['correct_answer'],
-                'order'          => $i + 1,
+                'order'          => $order,
             ]);
         }
 
