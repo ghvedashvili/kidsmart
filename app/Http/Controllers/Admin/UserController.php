@@ -53,7 +53,7 @@ class UserController extends Controller
         }
 
         $users = $query->paginate(25)->withQueryString();
-        $users->load(['childSetting.grade', 'themes:id']);
+        $users->load(['childSetting.grade', 'themes:id', 'parents:id,name,email', 'children:id,name,email,child_code']);
 
         return view('admin.users.index', [
             'users'            => $users,
@@ -131,6 +131,72 @@ class UserController extends Controller
                 'template_rotation'        => null,
                 'practice_topic_rotation'  => null,
             ]);
+        }
+
+        return response()->json(['ok' => true]);
+    }
+
+    /**
+     * Lightweight search for the parent/child relationship picker — role-scoped
+     * so a child row's "add parent" search only offers parent-role users, and
+     * vice versa.
+     */
+    public function searchUsers(Request $request)
+    {
+        $role = $request->input('role');
+        $q    = trim((string) $request->input('q', ''));
+
+        $query = User::query();
+        if (in_array($role, ['parent', 'child'], true)) {
+            $query->where('role', $role);
+        }
+        if ($q !== '') {
+            $query->where(fn ($s) => $s->where('name', 'like', "%{$q}%")
+                ->orWhere('email', 'like', "%{$q}%")
+                ->orWhere('child_code', 'like', "%{$q}%"));
+        }
+
+        return response()->json(
+            $query->orderBy('name')->limit(20)->get(['id', 'name', 'email', 'child_code'])
+        );
+    }
+
+    /**
+     * Attaches/detaches a parent<->child link from either side — a child can
+     * have several parents and a parent can have several children, so this is
+     * always additive/subtractive on the child_parent pivot, never a full sync
+     * that would silently drop other existing links.
+     */
+    public function manageRelation(Request $request, User $user)
+    {
+        $data = $request->validate([
+            'action'    => 'required|in:attach,detach',
+            'direction' => 'required|in:parent,child',
+            'target_id' => 'required|exists:users,id',
+        ]);
+
+        $target = User::find($data['target_id']);
+
+        if ($data['direction'] === 'parent') {
+            // $user is the CHILD; $target must be a parent-role user.
+            abort_unless($user->role === 'child', 404);
+            if ($data['action'] === 'attach') {
+                abort_unless($target->role === 'parent', 422);
+                $user->parents()->syncWithoutDetaching([$target->id]);
+            } else {
+                $user->parents()->detach($target->id);
+            }
+            $target->syncChildActivation();
+        } else {
+            // $user is the PARENT; $target must be a child-role user.
+            abort_unless($user->role === 'parent', 404);
+            if ($data['action'] === 'attach') {
+                abort_unless($target->role === 'child', 422);
+                $user->children()->syncWithoutDetaching([$target->id]);
+            } else {
+                $user->children()->detach($target->id);
+            }
+            $user->syncChildActivation();
         }
 
         return response()->json(['ok' => true]);

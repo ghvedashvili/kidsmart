@@ -51,6 +51,17 @@
     .cm-unlimited-row label { font-size: 0.72rem; color: #374151; cursor: pointer; }
     .cm-err { font-size: 0.72rem; color: #ef4444; margin-top: 8px; display: none; }
     .cm-reset-wrap { margin-top: 14px; border-top: 1px solid #f1f5f9; padding-top: 12px; }
+    .rel-chip-list { display: flex; flex-wrap: wrap; gap: 6px; min-height: 28px; }
+    .rel-chip { display: inline-flex; align-items: center; gap: 6px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; padding: 4px 6px 4px 12px; font-size: 0.72rem; color: #374151; }
+    .rel-chip button { background: none; border: none; color: #cbd5e1; cursor: pointer; font-size: 0.8rem; padding: 0 4px; line-height: 1; }
+    .rel-chip button:hover { color: #ef4444; }
+    .rel-empty { font-size: 0.7rem; color: #94a3b8; padding: 4px 0; }
+    .rel-search-wrap { position: relative; margin-top: 10px; }
+    .rel-search-results { display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 210; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; box-shadow: 0 6px 20px rgba(0,0,0,0.1); max-height: 220px; overflow-y: auto; margin-top: 2px; }
+    .rel-search-item { padding: 8px 12px; font-size: 0.74rem; color: #374151; cursor: pointer; border-bottom: 1px solid #f1f5f9; }
+    .rel-search-item:last-child { border-bottom: none; }
+    .rel-search-item:hover { background: #eef2ff; }
+    .rel-search-empty { padding: 10px 12px; font-size: 0.72rem; color: #94a3b8; }
     .btn-warn { background: #fffbeb; border: 1px solid #fde68a; color: #b45309; font-family: 'Goldman', monospace; font-size: 0.74rem; padding: 8px 14px; border-radius: 4px; cursor: pointer; width: 100%; }
     .btn-warn:hover { border-color: #d97706; }
     @media (max-width: 640px) {
@@ -119,7 +130,12 @@
                 $expired = !$sub && $user->subscriptions()->latest()->first()?->expires_at?->isPast();
             @endphp
             <tr>
-                <td>{{ $user->name }}</td>
+                <td>
+                    {{ $user->name }}
+                    @if($user->role === 'child' && $user->child_code)
+                    <div style="font-size:0.62rem;color:#94a3b8;margin-top:2px;">კოდი: {{ $user->child_code }}</div>
+                    @endif
+                </td>
                 <td style="color:#64748b;font-size:0.7rem;">{{ $user->email }}</td>
                 <td>
                     <select class="role-sel" data-id="{{ $user->id }}" data-orig="{{ $user->role }}">
@@ -148,7 +164,8 @@
                     @endif
                 </td>
                 <td style="color:#94a3b8;font-size:0.68rem;">{{ $user->created_at->format('d.m.Y') }}</td>
-                <td style="white-space:nowrap;">
+                <td>
+                    <div style="display:grid;grid-template-columns:repeat(2, auto);gap:4px;width:max-content;">
                     <button type="button" class="sub-btn"
                         onclick="openSubModal({{ $user->id }}, '{{ addslashes($user->name) }}')">
                         📦 პაკეტი
@@ -158,16 +175,27 @@
                         onclick="openChildModal({{ $user->id }}, '{{ addslashes($user->name) }}', {{ $user->childSetting?->grade_id ?? 'null' }}, {{ $user->childSetting?->difficulty ?? 1 }}, {{ $user->childSetting?->tests_per_week ?? 3 }}, {{ $user->childSetting?->unlimited_tests ? 'true' : 'false' }}, {{ $user->themes->pluck('id') }})">
                         ⚙ მართვა
                     </button>
+                    <button type="button" class="sub-btn"
+                        onclick="openRelModal({{ $user->id }}, '{{ addslashes($user->name) }}', 'parent', {{ $user->parents->map->only(['id', 'name']) }})">
+                        ✎ მშობლები
+                    </button>
                     @if($user->parents_count)
                     <a href="{{ route('admin.users.index', ['parents_of' => $user->id]) }}" class="sub-btn">
                         👪 მშობლები ({{ $user->parents_count }})
                     </a>
                     @endif
-                    @elseif($user->role === 'parent' && $user->children_count)
+                    @elseif($user->role === 'parent')
+                    <button type="button" class="sub-btn"
+                        onclick="openRelModal({{ $user->id }}, '{{ addslashes($user->name) }}', 'child', {{ $user->children->map->only(['id', 'name']) }})">
+                        ✎ შვილები
+                    </button>
+                    @if($user->children_count)
                     <a href="{{ route('admin.users.index', ['children_of' => $user->id]) }}" class="sub-btn">
                         🧒 შვილები ({{ $user->children_count }})
                     </a>
                     @endif
+                    @endif
+                    </div>
                 </td>
             </tr>
             @empty
@@ -269,6 +297,27 @@
 
         <div class="cm-reset-wrap">
             <button type="button" class="btn-warn" onclick="confirmResetProgress()">🔄 პროგრესის განულება</button>
+        </div>
+    </div>
+</div>
+
+{{-- Relationship management modal (shared: parents-of-a-child or children-of-a-parent) --}}
+<div class="modal-bg" id="relModal">
+    <div class="sub-box">
+        <div class="sub-box-title" id="relModalTitle">მშობლების მართვა</div>
+
+        <div class="lbl" id="relListLbl" style="margin-top:0;">მშობლები</div>
+        <div id="relList" class="rel-chip-list"></div>
+
+        <div class="rel-search-wrap">
+            <input type="text" id="relSearchInput" class="fc" style="width:100%;" autocomplete="off"
+                placeholder="🔍 დამატება სახელით/email/კოდით..." oninput="onRelSearchInput()"
+                onfocus="onRelSearchInput()" onblur="setTimeout(hideRelResults, 150)">
+            <div id="relResults" class="rel-search-results"></div>
+        </div>
+
+        <div class="sub-box-actions">
+            <button class="btn-cancel" onclick="closeRelModal()">დახურვა</button>
         </div>
     </div>
 </div>
@@ -478,6 +527,117 @@ async function resetProgress() {
 }
 document.getElementById('childModal').addEventListener('click', function(e) {
     if (e.target === this) closeChildModal();
+});
+
+// ── Relationship management modal (shared for both directions) ─────────────
+// relDirection === 'parent' means: relUserId is a CHILD, and we're managing
+// its PARENTS. relDirection === 'child' means: relUserId is a PARENT, and
+// we're managing its CHILDREN.
+let relUserId = null, relDirection = 'parent', relItems = [];
+
+function openRelModal(userId, userName, direction, items) {
+    relUserId = userId;
+    relDirection = direction;
+    relItems = items.slice();
+
+    document.getElementById('relModalTitle').textContent =
+        (direction === 'parent' ? 'მშობლების მართვა — ' : 'შვილების მართვა — ') + userName;
+    document.getElementById('relListLbl').textContent = direction === 'parent' ? 'მშობლები' : 'შვილები';
+    document.getElementById('relSearchInput').value = '';
+    hideRelResults();
+    renderRelList();
+    document.getElementById('relModal').classList.add('open');
+}
+function closeRelModal() {
+    document.getElementById('relModal').classList.remove('open');
+    relUserId = null;
+}
+function renderRelList() {
+    const box = document.getElementById('relList');
+    box.innerHTML = '';
+    if (!relItems.length) {
+        const span = document.createElement('span');
+        span.className = 'rel-empty';
+        span.textContent = 'არცერთი არ არის';
+        box.appendChild(span);
+        return;
+    }
+    relItems.forEach(item => {
+        const chip = document.createElement('span');
+        chip.className = 'rel-chip';
+        chip.append(document.createTextNode(item.name));
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.title = 'წაშლა';
+        btn.textContent = '✕';
+        btn.onclick = () => detachRel(item.id);
+        chip.appendChild(btn);
+        box.appendChild(chip);
+    });
+}
+async function onRelSearchInput() {
+    const q = document.getElementById('relSearchInput').value.trim();
+    const box = document.getElementById('relResults');
+    if (!q) { box.style.display = 'none'; box.innerHTML = ''; return; }
+
+    const role = relDirection === 'parent' ? 'parent' : 'child';
+    let data;
+    try {
+        const res = await fetch(`/admin/users/search?role=${role}&q=${encodeURIComponent(q)}`);
+        data = await res.json();
+    } catch (e) { return; }
+
+    const existingIds = new Set(relItems.map(i => i.id));
+    const matches = data.filter(u => !existingIds.has(u.id));
+
+    box.innerHTML = '';
+    if (!matches.length) {
+        const div = document.createElement('div');
+        div.className = 'rel-search-empty';
+        div.textContent = 'არაფერი ვერ მოიძებნა';
+        box.appendChild(div);
+    } else {
+        matches.forEach(u => {
+            const div = document.createElement('div');
+            div.className = 'rel-search-item';
+            div.textContent = u.name + ' (' + (u.email || u.child_code || '') + ')';
+            div.onclick = () => attachRel(u.id, u.name);
+            box.appendChild(div);
+        });
+    }
+    box.style.display = 'block';
+}
+function hideRelResults() {
+    document.getElementById('relResults').style.display = 'none';
+}
+async function attachRel(targetId, targetName) {
+    try {
+        const res = await fetch(`/admin/users/${relUserId}/relations`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+            body: JSON.stringify({ action: 'attach', direction: relDirection, target_id: targetId }),
+        });
+        if (!res.ok) { alert('შეცდომა — არ დაემატა'); return; }
+        relItems.push({ id: targetId, name: targetName });
+        renderRelList();
+        document.getElementById('relSearchInput').value = '';
+        hideRelResults();
+    } catch (e) { alert('დაკავშირების შეცდომა'); }
+}
+async function detachRel(targetId) {
+    try {
+        const res = await fetch(`/admin/users/${relUserId}/relations`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+            body: JSON.stringify({ action: 'detach', direction: relDirection, target_id: targetId }),
+        });
+        if (!res.ok) { alert('შეცდომა — არ წაიშალა'); return; }
+        relItems = relItems.filter(i => i.id !== targetId);
+        renderRelList();
+    } catch (e) { alert('დაკავშირების შეცდომა'); }
+}
+document.getElementById('relModal').addEventListener('click', function(e) {
+    if (e.target === this) closeRelModal();
 });
 </script>
 @endsection
