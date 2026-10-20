@@ -39,6 +39,33 @@
     .pdf-btn:hover { background: #f1f5f9; }
     .pdf-clear { background: none; border: none; color: #64748b; font-size: 0.8rem; cursor: pointer; padding: 0; }
     .pdf-clear:hover { color: #fff; }
+
+    /* live preview modal */
+    .lp-overlay { position:fixed; inset:0; background:rgba(15,23,42,0.4); display:flex; align-items:center; justify-content:center; z-index:100000; opacity:0; pointer-events:none; transition:opacity 0.15s; }
+    .lp-overlay.open { opacity:1; pointer-events:all; }
+    .lp-box { background:#fff; border-radius:10px; width:100%; max-width:420px; margin:0 16px; box-shadow:0 8px 32px rgba(0,0,0,0.16); transform:translateY(6px); transition:transform 0.15s; display:flex; flex-direction:column; max-height:84vh; }
+    .lp-overlay.open .lp-box { transform:translateY(0); }
+    .lp-head { display:flex; justify-content:space-between; align-items:center; padding:16px 18px 10px; font-size:0.7rem; color:#94a3b8; letter-spacing:0.14em; text-transform:uppercase; flex-shrink:0; }
+    .lp-close { background:none; border:none; color:#94a3b8; font-size:1rem; cursor:pointer; padding:0 4px; }
+    .lp-close:hover { color:#1e293b; }
+    .lp-body { padding:0 18px 16px; overflow-y:auto; font-family:'Goldman',monospace; }
+    .lp-foot { padding:12px 18px 18px; border-top:1px solid #f1f5f9; flex-shrink:0; }
+    .lp-loading, .lp-err { font-size:0.78rem; color:#94a3b8; padding:20px 0; text-align:center; }
+    .lp-err { color:#ef4444; }
+    .lp-q { font-size:0.88rem; color:#1e293b; line-height:1.55; margin-bottom:12px; }
+    .lp-hint { font-size:0.72rem; color:#64748b; border-left:2px solid #e2e8f0; padding-left:9px; margin-bottom:12px; }
+    .lp-opts { display:flex; flex-wrap:wrap; gap:7px; }
+    .lp-opt { font-size:0.78rem; padding:6px 14px; border-radius:4px; border:1px solid #e2e8f0; color:#374151; background:#fff; }
+    .lp-opt.correct { background:#ecfdf5; border-color:#6ee7b7; color:#065f46; font-weight:700; }
+    .lp-answer { font-size:0.82rem; color:#065f46; }
+    .lp-pyr-row { display:flex; gap:6px; justify-content:center; margin-bottom:6px; }
+    .lp-pyr-cell { width:40px; height:40px; border-radius:8px; background:#4f46e5; color:#fff; display:flex; align-items:center; justify-content:center; font-size:0.85rem; font-weight:700; }
+    .lp-pyr-cell.empty { background:#eef2ff; color:#4f46e5; border:2px dashed #a5b4fc; }
+    .lp-code-eqs { background:#fff8e7; border-radius:8px; padding:8px 12px; margin-bottom:10px; border:1.5px dashed #ffe194; font-size:0.8rem; color:#374151; }
+    .lp-code-target { display:flex; gap:8px; flex-wrap:wrap; }
+    .lp-code-sym { text-align:center; font-size:1.1rem; }
+    .lp-code-sym b { font-size:0.78rem; color:#15803d; }
+    .lp-cw { font-size:0.78rem; color:#374151; line-height:1.7; }
     @media (max-width: 640px) {
         .aw { padding: 14px 10px 48px; }
         .filters { gap: 6px; }
@@ -138,6 +165,7 @@
                 @endif
                 <span class="q-tag" style="color:#888;">= {{ $tpl->correct_formula }}</span>
                 <button type="button" class="q-regen" onclick="regenPreview(this)" title="ახალი მაგალითი">↺</button>
+                <button type="button" class="q-regen" onclick="openLivePreview({{ $tpl->id }})" title="ლაივ პრევიუ">👁</button>
                 <div style="flex:1;"></div>
                 @if($showTrashed)
                 <form method="POST" action="{{ route('admin.questions.restore', $tpl->id) }}" style="display:inline;">
@@ -179,6 +207,20 @@
     <button class="pdf-clear" onclick="clearAll()" title="გასუფთავება">✕</button>
 </div>
 
+{{-- Live preview modal --}}
+<div class="lp-overlay" id="lpOverlay" onclick="lpOverlayClick(event)">
+    <div class="lp-box">
+        <div class="lp-head">
+            <span>ლაივ პრევიუ</span>
+            <button type="button" class="lp-close" onclick="closeLivePreview()">✕</button>
+        </div>
+        <div class="lp-body" id="lpBody"></div>
+        <div class="lp-foot">
+            <button type="button" class="btn" onclick="regenLivePreview()">↺ ახალი თაობა</button>
+        </div>
+    </div>
+</div>
+
 <script>
 // grade → topic filtering
 const _allTopics = @json($topics->map(fn($t) => ['id' => $t->id, 'name' => $t->name, 'grade_id' => $t->grade_id]));
@@ -213,14 +255,112 @@ function onGradeChange(gradeId) {
 
 const THEME_VARS = @json($themeVarMap);
 @verbatim
+// Mirrors OPERATOR_LABELS / resolveTextFormula / findTopLevelChar in
+// QuestionTemplate.php and the admin form's JS twins — this listing page's
+// "↺" preview is a separate, lighter re-implementation (no access to
+// `conditions`, so no retry-until-satisfied loop), but still needs to handle
+// all 4 num_config variable modes or derived/operator/conditional vars render
+// as NaN/undefined.
+const OPERATOR_LABELS_LITE = { '+': 'ით მეტი', '-': 'ით ნაკლები', '*': 'ჯერ მეტი', '/': 'ჯერ ნაკლები' };
+
+function evalExprLite(expr, vars) {
+    let e = String(expr);
+    Object.entries(vars).forEach(([k, v]) => { e = e.replaceAll(k, String(v)); });
+    e = e.replace(/[^0-9+\-*/()\s%]/g, '');
+    try {
+        const r = Function('return (' + e + ')')();
+        return Number.isFinite(r) ? Math.floor(r) : 0;
+    } catch (err) { return 0; }
+}
+function stripWrappingParensLite(s) {
+    while (s.length >= 2 && s[0] === '(' && s[s.length - 1] === ')') {
+        let depth = 0, wrapsWhole = true;
+        for (let i = 0; i < s.length; i++) {
+            if (s[i] === '(') depth++;
+            else if (s[i] === ')') { depth--; if (depth === 0 && i !== s.length - 1) { wrapsWhole = false; break; } }
+        }
+        if (!wrapsWhole) break;
+        s = s.slice(1, -1).trim();
+    }
+    return s;
+}
+function findTopLevelCharLite(str, char) {
+    let depth = 0;
+    for (let i = 0; i < str.length; i++) {
+        if (str[i] === '(') depth++;
+        else if (str[i] === ')') depth--;
+        else if (depth === 0 && str[i] === char) return i;
+    }
+    return null;
+}
+function splitConditionExprLite(cond) {
+    for (const op of ['>=', '<=', '==', '!=']) { const p = cond.indexOf(op); if (p !== -1) return [cond.slice(0, p).trim(), op, cond.slice(p + 2).trim()]; }
+    for (const op of ['>', '<']) { const p = cond.indexOf(op); if (p !== -1) return [cond.slice(0, p).trim(), op, cond.slice(p + 1).trim()]; }
+    return null;
+}
+function resolveConditionalLite(formula, vars) {
+    formula = stripWrappingParensLite((formula || '').trim());
+    const qPos = findTopLevelCharLite(formula, '?');
+    if (qPos === null) {
+        if (formula in vars) return vars[formula];
+        if (formula.includes('{{')) return formula.replace(/\{\{(\w+)\}\}/g, (m, n) => (n in vars) ? vars[n] : m);
+        return formula || '?';
+    }
+    const condStr = formula.slice(0, qPos).trim();
+    const rest = formula.slice(qPos + 1);
+    const cPos = findTopLevelCharLite(rest, ':');
+    if (cPos === null) return '?';
+    const ifTrue = rest.slice(0, cPos).trim(), ifFalse = rest.slice(cPos + 1).trim();
+    const parts = splitConditionExprLite(condStr);
+    if (!parts) return '?';
+    const [l, op, r] = parts;
+    const lv = evalExprLite(l, vars), rv = evalExprLite(r, vars);
+    let ok;
+    switch (op) {
+        case '>': ok = lv > rv; break;
+        case '<': ok = lv < rv; break;
+        case '>=': ok = lv >= rv; break;
+        case '<=': ok = lv <= rv; break;
+        case '==': ok = lv === rv; break;
+        default: ok = lv !== rv;
+    }
+    return resolveConditionalLite(ok ? ifTrue : ifFalse, vars);
+}
+
 function genVars(nc) {
     const vars = {};
+    const randomEntries = [], operatorEntries = [], derivedEntries = [], conditionalEntries = [];
     for (const [name, conf] of Object.entries(nc)) {
+        if (name.startsWith('_') || typeof conf !== 'object' || conf === null) continue;
+        if (conf.operator) operatorEntries.push([name, conf]);
+        else if ('derived' in conf) derivedEntries.push([name, conf]);
+        else if ('conditional' in conf) conditionalEntries.push([name, conf]);
+        else randomEntries.push([name, conf]);
+    }
+    randomEntries.forEach(([name, conf]) => {
         const step = Math.max(1, conf.step || 1);
         const steps = Math.floor((conf.max - conf.min) / step);
         vars[name] = conf.min + Math.floor(Math.random() * (steps + 1)) * step;
-    }
-    return vars;
+    });
+    operatorEntries.forEach(([name, conf]) => {
+        const opts = (conf.options && conf.options.length) ? conf.options : ['+'];
+        vars[name] = opts[Math.floor(Math.random() * opts.length)];
+    });
+    derivedEntries.forEach(([name, conf]) => {
+        vars[name] = evalExprLite(conf.derived || '0', vars);
+    });
+    conditionalEntries.forEach(([name, conf]) => {
+        vars[name] = resolveConditionalLite(conf.conditional || '', vars);
+    });
+
+    // Display values for the rendered text — an operator variable shows its
+    // Georgian label ("ით მეტი") here instead of the raw symbol ("+") that
+    // was used above for any derived/conditional formula that referenced it.
+    const displayVars = { ...vars };
+    operatorEntries.forEach(([name]) => {
+        displayVars[name] = OPERATOR_LABELS_LITE[displayVars[name]] ?? displayVars[name];
+    });
+    return displayVars;
 }
 
 function renderPreview(el) {
@@ -255,6 +395,107 @@ function saveQSequence(input) {
         .then(r => { if (!r.ok) throw new Error(); return r.json(); })
         .then(() => { input.classList.add('saved'); setTimeout(() => input.classList.remove('saved'), 1200); })
         .catch(() => { alert('შეცდომა — რიგითობა არ შეინახა'); });
+}
+
+// ── Live preview modal — fetches the REAL server-side generate() result for
+// this exact template id, so it's never out of sync with what a child gets.
+let lpCurrentId = null;
+
+function openLivePreview(id) {
+    lpCurrentId = id;
+    document.getElementById('lpOverlay').classList.add('open');
+    regenLivePreview();
+}
+function closeLivePreview() {
+    document.getElementById('lpOverlay').classList.remove('open');
+}
+function lpOverlayClick(e) {
+    if (e.target === document.getElementById('lpOverlay')) closeLivePreview();
+}
+
+async function regenLivePreview() {
+    if (!lpCurrentId) return;
+    const body = document.getElementById('lpBody');
+    body.innerHTML = '<div class="lp-loading">იტვირთება...</div>';
+    try {
+        const r = await fetch(`/admin/questions/${lpCurrentId}/preview`, { headers: { 'Accept': 'application/json' } });
+        const data = await r.json();
+        if (!data.ok) {
+            body.innerHTML = `<div class="lp-err">⚠ ${escHtmlLp(data.error || 'შეცდომა')}</div>`;
+            return;
+        }
+        body.innerHTML = renderLivePreview(data);
+    } catch (e) {
+        body.innerHTML = '<div class="lp-err">⚠ დაკავშირების შეცდომა</div>';
+    }
+}
+
+function escHtmlLp(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function renderLivePreview(data) {
+    const qt = data.question_type || 'multiple_choice';
+    if (qt === 'pyramid')   return renderLpPyramid(data);
+    if (qt === 'code')      return renderLpCode(data);
+    if (qt === 'crossword') return renderLpCrossword(data);
+    return renderLpMc(data);
+}
+
+function renderLpMc(data) {
+    let html = `<div class="lp-q">${escHtmlLp(data.question_text)}</div>`;
+    if (data.hint_text) html += `<div class="lp-hint">${escHtmlLp(data.hint_text)}</div>`;
+    if (Array.isArray(data.options) && data.options.length) {
+        html += '<div class="lp-opts">' + data.options.map(o =>
+            `<div class="lp-opt ${o === data.correct_answer ? 'correct' : ''}">${escHtmlLp(o)}</div>`
+        ).join('') + '</div>';
+    } else {
+        html += `<div class="lp-answer">✍️ პასუხი: <b>${escHtmlLp(data.correct_answer)}</b></div>`;
+    }
+    return html;
+}
+
+function renderLpPyramid(data) {
+    let rows, sols;
+    try { rows = JSON.parse(data.question_text); sols = JSON.parse(data.correct_answer); }
+    catch (e) { return '<div class="lp-err">პარსინგის შეცდომა</div>'; }
+    let html = '<div class="lp-q">🔺 პირამიდა</div>';
+    rows.forEach((row, r) => {
+        html += '<div class="lp-pyr-row">';
+        row.forEach((val, c) => {
+            if (val === null) {
+                const sol = sols[`${r},${c}`];
+                html += `<div class="lp-pyr-cell empty">${sol ?? '?'}</div>`;
+            } else {
+                html += `<div class="lp-pyr-cell">${val}</div>`;
+            }
+        });
+        html += '</div>';
+    });
+    return html;
+}
+
+function renderLpCode(data) {
+    let q, ans;
+    try { q = JSON.parse(data.question_text); ans = JSON.parse(data.correct_answer); }
+    catch (e) { return '<div class="lp-err">პარსინგის შეცდომა</div>'; }
+    let html = '<div class="lp-q">🕵️ კოდი</div>';
+    html += '<div class="lp-code-eqs">' + (q.equations || []).map(eq => `<div>${escHtmlLp(eq)}</div>`).join('') + '</div>';
+    html += '<div class="lp-code-target">' + (q.target || []).map((sym, i) =>
+        `<div class="lp-code-sym">${sym}<br><b>${ans[i] ?? '?'}</b></div>`
+    ).join('') + '</div>';
+    return html;
+}
+
+function renderLpCrossword(data) {
+    let q;
+    try { q = JSON.parse(data.question_text); }
+    catch (e) { return '<div class="lp-err">პარსინგის შეცდომა</div>'; }
+    return `<div class="lp-q">🧮 კროსვორდი</div><div class="lp-cw">` +
+        `რიგები (${q.rows}×${q.cols})<br>` +
+        `სტრიქონების ოპერატორები: ${(q.row_ops || []).join(', ')} · შედეგები: ${(q.row_results || []).join(', ')}<br>` +
+        `სვეტების ოპერატორები: ${(q.col_ops || []).join(', ')} · შედეგები: ${(q.col_results || []).join(', ')}` +
+        `</div>`;
 }
 
 @endverbatim

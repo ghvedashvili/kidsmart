@@ -79,6 +79,29 @@ class QuestionTemplateController extends Controller
         ]));
     }
 
+    /**
+     * Live-preview button on the questions list ("👁") — runs the REAL generator
+     * (the same one a child's test uses), not a JS re-implementation, so this can
+     * never drift out of sync with what actually gets served.
+     */
+    public function preview(QuestionTemplate $question)
+    {
+        try {
+            $data = $question->generate($question->theme ?? \App\Models\Theme::first());
+        } catch (\App\Exceptions\QuestionGenerationException $e) {
+            return response()->json(['ok' => false, 'error' => $e->getMessage()], 422);
+        }
+
+        return response()->json([
+            'ok'             => true,
+            'question_type'  => $question->question_type ?? 'multiple_choice',
+            'question_text'  => $data['question_text'] ?? null,
+            'hint_text'      => $data['hint_text'] ?? null,
+            'options'        => $data['options'] ?? null,
+            'correct_answer' => $data['correct_answer'] ?? null,
+        ]);
+    }
+
     public function store(Request $request)
     {
         $data = $this->validated($request);
