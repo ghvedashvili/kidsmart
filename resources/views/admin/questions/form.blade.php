@@ -58,6 +58,8 @@
     .nc-toggle.on { color: #2563eb; }
     .nc-add { background: none; border: 1px dashed #cbd5e1; color: #94a3b8; font-family: 'Goldman', monospace; font-size: 0.6rem; letter-spacing: 0.08em; padding: 5px 14px; border-radius: 3px; cursor: pointer; transition: all 0.15s; margin-top: 4px; }
     .nc-add:hover { border-color: #64748b; color: #374151; }
+    .nc-add:disabled { opacity: 0.4; cursor: not-allowed; }
+    .nc-add:disabled:hover { border-color: #cbd5e1; color: #94a3b8; }
 
     .cond-row { display: grid; grid-template-columns: 1fr 110px 1fr 22px; gap: 5px; align-items: center; margin-bottom: 5px; }
     .cond-sel { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 3px; color: #374151; font-family: 'Goldman', monospace; font-size: 0.72rem; padding: 6px 8px; outline: none; box-sizing: border-box; width: 100%; cursor: pointer; }
@@ -168,6 +170,7 @@
                     $isExistingPyramid  = $existingQType === 'pyramid';
                     $isExistingCode     = $existingQType === 'code';
                     $isExistingCw       = $existingQType === 'crossword';
+                    $isExistingScale    = $existingQType === 'scale';
                     $codeCfg = ($existingQType === 'code') ? ($template->num_config ?? []) : [];
                     $cwCfg   = ($existingQType === 'crossword') ? ($template->num_config ?? []) : [];
                 @endphp
@@ -179,10 +182,11 @@
 
                 <div class="lbl">კითხვის ტიპი</div>
                 <div class="qt-row">
-                    <button type="button" class="qt-btn {{ !$isExistingPyramid && !$isExistingCode && !$isExistingCw ? 'sel' : '' }}" onclick="setQType('multiple_choice')">📝 Multiple Choice</button>
+                    <button type="button" class="qt-btn {{ !$isExistingPyramid && !$isExistingCode && !$isExistingCw && !$isExistingScale ? 'sel' : '' }}" onclick="setQType('multiple_choice')">📝 Multiple Choice</button>
                     <button type="button" class="qt-btn {{ $isExistingPyramid ? 'sel' : '' }}" onclick="setQType('pyramid')">🔺 პირამიდა</button>
                     <button type="button" class="qt-btn {{ $isExistingCode ? 'sel' : '' }}" onclick="setQType('code')">🕵️ კოდი</button>
                     <button type="button" class="qt-btn {{ $isExistingCw ? 'sel' : '' }}" onclick="setQType('crossword')">🧮 კროსვორდი</button>
+                    <button type="button" class="qt-btn {{ $isExistingScale ? 'sel' : '' }}" onclick="setQType('scale')">⚖ სასწორი</button>
                 </div>
                 <input type="hidden" name="question_type" id="qtInput" value="{{ $existingQType }}">
 
@@ -382,6 +386,64 @@
                         <span style="font-size:0.7rem;color:#64748b;margin-left:8px;">0 = ყველა ცარიელი</span>
                     </div>
                 </div>{{-- /cwFields --}}
+
+                {{-- Scale config --}}
+                <div id="scaleFields" style="display:none;margin-top:14px;border-top:1px solid #f1f5f9;padding-top:14px;">
+                    <div class="sec-title" style="margin-bottom:10px;">⚖ სასწორის პარამეტრები</div>
+
+                    <div class="lbl">სიმბოლოები <span style="color:#94a3b8;font-size:0.6rem;">(წონის ერთეულები — ემოჯი ან რიცხვი)</span></div>
+                    <div class="nc-hdr" style="grid-template-columns:34px 1fr 70px 56px 56px 28px;">
+                        <span></span><span>ტიპი</span><span>ემოჯი</span><span>min</span><span>max</span><span></span>
+                    </div>
+                    <div id="scaleSymRows"></div>
+                    <button type="button" class="nc-add" onclick="addScaleSymbol()">+ სიმბოლოს დამატება</button>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;">
+                        <div>
+                            <div class="lbl" style="display:flex;justify-content:space-between;">⬅ მარცხენა პინა <span id="scaleLeftCap" style="color:#94a3b8;font-weight:600;">0/4</span></div>
+                            <div id="scaleLeftRows"></div>
+                            <button type="button" class="nc-add" id="scaleLeftAddBtn" onclick="addScalePanItem('left')">+ დამატება</button>
+                        </div>
+                        <div>
+                            <div class="lbl" style="display:flex;justify-content:space-between;">➡ მარჯვენა პინა <span id="scaleRightCap" style="color:#94a3b8;font-weight:600;">0/4</span></div>
+                            <div id="scaleRightRows"></div>
+                            <button type="button" class="nc-add" id="scaleRightAddBtn" onclick="addScalePanItem('right')">+ დამატება</button>
+                        </div>
+                    </div>
+                    <div style="font-size:0.58rem;color:#94a3b8;margin-top:4px;">თითო მხარეს მაქსიმუმ 4 საგანი ეტევა ვიზუალურად (სულ რაოდენობა — ცალკეული ციფრების/ემოჯების ჯამი)</div>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;">
+                        <div>
+                            <div class="lbl">პასუხის სიმბოლო <span style="color:#94a3b8;font-size:0.55rem;">(არ უნდა იდგეს პინაზე)</span></div>
+                            <select id="scaleAnswerKey" class="fc" style="margin-bottom:0;" onchange="syncScaleConfig()"></select>
+                        </div>
+                        <div>
+                            <div class="lbl">საცნობი სიმბოლო <span style="color:#94a3b8;font-size:0.55rem;">(ემოჯი-პასუხისთვის სავალდებულო)</span></div>
+                            <select id="scaleReferenceKey" class="fc" style="margin-bottom:0;" onchange="syncScaleConfig()">
+                                <option value="">— არცერთი —</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="font-size:0.6rem;margin-top:4px;" id="scaleAtHint"></div>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+                        <div>
+                            <div class="lbl">რაოდენობა min <span style="color:#94a3b8;font-size:0.55rem;">(ემოჯი-პასუხის რაოდენობის ფარგლები)</span></div>
+                            <input type="number" class="pyr-inp" id="scaleCountMin" min="1" value="1" onchange="syncScaleConfig()">
+                        </div>
+                        <div>
+                            <div class="lbl">რაოდენობა max</div>
+                            <input type="number" class="pyr-inp" id="scaleCountMax" min="1" value="6" onchange="syncScaleConfig()">
+                        </div>
+                    </div>
+
+                    <div class="lbl" style="margin-top:12px;">პასუხის ტიპი</div>
+                    <div class="at-row">
+                        <button type="button" id="scaleAtInput" class="at-btn" onclick="setScaleAnswerMode('numeric_input')">⌨️ ჩაწერა (რიცხვი)</button>
+                        <button type="button" id="scaleAtMc" class="at-btn" onclick="setScaleAnswerMode('numeric')">🔢 არჩევანი (4 ვარიანტი)</button>
+                    </div>
+                    <div style="font-size:0.6rem;color:#94a3b8;margin-top:4px;">⌨️ ჩაწერა — ბავშვი თავად წერს რიცხვს (ემოჯი-პასუხისას კითხვაში ეტყობა რომელი ემოჯი). 🔢 არჩევანი — 4 ვარიანტიდან ირჩევს "{{'რაოდენობა + ემოჯი'}}" ან რიცხვს, ემოჯის ტიპი წინასწარ არ ეტყობა.</div>
+                </div>{{-- /scaleFields --}}
             </div>
 
             <div id="mcSections">
@@ -789,25 +851,29 @@ function setQType(type) {
         if ((type === 'pyramid'         && b.textContent.includes('პირამიდა'))   ||
             (type === 'multiple_choice' && b.textContent.includes('Multiple'))    ||
             (type === 'code'            && b.textContent.includes('კოდი'))        ||
-            (type === 'crossword'       && b.textContent.includes('კროსვორდი'))) {
+            (type === 'crossword'       && b.textContent.includes('კროსვორდი'))   ||
+            (type === 'scale'           && b.textContent.includes('სასწორი'))) {
             b.classList.add('sel');
         }
     });
     applyQType(type);
 }
 function applyQType(type) {
-    const isPyr = type === 'pyramid';
-    const isCode = type === 'code';
-    const isCw  = type === 'crossword';
-    const isMC  = !isPyr && !isCode && !isCw;
-    document.getElementById('pyrFields').style.display      = isPyr  ? 'block' : 'none';
-    document.getElementById('codeFields').style.display     = isCode ? 'block' : 'none';
-    document.getElementById('cwFields').style.display       = isCw   ? 'block' : 'none';
-    document.getElementById('themeFieldWrap').style.display = isMC   ? 'block' : 'none';
-    document.getElementById('mcSections').style.display     = isMC   ? 'block' : 'none';
-    if (isPyr)  { syncPyrConfig();  return; }
-    if (isCode) { syncCodeConfig(); return; }
-    if (isCw)   { syncCwConfig();   return; }
+    const isPyr   = type === 'pyramid';
+    const isCode  = type === 'code';
+    const isCw    = type === 'crossword';
+    const isScale = type === 'scale';
+    const isMC    = !isPyr && !isCode && !isCw && !isScale;
+    document.getElementById('pyrFields').style.display      = isPyr   ? 'block' : 'none';
+    document.getElementById('codeFields').style.display     = isCode  ? 'block' : 'none';
+    document.getElementById('cwFields').style.display       = isCw    ? 'block' : 'none';
+    document.getElementById('scaleFields').style.display     = isScale ? 'block' : 'none';
+    document.getElementById('themeFieldWrap').style.display = isMC    ? 'block' : 'none';
+    document.getElementById('mcSections').style.display     = isMC    ? 'block' : 'none';
+    if (isPyr)   { syncPyrConfig();   return; }
+    if (isCode)  { syncCodeConfig();  return; }
+    if (isCw)    { syncCwConfig();    return; }
+    if (isScale) { syncScaleConfig(); return; }
 }
 function syncPyrConfig() {
     const h    = document.getElementById('pyrHeight').value;
@@ -1023,6 +1089,366 @@ function genPreviewCw() {
     document.getElementById('prevFormula').innerHTML =
         `${R}×${C} · ხაზები:[${rowOps.join(',')}] სვეტები:[${colOps.join(',')}]`;
     document.getElementById('prevVars').innerHTML = '';
+}
+
+// ── Scale (balance-scale) config ────────────────────────────────────────────
+let scaleSymbols = []; // [{id, kind:'emoji'|'weight', symbol, min, max}]
+let scaleLeft    = []; // [{key, count}]
+let scaleRight   = []; // [{key, count}]
+
+function scaleSymbolLabel(i) { return String.fromCharCode(65 + i); }
+
+// Mirrors ScaleService::scaleSvg() (PHP) — straight, level beam resting on a
+// fixed triangle stand; items render in the row right above it (flex-end),
+// so they visually sit on top of the beam.
+function scaleSvgHtml() {
+    return '<svg viewBox="0 0 280 60" style="display:block;width:100%;height:auto;overflow:visible;">'
+        + '<line x1="10" y1="10" x2="270" y2="10" stroke="#1a7a3c" stroke-width="5" stroke-linecap="round"/>'
+        + '<circle cx="140" cy="10" r="6" fill="#1a7a3c"/>'
+        + '<polygon points="118,58 162,58 140,16" fill="#1a7a3c"/>'
+        + '</svg>';
+}
+
+function addScaleSymbol(kind, symbol, min, max, id) {
+    const sid = id || ('s' + Date.now() + '_' + Math.random().toString(36).slice(2, 6));
+    scaleSymbols.push({ id: sid, kind: kind || 'emoji', symbol: symbol || '🍎', min: min ?? 1, max: max ?? 9 });
+    renderScaleSymbols();
+    syncScaleConfig();
+    return sid;
+}
+function removeScaleSymbol(i) {
+    const id = scaleSymbols[i].id;
+    scaleSymbols.splice(i, 1);
+    scaleLeft  = scaleLeft.filter(it => it.key !== id);
+    scaleRight = scaleRight.filter(it => it.key !== id);
+    renderScaleSymbols();
+    renderScalePan('left');
+    renderScalePan('right');
+    syncScaleConfig();
+}
+function renderScaleSymbols() {
+    const el = document.getElementById('scaleSymRows');
+    el.innerHTML = scaleSymbols.map((s, i) => `
+        <div style="display:grid;grid-template-columns:34px 1fr 70px 56px 56px 28px;gap:4px;align-items:center;margin-bottom:4px;">
+            <div style="font-weight:800;color:#94a3b8;text-align:center;">${scaleSymbolLabel(i)}</div>
+            <select class="nc-inp" onchange="scaleSymbols[${i}].kind=this.value; renderScaleSymbols(); syncScaleConfig();">
+                <option value="emoji" ${s.kind === 'emoji' ? 'selected' : ''}>ემოჯი</option>
+                <option value="weight" ${s.kind === 'weight' ? 'selected' : ''}>წონა (რიცხვი)</option>
+            </select>
+            ${s.kind === 'emoji'
+                ? `<input class="nc-inp" style="text-align:center;font-size:1.1rem;" maxlength="4" value="${s.symbol}" oninput="scaleSymbols[${i}].symbol=this.value; syncScaleConfig();">`
+                : `<div style="font-size:0.58rem;color:#94a3b8;text-align:center;">(ჩანს რიცხვი)</div>`}
+            <input type="number" class="nc-inp" value="${s.min}" onchange="scaleSymbols[${i}].min=+this.value; syncScaleConfig();">
+            <input type="number" class="nc-inp" value="${s.max}" onchange="scaleSymbols[${i}].max=+this.value; syncScaleConfig();">
+            <button type="button" class="nc-del" onclick="removeScaleSymbol(${i})">✕</button>
+        </div>
+    `).join('');
+    renderScaleSelects();
+}
+// Visual cap: the scale graphic's platforms are sized to comfortably hold 4
+// items on a side — both the "+" button and the per-row count input enforce it.
+const SCALE_SIDE_MAX = 4;
+function scaleSideTotal(arr) {
+    return arr.reduce((t, it) => t + Math.max(1, +it.count || 1), 0);
+}
+function addScalePanItem(side) {
+    const arr = side === 'left' ? scaleLeft : scaleRight;
+    if (scaleSideTotal(arr) >= SCALE_SIDE_MAX) return;
+    // Default each new row to a symbol not already used in THIS pan (falling back
+    // to any other symbol) instead of always "A" — otherwise every new row looks
+    // identical until the admin notices the dropdown has other options too.
+    const usedHere  = new Set(arr.map(it => it.key));
+    const candidate = scaleSymbols.find(s => !usedHere.has(s.id)) || scaleSymbols[0] || null;
+    arr.push({ key: candidate ? candidate.id : '', count: 1 });
+    renderScalePan(side);
+    syncScaleConfig();
+}
+function removeScalePanItem(side, i) {
+    (side === 'left' ? scaleLeft : scaleRight).splice(i, 1);
+    renderScalePan(side);
+    syncScaleConfig();
+}
+function setScalePanItemCount(side, i, val) {
+    const arr = side === 'left' ? scaleLeft : scaleRight;
+    const otherTotal = scaleSideTotal(arr) - Math.max(1, +arr[i].count || 1);
+    arr[i].count = Math.max(1, Math.min(SCALE_SIDE_MAX - otherTotal, +val || 1));
+    renderScalePan(side);
+    syncScaleConfig();
+}
+function renderScalePan(side) {
+    const arr = side === 'left' ? scaleLeft : scaleRight;
+    const el  = document.getElementById(side === 'left' ? 'scaleLeftRows' : 'scaleRightRows');
+    const arrName = side === 'left' ? 'scaleLeft' : 'scaleRight';
+    // Every defined symbol is selectable here — including the current answer
+    // symbol; updateScaleAtHint() warns instead of hiding it, since silently
+    // excluding options is what made it look like "only one symbol is choosable"
+    // before.
+    el.innerHTML = arr.map((it, i) => `
+        <div style="display:flex;gap:4px;align-items:center;margin-bottom:4px;">
+            <select class="nc-inp" style="flex:1;" onchange="${arrName}[${i}].key=this.value; syncScaleConfig();">
+                ${scaleSymbols.map((s2) => `<option value="${s2.id}" ${s2.id === it.key ? 'selected' : ''}>${scaleSymbolLabel(scaleSymbols.indexOf(s2))} ${s2.kind === 'emoji' ? s2.symbol : '(წონა)'}</option>`).join('')}
+            </select>
+            <input type="number" class="nc-inp" style="width:56px;" min="1" max="${SCALE_SIDE_MAX}" value="${it.count}"
+                onchange="setScalePanItemCount('${side}', ${i}, this.value)">
+            <button type="button" class="nc-del" onclick="removeScalePanItem('${side}', ${i})">✕</button>
+        </div>
+    `).join('');
+    const total   = scaleSideTotal(arr);
+    const addBtn  = document.getElementById(side === 'left' ? 'scaleLeftAddBtn' : 'scaleRightAddBtn');
+    const capNote = document.getElementById(side === 'left' ? 'scaleLeftCap' : 'scaleRightCap');
+    if (addBtn)  addBtn.disabled = total >= SCALE_SIDE_MAX;
+    if (capNote) capNote.textContent = total >= SCALE_SIDE_MAX ? `მაქს. ${SCALE_SIDE_MAX} მიღწეულია` : `${total}/${SCALE_SIDE_MAX}`;
+    renderScaleSelects();
+}
+function renderScaleSelects() {
+    const ansSel = document.getElementById('scaleAnswerKey');
+    const refSel = document.getElementById('scaleReferenceKey');
+    const prevAns = ansSel.value, prevRef = refSel.value;
+    const optsHtml = scaleSymbols.map((s, i) => `<option value="${s.id}">${scaleSymbolLabel(i)} ${s.kind === 'emoji' ? s.symbol : '(წონა)'}</option>`).join('');
+    ansSel.innerHTML = optsHtml || '<option value="">— ჯერ დაამატეთ სიმბოლო —</option>';
+    refSel.innerHTML = '<option value="">— არცერთი —</option>' + optsHtml;
+    if (scaleSymbols.some(s => s.id === prevAns)) ansSel.value = prevAns;
+    if (scaleSymbols.some(s => s.id === prevRef)) refSel.value = prevRef;
+    updateScaleAtHint();
+}
+function updateScaleAtHint() {
+    const hint = document.getElementById('scaleAtHint');
+    if (!hint) return;
+    const ansKey = document.getElementById('scaleAnswerKey').value;
+    const sym = scaleSymbols.find(s => s.id === ansKey);
+    const usedInPans = [...scaleLeft, ...scaleRight].some(it => it.key === ansKey);
+    if (usedInPans) {
+        hint.innerHTML = '<span style="color:#ef4444;">⚠ ეს სიმბოლო ასევე დევს პინაზე — ამოაშალეთ იქიდან, თორემ კითხვა არასწორად აითვლება</span>';
+    } else if (sym && sym.kind === 'emoji' && !document.getElementById('scaleReferenceKey').value) {
+        hint.innerHTML = '<span style="color:#ef4444;">⚠ ემოჯი-პასუხისთვის საცნობი სიმბოლო სავალდებულოა — თორემ ბავშვს წონის დასადგენი საშუალება არ ექნება</span>';
+    } else {
+        hint.innerHTML = '';
+    }
+}
+function setScaleAnswerMode(mode) {
+    document.getElementById('answerTypeInput').value = mode === 'numeric_input' ? 'numeric_input' : 'numeric';
+    document.getElementById('scaleAtInput').classList.toggle('at-sel', mode === 'numeric_input');
+    document.getElementById('scaleAtMc').classList.toggle('at-sel', mode !== 'numeric_input');
+    syncScaleConfig();
+    previewDebounce();
+}
+function syncScaleConfig() {
+    const symbols = {};
+    scaleSymbols.forEach(s => {
+        symbols[s.id] = s.kind === 'emoji'
+            ? { kind: 'emoji', symbol: s.symbol || '❓', min: +s.min || 1, max: +s.max || 9 }
+            : { kind: 'weight', min: +s.min || 1, max: +s.max || 9 };
+    });
+    const left  = scaleLeft.map(it  => ({ key: it.key, count: Math.max(1, +it.count || 1) }));
+    const right = scaleRight.map(it => ({ key: it.key, count: Math.max(1, +it.count || 1) }));
+    const answerKey    = document.getElementById('scaleAnswerKey').value || '';
+    const referenceKey = document.getElementById('scaleReferenceKey').value || '';
+    const countMin = Math.max(1, parseInt(document.getElementById('scaleCountMin').value) || 1);
+    const countMax = Math.max(countMin, parseInt(document.getElementById('scaleCountMax').value) || 6);
+
+    document.getElementById('numConfigJson').value = JSON.stringify({
+        symbols, left, right,
+        answer_key: answerKey, reference_key: referenceKey || null,
+        count_min: countMin, count_max: countMax,
+    });
+    updateScaleAtHint();
+    if (document.getElementById('qtInput').value === 'scale') genPreviewScale();
+}
+function restoreScaleConfig(numCfg, answerType) {
+    scaleSymbols = Object.entries(numCfg.symbols || {}).map(([key, conf]) => ({
+        id: key, kind: conf.kind || 'emoji', symbol: conf.symbol || '🍎', min: conf.min ?? 1, max: conf.max ?? 9,
+    }));
+    scaleLeft  = (numCfg.left  || []).map(it => ({ key: it.key, count: it.count || 1 }));
+    scaleRight = (numCfg.right || []).map(it => ({ key: it.key, count: it.count || 1 }));
+    renderScaleSymbols();
+    renderScalePan('left');
+    renderScalePan('right');
+    document.getElementById('scaleAnswerKey').value    = numCfg.answer_key || '';
+    document.getElementById('scaleReferenceKey').value = numCfg.reference_key || '';
+    document.getElementById('scaleCountMin').value = numCfg.count_min || 1;
+    document.getElementById('scaleCountMax').value = numCfg.count_max || 6;
+    setScaleAnswerMode(answerType === 'numeric_input' ? 'numeric_input' : 'numeric');
+}
+
+/**
+ * Client-side mirror of ScaleService::build() (PHP) — same retry-until-solvable
+ * algorithm, duplicated here so the live preview doesn't need a server round trip.
+ * See QuestionTemplate.php's parity convention note for why this duplication is
+ * intentional: any change to the PHP generator must be mirrored here too.
+ */
+function genPreviewScale() {
+    let cfg;
+    try { cfg = JSON.parse(document.getElementById('numConfigJson').value); } catch (e) { cfg = null; }
+    if (!cfg || !cfg.answer_key || !cfg.symbols || !cfg.symbols[cfg.answer_key]) {
+        document.getElementById('prevQ').innerHTML = '<span style="color:#94a3b8;font-size:0.72rem;">სიმბოლოები, პინები და პასუხის სიმბოლო შეავსეთ preview-სთვის</span>';
+        document.getElementById('prevOpts').innerHTML = '';
+        document.getElementById('prevHint').innerHTML = '';
+        document.getElementById('prevFormula').innerHTML = '';
+        document.getElementById('prevVars').innerHTML = '';
+        document.getElementById('prevWarn').innerHTML = '';
+        return;
+    }
+
+    const symbols = cfg.symbols, left = cfg.left || [], right = cfg.right || [];
+    const answerKey = cfg.answer_key, referenceKey = cfg.reference_key || null;
+    const countMin = cfg.count_min || 1, countMax = cfg.count_max || 6;
+    const answerConf = symbols[answerKey];
+    const answerKind = answerConf.kind || 'emoji';
+
+    // The answer symbol's weight is never rolled (its value IS what's solved for),
+    // so if it's ALSO placed on a pan, that pan's total silently drops that term —
+    // same invariant ScaleService::build() enforces at save time. Caught here too
+    // so the live preview shows a clear warning instead of "undefined".
+    if ([...left, ...right].some(it => it.key === answerKey)) {
+        document.getElementById('prevQ').innerHTML = '';
+        document.getElementById('prevOpts').innerHTML = '';
+        document.getElementById('prevHint').innerHTML = '';
+        document.getElementById('prevFormula').innerHTML = '';
+        document.getElementById('prevVars').innerHTML = '';
+        document.getElementById('prevWarn').innerHTML = '<span style="color:#f87171;">⚠ პასუხის სიმბოლო ასევე დევს პინაზე — ამოაშალეთ ის მარცხენა/მარჯვენა პინიდან</span>';
+        return;
+    }
+
+    let result = null;
+    for (let attempt = 0; attempt < 300 && !result; attempt++) {
+        const weights = {};
+        Object.entries(symbols).forEach(([key, conf]) => {
+            if (key === answerKey && answerKind === 'weight') return;
+            const min = conf.min || 1, max = Math.max(min, conf.max || 9);
+            weights[key] = min + Math.floor(Math.random() * (max - min + 1));
+        });
+        const sumSide = items => items.reduce((t, it) => t + (weights[it.key] || 0) * Math.max(1, it.count || 1), 0);
+        const totalLeft = sumSide(left), totalRight = sumSide(right);
+        const deficit = totalLeft - totalRight;
+        if (deficit === 0) continue;
+        const blankSide = deficit > 0 ? 'right' : 'left';
+        const need = Math.abs(deficit);
+
+        let conditionText = null, answerValue = null;
+        if (answerKind === 'weight') {
+            const aMin = answerConf.min || 1, aMax = Math.max(aMin, answerConf.max || 20);
+            if (need < aMin || need > aMax) continue;
+            answerValue = need;
+        } else {
+            const aw = weights[answerKey] || 0;
+            if (aw <= 0 || need % aw !== 0) continue;
+            const neededCount = Math.floor(need / aw);
+            if (neededCount < countMin || neededCount > countMax) continue;
+            answerValue = neededCount;
+            if (referenceKey) {
+                const rw = weights[referenceKey] || 0;
+                if (rw <= 0 || aw % rw !== 0) continue;
+                const ratio = aw / rw;
+                if (ratio < 1) continue;
+                conditionText = `1 ${answerConf.symbol || '❓'} = ${ratio} ${symbols[referenceKey].symbol || '❓'}`;
+            }
+        }
+        result = { weights, blankSide, answerValue, conditionText };
+    }
+
+    if (!result) {
+        document.getElementById('prevQ').innerHTML = '';
+        document.getElementById('prevOpts').innerHTML = '';
+        document.getElementById('prevHint').innerHTML = '';
+        document.getElementById('prevFormula').innerHTML = '';
+        document.getElementById('prevVars').innerHTML = '';
+        document.getElementById('prevWarn').innerHTML = '<span style="color:#f87171;">⚠ ამ კონფიგურაციით ამოხსნადი კომბინაცია ვერ მოიძებნა — შეამოწმეთ წონების დიაპაზონები</span>';
+        return;
+    }
+    document.getElementById('prevWarn').innerHTML = '';
+
+    const isMc = document.getElementById('answerTypeInput').value !== 'numeric_input';
+    let options = null, correctAnswer;
+    if (answerKind === 'weight') {
+        correctAnswer = String(result.answerValue);
+        if (isMc) {
+            const wrong = [];
+            let attempts = 0;
+            while (wrong.length < 3 && attempts < 100) {
+                attempts++;
+                const delta = 1 + Math.floor(Math.random() * 5);
+                const cand  = result.answerValue + (Math.random() < 0.5 ? -1 : 1) * delta;
+                if (cand > 0 && cand !== result.answerValue && !wrong.includes(cand)) wrong.push(cand);
+            }
+            options = [result.answerValue, ...wrong].map(String).sort(() => Math.random() - 0.5);
+        }
+    } else {
+        const label = `${result.answerValue} ${answerConf.symbol || '❓'}`;
+        correctAnswer = label;
+        if (isMc) {
+            const emojiKeys = Object.keys(symbols).filter(k => (symbols[k].kind || 'emoji') === 'emoji');
+            const pool = emojiKeys.length ? emojiKeys : [answerKey];
+            const wrong = [];
+            let attempts = 0;
+            while (wrong.length < 3 && attempts < 100) {
+                attempts++;
+                const key = pool[Math.floor(Math.random() * pool.length)];
+                const cnt = countMin + Math.floor(Math.random() * (countMax - countMin + 1));
+                const lbl = `${cnt} ${symbols[key].symbol || '❓'}`;
+                if (lbl !== label && !wrong.includes(lbl)) wrong.push(lbl);
+            }
+            options = [label, ...wrong].sort(() => Math.random() - 0.5);
+        }
+    }
+
+    // Every occurrence gets its OWN chip (never a single text blob with the
+    // symbol repeated N times) — lets the nowrap row size each one individually
+    // instead of risking the browser line-wrapping a multi-emoji string.
+    const panHtml = (items, blankHere) => {
+        let html = items.map(it => {
+            const conf  = symbols[it.key] || {};
+            const count = Math.max(1, it.count || 1);
+            if ((conf.kind || 'emoji') === 'weight') {
+                return Array.from({ length: count }, () =>
+                    `<div style="width:26px;height:26px;border-radius:6px;background:#4f46e5;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.7rem;flex-shrink:0;">${result.weights[it.key]}</div>`
+                ).join('');
+            }
+            return Array.from({ length: count }, () =>
+                `<div style="font-size:1.15rem;line-height:1;flex-shrink:0;">${conf.symbol || '❓'}</div>`
+            ).join('');
+        }).join('');
+        if (blankHere) {
+            html += answerKind === 'weight'
+                ? `<div style="width:26px;height:26px;border-radius:6px;border:2.5px dashed #94a3b8;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-weight:800;font-size:0.75rem;flex-shrink:0;">?</div>`
+                : `<div style="font-size:1.15rem;line-height:1;border:2.5px dashed #94a3b8;border-radius:7px;padding:2px 4px;text-align:center;flex-shrink:0;">${answerConf.symbol || '❓'}<span style="font-size:0.5rem;color:#94a3b8;display:block;line-height:1;">?</span></div>`;
+        }
+        return html;
+    };
+
+    const defaultPrompt = isMc
+        ? 'რომელი ვარიანტი დააბალანსებს სასწორს? ⚖️'
+        : (answerKind === 'weight'
+            ? 'რა წონა აკლია, რომ სასწორი დაბალანსდეს? ⚖️'
+            : `რამდენი ${answerConf.symbol || ''} დასამატებელია, რომ სასწორი დაბალანსდეს? ⚖️`);
+    const prompt = document.getElementById('templateText').value.trim() || defaultPrompt;
+
+    document.getElementById('prevQ').innerHTML = '⚖️ ' + escHtmlFormLp(prompt);
+    document.getElementById('prevHint').innerHTML = escHtmlFormLp(document.getElementById('hintText').value || '');
+
+    // The scale graphic + condition hint span both preview-opts grid columns;
+    // the actual options (or numeric_input answer) render with the exact same
+    // .preview-opt/.c classes every other question type's preview uses.
+    let optsHtml = `<div style="grid-column:1/-1;max-width:280px;margin:4px auto 0;">
+        <div style="display:flex;justify-content:space-between;gap:6px;padding:0 6px;margin-bottom:2px;">
+            <div style="flex:1;display:flex;flex-wrap:nowrap;gap:2px;align-items:flex-end;justify-content:center;min-height:34px;overflow:visible;">${panHtml(left, result.blankSide === 'left')}</div>
+            <div style="flex:1;display:flex;flex-wrap:nowrap;gap:2px;align-items:flex-end;justify-content:center;min-height:34px;overflow:visible;">${panHtml(right, result.blankSide === 'right')}</div>
+        </div>
+        ${scaleSvgHtml()}
+    </div>`;
+    if (result.conditionText) {
+        optsHtml += `<div style="grid-column:1/-1;background:#eef2ff;border:1.5px dashed #a5b4fc;border-radius:8px;padding:5px 10px;text-align:center;font-size:0.75rem;font-weight:700;color:#4338ca;margin:8px 0 0;">💡 ${escHtmlFormLp(result.conditionText)}</div>`;
+    }
+    if (options) {
+        optsHtml += options.map(o => `<div class="preview-opt ${o === correctAnswer ? 'c' : ''}">${escHtmlFormLp(o)}</div>`).join('');
+    } else {
+        optsHtml += `<div class="preview-opt c" style="grid-column:1/-1;cursor:default;">✍️ ${escHtmlFormLp(correctAnswer)}</div>`;
+    }
+    document.getElementById('prevOpts').innerHTML = optsHtml;
+    document.getElementById('prevFormula').innerHTML = '';
+    document.getElementById('prevVars').innerHTML = '';
+}
+function escHtmlFormLp(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 // init on page load
@@ -1485,6 +1911,7 @@ function syncAll() {
     if (_qt === 'pyramid')   { syncPyrConfig();  return; }
     if (_qt === 'code')      { syncCodeConfig();  return; }
     if (_qt === 'crossword') { syncCwConfig();    return; }
+    if (_qt === 'scale')     { syncScaleConfig(); return; }
     const ncObj = {};
     ncRows.forEach(r => {
         if (!r.name) return;
@@ -1916,6 +2343,7 @@ function genPreview() {
     if (qt === 'pyramid')   { genPreviewPyramid(); return; }
     if (qt === 'code')      { genPreviewCode();     return; }
     if (qt === 'crossword') { genPreviewCw();       return; }
+    if (qt === 'scale')     { genPreviewScale();    return; }
     const autoEl = document.getElementById('autoBuildEnabled');
     if (autoEl && autoEl.checked) { genPreviewAuto(); return; }
     const tmpl = document.getElementById('templateText').value;
@@ -2475,6 +2903,8 @@ function loadIntoForm(data) {
         document.getElementById('cwOpDiv').checked   = wops.includes('÷');
         document.getElementById('cwRevealedCount').value = numCfg.revealed_count || 0;
         syncCwConfig();
+    } else if (data.question_type === 'scale') {
+        restoreScaleConfig(numCfg, data.answer_type);
     } else if (data.answer_type !== 'text') {
         // multiple_choice, numeric — rebuild ncRows from num_config the same way
         // the page-load restore does, then separately restore _unique/_auto.
@@ -2631,7 +3061,9 @@ function array_key_exists_js(key, obj) { return obj && Object.prototype.hasOwnPr
     }
 
     const numCfg = _KS.numConfig;
-    if (numCfg && typeof numCfg === 'object' && Object.keys(numCfg).length) {
+    if (document.getElementById('qtInput').value === 'scale') {
+        restoreScaleConfig(numCfg || {}, _KS.answerType);
+    } else if (numCfg && typeof numCfg === 'object' && Object.keys(numCfg).length) {
         if (numCfg['_unique']) {
             const cb = document.getElementById('uniqueNumVars');
             if (cb) cb.checked = true;

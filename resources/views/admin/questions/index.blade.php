@@ -89,6 +89,14 @@
     .lp-code-sym { text-align:center; font-size:1.1rem; }
     .lp-code-sym b { font-size:0.78rem; color:#15803d; }
     .lp-cw { font-size:0.78rem; color:#374151; line-height:1.7; }
+    .lp-scale-row { display:flex; align-items:flex-start; justify-content:center; gap:8px; flex-wrap:nowrap; margin-bottom:8px; padding:0 4px; }
+    .lp-scale-pan { display:flex; flex-wrap:nowrap; gap:2px; align-items:flex-end; justify-content:center; min-width:60px; min-height:34px; overflow:visible; }
+    .lp-scale-emoji { font-size:1.15rem; line-height:1; flex-shrink:0; }
+    .lp-scale-emoji.lp-scale-blank { border:2px dashed #94a3b8; border-radius:7px; padding:2px 4px; text-align:center; }
+    .lp-scale-emoji.lp-scale-blank span { font-size:0.5rem; color:#94a3b8; display:block; line-height:1; }
+    .lp-scale-wplate { width:26px; height:26px; border-radius:6px; background:#4f46e5; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.7rem; flex-shrink:0; }
+    .lp-scale-wplate.lp-scale-blank { background:#f8fafc; border:2px dashed #94a3b8; color:#94a3b8; }
+    .lp-scale-cond { background:#eef2ff; border:1.5px dashed #a5b4fc; border-radius:8px; padding:6px 10px; text-align:center; font-size:0.74rem; font-weight:700; color:#4338ca; margin-bottom:10px; }
     @media (max-width: 640px) {
         .aw { padding: 14px 10px 48px; }
         .filters { gap: 6px; }
@@ -539,7 +547,7 @@ function openReassign(btn, mode) {
     setRsDiff(rsDiff);
 
     const themeSel = document.getElementById('rsTheme');
-    const isSpecial = ['pyramid', 'code', 'crossword'].includes(rsQType);
+    const isSpecial = ['pyramid', 'code', 'crossword', 'scale'].includes(rsQType);
     themeSel.disabled = isSpecial;
     document.getElementById('rsThemeWrap').style.opacity = isSpecial ? '0.4' : '1';
     themeSel.value = isSpecial ? '' : (themeId || '');
@@ -655,6 +663,7 @@ function renderLivePreview(data) {
     if (qt === 'pyramid')   return renderLpPyramid(data);
     if (qt === 'code')      return renderLpCode(data);
     if (qt === 'crossword') return renderLpCrossword(data);
+    if (qt === 'scale')     return renderLpScale(data);
     return renderLpMc(data);
 }
 
@@ -712,6 +721,66 @@ function renderLpCrossword(data) {
         `სტრიქონების ოპერატორები: ${(q.row_ops || []).join(', ')} · შედეგები: ${(q.row_results || []).join(', ')}<br>` +
         `სვეტების ოპერატორები: ${(q.col_ops || []).join(', ')} · შედეგები: ${(q.col_results || []).join(', ')}` +
         `</div>`;
+}
+
+// Mirrors ScaleService::scaleSvg() (PHP) — same static, level triangle+beam frame.
+// Mirrors ScaleService::scaleSvg() (PHP) — beam tilts toward the heavier side
+// around a fixed triangle stand; no platform/tray.
+// Mirrors ScaleService::scaleSvg() (PHP) — straight, level beam resting on a
+// fixed triangle stand; items render right above it, sitting on top of the beam.
+function scaleSvgHtmlLp() {
+    return '<svg viewBox="0 0 280 60" style="display:block;width:100%;height:auto;overflow:visible;">'
+        + '<line x1="10" y1="10" x2="270" y2="10" stroke="#1a7a3c" stroke-width="5" stroke-linecap="round"/>'
+        + '<circle cx="140" cy="10" r="6" fill="#1a7a3c"/>'
+        + '<polygon points="118,58 162,58 140,16" fill="#1a7a3c"/>'
+        + '</svg>';
+}
+
+// Every occurrence gets its OWN chip (never a single text blob with the symbol
+// repeated N times) — lets the nowrap row size each one individually instead of
+// risking the browser line-wrapping a multi-emoji string.
+function renderLpScalePan(items) {
+    let html = '';
+    (items || []).forEach(it => {
+        const count = Math.max(1, it.count || 1);
+        for (let i = 0; i < count; i++) {
+            html += it.kind === 'weight'
+                ? `<div class="lp-scale-wplate">${escHtmlLp(String(it.value ?? '?'))}</div>`
+                : `<div class="lp-scale-emoji">${it.symbol || '❓'}</div>`;
+        }
+    });
+    return html;
+}
+
+function renderLpScaleBlank(kind, symbol) {
+    if (kind === 'weight') return `<div class="lp-scale-wplate lp-scale-blank">?</div>`;
+    return `<div class="lp-scale-emoji lp-scale-blank">${symbol ? escHtmlLp(symbol) : '❓'}<span>?</span></div>`;
+}
+
+function renderLpScale(data) {
+    let q;
+    try { q = JSON.parse(data.question_text); }
+    catch (e) { return '<div class="lp-err">პარსინგის შეცდომა</div>'; }
+
+    const blankChip = renderLpScaleBlank(q.blank_kind, q.blank_symbol);
+    const leftHtml  = renderLpScalePan(q.left)  + (q.blank_side === 'left'  ? blankChip : '');
+    const rightHtml = renderLpScalePan(q.right) + (q.blank_side === 'right' ? blankChip : '');
+
+    let html = `<div class="lp-q">⚖️ ${escHtmlLp(q.prompt || '')}</div>`;
+    html += `<div style="max-width:260px;margin:0 auto 8px;"><div class="lp-scale-row" style="justify-content:space-between;align-items:flex-end;margin-bottom:2px;">`
+        + `<div class="lp-scale-pan" style="flex:1;">${leftHtml}</div>`
+        + `<div class="lp-scale-pan" style="flex:1;">${rightHtml}</div>`
+        + `</div>${scaleSvgHtmlLp()}</div>`;
+    if (q.condition_text) html += `<div class="lp-scale-cond">💡 ${escHtmlLp(q.condition_text)}</div>`;
+
+    if (Array.isArray(data.options) && data.options.length) {
+        html += '<div class="lp-opts">' + data.options.map(o =>
+            `<div class="lp-opt ${o === data.correct_answer ? 'correct' : ''}">${escHtmlLp(o)}</div>`
+        ).join('') + '</div>';
+    } else {
+        html += `<div class="lp-answer">✍️ პასუხი: <b>${escHtmlLp(data.correct_answer)}</b></div>`;
+    }
+    return html;
 }
 
 @endverbatim

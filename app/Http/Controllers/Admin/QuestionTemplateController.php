@@ -223,9 +223,9 @@ class QuestionTemplateController extends Controller
             return response()->json(['error' => "ამ კლასს მაქსიმუმ {$grade->max_level} დონე აქვს"], 422);
         }
 
-        // pyramid/code/crossword never use a theme — keep that invariant regardless
-        // of what the modal happened to send.
-        if (in_array($question->question_type, ['pyramid', 'code', 'crossword'], true)) {
+        // pyramid/code/crossword/scale never use a theme — keep that invariant
+        // regardless of what the modal happened to send.
+        if (in_array($question->question_type, ['pyramid', 'code', 'crossword', 'scale'], true)) {
             $data['theme_id'] = null;
         }
 
@@ -252,7 +252,7 @@ class QuestionTemplateController extends Controller
             return response()->json(['error' => "ამ კლასს მაქსიმუმ {$grade->max_level} დონე აქვს"], 422);
         }
 
-        if (in_array($question->question_type, ['pyramid', 'code', 'crossword'], true)) {
+        if (in_array($question->question_type, ['pyramid', 'code', 'crossword', 'scale'], true)) {
             $data['theme_id'] = null;
         }
 
@@ -335,7 +335,8 @@ class QuestionTemplateController extends Controller
         $isPyramid   = $qType === 'pyramid';
         $isCode      = $qType === 'code';
         $isCrossword = $qType === 'crossword';
-        $isSpecial   = $isPyramid || $isCode || $isCrossword;
+        $isScale     = $qType === 'scale';
+        $isSpecial   = $isPyramid || $isCode || $isCrossword || $isScale;
 
         $raw = $request->validate([
             'topic_id'        => 'required|exists:topics,id',
@@ -344,8 +345,8 @@ class QuestionTemplateController extends Controller
             'is_olympiad'     => 'nullable|boolean',
             'is_active'       => 'nullable|boolean',
             'sequence'        => 'nullable|integer|min:1',
-            'question_type'   => 'required|in:multiple_choice,pyramid,code,crossword',
-            'answer_type'     => $isSpecial ? 'nullable' : 'required|in:numeric,text,numeric_input',
+            'question_type'   => 'required|in:multiple_choice,pyramid,code,crossword,scale',
+            'answer_type'     => $isScale ? 'required|in:numeric,numeric_input' : ($isSpecial ? 'nullable' : 'required|in:numeric,text,numeric_input'),
             'title'           => 'nullable|string|max:150',
             'template_text'   => $isSpecial ? 'nullable|string' : 'required|string',
             'hint_text'       => 'nullable|string',
@@ -460,6 +461,61 @@ class QuestionTemplateController extends Controller
                     'operators'     => $ops,
                     'vars_per_eq'   => $varsPerEq,
                     'unique_values' => $uniqueVals,
+                ],
+                'distractors'     => null,
+                'conditions'      => null,
+            ];
+        }
+
+        if ($isScale) {
+            $symbols = is_array($numConfig['symbols'] ?? null) ? $numConfig['symbols'] : [];
+            $left    = is_array($numConfig['left']    ?? null) ? $numConfig['left']    : [];
+            $right   = is_array($numConfig['right']   ?? null) ? $numConfig['right']   : [];
+            $answerKey    = (string) ($numConfig['answer_key'] ?? '');
+            $referenceKey = $numConfig['reference_key'] ?: null;
+            $countMin = max(1, (int) ($numConfig['count_min'] ?? 1));
+            $countMax = max($countMin, (int) ($numConfig['count_max'] ?? 6));
+
+            if ($answerKey === '' || ! isset($symbols[$answerKey])) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'num_config' => 'სასწორის პასუხის სიმბოლო არ არის მითითებული',
+                ]);
+            }
+            $answerKind = $symbols[$answerKey]['kind'] ?? 'emoji';
+            if ($answerKind === 'emoji' && ! $referenceKey) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'num_config' => 'ემოჯი-ტიპის პასუხისთვის საცნობი სიმბოლო სავალდებულოა',
+                ]);
+            }
+            foreach (array_merge($left, $right) as $it) {
+                if (($it['key'] ?? null) === $answerKey) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'num_config' => 'პასუხის სიმბოლო არ შეიძლება იდგეს პინაზე — ამოაშალეთ ის მარცხენა/მარჯვენა პინიდან',
+                    ]);
+                }
+            }
+
+            return [
+                'topic_id'        => $raw['topic_id'],
+                'theme_id'        => null,
+                'difficulty'      => $raw['difficulty'],
+                'is_olympiad'     => $isOlympiad,
+                'is_active'       => $isActive,
+                'sequence'        => $sequence,
+                'question_type'   => 'scale',
+                'answer_type'     => $raw['answer_type'],
+                'title'           => $raw['title'] ?? null,
+                'template_text'   => $raw['template_text'] ?? '',
+                'hint_text'       => $raw['hint_text'] ?? null,
+                'correct_formula' => '',
+                'num_config'      => [
+                    'symbols'       => $symbols,
+                    'left'          => $left,
+                    'right'         => $right,
+                    'answer_key'    => $answerKey,
+                    'reference_key' => $referenceKey,
+                    'count_min'     => $countMin,
+                    'count_max'     => $countMax,
                 ],
                 'distractors'     => null,
                 'conditions'      => null,

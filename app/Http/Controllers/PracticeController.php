@@ -115,12 +115,17 @@ class PracticeController extends Controller
         $session = PracticeSession::forChild($child->id, $topic->id, 'topic');
         $diff    = min($session->level, 5);
 
+        // "scale" has its own two-pan visual that this cache-based practice flow
+        // (and practice.blade.php's renderer) doesn't know how to draw — unlike
+        // pyramid/code/crossword, which DO have dedicated rendering below, scale
+        // questions are only ever served through real tests (TestGeneratorService).
         $template = QuestionTemplate::where('topic_id', $topic->id)
             ->where('difficulty', $diff)
             ->where('is_active', true)
+            ->whereNotIn('question_type', ['scale'])
             ->inRandomOrder()
             ->first()
-            ?? QuestionTemplate::where('topic_id', $topic->id)->where('is_active', true)->inRandomOrder()->first();
+            ?? QuestionTemplate::where('topic_id', $topic->id)->where('is_active', true)->whereNotIn('question_type', ['scale'])->inRandomOrder()->first();
 
         if (! $template) {
             return response()->json(['error' => 'კითხვები ვერ მოიძებნა'], 404);
@@ -190,7 +195,7 @@ class PracticeController extends Controller
                 $excludedIds[] = $template->id;
                 $template = QuestionTemplate::where('topic_id', $topic->id)
                     ->where('is_active', true)
-                    ->whereNotIn('question_type', ['pyramid', 'code', 'crossword'])
+                    ->whereNotIn('question_type', ['pyramid', 'code', 'crossword', 'scale'])
                     ->whereNotIn('id', $excludedIds)
                     ->inRandomOrder()
                     ->first();

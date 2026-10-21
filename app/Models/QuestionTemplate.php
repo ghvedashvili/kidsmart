@@ -67,15 +67,86 @@ class QuestionTemplate extends Model
     public function isPyramid(): bool    { return $this->question_type === 'pyramid'; }
     public function isCode(): bool       { return $this->question_type === 'code'; }
     public function isCrossword(): bool  { return $this->question_type === 'crossword'; }
+    public function isScale(): bool      { return $this->question_type === 'scale'; }
 
     public function generate(?Theme $theme = null): array
     {
         if ($this->isPyramid())   return $this->generatePyramid();
         if ($this->isCode())      return $this->generateCode();
         if ($this->isCrossword()) return $this->generateCrossword();
+        if ($this->isScale())     return $this->generateScale();
         return $this->answer_type === 'text'
             ? $this->generateText($theme)
             : $this->generateNumeric($theme);
+    }
+
+    /**
+     * Balance-scale puzzle: two pans, each holding a fixed (admin-authored)
+     * composition of "weight" items (value shown directly) and/or "emoji" items
+     * (weight hidden, rolled fresh each generation — see ScaleService::build()).
+     * One side ends up lighter; the child must say what it takes to balance it —
+     * either a plain number (weight-kind answer, or emoji-kind with answer_type
+     * numeric_input, which also names the emoji in the prompt) or, in MC mode,
+     * pick the correct "{count} {emoji}" figure from 4 options (emoji identity
+     * not revealed in advance).
+     */
+    public function generateScale(): array
+    {
+        $cfg     = $this->num_config ?? [];
+        $symbols = is_array($cfg['symbols'] ?? null) ? $cfg['symbols'] : [];
+        $left    = is_array($cfg['left']    ?? null) ? $cfg['left']    : [];
+        $right   = is_array($cfg['right']   ?? null) ? $cfg['right']   : [];
+        $answerKey    = (string) ($cfg['answer_key'] ?? '');
+        $referenceKey = $cfg['reference_key'] ?: null;
+        $countMin = max(1, (int) ($cfg['count_min'] ?? 1));
+        $countMax = max($countMin, (int) ($cfg['count_max'] ?? 6));
+        $isMc     = $this->answer_type !== 'numeric_input';
+
+        try {
+            $result = \App\Services\ScaleService::build($symbols, $left, $right, $answerKey, $referenceKey, $countMin, $countMax);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('QuestionTemplate: scale config never resolved after retries', [
+                'template_id' => $this->id,
+                'error'       => $e->getMessage(),
+            ]);
+            throw new \App\Exceptions\QuestionGenerationException("Template #{$this->id}: scale config never resolved");
+        }
+
+        $answerKind  = $result['blank_kind'];
+        $answerValue = (int) $result['answer_value'];
+
+        if ($answerKind === 'weight') {
+            $ansData = $this->buildMcOptions($answerValue);
+        } elseif ($isMc) {
+            $ansData = \App\Services\ScaleService::buildEmojiOptions($symbols, $answerKey, $answerValue, $countMin, $countMax);
+        } else {
+            $ansData = ['options' => null, 'correct_answer' => (string) $answerValue];
+        }
+
+        $isMcResolved = ! empty($ansData['options']);
+
+        $defaultPrompt = $isMcResolved
+            ? 'რომელი ვარიანტი დააბალანსებს სასწორს? ⚖️'
+            : ($answerKind === 'weight'
+                ? 'რა წონა აკლია, რომ სასწორი დაბალანსდეს? ⚖️'
+                : 'რამდენი ' . ($result['blank_symbol'] ?? '') . ' დასამატებელია, რომ სასწორი დაბალანსდეს? ⚖️');
+        $prompt = trim((string) $this->template_text) !== '' ? $this->template_text : $defaultPrompt;
+
+        $questionData = [
+            'type'           => 'scale',
+            'prompt'         => $prompt,
+            'left'           => $result['left'],
+            'right'          => $result['right'],
+            'blank_side'     => $result['blank_side'],
+            'blank_kind'     => $answerKind,
+            'blank_symbol'   => $isMcResolved ? null : $result['blank_symbol'],
+            'condition_text' => $result['condition_text'],
+        ];
+
+        return array_merge(
+            ['question_text' => json_encode($questionData), 'hint_text' => $this->hint_text ?: null],
+            $ansData
+        );
     }
 
     public function generateCrossword(): array

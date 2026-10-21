@@ -37,9 +37,9 @@ class TestGeneratorService
             ->whereHas('topic', fn ($q) => $q->where('grade_id', $setting->grade_id))
             ->when(! empty($childTopicIds), fn ($q) => $q->whereIn('topic_id', $childTopicIds));
 
-        // Pyramid, code, and crossword templates are theme-independent — always included
+        // Pyramid, code, crossword, and scale templates are theme-independent — always included
         $specialTemplates = $baseQuery()
-            ->whereIn('question_type', ['pyramid', 'code', 'crossword'])
+            ->whereIn('question_type', ['pyramid', 'code', 'crossword', 'scale'])
             ->with('topic')
             ->get();
 
@@ -180,7 +180,7 @@ class TestGeneratorService
             ->when(! empty($childTopicIds), fn ($q) => $q->whereIn('topic_id', $childTopicIds));
 
         $specialTemplates = $baseQuery()
-            ->whereIn('question_type', ['pyramid', 'code', 'crossword'])
+            ->whereIn('question_type', ['pyramid', 'code', 'crossword', 'scale'])
             ->with('topic')
             ->get();
 

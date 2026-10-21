@@ -295,14 +295,22 @@
             @endforeach
         </div>
         @elseif(empty($q['options']))
+        @if($qType === 'scale')
+        {!! \App\Services\ScaleService::renderPansHtml(json_decode($q['question_text'], true) ?? []) !!}
+        @else
         <div class="q-text">{!! nl2br(e($q['question_text'])) !!}</div>
+        @endif
         <div style="margin-top:8px;font-size:0.85rem;font-weight:800;color:#15803d;">✍️ სწორი პასუხი: {{ $q['correct_answer'] }}</div>
         @if(!empty($q['hint_text']))
         <div class="hint">{{ $q['hint_text'] }}</div>
         @endif
 
         @else
+        @if($qType === 'scale')
+        {!! \App\Services\ScaleService::renderPansHtml(json_decode($q['question_text'], true) ?? []) !!}
+        @else
         <div class="q-text">{!! nl2br(e($q['question_text'])) !!}</div>
+        @endif
         <div class="opts">
             @foreach($q['options'] ?? [] as $opt)
             <span class="opt {{ $opt === $q['correct_answer'] ? 'correct' : '' }}">

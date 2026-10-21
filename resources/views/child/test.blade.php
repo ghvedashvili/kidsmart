@@ -283,7 +283,11 @@ body {
         <input type="hidden" name="answers[{{ $q->id }}]" value="crossword_submitted">
 
         @elseif(empty($q->options))
+        @if($qType === 'scale')
+        {!! \App\Services\ScaleService::renderPansHtml(json_decode($q->question_text, true) ?? []) !!}
+        @else
         <div class="q-text">{!! nl2br(e($q->question_text)) !!}</div>
+        @endif
         @if($q->hint_text)<div class="q-hint">{{ $q->hint_text }}</div>@endif
         <div class="num-ans-wrap">
             <input type="number" inputmode="numeric" class="num-ans-inp" name="answers[{{ $q->id }}]"
@@ -292,7 +296,11 @@ body {
         </div>
 
         @else
+        @if($qType === 'scale')
+        {!! \App\Services\ScaleService::renderPansHtml(json_decode($q->question_text, true) ?? []) !!}
+        @else
         <div class="q-text">{!! nl2br(e($q->question_text)) !!}</div>
+        @endif
         @if($q->hint_text)<div class="q-hint">{{ $q->hint_text }}</div>@endif
         <div class="opts">
             @foreach($q->options ?? [] as $opt)

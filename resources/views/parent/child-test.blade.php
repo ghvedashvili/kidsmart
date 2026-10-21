@@ -309,7 +309,11 @@
         @endif
 
         @elseif(empty($q->options))
+        @if($qType === 'scale')
+        {!! \App\Services\ScaleService::renderPansHtml(json_decode($q->question_text, true) ?? []) !!}
+        @else
         <div class="q-text">{!! nl2br(e($q->question_text)) !!}</div>
+        @endif
         @if($q->hint_text)<div class="q-hint">{{ $q->hint_text }}</div>@endif
         @php $numOk = $answer?->is_correct; @endphp
         <div style="display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap;">
@@ -331,7 +335,11 @@
         @endif
 
         @else
+        @if($qType === 'scale')
+        {!! \App\Services\ScaleService::renderPansHtml(json_decode($q->question_text, true) ?? []) !!}
+        @else
         <div class="q-text">{!! nl2br(e($q->question_text)) !!}</div>
+        @endif
         @if($q->hint_text)<div class="q-hint">{{ $q->hint_text }}</div>@endif
         <div class="opts">
             @foreach($q->options ?? [] as $opt)

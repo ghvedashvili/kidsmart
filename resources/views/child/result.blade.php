@@ -359,7 +359,11 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
             @endforeach
         </div>
         @else
+        @if($qType === 'scale')
+        {!! \App\Services\ScaleService::renderPansHtml(json_decode($q->question_text, true) ?? []) !!}
+        @else
         <div class="q-text-r">{!! nl2br(e($q->question_text)) !!}</div>
+        @endif
         <div class="ans-row">
             @if($status === 'correct')
                 <span class="ans-correct">✓ {{ $ans->selected_answer }}</span>
