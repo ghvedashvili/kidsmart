@@ -96,11 +96,10 @@ class QuestionTemplate extends Model
         $symbols = is_array($cfg['symbols'] ?? null) ? $cfg['symbols'] : [];
         $left    = is_array($cfg['left']    ?? null) ? $cfg['left']    : [];
         $right   = is_array($cfg['right']   ?? null) ? $cfg['right']   : [];
-        $answerKey    = (string) ($cfg['answer_key'] ?? '');
-        $referenceKey = $cfg['reference_key'] ?: null;
         $countMin = max(1, (int) ($cfg['count_min'] ?? 1));
         $countMax = max($countMin, (int) ($cfg['count_max'] ?? 6));
         $isMc     = $this->answer_type !== 'numeric_input';
+        $hasCustomPrompt = trim((string) $this->template_text) !== '';
 
         // Letters (A, B, C...) are the names the admin builds both {{A}}-style
         // template_text tokens and "conditions" rows against — assigned
@@ -129,7 +128,7 @@ class QuestionTemplate extends Model
         };
 
         try {
-            $result = \App\Services\ScaleService::build($symbols, $left, $right, $answerKey, $referenceKey, $countMin, $countMax, $conditionsCheck);
+            $result = \App\Services\ScaleService::build($symbols, $left, $right, $countMin, $countMax, $hasCustomPrompt, $conditionsCheck);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('QuestionTemplate: scale config never resolved after retries', [
                 'template_id' => $this->id,
@@ -138,13 +137,17 @@ class QuestionTemplate extends Model
             throw new \App\Exceptions\QuestionGenerationException("Template #{$this->id}: scale config never resolved");
         }
 
+        // The answer symbol is chosen automatically (see ScaleService::build()),
+        // not admin-picked — varies freely between generations of the same
+        // template, as long as it's one of the symbols not placed on either pan.
+        $answerKey   = $result['answer_key'];
         $answerKind  = $result['blank_kind'];
         $answerValue = (int) $result['answer_value'];
 
         if ($answerKind === 'weight') {
             $ansData = $this->buildMcOptions($answerValue);
         } elseif ($isMc) {
-            $ansData = \App\Services\ScaleService::buildEmojiOptions($symbols, $answerKey, $answerValue, $countMin, $countMax);
+            $ansData = \App\Services\ScaleService::buildEmojiOptions($symbols, $answerKey, $answerValue, $countMin, $countMax, $result['weights']);
         } else {
             $ansData = ['options' => null, 'correct_answer' => (string) $answerValue];
         }
@@ -156,17 +159,19 @@ class QuestionTemplate extends Model
             : ($answerKind === 'weight'
                 ? 'რა წონა აკლია, რომ სასწორი დაბალანსდეს? ⚖️'
                 : 'რამდენი ' . ($result['blank_symbol'] ?? '') . ' დასამატებელია, რომ სასწორი დაბალანსდეს? ⚖️');
-        $prompt = trim((string) $this->template_text) !== '' ? $this->template_text : $defaultPrompt;
+        $prompt = $hasCustomPrompt ? $this->template_text : $defaultPrompt;
 
         // {{A}}, {{B}}... in a custom prompt resolve to that symbol's rolled
-        // value — the number itself for a weight-kind symbol (its own weight if
-        // rolled, or the just-solved answer value for the answer symbol, which
-        // is deliberately never pre-rolled), or the emoji character for an
+        // value — the number itself for a weight-kind symbol (the just-solved
+        // answer value if it won this round as the answer — checked FIRST,
+        // since every symbol now gets a throwaway provisional roll regardless,
+        // so `??` alone would wrongly prefer that over the real solved value —
+        // or its own rolled weight otherwise), or the emoji character for an
         // emoji-kind symbol (never its hidden weight, which would spoil the puzzle).
         foreach ($letterMap as $letter => $key) {
             $conf = $symbols[$key] ?? [];
             if (($conf['kind'] ?? 'emoji') === 'weight') {
-                $val = $result['weights'][$key] ?? ($key === $answerKey ? $answerValue : '?');
+                $val = ($key === $answerKey) ? $answerValue : ($result['weights'][$key] ?? '?');
             } else {
                 $val = $conf['symbol'] ?? '❓';
             }
@@ -174,14 +179,13 @@ class QuestionTemplate extends Model
         }
 
         $questionData = [
-            'type'           => 'scale',
-            'prompt'         => $prompt,
-            'left'           => $result['left'],
-            'right'          => $result['right'],
-            'blank_side'     => $result['blank_side'],
-            'blank_kind'     => $answerKind,
-            'blank_symbol'   => $isMcResolved ? null : $result['blank_symbol'],
-            'condition_text' => $result['condition_text'],
+            'type'         => 'scale',
+            'prompt'       => $prompt,
+            'left'         => $result['left'],
+            'right'        => $result['right'],
+            'blank_side'   => $result['blank_side'],
+            'blank_kind'   => $answerKind,
+            'blank_symbol' => $isMcResolved ? null : $result['blank_symbol'],
         ];
 
         return array_merge(

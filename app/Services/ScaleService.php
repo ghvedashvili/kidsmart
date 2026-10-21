@@ -5,82 +5,80 @@ namespace App\Services;
 class ScaleService
 {
     /**
-     * Builds one balance-scale puzzle. Every symbol in $symbols gets a random
-     * hidden weight (rolled fresh each attempt) within its own min/max, EXCEPT
-     * the answer symbol when its kind is 'weight' — that one is never pre-assigned,
-     * since its value IS the thing being solved for (the deficit itself).
+     * Builds one balance-scale puzzle. The pans ($left/$right) are the admin's
+     * fixed composition. The answer symbol is NOT admin-picked — it's
+     * automatically chosen, per attempt, from ANY defined symbol (on a pan or
+     * not), trying them in random order until one resolves into a clean,
+     * in-range value:
+     *   - emoji-kind candidate: deficit / itsWeight, as a whole, in-range COUNT
+     *     to ADD — works identically whether it's already on a pan too (e.g.
+     *     the right pan already has 3⭐, answer is "2 more ⭐") or not, since
+     *     its weight is always rolled and already correctly baked into the
+     *     pan totals either way.
+     *   - weight-kind candidate NOT on any pan: the deficit itself (classic
+     *     shortcut, its "?" is a separately-appended blank chip).
+     *   - weight-kind candidate ALSO on a pan: solved ALGEBRAICALLY — its own
+     *     occurrences are excluded from both sides' "known" sums, leaving
+     *     (cLeft - cRight) copies of the unknown X, so
+     *     X = (knownRight - knownLeft) / (cLeft - cRight). Equal nonzero
+     *     counts on both sides make X cancel out of the equation entirely
+     *     (indeterminate), so that specific candidate is skipped. Its "?" is
+     *     rendered IN PLACE on the pan instead of appended separately.
      *
-     * $left/$right: [['key' => string, 'count' => int], ...] — fixed pan composition,
-     * only the underlying weights are randomized each generation.
-     *
-     * Retries (same outer-retry pattern used elsewhere in this app) until the pans
-     * come out unbalanced AND the deficit resolves to a clean, in-range answer —
-     * a whole weight value (weight-kind answer) or a whole, in-range item count
-     * (emoji-kind answer, deficit / answerWeight). When a reference symbol is set,
-     * its ratio to the answer symbol's weight must ALSO come out whole, since that
-     * ratio is shown to the child as the "condition" (e.g. "1🍌 = 2🍐").
+     * An emoji-kind candidate's weight is never shown to the child directly, so
+     * it's only eligible when $hasCustomPrompt is true — trusting the admin to
+     * have written the needed relationship themselves (e.g. "{{A}} = 2×{{B}}")
+     * into the template_text, since there's no more admin-picked "reference
+     * symbol" to auto-generate that hint from.
      *
      * $conditionsCheck, if given, is called with the rolled $weights map (keyed
-     * by symbol key, same as everywhere else here) on every attempt; returning
-     * false rejects that attempt and retries, exactly like the other per-attempt
-     * checks below. Lets the caller (QuestionTemplate::generateScale()) reuse its
-     * own conditionsMet()/evalExpr() engine against the symbols' letter labels
-     * without this class needing to know anything about that syntax.
+     * by symbol key) on every attempt; returning false rejects that attempt and
+     * retries, exactly like the other per-attempt checks below. Lets the caller
+     * (QuestionTemplate::generateScale()) reuse its own conditionsMet()/evalExpr()
+     * engine against the symbols' letter labels without this class needing to
+     * know anything about that syntax. Note: for a weight-kind symbol that ends
+     * up winning as an on-pan (algebraic) answer, its condition-check value is
+     * still its throwaway provisional roll, not the solved X — a condition that
+     * specifically targets that exact combination is a known edge case this
+     * doesn't resolve perfectly.
      *
-     * @throws \RuntimeException if no attempt resolves within the retry budget.
+     * @throws \RuntimeException if no candidate symbol exists, or no attempt
+     *     resolves within the retry budget.
      */
     public static function build(
         array $symbols,
         array $left,
         array $right,
-        string $answerKey,
-        ?string $referenceKey,
         int $countMin,
         int $countMax,
+        bool $hasCustomPrompt,
         ?callable $conditionsCheck = null
     ): array {
-        $answerConf = $symbols[$answerKey] ?? null;
-        if (! $answerConf) {
-            throw new \RuntimeException("scale: answer_key '{$answerKey}' not found in symbols");
+        $candidates = [];
+        foreach ($symbols as $key => $conf) {
+            $kind = $conf['kind'] ?? 'emoji';
+            if ($kind === 'emoji' && ! $hasCustomPrompt) continue;
+            $candidates[] = $key;
         }
-        $answerKind   = $answerConf['kind'] ?? 'emoji';
-        $answerSymbol = $answerConf['symbol'] ?? '❓';
-        $answerMin    = (int) ($answerConf['min'] ?? 1);
-        $answerMax    = max($answerMin, (int) ($answerConf['max'] ?? 20));
-
-        // An emoji-kind answer's weight is never shown directly — without a
-        // reference symbol to express it relative to, a child would have no way
-        // to ever determine it, no matter how many attempts are retried below.
-        // The admin form enforces this too, but a template saved any other way
-        // (direct DB edit, a future bug) must still fail safely rather than serve
-        // an unsolvable question.
-        if ($answerKind === 'emoji' && ! $referenceKey) {
-            throw new \RuntimeException('scale: emoji-kind answer requires a reference_key');
-        }
-
-        // The answer symbol is never a placed pan item — its "?" marker is attached
-        // automatically to whichever side comes out lighter. If it were ALSO used as
-        // a real item, a weight-kind answer has no weight rolled for it at all (see
-        // above), so every occurrence of it in sumSide() would silently count as 0 —
-        // corrupting both pan totals and the on-screen pan display (shown as
-        // "undefined", since renderPansHtml()/renderLpScale() look up a weight that
-        // was deliberately never assigned).
-        foreach (array_merge($left, $right) as $it) {
-            if (($it['key'] ?? null) === $answerKey) {
-                throw new \RuntimeException("scale: answer_key '{$answerKey}' must not appear in left/right pans");
-            }
+        if (! $candidates) {
+            throw new \RuntimeException(
+                'scale: no eligible answer symbol — add a weight-kind symbol'
+                . ($hasCustomPrompt ? '' : ', or write a custom template_text to also allow an emoji-kind one')
+            );
         }
 
         for ($attempt = 0; $attempt < 300; $attempt++) {
+            // Every symbol gets a provisional rolled weight — used directly for
+            // an emoji-kind symbol (always), and as a weight-kind symbol's own
+            // pan value for whenever it ISN'T the candidate being tried below
+            // (when it IS, this provisional roll is set aside entirely in favor
+            // of solving for its true value).
             $weights = [];
             foreach ($symbols as $key => $conf) {
-                if ($key === $answerKey && $answerKind === 'weight') continue;
                 $min = (int) ($conf['min'] ?? 1);
                 $max = max($min, (int) ($conf['max'] ?? 9));
                 $weights[$key] = rand($min, $max);
             }
-
-            if ($conditionsCheck && ! $conditionsCheck($weights)) continue;
 
             $totalLeft  = self::sumSide($left, $weights);
             $totalRight = self::sumSide($right, $weights);
@@ -90,74 +88,134 @@ class ScaleService
             $blankSide = $deficit > 0 ? 'right' : 'left';
             $need      = abs($deficit);
 
-            $conditionText = null;
+            $pool = $candidates;
+            shuffle($pool);
+            foreach ($pool as $answerKey) {
+                $conf = $symbols[$answerKey];
+                $kind = $conf['kind'] ?? 'emoji';
+                $cLeft  = self::countOf($left, $answerKey);
+                $cRight = self::countOf($right, $answerKey);
+                $coef   = $cLeft - $cRight;
+                $inline = false;
+                $thisBlankSide = $blankSide;
 
-            if ($answerKind === 'weight') {
-                if ($need < $answerMin || $need > $answerMax) continue;
-                $answerValue = $need;
-            } else {
-                $aw = $weights[$answerKey] ?? 0;
-                if ($aw <= 0 || $need % $aw !== 0) continue;
-                $neededCount = intdiv($need, $aw);
-                if ($neededCount < $countMin || $neededCount > $countMax) continue;
-                $answerValue = $neededCount;
-
-                if ($referenceKey) {
-                    $rw = $weights[$referenceKey] ?? 0;
-                    if ($rw <= 0 || $aw % $rw !== 0) continue;
-                    $ratio = intdiv($aw, $rw);
-                    if ($ratio < 1) continue;
-                    $refSymbol     = $symbols[$referenceKey]['symbol'] ?? '❓';
-                    $conditionText = "1 {$answerSymbol} = {$ratio} {$refSymbol}";
+                if ($kind === 'weight' && $coef !== 0) {
+                    if ($cLeft === $cRight) continue; // cancels out — indeterminate
+                    $knownLeft  = $totalLeft  - $weights[$answerKey] * $cLeft;
+                    $knownRight = $totalRight - $weights[$answerKey] * $cRight;
+                    $diff = $knownRight - $knownLeft;
+                    if ($diff % $coef !== 0) continue;
+                    $x = intdiv($diff, $coef);
+                    $min = (int) ($conf['min'] ?? 1);
+                    $max = max($min, (int) ($conf['max'] ?? 20));
+                    if ($x < $min || $x > $max) continue;
+                    $answerValue   = $x;
+                    $inline        = true;
+                    $thisBlankSide = null;
+                } elseif ($kind === 'weight') {
+                    $min = (int) ($conf['min'] ?? 1);
+                    $max = max($min, (int) ($conf['max'] ?? 20));
+                    if ($need < $min || $need > $max) continue;
+                    $answerValue = $need;
+                } else {
+                    $aw = $weights[$answerKey] ?? 0;
+                    if ($aw <= 0 || $need % $aw !== 0) continue;
+                    $cnt = intdiv($need, $aw);
+                    if ($cnt < $countMin || $cnt > $countMax) continue;
+                    $answerValue = $cnt;
                 }
-            }
 
-            return [
-                'left'           => self::renderItems($left, $symbols, $weights),
-                'right'          => self::renderItems($right, $symbols, $weights),
-                'blank_side'     => $blankSide,
-                'blank_kind'     => $answerKind,
-                'blank_symbol'   => $answerKind === 'emoji' ? $answerSymbol : null,
-                'condition_text' => $conditionText,
-                'answer_value'   => $answerValue,
-                'weights'        => $weights,
-            ];
+                // Conditions must be checked against each symbol's REAL final
+                // value, not the provisional roll — for a weight-kind winner
+                // (inline-solved or the classic deficit answer), its provisional
+                // roll was never actually used/shown, so it's swapped out here.
+                if ($conditionsCheck) {
+                    $checkWeights = $weights;
+                    if ($kind === 'weight') {
+                        $checkWeights[$answerKey] = $answerValue;
+                    }
+                    if (! $conditionsCheck($checkWeights)) continue;
+                }
+
+                return [
+                    'left'         => self::renderItems($left, $symbols, $weights, $inline ? $answerKey : null),
+                    'right'        => self::renderItems($right, $symbols, $weights, $inline ? $answerKey : null),
+                    'blank_side'   => $thisBlankSide,
+                    'blank_kind'   => $kind,
+                    'blank_symbol' => $kind === 'emoji' ? ($conf['symbol'] ?? '❓') : null,
+                    'answer_key'   => $answerKey,
+                    'answer_value' => $answerValue,
+                    'weights'      => $weights,
+                ];
+            }
+            // none of the candidates resolved this deficit — retry with fresh weights
         }
 
         throw new \RuntimeException('scale: no solvable combination found after 300 attempts');
     }
 
     /**
-     * Builds 4 "{count} {symbol}" multiple-choice options for an emoji-kind answer
-     * (the child picks both the emoji AND the count together — the question never
-     * names which emoji is correct). Distractors are random (symbol,count) pairs
-     * from the whole emoji pool, not checked against the puzzle's actual weights —
-     * good enough to look plausible without risking a second accidentally-correct
-     * option slipping past a cheap check.
+     * Builds 4 multiple-choice options for an emoji-kind answer, each a symbol
+     * repeated N times with no digit (e.g. "⭐⭐", never "2⭐") — matching how
+     * symbols are shown on the pans. Distractors are drawn from every emoji-kind
+     * symbol in the template, INCLUDING ones already placed on a pan — the
+     * generator already knows each one's real rolled weight, so there's no
+     * reason not to reuse them instead of requiring the admin to add an unused
+     * symbol just for variety. Ranked by how close a candidate's TOTAL weight
+     * comes to the actual deficit, so wrong answers look like genuine near-misses
+     * rather than arbitrary noise. Different symbols are preferred over
+     * different counts of the same one, as long as there are enough of them.
      */
-    public static function buildEmojiOptions(array $symbols, string $answerKey, int $correctCount, int $countMin, int $countMax): array
+    public static function buildEmojiOptions(array $symbols, string $answerKey, int $correctCount, int $countMin, int $countMax, array $weights): array
     {
         $answerSymbol = $symbols[$answerKey]['symbol'] ?? '❓';
-        $correctLabel = "{$correctCount} {$answerSymbol}";
+        $label = fn (string $symbol, int $n) => str_repeat($symbol, max(1, $n));
+        $correctLabel = $label($answerSymbol, $correctCount);
+        $need = $correctCount * max(1, (int) ($weights[$answerKey] ?? 1));
 
-        $emojiKeys = array_keys(array_filter($symbols, fn ($c) => ($c['kind'] ?? 'emoji') === 'emoji'));
-        if (! $emojiKeys) $emojiKeys = [$answerKey];
+        $pool = array_keys(array_filter($symbols, fn ($c) => ($c['kind'] ?? 'emoji') === 'emoji'));
+        if (! $pool) $pool = [$answerKey];
 
-        $wrong = [];
-        $attempts = 0;
-        while (count($wrong) < 3 && $attempts < 60) {
-            $attempts++;
-            $key   = $emojiKeys[array_rand($emojiKeys)];
-            $cnt   = rand($countMin, $countMax);
-            $label = "{$cnt} " . ($symbols[$key]['symbol'] ?? '❓');
-            if ($label === $correctLabel || in_array($label, $wrong, true)) continue;
-            $wrong[] = $label;
+        $ranked = [];
+        foreach ($pool as $key) {
+            $w = max(1, (int) ($weights[$key] ?? 1));
+            for ($cnt = $countMin; $cnt <= $countMax; $cnt++) {
+                $lbl = $label($symbols[$key]['symbol'] ?? '❓', $cnt);
+                if ($lbl === $correctLabel) continue;
+                $total = $cnt * $w;
+                // A different symbol can happen to share the same rolled weight
+                // as the answer symbol (e.g. both weigh 5) — if this candidate's
+                // TOTAL also happens to equal the actual deficit, it would
+                // genuinely balance the scale too, so it's a second correct
+                // answer in disguise, not a wrong one. Must be excluded, not
+                // just the one matching the correct LABEL string.
+                if ($total === $need) continue;
+                $ranked[] = ['label' => $lbl, 'key' => $key, 'dev' => abs($total - $need)];
+            }
         }
+        usort($ranked, fn ($a, $b) => $a['dev'] <=> $b['dev']);
 
+        // First pass: closest candidate per DISTINCT symbol, for variety.
+        $wrong = [];
+        $usedKeys = [];
+        foreach ($ranked as $cand) {
+            if (count($wrong) >= 3) break;
+            if (in_array($cand['key'], $usedKeys, true) || in_array($cand['label'], $wrong, true)) continue;
+            $wrong[] = $cand['label'];
+            $usedKeys[] = $cand['key'];
+        }
+        // Second pass: not enough distinct symbols in the pool — fill remaining
+        // slots with the next-closest candidates regardless of symbol repeats.
+        foreach ($ranked as $cand) {
+            if (count($wrong) >= 3) break;
+            if (in_array($cand['label'], $wrong, true)) continue;
+            $wrong[] = $cand['label'];
+        }
+        // Last-resort fallback — pool/count range too narrow to find 3 at all.
         $delta = 1;
         while (count($wrong) < 3) {
-            $label = max(1, $correctCount + $delta) . " {$answerSymbol}";
-            if ($label !== $correctLabel && ! in_array($label, $wrong, true)) $wrong[] = $label;
+            $cand = $label($answerSymbol, $correctCount + $delta);
+            if ($cand !== $correctLabel && ! in_array($cand, $wrong, true)) $wrong[] = $cand;
             $delta++;
         }
 
@@ -168,11 +226,11 @@ class ScaleService
     }
 
     /**
-     * Renders the two-pan visual (prompt + left/right boxes + condition hint) as
-     * self-contained HTML — shared by every view that needs to show a scale
-     * question (interactive test-taking, read-only review, teacher preview) so
-     * the box layout only has to be designed once. $data is the array decoded
-     * from a TestQuestion's question_text (see QuestionTemplate::generateScale()).
+     * Renders the two-pan visual (prompt + left/right boxes) as self-contained
+     * HTML — shared by every view that needs to show a scale question
+     * (interactive test-taking, read-only review, teacher preview) so the box
+     * layout only has to be designed once. $data is the array decoded from a
+     * TestQuestion's question_text (see QuestionTemplate::generateScale()).
      * Every piece placed into the markup is either a fixed emoji/symbol from an
      * admin-authored template or an escaped string — never raw user input.
      */
@@ -184,7 +242,6 @@ class ScaleService
         $blankSide   = $data['blank_side'] ?? 'right';
         $blankKind   = $data['blank_kind'] ?? 'emoji';
         $blankSymbol = $data['blank_symbol'] ?? null;
-        $condition   = $data['condition_text'] ?? null;
 
         $blankChip = self::renderBlankChip($blankKind, $blankSymbol);
         $leftHtml  = self::renderPanHtml($left)  . ($blankSide === 'left'  ? $blankChip : '');
@@ -202,9 +259,6 @@ class ScaleService
         $html .= '</div>';
         $html .= self::scaleSvg();
         $html .= '</div>';
-        if ($condition) {
-            $html .= '<div style="background:#eef2ff;border:1.5px dashed #a5b4fc;border-radius:10px;padding:7px 12px;text-align:center;font-size:0.82rem;font-weight:700;color:#4338ca;margin:10px 0 4px;">💡 ' . e((string) $condition) . '</div>';
-        }
         return $html;
     }
 
@@ -236,7 +290,12 @@ class ScaleService
             $kind  = $it['kind'] ?? 'emoji';
             $count = max(1, (int) ($it['count'] ?? 1));
             for ($i = 0; $i < $count; $i++) {
-                if ($kind === 'weight') {
+                if (! empty($it['blank'])) {
+                    // Weight-kind answer symbol placed inline on a pan (see
+                    // build()'s algebraic branch) — same dashed "?" plate as the
+                    // separately-appended blank, just rendered in-place instead.
+                    $html .= '<div style="width:26px;height:26px;border-radius:6px;border:2.5px dashed #94a3b8;background:#f8fafc;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.75rem;color:#94a3b8;flex-shrink:0;">?</div>';
+                } elseif ($kind === 'weight') {
                     $val = e((string) ($it['value'] ?? '?'));
                     $html .= '<div style="width:26px;height:26px;border-radius:6px;background:#4f46e5;color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.7rem;flex-shrink:0;">' . $val . '</div>';
                 } else {
@@ -269,20 +328,37 @@ class ScaleService
         return $total;
     }
 
-    private static function renderItems(array $items, array $symbols, array $weights): array
+    /**
+     * $inlineAnswerKey, when given, marks every pan item matching it as the
+     * unlabeled "?" answer slot (its weight is never shown — it's what's being
+     * solved for) instead of a normal numbered plate, for a weight-kind answer
+     * that's also a placed pan item (see build()'s algebraic branch above).
+     */
+    private static function renderItems(array $items, array $symbols, array $weights, ?string $inlineAnswerKey = null): array
     {
         $out = [];
         foreach ($items as $it) {
-            $key  = $it['key'] ?? null;
-            $conf = $symbols[$key] ?? ['kind' => 'emoji', 'symbol' => '❓'];
-            $kind = $conf['kind'] ?? 'emoji';
+            $key    = $it['key'] ?? null;
+            $conf   = $symbols[$key] ?? ['kind' => 'emoji', 'symbol' => '❓'];
+            $kind   = $conf['kind'] ?? 'emoji';
+            $isBlank = $inlineAnswerKey !== null && $key === $inlineAnswerKey;
             $out[] = [
                 'kind'   => $kind,
                 'symbol' => $conf['symbol'] ?? null,
-                'value'  => $kind === 'weight' ? ($weights[$key] ?? null) : null,
+                'value'  => ($kind === 'weight' && ! $isBlank) ? ($weights[$key] ?? null) : null,
                 'count'  => max(1, (int) ($it['count'] ?? 1)),
+                'blank'  => $isBlank,
             ];
         }
         return $out;
+    }
+
+    private static function countOf(array $items, string $key): int
+    {
+        $total = 0;
+        foreach ($items as $it) {
+            if (($it['key'] ?? null) === $key) $total += max(1, (int) ($it['count'] ?? 1));
+        }
+        return $total;
     }
 }

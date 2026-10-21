@@ -416,18 +416,7 @@
                     </div>
                     <div style="font-size:0.58rem;color:#94a3b8;margin-top:4px;">თითო მხარეს მაქსიმუმ 4 საგანი ეტევა ვიზუალურად (სულ რაოდენობა — ცალკეული ციფრების/ემოჯების ჯამი)</div>
 
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;">
-                        <div>
-                            <div class="lbl">პასუხის სიმბოლო <span style="color:#94a3b8;font-size:0.55rem;">(არ უნდა იდგეს პინაზე)</span></div>
-                            <select id="scaleAnswerKey" class="fc" style="margin-bottom:0;" onchange="syncScaleConfig()"></select>
-                        </div>
-                        <div>
-                            <div class="lbl">საცნობი სიმბოლო <span style="color:#94a3b8;font-size:0.55rem;">(ემოჯი-პასუხისთვის სავალდებულო)</span></div>
-                            <select id="scaleReferenceKey" class="fc" style="margin-bottom:0;" onchange="syncScaleConfig()">
-                                <option value="">— არცერთი —</option>
-                            </select>
-                        </div>
-                    </div>
+                    <div style="font-size:0.6rem;color:#94a3b8;margin-top:10px;">პასუხის სიმბოლო ავტომატურად აირჩევა — ნებისმიერი სიმბოლო, რომელიც არცერთ პინაზე არ დევს. ემოჯი-ტიპის სიმბოლო ამ როლისთვის მხოლოდ მაშინ გამოდგება, თუ ზემოთ კითხვის ტექსტიც დაწერეთ (მისი წონა ბავშვს პირდაპირ არასდროს უჩანს).</div>
                     <div style="font-size:0.6rem;margin-top:4px;" id="scaleAtHint"></div>
 
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
@@ -1176,7 +1165,7 @@ function renderScaleSymbols() {
             <button type="button" class="nc-del" onclick="removeScaleSymbol(${i})">✕</button>
         </div>
     `).join('');
-    renderScaleSelects();
+    updateScaleAtHint();
     renderScaleConds();
 }
 
@@ -1324,29 +1313,33 @@ function renderScalePan(side) {
     const capNote = document.getElementById(side === 'left' ? 'scaleLeftCap' : 'scaleRightCap');
     if (addBtn)  addBtn.disabled = total >= SCALE_SIDE_MAX;
     if (capNote) capNote.textContent = total >= SCALE_SIDE_MAX ? `მაქს. ${SCALE_SIDE_MAX} მიღწეულია` : `${total}/${SCALE_SIDE_MAX}`;
-    renderScaleSelects();
-}
-function renderScaleSelects() {
-    const ansSel = document.getElementById('scaleAnswerKey');
-    const refSel = document.getElementById('scaleReferenceKey');
-    const prevAns = ansSel.value, prevRef = refSel.value;
-    const optsHtml = scaleSymbols.map((s, i) => `<option value="${s.id}">${scaleSymbolLabel(i)} ${s.kind === 'emoji' ? s.symbol : '(წონა)'}</option>`).join('');
-    ansSel.innerHTML = optsHtml || '<option value="">— ჯერ დაამატეთ სიმბოლო —</option>';
-    refSel.innerHTML = '<option value="">— არცერთი —</option>' + optsHtml;
-    if (scaleSymbols.some(s => s.id === prevAns)) ansSel.value = prevAns;
-    if (scaleSymbols.some(s => s.id === prevRef)) refSel.value = prevRef;
     updateScaleAtHint();
+}
+// The answer symbol is no longer admin-picked — it's auto-chosen at generation
+// time from ANY defined symbol, on a pan or not (see genPreviewScale() /
+// ScaleService::build()). This returns that eligible candidate pool: a
+// weight-kind symbol is always eligible; an emoji-kind one only when a custom
+// template_text is present (its weight is never shown directly, so without a
+// hand-written relationship there'd be no way for a child to solve it).
+function scaleEligibleCandidates() {
+    const hasCustomPrompt = !!document.getElementById('scaleTemplateText').value.trim();
+    return scaleSymbols.filter(s => s.kind === 'weight' || hasCustomPrompt);
 }
 function updateScaleAtHint() {
     const hint = document.getElementById('scaleAtHint');
     if (!hint) return;
-    const ansKey = document.getElementById('scaleAnswerKey').value;
-    const sym = scaleSymbols.find(s => s.id === ansKey);
-    const usedInPans = [...scaleLeft, ...scaleRight].some(it => it.key === ansKey);
-    if (usedInPans) {
-        hint.innerHTML = '<span style="color:#ef4444;">⚠ ეს სიმბოლო ასევე დევს პინაზე — ამოაშალეთ იქიდან, თორემ კითხვა არასწორად აითვლება</span>';
-    } else if (sym && sym.kind === 'emoji' && !document.getElementById('scaleReferenceKey').value) {
-        hint.innerHTML = '<span style="color:#ef4444;">⚠ ემოჯი-პასუხისთვის საცნობი სიმბოლო სავალდებულოა — თორემ ბავშვს წონის დასადგენი საშუალება არ ექნება</span>';
+    const eligible = scaleEligibleCandidates();
+
+    if (scaleSymbols.length && !eligible.length) {
+        hint.innerHTML = '<span style="color:#ef4444;">⚠ ყველა სიმბოლო ემოჯი-ტიპისაა — დაწერეთ კითხვის ტექსტი ზემოთ, თორემ პასუხისთვის ვერც ერთი ვერ გამოდგება</span>';
+    } else if (document.getElementById('answerTypeInput').value !== 'numeric_input') {
+        // MC distractors draw from every emoji-kind symbol (pan-placed ones
+        // included) — if the template only has this one emoji defined at all,
+        // options will all be the same emoji with different counts.
+        const emojiCount = scaleSymbols.filter(s => s.kind === 'emoji').length;
+        hint.innerHTML = emojiCount === 1
+            ? '<span style="color:#b45309;">ℹ️ მხოლოდ ერთი ემოჯი-სიმბოლოა განსაზღვრული — თუ ემოჯი გაიმარჯვებს პასუხად, ვარიანტებში მხოლოდ ამ ერთის სხვადასხვა რაოდენობა გამოჩნდება</span>'
+            : '';
     } else {
         hint.innerHTML = '';
     }
@@ -1367,14 +1360,11 @@ function syncScaleConfig() {
     });
     const left  = scaleLeft.map(it  => ({ key: it.key, count: Math.max(1, +it.count || 1) }));
     const right = scaleRight.map(it => ({ key: it.key, count: Math.max(1, +it.count || 1) }));
-    const answerKey    = document.getElementById('scaleAnswerKey').value || '';
-    const referenceKey = document.getElementById('scaleReferenceKey').value || '';
     const countMin = Math.max(1, parseInt(document.getElementById('scaleCountMin').value) || 1);
     const countMax = Math.max(countMin, parseInt(document.getElementById('scaleCountMax').value) || 6);
 
     document.getElementById('numConfigJson').value = JSON.stringify({
         symbols, left, right,
-        answer_key: answerKey, reference_key: referenceKey || null,
         count_min: countMin, count_max: countMax,
     });
 
@@ -1382,12 +1372,12 @@ function syncScaleConfig() {
         scaleConditions.map(c => ({ left: c.left, op: c.op, right: c.right }))
     );
 
-    // Distractor range only matters for a weight-kind answer in MC mode — an
-    // emoji-kind MC answer builds its own "{count} {emoji}" wrong options via
-    // ScaleService::buildEmojiOptions() instead, which doesn't consult this.
-    const ansSym  = symbols[answerKey];
-    const isMc    = document.getElementById('answerTypeInput').value !== 'numeric_input';
-    const showDist = !!(ansSym && ansSym.kind === 'weight' && isMc);
+    // Distractor range only matters when a weight-kind candidate could win as
+    // the answer in MC mode — an emoji-kind MC answer builds its own
+    // "{count} {emoji}" wrong options via ScaleService::buildEmojiOptions()
+    // instead, which doesn't consult this.
+    const isMc = document.getElementById('answerTypeInput').value !== 'numeric_input';
+    const showDist = isMc && scaleEligibleCandidates().some(s => s.kind === 'weight');
     document.getElementById('scaleDistSection').style.display = showDist ? '' : 'none';
     if (showDist) {
         const dMin = Math.max(1, parseInt(document.getElementById('scaleDistMin').value) || 1);
@@ -1409,16 +1399,14 @@ function restoreScaleConfig(numCfg, answerType, distractors, conditionsArr) {
     scaleConditions = (Array.isArray(conditionsArr) ? conditionsArr : []).map(c => ({
         id: scaleCondIdSeq++, left: c.left || '', op: c.op || '>', right: c.right || '',
     }));
+    document.getElementById('scaleTemplateText').value = document.getElementById('templateText').value || '';
+    document.getElementById('scaleCountMin').value = numCfg.count_min || 1;
+    document.getElementById('scaleCountMax').value = numCfg.count_max || 6;
+    document.getElementById('scaleDistMin').value = distractors?.min || 1;
+    document.getElementById('scaleDistMax').value = distractors?.max || 5;
     renderScaleSymbols();
     renderScalePan('left');
     renderScalePan('right');
-    document.getElementById('scaleAnswerKey').value    = numCfg.answer_key || '';
-    document.getElementById('scaleReferenceKey').value = numCfg.reference_key || '';
-    document.getElementById('scaleCountMin').value = numCfg.count_min || 1;
-    document.getElementById('scaleCountMax').value = numCfg.count_max || 6;
-    document.getElementById('scaleTemplateText').value = document.getElementById('templateText').value || '';
-    document.getElementById('scaleDistMin').value = distractors?.min || 1;
-    document.getElementById('scaleDistMax').value = distractors?.max || 5;
     renderScaleConds();
     setScaleAnswerMode(answerType === 'numeric_input' ? 'numeric_input' : 'numeric');
 }
@@ -1432,8 +1420,8 @@ function restoreScaleConfig(numCfg, answerType, distractors, conditionsArr) {
 function genPreviewScale() {
     let cfg;
     try { cfg = JSON.parse(document.getElementById('numConfigJson').value); } catch (e) { cfg = null; }
-    if (!cfg || !cfg.answer_key || !cfg.symbols || !cfg.symbols[cfg.answer_key]) {
-        document.getElementById('prevQ').innerHTML = '<span style="color:#94a3b8;font-size:0.72rem;">სიმბოლოები, პინები და პასუხის სიმბოლო შეავსეთ preview-სთვის</span>';
+    if (!cfg || !cfg.symbols || !Object.keys(cfg.symbols).length) {
+        document.getElementById('prevQ').innerHTML = '<span style="color:#94a3b8;font-size:0.72rem;">სიმბოლოები და პინები შეავსეთ preview-სთვის</span>';
         document.getElementById('prevOpts').innerHTML = '';
         document.getElementById('prevHint').innerHTML = '';
         document.getElementById('prevFormula').innerHTML = '';
@@ -1443,10 +1431,7 @@ function genPreviewScale() {
     }
 
     const symbols = cfg.symbols, left = cfg.left || [], right = cfg.right || [];
-    const answerKey = cfg.answer_key, referenceKey = cfg.reference_key || null;
     const countMin = cfg.count_min || 1, countMax = cfg.count_max || 6;
-    const answerConf = symbols[answerKey];
-    const answerKind = answerConf.kind || 'emoji';
 
     // Letters (A, B, C...) in symbol save order — same positional labels
     // scaleSymbolLabel() shows in the admin UI, used both for the conditions
@@ -1454,33 +1439,39 @@ function genPreviewScale() {
     const letterMap = {};
     Object.keys(symbols).forEach((key, i) => { letterMap[String.fromCharCode(65 + i)] = key; });
 
-    // The answer symbol's weight is never rolled (its value IS what's solved for),
-    // so if it's ALSO placed on a pan, that pan's total silently drops that term —
-    // same invariant ScaleService::build() enforces at save time. Caught here too
-    // so the live preview shows a clear warning instead of "undefined".
-    if ([...left, ...right].some(it => it.key === answerKey)) {
+    // The answer symbol is auto-chosen (mirrors ScaleService::build()), not
+    // admin-picked: ANY defined symbol is a candidate, on a pan or not — an
+    // emoji-kind one only when a custom template_text is present (its weight
+    // is never shown directly, so without a hand-written relationship there'd
+    // be no way for a child to determine it).
+    const hasCustomPrompt = !!document.getElementById('templateText').value.trim();
+    const candidates = Object.keys(symbols).filter(key => {
+        const kind = symbols[key].kind || 'emoji';
+        return kind === 'weight' || hasCustomPrompt;
+    });
+    if (!candidates.length) {
         document.getElementById('prevQ').innerHTML = '';
         document.getElementById('prevOpts').innerHTML = '';
         document.getElementById('prevHint').innerHTML = '';
         document.getElementById('prevFormula').innerHTML = '';
         document.getElementById('prevVars').innerHTML = '';
-        document.getElementById('prevWarn').innerHTML = '<span style="color:#f87171;">⚠ პასუხის სიმბოლო ასევე დევს პინაზე — ამოაშალეთ ის მარცხენა/მარჯვენა პინიდან</span>';
+        document.getElementById('prevWarn').innerHTML = '<span style="color:#f87171;">⚠ საჭიროა მინიმუმ 1 წონა-ტიპის სიმბოლო, ან დაწერეთ კითხვის ტექსტი, რომ ემოჯი-ტიპის სიმბოლოც დასაშვები გახდეს</span>';
         return;
     }
+    const countOnSidePv = (arr, key) => arr.filter(it => it.key === key).reduce((t, it) => t + Math.max(1, it.count || 1), 0);
 
     let result = null;
     for (let attempt = 0; attempt < 300 && !result; attempt++) {
+        // Every symbol gets a provisional rolled weight — used directly for an
+        // emoji-kind symbol (always), and as a weight-kind symbol's own pan
+        // value for whenever it ISN'T the candidate being tried below (when it
+        // IS, this provisional roll is set aside in favor of solving for its
+        // true value).
         const weights = {};
         Object.entries(symbols).forEach(([key, conf]) => {
-            if (key === answerKey && answerKind === 'weight') return;
             const min = conf.min || 1, max = Math.max(min, conf.max || 9);
             weights[key] = min + Math.floor(Math.random() * (max - min + 1));
         });
-        if (scaleConditions.length) {
-            const letterWeights = {};
-            Object.entries(letterMap).forEach(([letter, key]) => { letterWeights[letter] = weights[key] || 0; });
-            if (!evalScaleConditions(letterWeights)) continue;
-        }
         const sumSide = items => items.reduce((t, it) => t + (weights[it.key] || 0) * Math.max(1, it.count || 1), 0);
         const totalLeft = sumSide(left), totalRight = sumSide(right);
         const deficit = totalLeft - totalRight;
@@ -1488,26 +1479,51 @@ function genPreviewScale() {
         const blankSide = deficit > 0 ? 'right' : 'left';
         const need = Math.abs(deficit);
 
-        let conditionText = null, answerValue = null;
-        if (answerKind === 'weight') {
-            const aMin = answerConf.min || 1, aMax = Math.max(aMin, answerConf.max || 20);
-            if (need < aMin || need > aMax) continue;
-            answerValue = need;
-        } else {
-            const aw = weights[answerKey] || 0;
-            if (aw <= 0 || need % aw !== 0) continue;
-            const neededCount = Math.floor(need / aw);
-            if (neededCount < countMin || neededCount > countMax) continue;
-            answerValue = neededCount;
-            if (referenceKey) {
-                const rw = weights[referenceKey] || 0;
-                if (rw <= 0 || aw % rw !== 0) continue;
-                const ratio = aw / rw;
-                if (ratio < 1) continue;
-                conditionText = `1 ${answerConf.symbol || '❓'} = ${ratio} ${symbols[referenceKey].symbol || '❓'}`;
+        const pool = [...candidates].sort(() => Math.random() - 0.5);
+        for (const answerKey of pool) {
+            const conf = symbols[answerKey];
+            const kind = conf.kind || 'emoji';
+            const cLeft = countOnSidePv(left, answerKey), cRight = countOnSidePv(right, answerKey);
+            const coef = cLeft - cRight;
+            let answerValue, inline = false, thisBlankSide = blankSide;
+
+            if (kind === 'weight' && coef !== 0) {
+                if (cLeft === cRight) continue; // cancels out — indeterminate
+                const knownLeft = totalLeft - weights[answerKey] * cLeft;
+                const knownRight = totalRight - weights[answerKey] * cRight;
+                const diff = knownRight - knownLeft;
+                if (diff % coef !== 0) continue;
+                const x = diff / coef;
+                const min = conf.min || 1, max = Math.max(min, conf.max || 20);
+                if (x < min || x > max) continue;
+                answerValue = x;
+                inline = true;
+                thisBlankSide = null;
+            } else if (kind === 'weight') {
+                const min = conf.min || 1, max = Math.max(min, conf.max || 20);
+                if (need < min || need > max) continue;
+                answerValue = need;
+            } else {
+                const aw = weights[answerKey] || 0;
+                if (aw <= 0 || need % aw !== 0) continue;
+                const cnt = Math.floor(need / aw);
+                if (cnt < countMin || cnt > countMax) continue;
+                answerValue = cnt;
             }
+
+            // Conditions must be checked against each symbol's REAL final value,
+            // not the provisional roll — a weight-kind winner's provisional roll
+            // was never actually used/shown, so it's swapped out here.
+            if (scaleConditions.length) {
+                const checkWeights = kind === 'weight' ? { ...weights, [answerKey]: answerValue } : weights;
+                const letterWeights = {};
+                Object.entries(letterMap).forEach(([letter, key]) => { letterWeights[letter] = checkWeights[key] || 0; });
+                if (!evalScaleConditions(letterWeights)) continue;
+            }
+
+            result = { weights, blankSide: thisBlankSide, answerKey, answerKind: kind, answerValue, inline };
+            break;
         }
-        result = { weights, blankSide, answerValue, conditionText };
     }
 
     if (!result) {
@@ -1520,6 +1536,10 @@ function genPreviewScale() {
         return;
     }
     document.getElementById('prevWarn').innerHTML = '';
+
+    const answerKey  = result.answerKey;
+    const answerKind = result.answerKind;
+    const answerConf = symbols[answerKey];
 
     const isMc = document.getElementById('answerTypeInput').value !== 'numeric_input';
     let options = null, correctAnswer;
@@ -1541,19 +1561,59 @@ function genPreviewScale() {
             options = [result.answerValue, ...wrong].map(String).sort(() => Math.random() - 0.5);
         }
     } else {
-        const label = `${result.answerValue} ${answerConf.symbol || '❓'}`;
+        // Mirrors ScaleService::buildEmojiOptions() — each option is a symbol
+        // repeated N times with no digit (e.g. "⭐⭐", never "2⭐"). Distractors
+        // are drawn from every emoji-kind symbol, pan-placed ones included (the
+        // rolled weights are already known at this point, no reason not to reuse
+        // them), ranked by how close that candidate's TOTAL weight comes to the
+        // actual deficit, so wrong answers look like genuine near-misses —
+        // different symbols preferred over different counts of the same one, as
+        // long as there are enough of them.
+        const emojiLabel = (sym, n) => sym.repeat(Math.max(1, n));
+        const answerSym = answerConf.symbol || '❓';
+        const label = emojiLabel(answerSym, result.answerValue);
         correctAnswer = label;
         if (isMc) {
-            const emojiKeys = Object.keys(symbols).filter(k => (symbols[k].kind || 'emoji') === 'emoji');
-            const pool = emojiKeys.length ? emojiKeys : [answerKey];
+            const need = result.answerValue * Math.max(1, result.weights[answerKey] || 1);
+            let pool = Object.keys(symbols).filter(k => (symbols[k].kind || 'emoji') === 'emoji');
+            if (!pool.length) pool = [answerKey];
+
+            const ranked = [];
+            pool.forEach(key => {
+                const w = Math.max(1, result.weights[key] || 1);
+                for (let cnt = countMin; cnt <= countMax; cnt++) {
+                    const lbl = emojiLabel(symbols[key].symbol || '❓', cnt);
+                    if (lbl === label) continue;
+                    const total = cnt * w;
+                    // A different symbol can share the same rolled weight as the
+                    // answer symbol — if this candidate's TOTAL also equals the
+                    // actual deficit, it would genuinely balance the scale too
+                    // (a second correct answer in disguise), so exclude it, not
+                    // just the one matching the correct LABEL string.
+                    if (total === need) continue;
+                    ranked.push({ label: lbl, key, dev: Math.abs(total - need) });
+                }
+            });
+            ranked.sort((a, b) => a.dev - b.dev);
+
             const wrong = [];
-            let attempts = 0;
-            while (wrong.length < 3 && attempts < 100) {
-                attempts++;
-                const key = pool[Math.floor(Math.random() * pool.length)];
-                const cnt = countMin + Math.floor(Math.random() * (countMax - countMin + 1));
-                const lbl = `${cnt} ${symbols[key].symbol || '❓'}`;
-                if (lbl !== label && !wrong.includes(lbl)) wrong.push(lbl);
+            const usedKeys = [];
+            for (const cand of ranked) {
+                if (wrong.length >= 3) break;
+                if (usedKeys.includes(cand.key) || wrong.includes(cand.label)) continue;
+                wrong.push(cand.label);
+                usedKeys.push(cand.key);
+            }
+            for (const cand of ranked) {
+                if (wrong.length >= 3) break;
+                if (wrong.includes(cand.label)) continue;
+                wrong.push(cand.label);
+            }
+            let delta = 1;
+            while (wrong.length < 3) {
+                const cand = emojiLabel(answerSym, result.answerValue + delta);
+                if (cand !== label && !wrong.includes(cand)) wrong.push(cand);
+                delta++;
             }
             options = [label, ...wrong].sort(() => Math.random() - 0.5);
         }
@@ -1566,6 +1626,14 @@ function genPreviewScale() {
         let html = items.map(it => {
             const conf  = symbols[it.key] || {};
             const count = Math.max(1, it.count || 1);
+            // Weight-kind answer symbol placed inline on a pan (result.inline,
+            // see above) — its value is never shown directly, so render it as
+            // the same dashed "?" plate the separately-appended blank uses.
+            if (result.inline && it.key === answerKey) {
+                return Array.from({ length: count }, () =>
+                    `<div style="width:26px;height:26px;border-radius:6px;border:2.5px dashed #94a3b8;background:#f8fafc;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.75rem;color:#94a3b8;flex-shrink:0;">?</div>`
+                ).join('');
+            }
             if ((conf.kind || 'emoji') === 'weight') {
                 return Array.from({ length: count }, () =>
                     `<div style="width:26px;height:26px;border-radius:6px;background:#4f46e5;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.7rem;flex-shrink:0;">${result.weights[it.key]}</div>`
@@ -1576,9 +1644,15 @@ function genPreviewScale() {
             ).join('');
         }).join('');
         if (blankHere) {
+            // MC mode never names the answer symbol in advance (that's the whole
+            // point of offering 4 "{emoji}×N" choices) — show a bare "?" there
+            // too, same as weight-kind, instead of leaking which emoji it is.
+            const revealSymbol = !isMc;
             html += answerKind === 'weight'
                 ? `<div style="width:26px;height:26px;border-radius:6px;border:2.5px dashed #94a3b8;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-weight:800;font-size:0.75rem;flex-shrink:0;">?</div>`
-                : `<div style="font-size:1.15rem;line-height:1;border:2.5px dashed #94a3b8;border-radius:7px;padding:2px 4px;text-align:center;flex-shrink:0;">${answerConf.symbol || '❓'}<span style="font-size:0.5rem;color:#94a3b8;display:block;line-height:1;">?</span></div>`;
+                : (revealSymbol
+                    ? `<div style="font-size:1.15rem;line-height:1;border:2.5px dashed #94a3b8;border-radius:7px;padding:2px 4px;text-align:center;flex-shrink:0;">${answerConf.symbol || '❓'}<span style="font-size:0.5rem;color:#94a3b8;display:block;line-height:1;">?</span></div>`
+                    : `<div style="width:26px;height:26px;border-radius:6px;border:2.5px dashed #94a3b8;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-weight:800;font-size:0.95rem;flex-shrink:0;">?</div>`);
         }
         return html;
     };
@@ -1591,15 +1665,27 @@ function genPreviewScale() {
     let prompt = document.getElementById('templateText').value.trim() || defaultPrompt;
 
     // {{A}}, {{B}}... resolve to that symbol's rolled value — the number for a
-    // weight-kind symbol (or the just-solved answer value for the answer symbol
-    // itself, which is never pre-rolled), or the emoji character for an
-    // emoji-kind symbol (never its hidden weight). Mirrors generateScale() (PHP).
+    // weight-kind symbol (the just-solved answer value if it won this round —
+    // checked FIRST, since every symbol now gets a throwaway provisional roll
+    // regardless, so `??` alone would wrongly prefer that over the real solved
+    // value — or its own rolled weight otherwise), or the emoji character for
+    // an emoji-kind symbol (never its hidden weight). Mirrors generateScale() (PHP).
+    // letterDebug collects the same letters' actual NUMERIC values (admin-only,
+    // shown below the preview — never substituted into the child-facing prompt
+    // for an emoji symbol) so a condition like "A > B" can be checked by eye.
+    const letterDebug = [];
     Object.entries(letterMap).forEach(([letter, key]) => {
         const conf = symbols[key] || {};
-        const val = (conf.kind || 'emoji') === 'weight'
-            ? (result.weights[key] ?? (key === answerKey ? result.answerValue : '?'))
-            : (conf.symbol || '❓');
+        const isWeight = (conf.kind || 'emoji') === 'weight';
+        // Only a WEIGHT-kind winner's provisional roll is thrown away in favor
+        // of result.answerValue (the just-solved number) -- for an EMOJI-kind
+        // winner, answerValue is the ADD-ON COUNT (e.g. "2 more 🎵"), a totally
+        // different quantity from its hidden weight, so it must never be
+        // substituted here even when that symbol happens to be the answer.
+        const numericVal = (isWeight && key === answerKey) ? result.answerValue : (result.weights[key] ?? null);
+        const val = isWeight ? (numericVal ?? '?') : (conf.symbol || '❓');
         prompt = prompt.split(`{{${letter}}}`).join(String(val));
+        letterDebug.push(isWeight ? `${letter}=${numericVal ?? '?'}` : `${letter}=${conf.symbol || '❓'}(${numericVal ?? '?'})`);
     });
 
     document.getElementById('prevQ').innerHTML = '⚖️ ' + escHtmlFormLp(prompt);
@@ -1615,9 +1701,6 @@ function genPreviewScale() {
         </div>
         ${scaleSvgHtml()}
     </div>`;
-    if (result.conditionText) {
-        optsHtml += `<div style="grid-column:1/-1;background:#eef2ff;border:1.5px dashed #a5b4fc;border-radius:8px;padding:5px 10px;text-align:center;font-size:0.75rem;font-weight:700;color:#4338ca;margin:8px 0 0;">💡 ${escHtmlFormLp(result.conditionText)}</div>`;
-    }
     if (options) {
         optsHtml += options.map(o => `<div class="preview-opt ${o === correctAnswer ? 'c' : ''}">${escHtmlFormLp(o)}</div>`).join('');
     } else {
@@ -1625,7 +1708,7 @@ function genPreviewScale() {
     }
     document.getElementById('prevOpts').innerHTML = optsHtml;
     document.getElementById('prevFormula').innerHTML = '';
-    document.getElementById('prevVars').innerHTML = '';
+    document.getElementById('prevVars').innerHTML = escHtmlFormLp(letterDebug.join(' · '));
 }
 function escHtmlFormLp(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

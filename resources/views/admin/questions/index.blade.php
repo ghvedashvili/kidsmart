@@ -771,7 +771,6 @@ function renderLpScale(data) {
         + `<div class="lp-scale-pan" style="flex:1;">${leftHtml}</div>`
         + `<div class="lp-scale-pan" style="flex:1;">${rightHtml}</div>`
         + `</div>${scaleSvgHtmlLp()}</div>`;
-    if (q.condition_text) html += `<div class="lp-scale-cond">💡 ${escHtmlLp(q.condition_text)}</div>`;
 
     if (Array.isArray(data.options) && data.options.length) {
         html += '<div class="lp-opts">' + data.options.map(o =>

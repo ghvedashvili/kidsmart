@@ -471,28 +471,24 @@ class QuestionTemplateController extends Controller
             $symbols = is_array($numConfig['symbols'] ?? null) ? $numConfig['symbols'] : [];
             $left    = is_array($numConfig['left']    ?? null) ? $numConfig['left']    : [];
             $right   = is_array($numConfig['right']   ?? null) ? $numConfig['right']   : [];
-            $answerKey    = (string) ($numConfig['answer_key'] ?? '');
-            $referenceKey = $numConfig['reference_key'] ?: null;
             $countMin = max(1, (int) ($numConfig['count_min'] ?? 1));
             $countMax = max($countMin, (int) ($numConfig['count_max'] ?? 6));
+            $hasCustomPrompt = trim((string) ($raw['template_text'] ?? '')) !== '';
 
-            if ($answerKey === '' || ! isset($symbols[$answerKey])) {
+            // The answer symbol is chosen automatically at generation time from
+            // ANY defined symbol, on a pan or not (see ScaleService::build()) —
+            // not admin-picked. An emoji-kind candidate is only eligible when
+            // the admin has written a custom template_text (its weight is never
+            // shown directly, so without a hand-written relationship there'd be
+            // no way for a child to determine it).
+            $eligible = array_filter(array_keys($symbols), function ($key) use ($symbols, $hasCustomPrompt) {
+                $kind = $symbols[$key]['kind'] ?? 'emoji';
+                return $kind === 'weight' || $hasCustomPrompt;
+            });
+            if (! $eligible) {
                 throw \Illuminate\Validation\ValidationException::withMessages([
-                    'num_config' => 'სასწორის პასუხის სიმბოლო არ არის მითითებული',
+                    'num_config' => 'საჭიროა მინიმუმ 1 წონა-ტიპის სიმბოლო, ან დაწერეთ კითხვის ტექსტი, რომ ემოჯი-ტიპის სიმბოლოც დასაშვები გახდეს პასუხად',
                 ]);
-            }
-            $answerKind = $symbols[$answerKey]['kind'] ?? 'emoji';
-            if ($answerKind === 'emoji' && ! $referenceKey) {
-                throw \Illuminate\Validation\ValidationException::withMessages([
-                    'num_config' => 'ემოჯი-ტიპის პასუხისთვის საცნობი სიმბოლო სავალდებულოა',
-                ]);
-            }
-            foreach (array_merge($left, $right) as $it) {
-                if (($it['key'] ?? null) === $answerKey) {
-                    throw \Illuminate\Validation\ValidationException::withMessages([
-                        'num_config' => 'პასუხის სიმბოლო არ შეიძლება იდგეს პინაზე — ამოაშალეთ ის მარცხენა/მარჯვენა პინიდან',
-                    ]);
-                }
             }
 
             // Distractors: only meaningful for a weight-kind answer in MC mode
@@ -527,13 +523,11 @@ class QuestionTemplateController extends Controller
                 'hint_text'       => $raw['hint_text'] ?? null,
                 'correct_formula' => '',
                 'num_config'      => [
-                    'symbols'       => $symbols,
-                    'left'          => $left,
-                    'right'         => $right,
-                    'answer_key'    => $answerKey,
-                    'reference_key' => $referenceKey,
-                    'count_min'     => $countMin,
-                    'count_max'     => $countMax,
+                    'symbols'   => $symbols,
+                    'left'      => $left,
+                    'right'     => $right,
+                    'count_min' => $countMin,
+                    'count_max' => $countMax,
                 ],
                 'distractors'     => $scaleDistractors,
                 'conditions'      => $scaleConditions,
