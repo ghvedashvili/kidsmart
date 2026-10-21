@@ -20,6 +20,13 @@ class ScaleService
      * its ratio to the answer symbol's weight must ALSO come out whole, since that
      * ratio is shown to the child as the "condition" (e.g. "1🍌 = 2🍐").
      *
+     * $conditionsCheck, if given, is called with the rolled $weights map (keyed
+     * by symbol key, same as everywhere else here) on every attempt; returning
+     * false rejects that attempt and retries, exactly like the other per-attempt
+     * checks below. Lets the caller (QuestionTemplate::generateScale()) reuse its
+     * own conditionsMet()/evalExpr() engine against the symbols' letter labels
+     * without this class needing to know anything about that syntax.
+     *
      * @throws \RuntimeException if no attempt resolves within the retry budget.
      */
     public static function build(
@@ -29,7 +36,8 @@ class ScaleService
         string $answerKey,
         ?string $referenceKey,
         int $countMin,
-        int $countMax
+        int $countMax,
+        ?callable $conditionsCheck = null
     ): array {
         $answerConf = $symbols[$answerKey] ?? null;
         if (! $answerConf) {
@@ -72,6 +80,8 @@ class ScaleService
                 $weights[$key] = rand($min, $max);
             }
 
+            if ($conditionsCheck && ! $conditionsCheck($weights)) continue;
+
             $totalLeft  = self::sumSide($left, $weights);
             $totalRight = self::sumSide($right, $weights);
             $deficit    = $totalLeft - $totalRight;
@@ -110,6 +120,7 @@ class ScaleService
                 'blank_symbol'   => $answerKind === 'emoji' ? $answerSymbol : null,
                 'condition_text' => $conditionText,
                 'answer_value'   => $answerValue,
+                'weights'        => $weights,
             ];
         }
 

@@ -102,8 +102,34 @@ class QuestionTemplate extends Model
         $countMax = max($countMin, (int) ($cfg['count_max'] ?? 6));
         $isMc     = $this->answer_type !== 'numeric_input';
 
+        // Letters (A, B, C...) are the names the admin builds both {{A}}-style
+        // template_text tokens and "conditions" rows against — assigned
+        // positionally from $symbols in save order, same as the admin form's
+        // display labels (scaleSymbolLabel()).
+        $letterMap = [];
+        $li = 0;
+        foreach (array_keys($symbols) as $key) {
+            $letterMap[chr(65 + $li)] = $key;
+            $li++;
+        }
+
+        // Conditions constrain how the symbols' rolled weights relate to each
+        // other, reusing the same conditionsMet()/evalExpr() engine the plain
+        // numeric templates use — just against these letter-named weights
+        // instead of N1/N2. Checked on every ScaleService::build() attempt, so
+        // an impossible condition just exhausts the retry budget like any other
+        // unsatisfiable constraint (caught below as QuestionGenerationException).
+        $conditions = $this->conditions ?? [];
+        $conditionsCheck = empty($conditions) ? null : function (array $weights) use ($conditions, $letterMap) {
+            $letterWeights = [];
+            foreach ($letterMap as $letter => $key) {
+                $letterWeights[$letter] = $weights[$key] ?? 0;
+            }
+            return $this->conditionsMet($conditions, $letterWeights);
+        };
+
         try {
-            $result = \App\Services\ScaleService::build($symbols, $left, $right, $answerKey, $referenceKey, $countMin, $countMax);
+            $result = \App\Services\ScaleService::build($symbols, $left, $right, $answerKey, $referenceKey, $countMin, $countMax, $conditionsCheck);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('QuestionTemplate: scale config never resolved after retries', [
                 'template_id' => $this->id,
@@ -131,6 +157,21 @@ class QuestionTemplate extends Model
                 ? 'რა წონა აკლია, რომ სასწორი დაბალანსდეს? ⚖️'
                 : 'რამდენი ' . ($result['blank_symbol'] ?? '') . ' დასამატებელია, რომ სასწორი დაბალანსდეს? ⚖️');
         $prompt = trim((string) $this->template_text) !== '' ? $this->template_text : $defaultPrompt;
+
+        // {{A}}, {{B}}... in a custom prompt resolve to that symbol's rolled
+        // value — the number itself for a weight-kind symbol (its own weight if
+        // rolled, or the just-solved answer value for the answer symbol, which
+        // is deliberately never pre-rolled), or the emoji character for an
+        // emoji-kind symbol (never its hidden weight, which would spoil the puzzle).
+        foreach ($letterMap as $letter => $key) {
+            $conf = $symbols[$key] ?? [];
+            if (($conf['kind'] ?? 'emoji') === 'weight') {
+                $val = $result['weights'][$key] ?? ($key === $answerKey ? $answerValue : '?');
+            } else {
+                $val = $conf['symbol'] ?? '❓';
+            }
+            $prompt = str_replace("{{{$letter}}}", (string) $val, $prompt);
+        }
 
         $questionData = [
             'type'           => 'scale',

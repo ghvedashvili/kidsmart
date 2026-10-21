@@ -391,6 +391,10 @@
                 <div id="scaleFields" style="display:none;margin-top:14px;border-top:1px solid #f1f5f9;padding-top:14px;">
                     <div class="sec-title" style="margin-bottom:10px;">⚖ სასწორის პარამეტრები</div>
 
+                    <div class="lbl">კითხვის ტექსტი <span style="color:#94a3b8;font-size:0.6rem;">(არასავალდებულო — ცარიელი დატოვებისას ავტომატურად დაგენერირდება პირობის მიხედვით)</span></div>
+                    <textarea id="scaleTemplateText" class="fc" rows="2" placeholder="⚖️ რომელი ვარიანტი დააბალანსებს სასწორს?"
+                        oninput="document.getElementById('templateText').value = this.value; previewDebounce();"></textarea>
+
                     <div class="lbl">სიმბოლოები <span style="color:#94a3b8;font-size:0.6rem;">(წონის ერთეულები — ემოჯი ან რიცხვი)</span></div>
                     <div class="nc-hdr" style="grid-template-columns:34px 1fr 70px 56px 56px 28px;">
                         <span></span><span>ტიპი</span><span>ემოჯი</span><span>min</span><span>max</span><span></span>
@@ -437,12 +441,29 @@
                         </div>
                     </div>
 
+                    <div class="lbl" style="margin-top:12px;">პირობები <span style="color:#94a3b8;font-size:0.6rem;">(სურვილისამებრ — სიმბოლოების წონებს შორის მიმართება, ასო-სახელებით)</span></div>
+                    <div class="hint" style="margin-bottom:6px;">ორივე მხარეს შეიძლება გამოთქმა: <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">A &gt; B+1</code></div>
+                    <div id="scaleCondChips" class="cond-chips" style="display:none;"></div>
+                    <div id="scaleCondRows"></div>
+                    <button type="button" class="nc-add" id="scaleAddCondBtn" onclick="addScaleCond()" style="display:none;">+ პირობის დამატება</button>
+                    <span id="scaleCondNoVars" style="font-size:0.6rem;color:#94a3b8;">ჯერ დაამატეთ სიმბოლო</span>
+
                     <div class="lbl" style="margin-top:12px;">პასუხის ტიპი</div>
                     <div class="at-row">
                         <button type="button" id="scaleAtInput" class="at-btn" onclick="setScaleAnswerMode('numeric_input')">⌨️ ჩაწერა (რიცხვი)</button>
                         <button type="button" id="scaleAtMc" class="at-btn" onclick="setScaleAnswerMode('numeric')">🔢 არჩევანი (4 ვარიანტი)</button>
                     </div>
                     <div style="font-size:0.6rem;color:#94a3b8;margin-top:4px;">⌨️ ჩაწერა — ბავშვი თავად წერს რიცხვს (ემოჯი-პასუხისას კითხვაში ეტყობა რომელი ემოჯი). 🔢 არჩევანი — 4 ვარიანტიდან ირჩევს "{{'რაოდენობა + ემოჯი'}}" ან რიცხვს, ემოჯის ტიპი წინასწარ არ ეტყობა.</div>
+
+                    <div id="scaleDistSection" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9;">
+                        <div class="lbl">მცდარი პასუხების დიაპაზონი <span style="color:#94a3b8;font-size:0.6rem;">± (წონა-ტიპის პასუხის არჩევანისთვის)</span></div>
+                        <div style="display:flex;gap:10px;align-items:center;">
+                            <div class="lbl" style="margin:0;white-space:nowrap;">min</div>
+                            <input type="number" id="scaleDistMin" class="nc-inp" style="width:76px;" min="1" value="1" onchange="syncScaleConfig()">
+                            <div class="lbl" style="margin:0;white-space:nowrap;">max</div>
+                            <input type="number" id="scaleDistMax" class="nc-inp" style="width:76px;" min="1" value="5" onchange="syncScaleConfig()">
+                        </div>
+                    </div>
                 </div>{{-- /scaleFields --}}
             </div>
 
@@ -1109,9 +1130,19 @@ function scaleSvgHtml() {
         + '</svg>';
 }
 
+// Curated emoji pool for the admin's "emoji" symbol picker — same set
+// CodeService uses, so a child sees familiar icons across question types.
+const SCALE_EMOJI_POOL = [
+    '🍎','🍌','🍓','🍊','🍇','🍐','🍍','🍒','🍉','🍋',
+    '🍑','🥝','⭐','🌙','💎','🔥','🌊','🎵','🐶','🐱',
+    '🐻','🦊','🐼','🌸','🌈','🎯','🏆','🚀','🎸','🦋',
+];
 function addScaleSymbol(kind, symbol, min, max, id) {
     const sid = id || ('s' + Date.now() + '_' + Math.random().toString(36).slice(2, 6));
-    scaleSymbols.push({ id: sid, kind: kind || 'emoji', symbol: symbol || '🍎', min: min ?? 1, max: max ?? 9 });
+    // Defaults to "weight" (a plain number the child sees directly) — switching
+    // to "emoji" is an explicit choice, made by picking from SCALE_EMOJI_POOL
+    // below rather than typing/pasting a character.
+    scaleSymbols.push({ id: sid, kind: kind || 'weight', symbol: symbol || SCALE_EMOJI_POOL[0], min: min ?? 1, max: max ?? 9 });
     renderScaleSymbols();
     syncScaleConfig();
     return sid;
@@ -1132,11 +1163,13 @@ function renderScaleSymbols() {
         <div style="display:grid;grid-template-columns:34px 1fr 70px 56px 56px 28px;gap:4px;align-items:center;margin-bottom:4px;">
             <div style="font-weight:800;color:#94a3b8;text-align:center;">${scaleSymbolLabel(i)}</div>
             <select class="nc-inp" onchange="scaleSymbols[${i}].kind=this.value; renderScaleSymbols(); syncScaleConfig();">
-                <option value="emoji" ${s.kind === 'emoji' ? 'selected' : ''}>ემოჯი</option>
                 <option value="weight" ${s.kind === 'weight' ? 'selected' : ''}>წონა (რიცხვი)</option>
+                <option value="emoji" ${s.kind === 'emoji' ? 'selected' : ''}>ემოჯი</option>
             </select>
             ${s.kind === 'emoji'
-                ? `<input class="nc-inp" style="text-align:center;font-size:1.1rem;" maxlength="4" value="${s.symbol}" oninput="scaleSymbols[${i}].symbol=this.value; syncScaleConfig();">`
+                ? `<select class="nc-inp" style="text-align:center;font-size:1.1rem;" onchange="scaleSymbols[${i}].symbol=this.value; renderScaleSymbols(); syncScaleConfig();">
+                    ${SCALE_EMOJI_POOL.map(e => `<option value="${e}" ${e === s.symbol ? 'selected' : ''}>${e}</option>`).join('')}
+                  </select>`
                 : `<div style="font-size:0.58rem;color:#94a3b8;text-align:center;">(ჩანს რიცხვი)</div>`}
             <input type="number" class="nc-inp" value="${s.min}" onchange="scaleSymbols[${i}].min=+this.value; syncScaleConfig();">
             <input type="number" class="nc-inp" value="${s.max}" onchange="scaleSymbols[${i}].max=+this.value; syncScaleConfig();">
@@ -1144,7 +1177,100 @@ function renderScaleSymbols() {
         </div>
     `).join('');
     renderScaleSelects();
+    renderScaleConds();
 }
+
+// ── Conditions (scale) — same engine/UI pattern as the generic MC "პირობები"
+// section (#condRows/addCond()), but driven by the symbols' letter labels
+// (scaleSymbolLabel()) instead of ncRows names, and writing into the SAME
+// #conditionsJson hidden field (the generic sync is bypassed for scale).
+let scaleConditions = [];
+let scaleCondIdSeq  = 1;
+let scaleCondFocus  = null;
+
+function addScaleCond(left = '', op = '>', right = '', silent = false) {
+    const names = scaleSymbols.map((s, i) => scaleSymbolLabel(i));
+    if (!names.length) return;
+    scaleConditions.push({ id: scaleCondIdSeq++, left: left || names[0], op, right: right || (names[1] || names[0]) });
+    renderScaleConds();
+    if (!silent) previewDebounce();
+}
+function removeScaleCond(id) {
+    scaleConditions = scaleConditions.filter(c => c.id !== id);
+    renderScaleConds();
+}
+function updScaleCond(id, field, val) {
+    const c = scaleConditions.find(c => c.id === id);
+    if (c) { c[field] = val; syncScaleConfig(); previewDebounce(); }
+}
+function insertIntoScaleCond(text) {
+    if (!scaleCondFocus) return;
+    const inp = document.getElementById('scalecond-' + scaleCondFocus.id + '-' + scaleCondFocus.field);
+    if (!inp) return;
+    const s = inp.selectionStart ?? inp.value.length;
+    const e = inp.selectionEnd   ?? inp.value.length;
+    inp.value = inp.value.slice(0, s) + text + inp.value.slice(e);
+    inp.selectionStart = inp.selectionEnd = s + text.length;
+    inp.focus();
+    updScaleCond(scaleCondFocus.id, scaleCondFocus.field, inp.value.trim());
+}
+function renderScaleConds() {
+    const container = document.getElementById('scaleCondRows');
+    if (!container) return;
+    container.innerHTML = '';
+    const names   = scaleSymbols.map((s, i) => scaleSymbolLabel(i));
+    const hasVars = names.length > 0;
+
+    document.getElementById('scaleAddCondBtn').style.display = hasVars ? '' : 'none';
+    document.getElementById('scaleCondNoVars').style.display = hasVars ? 'none' : '';
+
+    const chipBar = document.getElementById('scaleCondChips');
+    chipBar.style.display = hasVars && scaleConditions.length ? '' : 'none';
+    chipBar.innerHTML = '';
+    names.forEach(n => {
+        const c = document.createElement('span');
+        c.className = 'cond-chip'; c.textContent = n;
+        c.onclick = () => insertIntoScaleCond(n); chipBar.appendChild(c);
+    });
+    OP_SYMS.forEach(s => {
+        const c = document.createElement('span');
+        c.className = 'cond-chip cond-op-chip'; c.textContent = s;
+        c.onclick = () => insertIntoScaleCond(s); chipBar.appendChild(c);
+    });
+
+    scaleConditions.forEach(cond => {
+        const div = document.createElement('div');
+        div.className = 'cond-row';
+        const opOpts = Object.entries(OP_LABELS).map(([v, l]) =>
+            `<option value="${v}" ${cond.op === v ? 'selected' : ''}>${l}</option>`).join('');
+        div.innerHTML = `
+            <input id="scalecond-${cond.id}-left" class="nc-inp" placeholder="A ან A+1" value="${cond.left}"
+                data-sci="${cond.id}" data-scf="left">
+            <select class="cond-sel cond-op" data-sci="${cond.id}" data-scf="op">${opOpts}</select>
+            <input id="scalecond-${cond.id}-right" class="nc-inp" placeholder="B ან B+1 ან 5" value="${cond.right}"
+                data-sci="${cond.id}" data-scf="right">
+            <button type="button" class="nc-del" onclick="removeScaleCond(${cond.id})">✕</button>
+        `;
+        container.appendChild(div);
+    });
+
+    syncScaleConfig();
+}
+document.getElementById('scaleCondRows').addEventListener('input', function (e) {
+    const el = e.target, id = +el.dataset.sci, field = el.dataset.scf;
+    if (!id || !field || field === 'op') return;
+    updScaleCond(id, field, el.value.trim());
+});
+document.getElementById('scaleCondRows').addEventListener('change', function (e) {
+    const el = e.target, id = +el.dataset.sci, field = el.dataset.scf;
+    if (!id || field !== 'op') return;
+    updScaleCond(id, 'op', el.value);
+});
+document.getElementById('scaleCondRows').addEventListener('focusin', function (e) {
+    const el = e.target, id = +el.dataset.sci, field = el.dataset.scf;
+    if (id && field && field !== 'op') scaleCondFocus = { id, field };
+});
+
 // Visual cap: the scale graphic's platforms are sized to comfortably hold 4
 // items on a side — both the "+" button and the per-row count input enforce it.
 const SCALE_SIDE_MAX = 4;
@@ -1251,15 +1377,38 @@ function syncScaleConfig() {
         answer_key: answerKey, reference_key: referenceKey || null,
         count_min: countMin, count_max: countMax,
     });
+
+    document.getElementById('conditionsJson').value = JSON.stringify(
+        scaleConditions.map(c => ({ left: c.left, op: c.op, right: c.right }))
+    );
+
+    // Distractor range only matters for a weight-kind answer in MC mode — an
+    // emoji-kind MC answer builds its own "{count} {emoji}" wrong options via
+    // ScaleService::buildEmojiOptions() instead, which doesn't consult this.
+    const ansSym  = symbols[answerKey];
+    const isMc    = document.getElementById('answerTypeInput').value !== 'numeric_input';
+    const showDist = !!(ansSym && ansSym.kind === 'weight' && isMc);
+    document.getElementById('scaleDistSection').style.display = showDist ? '' : 'none';
+    if (showDist) {
+        const dMin = Math.max(1, parseInt(document.getElementById('scaleDistMin').value) || 1);
+        const dMax = Math.max(dMin, parseInt(document.getElementById('scaleDistMax').value) || 5);
+        document.getElementById('distractorsJson').value = JSON.stringify({ min: dMin, max: dMax });
+    } else {
+        document.getElementById('distractorsJson').value = '';
+    }
+
     updateScaleAtHint();
     if (document.getElementById('qtInput').value === 'scale') genPreviewScale();
 }
-function restoreScaleConfig(numCfg, answerType) {
+function restoreScaleConfig(numCfg, answerType, distractors, conditionsArr) {
     scaleSymbols = Object.entries(numCfg.symbols || {}).map(([key, conf]) => ({
-        id: key, kind: conf.kind || 'emoji', symbol: conf.symbol || '🍎', min: conf.min ?? 1, max: conf.max ?? 9,
+        id: key, kind: conf.kind || 'weight', symbol: conf.symbol || SCALE_EMOJI_POOL[0], min: conf.min ?? 1, max: conf.max ?? 9,
     }));
     scaleLeft  = (numCfg.left  || []).map(it => ({ key: it.key, count: it.count || 1 }));
     scaleRight = (numCfg.right || []).map(it => ({ key: it.key, count: it.count || 1 }));
+    scaleConditions = (Array.isArray(conditionsArr) ? conditionsArr : []).map(c => ({
+        id: scaleCondIdSeq++, left: c.left || '', op: c.op || '>', right: c.right || '',
+    }));
     renderScaleSymbols();
     renderScalePan('left');
     renderScalePan('right');
@@ -1267,6 +1416,10 @@ function restoreScaleConfig(numCfg, answerType) {
     document.getElementById('scaleReferenceKey').value = numCfg.reference_key || '';
     document.getElementById('scaleCountMin').value = numCfg.count_min || 1;
     document.getElementById('scaleCountMax').value = numCfg.count_max || 6;
+    document.getElementById('scaleTemplateText').value = document.getElementById('templateText').value || '';
+    document.getElementById('scaleDistMin').value = distractors?.min || 1;
+    document.getElementById('scaleDistMax').value = distractors?.max || 5;
+    renderScaleConds();
     setScaleAnswerMode(answerType === 'numeric_input' ? 'numeric_input' : 'numeric');
 }
 
@@ -1295,6 +1448,12 @@ function genPreviewScale() {
     const answerConf = symbols[answerKey];
     const answerKind = answerConf.kind || 'emoji';
 
+    // Letters (A, B, C...) in symbol save order — same positional labels
+    // scaleSymbolLabel() shows in the admin UI, used both for the conditions
+    // check below and for {{A}}-style substitution into the prompt.
+    const letterMap = {};
+    Object.keys(symbols).forEach((key, i) => { letterMap[String.fromCharCode(65 + i)] = key; });
+
     // The answer symbol's weight is never rolled (its value IS what's solved for),
     // so if it's ALSO placed on a pan, that pan's total silently drops that term —
     // same invariant ScaleService::build() enforces at save time. Caught here too
@@ -1317,6 +1476,11 @@ function genPreviewScale() {
             const min = conf.min || 1, max = Math.max(min, conf.max || 9);
             weights[key] = min + Math.floor(Math.random() * (max - min + 1));
         });
+        if (scaleConditions.length) {
+            const letterWeights = {};
+            Object.entries(letterMap).forEach(([letter, key]) => { letterWeights[letter] = weights[key] || 0; });
+            if (!evalScaleConditions(letterWeights)) continue;
+        }
         const sumSide = items => items.reduce((t, it) => t + (weights[it.key] || 0) * Math.max(1, it.count || 1), 0);
         const totalLeft = sumSide(left), totalRight = sumSide(right);
         const deficit = totalLeft - totalRight;
@@ -1362,11 +1526,15 @@ function genPreviewScale() {
     if (answerKind === 'weight') {
         correctAnswer = String(result.answerValue);
         if (isMc) {
+            // Mirrors QuestionTemplate::buildMcOptions() — same admin-configured
+            // ± range (#scaleDistMin/#scaleDistMax) the backend uses via `distractors`.
+            const dMin = Math.max(1, parseInt(document.getElementById('scaleDistMin').value) || 1);
+            const dMax = Math.max(dMin, parseInt(document.getElementById('scaleDistMax').value) || 5);
             const wrong = [];
             let attempts = 0;
             while (wrong.length < 3 && attempts < 100) {
                 attempts++;
-                const delta = 1 + Math.floor(Math.random() * 5);
+                const delta = dMin + Math.floor(Math.random() * (dMax - dMin + 1));
                 const cand  = result.answerValue + (Math.random() < 0.5 ? -1 : 1) * delta;
                 if (cand > 0 && cand !== result.answerValue && !wrong.includes(cand)) wrong.push(cand);
             }
@@ -1420,7 +1588,19 @@ function genPreviewScale() {
         : (answerKind === 'weight'
             ? 'რა წონა აკლია, რომ სასწორი დაბალანსდეს? ⚖️'
             : `რამდენი ${answerConf.symbol || ''} დასამატებელია, რომ სასწორი დაბალანსდეს? ⚖️`);
-    const prompt = document.getElementById('templateText').value.trim() || defaultPrompt;
+    let prompt = document.getElementById('templateText').value.trim() || defaultPrompt;
+
+    // {{A}}, {{B}}... resolve to that symbol's rolled value — the number for a
+    // weight-kind symbol (or the just-solved answer value for the answer symbol
+    // itself, which is never pre-rolled), or the emoji character for an
+    // emoji-kind symbol (never its hidden weight). Mirrors generateScale() (PHP).
+    Object.entries(letterMap).forEach(([letter, key]) => {
+        const conf = symbols[key] || {};
+        const val = (conf.kind || 'emoji') === 'weight'
+            ? (result.weights[key] ?? (key === answerKey ? result.answerValue : '?'))
+            : (conf.symbol || '❓');
+        prompt = prompt.split(`{{${letter}}}`).join(String(val));
+    });
 
     document.getElementById('prevQ').innerHTML = '⚖️ ' + escHtmlFormLp(prompt);
     document.getElementById('prevHint').innerHTML = escHtmlFormLp(document.getElementById('hintText').value || '');
@@ -1998,6 +2178,25 @@ function evalExpr(expr, numVars) {
     e = e.replace(/[^0-9+\-*/()\s%]/g, '');
     try { const r = Function('return (' + e + ')')(); return Number.isFinite(r) ? Math.floor(r) : 0; }
     catch(_) { return 0; }
+}
+// Scale's own conditions check — same evalExpr() engine, against scaleConditions
+// (letter-named: A, B, C...) instead of the generic numeric-vars conditions array.
+function evalScaleConditions(letterVars) {
+    return scaleConditions.every(c => {
+        const l = evalExpr(c.left  ?? '0', letterVars);
+        const r = evalExpr(c.right ?? '0', letterVars);
+        switch (c.op) {
+            case '>':   return l > r;
+            case '<':   return l < r;
+            case '>=':  return l >= r;
+            case '<=':  return l <= r;
+            case '==':  return l === r;
+            case '!=':  return l !== r;
+            case '%0':  return r !== 0 && l % r === 0;
+            case '!%0': return r !== 0 && l % r !== 0;
+            default:    return true;
+        }
+    });
 }
 function evalConditions(numVars) {
     return conditions.every(c => {
@@ -2904,7 +3103,7 @@ function loadIntoForm(data) {
         document.getElementById('cwRevealedCount').value = numCfg.revealed_count || 0;
         syncCwConfig();
     } else if (data.question_type === 'scale') {
-        restoreScaleConfig(numCfg, data.answer_type);
+        restoreScaleConfig(numCfg, data.answer_type, data.distractors || null, data.conditions || []);
     } else if (data.answer_type !== 'text') {
         // multiple_choice, numeric — rebuild ncRows from num_config the same way
         // the page-load restore does, then separately restore _unique/_auto.
@@ -3062,7 +3261,7 @@ function array_key_exists_js(key, obj) { return obj && Object.prototype.hasOwnPr
 
     const numCfg = _KS.numConfig;
     if (document.getElementById('qtInput').value === 'scale') {
-        restoreScaleConfig(numCfg || {}, _KS.answerType);
+        restoreScaleConfig(numCfg || {}, _KS.answerType, _KS.distractors, _KS.conditions);
     } else if (numCfg && typeof numCfg === 'object' && Object.keys(numCfg).length) {
         if (numCfg['_unique']) {
             const cb = document.getElementById('uniqueNumVars');

@@ -495,6 +495,24 @@ class QuestionTemplateController extends Controller
                 }
             }
 
+            // Distractors: only meaningful for a weight-kind answer in MC mode
+            // (an emoji-kind MC answer builds its own "{count} {emoji}" wrong
+            // options instead — see ScaleService::buildEmojiOptions()).
+            $scaleDistractors = null;
+            if (! empty($raw['distractors'])) {
+                $scaleDistractors = json_decode($raw['distractors'], true);
+                if (! is_array($scaleDistractors)) $scaleDistractors = null;
+            }
+
+            // Conditions constrain how the symbols' rolled weights relate to each
+            // other (by their display letter — A, B, C... in save order), reusing
+            // the same conditions engine/evaluator the plain MC templates use.
+            $scaleConditions = null;
+            if (! empty($raw['conditions'])) {
+                $scaleConditions = json_decode($raw['conditions'], true);
+                if (! is_array($scaleConditions)) $scaleConditions = null;
+            }
+
             return [
                 'topic_id'        => $raw['topic_id'],
                 'theme_id'        => null,
@@ -517,8 +535,8 @@ class QuestionTemplateController extends Controller
                     'count_min'     => $countMin,
                     'count_max'     => $countMax,
                 ],
-                'distractors'     => null,
-                'conditions'      => null,
+                'distractors'     => $scaleDistractors,
+                'conditions'      => $scaleConditions,
             ];
         }
 
