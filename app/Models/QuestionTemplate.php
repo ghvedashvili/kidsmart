@@ -267,17 +267,91 @@ class QuestionTemplate extends Model
 
         $dist = $this->distractors ?? [];
         $optionVarNames = $dist['vars'] ?? [];
+        $wrongCount = max(1, (int) ($dist['count'] ?? 3));
 
-        $options = [];
+        // A distractor "var name" is normally looked up directly, but it may
+        // instead be a hand-typed template combining several vars into one
+        // string (e.g. "{{N1}} და {{N2}}") — the admin form's chip picker can
+        // only select a single existing variable's value, so this is the only
+        // way to express a combined distractor like the correct answer often is.
+        // A "{{*}}" slot (instead of a named var) is a WILDCARD — filled with a
+        // random base variable's value each time the pattern is expanded below,
+        // so one typed template auto-generates many distinct wrong answers
+        // instead of the admin having to type out every combination by hand.
+        $swappablePool = [];
+        foreach (($this->num_config ?? []) as $key => $conf) {
+            if (! is_array($conf) || str_starts_with((string) $key, '_')) continue;
+            if (! empty($conf['operator']) || array_key_exists('derived', $conf) || array_key_exists('conditional', $conf)) continue;
+            $swappablePool[] = $key;
+        }
+        // Each "{{*}}" slot in a SINGLE rendering must land on a DIFFERENT
+        // variable — two slots independently picking the same one (e.g. both
+        // landing on N1) would render as something like "2 და 2", which reads
+        // as "delete two separate 2s" when only one position actually holds
+        // that value. Shuffled once per call and consumed in order, so a
+        // 2-slot pattern can never repeat a position within that rendering.
+        $resolvePattern = function (string $tpl) use ($vars, $swappablePool) {
+            $shuffledPool = $swappablePool;
+            shuffle($shuffledPool);
+            $idx = 0;
+            return preg_replace_callback('/\{\{(\*|\w+)\}\}/', function ($m) use ($vars, $shuffledPool, &$idx) {
+                if ($m[1] === '*') {
+                    if (! $shuffledPool) return $m[0];
+                    $pick = $shuffledPool[$idx % count($shuffledPool)];
+                    $idx++;
+                    return (string) ($vars[$pick] ?? '?');
+                }
+                return isset($vars[$m[1]]) ? (string) $vars[$m[1]] : $m[0];
+            }, $tpl);
+        };
+
+        // Two wildcard-filled renderings that pick the SAME numbers in a
+        // different order (e.g. "6 და 2" vs "2 და 6") are the same answer in
+        // disguise when the slots are interchangeable — compared by their
+        // sorted digit multiset rather than the literal string, so only one
+        // ordering of any given pair ever shows up.
+        $digitKey = function (string $s): string {
+            preg_match_all('/\d+/', $s, $m);
+            $nums = array_map('intval', $m[0]);
+            sort($nums);
+            return implode(',', $nums);
+        };
+
+        // __ALL__/__NONE__/__EQUAL__ (the SPEC-style special answers) are
+        // PINNED — always included when selected, on top of $wrongCount —
+        // while every plain variable and hand-typed template is the RANDOM
+        // POOL that many are sampled from each generation, so an admin can
+        // mark a wider set of plausible wrong answers without bloating every
+        // question to more than 4 options.
+        $seen = [$correct => true];
+        $seenWildcardKeys = [$digitKey($correct) => true];
+        $pinned = [];
+        $pool = [];
         foreach ($optionVarNames as $varName) {
-            $val = $vars[$varName] ?? '?';
-            if (!in_array($val, $options, true)) {
-                $options[] = $val;
+            if (str_contains($varName, '{{*}}')) {
+                if (! $swappablePool) continue;
+                for ($attempt = 0; $attempt < 30 && count($pool) < $wrongCount * 3; $attempt++) {
+                    $val = $resolvePattern($varName);
+                    $key = $digitKey($val);
+                    if (isset($seen[$val]) || isset($seenWildcardKeys[$key])) continue;
+                    $seen[$val] = true;
+                    $seenWildcardKeys[$key] = true;
+                    $pool[] = $val;
+                }
+                continue;
             }
+            $val = str_contains($varName, '{{') ? $resolvePattern($varName) : ($vars[$varName] ?? '?');
+            // A candidate that happens to resolve to the same text as the
+            // correct answer this round would be a second "correct" option in
+            // disguise, not a wrong one — drop it rather than show a
+            // duplicate (or silently eating one of the wrong-answer slots).
+            if (isset($seen[$val])) continue;
+            $seen[$val] = true;
+            in_array($varName, ['__ALL__', '__NONE__', '__EQUAL__'], true) ? $pinned[] = $val : $pool[] = $val;
         }
-        if (!in_array($correct, $options, true)) {
-            array_unshift($options, $correct);
-        }
+        shuffle($pool);
+        $options = array_merge($pinned, array_slice($pool, 0, $wrongCount));
+        array_unshift($options, $correct);
         shuffle($options);
 
         $text = preg_replace('/\{\{(\w+)\}(?!\})/', '{{$1}}', $this->template_text);

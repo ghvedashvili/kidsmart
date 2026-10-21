@@ -641,9 +641,33 @@
                             <div class="hint">პირობა რიცხვით ცვლადებზე (&gt;, &lt;, &gt;=, &lt;=, ==, !=), მერე ? და : შორის — თითო მხარეს ცვლადის სახელი ან ტექსტი. ჯაჭვურადაც შეიძლება: A&gt;B?X:C&gt;D?Y:Z</div>
                         </div>
 
-                        <div class="lbl" style="margin-top:4px;">ვარიანტების ცვლადები <span style="color:#94a3b8;font-size:0.6rem;">(კლიკით)</span></div>
+                        <div class="lbl" style="margin-top:4px;display:flex;align-items:center;gap:6px;justify-content:space-between;">
+                            <span>ვარიანტების ცვლადები <span style="color:#94a3b8;font-size:0.6rem;">(კლიკით)</span></span>
+                            <span style="font-size:0.62rem;color:#64748b;white-space:nowrap;">
+                                რამდენი არასწორი:
+                                <input type="number" id="textDistCount" class="fc" value="3" min="1" max="8"
+                                    style="width:40px;display:inline-block;margin:0;padding:2px 4px;text-align:center;"
+                                    oninput="syncAll();previewDebounce();">
+                            </span>
+                        </div>
+                        <div class="hint" style="margin:-2px 0 4px;">მონიშნეთ ნებისმიერი რაოდენობა — თითო გენერაციაზე ზემოთ მითითებული რაოდენობა შემთხვევით შეირჩევა მათგან (მათ გამორჩევით, რაც ამ რაუნდში სწორ პასუხს დაემთხვა)</div>
                         <div id="textOptChips"></div>
                         <div id="noVarsHint2" style="display:none;font-size:0.6rem;color:#94a3b8;margin-top:4px;">ცვლადები არ არის</div>
+
+                        {{-- Hand-typed distractor templates, e.g. a combined var token
+                             string — a combination the chip picker above can't express
+                             since each chip is a single existing variable's value, not
+                             several combined into one custom string. Also joins the
+                             random pool above, not the pinned "ყველა სწორია"-style ones. --}}
+                        <div class="lbl" style="margin-top:8px;">სავარაუდო პასუხის ხელით ჩაწერა <span style="color:#94a3b8;font-size:0.6rem;">(მაგ: @{{N1}} და @{{N2}})</span></div>
+                        <div class="hint" style="margin:-2px 0 4px;">@{{*}} — ავტომატურად ავირჩევთ შემთხვევით ცვლადს ამ ადგილზე ყოველ გენერაციაზე, ანუ ერთი შაბლონი @{{*}} და @{{*}} თავისთავად დააგენერირებს "რამდენი არასწორი"-ით მითითებულ რაოდენობას სხვადასხვა კომბინაციით — ცალ-ცალკე ხელით ჩაწერა არ გჭირდებათ</div>
+                        <div style="display:flex;gap:4px;">
+                            <input type="text" id="textOptCustomInput" class="fc" style="margin:0;"
+                                placeholder="@{{*}} და @{{*}}"
+                                onkeydown="if(event.key==='Enter'){event.preventDefault();addTextOptCustom();}">
+                            <button type="button" class="btn-cancel" style="padding:6px 10px;white-space:nowrap;" onclick="addTextOptCustom()">+ დამატება</button>
+                        </div>
+                        <div class="chips" id="textOptCustomChips" style="margin-top:4px;"></div>
                     </div>
 
                     <input type="hidden" name="correct_formula" id="correctFormulaHidden"
@@ -843,7 +867,8 @@ function renderTextOptChips(data) {
             }).join('')
             + '</div>';
     }
-    html += '<div class="chips" style="margin-top:6px;border-top:1px solid #f1f5f9;padding-top:6px;">'
+    html += '<div style="font-size:0.52rem;color:#94a3b8;margin-top:6px;border-top:1px solid #f1f5f9;padding-top:6px;">ეს ყოველთვის დაემატება, ზემოთ მითითებული რაოდენობის გარდა:</div>'
+        + '<div class="chips">'
         + Object.entries(SPEC).map(function(e) {
             return '<span class="chip chip-txt text-opt-chip' + (prevSel.has(e[0]) ? ' sel' : '') + '" data-varname="' + e[0] + '" onclick="toggleTextOpt(this)">' + e[1] + '</span>';
         }).join('')
@@ -1787,6 +1812,34 @@ function toggleTextOpt(el) {
     syncAll(); previewDebounce();
 }
 
+// ── Hand-typed distractor templates (e.g. a combined "{{N1}} და {{N2}}"
+// string) — kept in their own array rather than as extra .text-opt-chip
+// elements, since renderTextOptChips() fully rebuilds that chip list from
+// the template's variable set (on theme change etc.) and would otherwise
+// wipe out a custom one that isn't among those variables.
+let textCustomOpts = [];
+function addTextOptCustom() {
+    const inp = document.getElementById('textOptCustomInput');
+    const val = inp.value.trim();
+    if (!val || textCustomOpts.includes(val)) return;
+    textCustomOpts.push(val);
+    inp.value = '';
+    renderTextOptCustomChips();
+    syncAll(); previewDebounce();
+}
+function removeTextOptCustom(idx) {
+    textCustomOpts.splice(idx, 1);
+    renderTextOptCustomChips();
+    syncAll(); previewDebounce();
+}
+function renderTextOptCustomChips() {
+    const el = document.getElementById('textOptCustomChips');
+    if (!el) return;
+    el.innerHTML = textCustomOpts.map((v, i) =>
+        `<span class="chip chip-txt sel">${escHtmlFormLp(v)} <a href="javascript:void(0)" onclick="removeTextOptCustom(${i})" style="color:#ef4444;font-weight:800;margin-left:3px;">×</a></span>`
+    ).join('');
+}
+
 // ── Text answer: plain-variable dropdown vs conditional formula ("A>B?X:Y").
 // The hidden `correct_formula` field carries whichever mode is active — the
 // backend's resolveTextFormula() treats a plain name and a conditional formula
@@ -2244,8 +2297,9 @@ function syncAll() {
         document.getElementById('correctFormulaHidden').value = textCondMode
             ? document.getElementById('textCondFormula').value.trim()
             : document.getElementById('textCorrectVar').value;
-        const optVars = [...document.querySelectorAll('.text-opt-chip.sel')].map(c => c.dataset.varname);
-        document.getElementById('distractorsJson').value = JSON.stringify({ vars: optVars });
+        const optVars = [...document.querySelectorAll('.text-opt-chip.sel')].map(c => c.dataset.varname).concat(textCustomOpts);
+        const wrongCount = Math.max(1, parseInt(document.getElementById('textDistCount')?.value) || 3);
+        document.getElementById('distractorsJson').value = JSON.stringify({ vars: optVars, count: wrongCount });
     } else {
         document.getElementById('correctFormulaHidden').value = document.getElementById('correctFormula').value;
         const dMin = +document.getElementById('distMin').value || 1;
@@ -2871,14 +2925,82 @@ function genPreviewText(tmpl) {
 
     const themeAndSpecial = { ...themeMap, ...SPEC };
     const correct = resolveTextFormulaJs(formula, numVars, themeAndSpecial);
-    const optVarNames = [...document.querySelectorAll('.text-opt-chip.sel')].map(c => c.dataset.varname);
-    const seen = new Set();
-    const opts = [];
-    optVarNames.forEach(v => {
-        const val = SPEC[v] || themeMap[v] || '?';
-        if (!seen.has(val)) { seen.add(val); opts.push({ v: val, c: val === correct }); }
+    const chipVarNames = [...document.querySelectorAll('.text-opt-chip.sel')].map(c => c.dataset.varname);
+    const SPEC_KEYS = Object.keys(SPEC);
+    // SPEC chips (__ALL__/__NONE__/__EQUAL__) are PINNED -- always included
+    // when selected, on top of the configured count -- everything else
+    // (plain var chips + hand-typed templates) is the RANDOM POOL that many
+    // get sampled from each generation. Mirrors the PHP generateText() split.
+    const pinnedNames = chipVarNames.filter(v => SPEC_KEYS.includes(v));
+    const poolNames = chipVarNames.filter(v => !SPEC_KEYS.includes(v)).concat(textCustomOpts);
+    const wrongCount = Math.max(1, parseInt(document.getElementById('textDistCount')?.value) || 3);
+    // A hand-typed distractor (containing {{VAR}} tokens) is substituted the
+    // same way the correct_formula's literal-text form is -- mirrors the PHP
+    // generateText() fix for distractor "var names" that are really templates.
+    // A "{{*}}" slot is a WILDCARD -- filled with a random base variable's
+    // value each time the pattern is expanded, so one typed template
+    // auto-generates many distinct wrong answers (mirrors PHP's $resolvePattern).
+    const allVarsForOpts = { ...numVars, ...themeAndSpecial };
+    const swappablePool = ncRows.filter(r => r.name && !['derived','operator','conditional'].includes(r.mode)).map(r => r.name);
+    // Each "{{*}}" slot in a SINGLE rendering must land on a DIFFERENT
+    // variable -- two slots independently picking the same one (e.g. both
+    // landing on N1) would render as something like "2 და 2", which reads as
+    // "delete two separate 2s" when only one position actually holds that
+    // value. Shuffled once per call and consumed in order, so a 2-slot
+    // pattern can never repeat a position within that rendering. Mirrors PHP.
+    const resolvePattern = tpl => {
+        const shuffled = [...swappablePool];
+        for (let i = shuffled.length-1; i > 0; i--) {
+            const j = Math.floor(Math.random()*(i+1)); [shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]];
+        }
+        let idx = 0;
+        return tpl.replace(/\{\{(\*|\w+)\}\}/g, (m, name) => {
+            if (name === '*') {
+                if (!shuffled.length) return m;
+                const pick = shuffled[idx % shuffled.length];
+                idx++;
+                return allVarsForOpts[pick] ?? '?';
+            }
+            return (name in allVarsForOpts) ? allVarsForOpts[name] : m;
+        });
+    };
+    const resolveOpt = v => v.includes('{{') ? resolvePattern(v) : (SPEC[v] || themeMap[v] || '?');
+    // Two wildcard-filled renderings that pick the SAME numbers in a
+    // different order (e.g. "6 და 2" vs "2 და 6") are the same answer in
+    // disguise when the slots are interchangeable -- compared by their
+    // sorted digit multiset rather than the literal string, so only one
+    // ordering of any given pair ever shows up. Mirrors PHP's $digitKey.
+    const digitKey = s => (s.match(/\d+/g) || []).map(Number).sort((a,b) => a-b).join(',');
+
+    const seen = new Set([correct]);
+    const seenWildcardKeys = new Set([digitKey(correct)]);
+    const pinned = [];
+    pinnedNames.forEach(v => {
+        const val = resolveOpt(v);
+        if (seen.has(val)) return;
+        seen.add(val); pinned.push(val);
     });
-    if (!seen.has(correct)) opts.unshift({ v: correct, c: true });
+    let pool = [];
+    poolNames.forEach(v => {
+        if (v.includes('{{*}}')) {
+            if (!swappablePool.length) return;
+            for (let attempt = 0; attempt < 30 && pool.length < wrongCount * 3; attempt++) {
+                const val = resolvePattern(v);
+                const key = digitKey(val);
+                if (seen.has(val) || seenWildcardKeys.has(key)) continue;
+                seen.add(val); seenWildcardKeys.add(key); pool.push(val);
+            }
+            return;
+        }
+        const val = resolveOpt(v);
+        if (seen.has(val)) return;
+        seen.add(val); pool.push(val);
+    });
+    for (let i = pool.length-1; i > 0; i--) {
+        const j = Math.floor(Math.random()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]];
+    }
+    const opts = [...pinned, ...pool.slice(0, wrongCount)].map(v => ({ v, c: false }));
+    opts.unshift({ v: correct, c: true });
     for (let i = opts.length-1; i > 0; i--) {
         const j = Math.floor(Math.random()*(i+1)); [opts[i],opts[j]]=[opts[j],opts[i]];
     }
@@ -2888,6 +3010,13 @@ function genPreviewText(tmpl) {
     document.getElementById('prevFormula').innerHTML =
         `სწ. პასუხი: <span style="color:#2a7a2a;">${correct}</span> <span style="color:#94a3b8;">(${formula})</span>`;
     document.getElementById('prevVars').innerHTML = Object.entries({...themeMap, ...numVars}).map(([k,v]) => `${k}=${v}`).join(' · ');
+    // "რამდენი არასწორი" only picks N from the candidates already marked
+    // below it -- it can't invent any on its own, so an admin who filled it
+    // in without marking/typing a single chip would otherwise see just the
+    // correct answer with no clue why.
+    document.getElementById('prevWarn').innerHTML = (!pinned.length && !pool.length)
+        ? '<span>⚠ არჩეული კანდიდატი არ არის — მონიშნეთ ჩიფი ან დააწერეთ შაბლონი ზემოთ, "რამდენი არასწორი" მხოლოდ მათგან ირჩევს</span>'
+        : '';
 }
 
 function genPreviewNumeric(tmpl) {
@@ -3323,7 +3452,14 @@ function array_key_exists_js(key, obj) { return obj && Object.prototype.hasOwnPr
     // For text mode: restore correct var (plain) or conditional formula + selected option vars
     if (isTxtInit) {
         if (_KS.editCorrectFormula) {
-            if (_KS.editCorrectFormula.includes('?') && _KS.editCorrectFormula.includes(':')) {
+            // resolveTextFormula() (PHP) accepts a plain var name, a ternary
+            // ("A>B?X:Y"), or literal text with one or more {{VAR}} tokens
+            // (e.g. "{{DEL1}} და {{DEL2}}") — only the first form fits the
+            // plain dropdown below, so the other two both need the advanced
+            // formula textbox, or an existing {{VAR}}-only formula would be
+            // silently dropped (dropdown can't hold arbitrary text) and the
+            // preview/answer would come up empty on every edit.
+            if ((_KS.editCorrectFormula.includes('?') && _KS.editCorrectFormula.includes(':')) || _KS.editCorrectFormula.includes('{{')) {
                 textCondMode = true;
                 document.getElementById('textCorrectVar').style.display = 'none';
                 document.getElementById('textCondWrap').style.display = '';
@@ -3336,10 +3472,20 @@ function array_key_exists_js(key, obj) { return obj && Object.prototype.hasOwnPr
         }
         if (_KS.distractors && Array.isArray(_KS.distractors.vars)) {
             _KS.distractors.vars.forEach(function(varName) {
+                // A saved "{{VAR}}"-style entry is a hand-typed template, not an
+                // existing variable's chip -- restore it into textCustomOpts
+                // instead (see addTextOptCustom()), since no chip for it exists.
+                if (varName.includes('{{')) {
+                    if (!textCustomOpts.includes(varName)) textCustomOpts.push(varName);
+                    return;
+                }
                 const chip = document.querySelector('.text-opt-chip[data-varname="' + varName + '"]');
                 if (chip) chip.classList.add('sel');
             });
+            renderTextOptCustomChips();
         }
+        const distCountEl = document.getElementById('textDistCount');
+        if (distCountEl) distCountEl.value = (_KS.distractors && _KS.distractors.count) || 3;
     }
 
     const numCfg = _KS.numConfig;
