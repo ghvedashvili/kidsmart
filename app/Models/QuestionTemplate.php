@@ -20,7 +20,13 @@ class QuestionTemplate extends Model
         foreach ($vars as $k => $v) {
             $e = str_replace($k, (string) $v, $e);
         }
-        $e = preg_replace('/[^0-9+\-*\/()\s%]/', '', $e);
+        // Any bare word surviving variable substitution must be one of the
+        // whitelisted math functions — everything else (an unresolved
+        // variable, a typo'd/foreign identifier) is dropped here, BEFORE the
+        // general character filter below, so eval() can never be handed a
+        // real PHP function/constant name to call.
+        $e = preg_replace_callback('/[a-zA-Z_][a-zA-Z0-9_]*/', fn ($m) => in_array($m[0], self::MATH_FNS, true) ? $m[0] : '', $e);
+        $e = preg_replace('/[^0-9a-zA-Z_+\-*\/(),\s%.]/', '', $e);
         // @ only suppresses warnings — malformed input (e.g. an unresolved variable
         // name leaving stray tokens, or two numbers left adjacent with no operator
         // between them) makes eval() throw a real ParseError/Error, which @ does NOT
@@ -30,7 +36,7 @@ class QuestionTemplate extends Model
         } catch (\Throwable $ex) {
             $result = false;
         }
-        return ($result === false || !is_numeric($result)) ? 0 : (int) $result;
+        return ($result === false || !is_numeric($result) || !is_finite((float) $result)) ? 0 : (int) $result;
     }
 
     private function conditionsMet(array $conditions, array $vars): bool
@@ -571,6 +577,13 @@ class QuestionTemplate extends Model
         '/' => 'ჯერ ნაკლები',
     ];
 
+    // The only function names evalExpr() (and correct_formula's own inline
+    // evaluator in generateNumeric()) will call — every other bare word left
+    // over after variable substitution is stripped before eval() ever sees
+    // it, so a typo or a foreign identifier can never reach real PHP code
+    // instead of just failing to resolve. Mirrored in form.blade.php's JS.
+    private const MATH_FNS = ['round', 'floor', 'ceil', 'abs', 'min', 'max', 'pow', 'sqrt'];
+
     private function generateNumeric(Theme $theme): array
     {
         $numConf = $this->num_config ?? [];
@@ -659,10 +672,13 @@ class QuestionTemplate extends Model
                 foreach ($numVars as $k => $v) {
                     $f = str_replace($k, (string) $v, $f);
                 }
-                // Strip anything left over that isn't a valid arithmetic character —
-                // an unresolved variable reference (typo, or one that depends on a
-                // row added after it) would otherwise reach eval() as bare text.
-                $f = preg_replace('/[^0-9+\-*\/()\s%.]/', '', $f);
+                // Any bare word surviving substitution must be one of the
+                // whitelisted math functions (see evalExpr()) — everything
+                // else, including an unresolved variable reference (typo, or
+                // one that depends on a row added after it), is dropped here
+                // so eval() can never be handed a real PHP identifier to call.
+                $f = preg_replace_callback('/[a-zA-Z_][a-zA-Z0-9_]*/', fn ($m) => in_array($m[0], self::MATH_FNS, true) ? $m[0] : '', $f);
+                $f = preg_replace('/[^0-9a-zA-Z_+\-*\/(),\s%.]/', '', $f);
                 // @ only suppresses warnings — malformed input makes eval() throw a
                 // real ParseError/Error, which @ does NOT catch. Without this
                 // try/catch, one bad formula crashes the whole request instead of
@@ -672,6 +688,7 @@ class QuestionTemplate extends Model
                 } catch (\Throwable $e) {
                     $rawResult = false;
                 }
+                if (is_numeric($rawResult) && ! is_finite((float) $rawResult)) $rawResult = false;
                 // Reject non-whole results outright instead of silently truncating —
                 // matters most for an operator variable landing on "/" where the
                 // numbers don't happen to divide evenly this attempt.

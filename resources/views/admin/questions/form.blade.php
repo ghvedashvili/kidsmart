@@ -431,7 +431,7 @@
                     </div>
 
                     <div class="lbl" style="margin-top:12px;">პირობები <span style="color:#94a3b8;font-size:0.6rem;">(სურვილისამებრ — სიმბოლოების წონებს შორის მიმართება, ასო-სახელებით)</span></div>
-                    <div class="hint" style="margin-bottom:6px;">ორივე მხარეს შეიძლება გამოთქმა: <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">A &gt; B+1</code></div>
+                    <div class="hint" style="margin-bottom:6px;">ორივე მხარეს შეიძლება გამოთქმა, ფუნქციების ჩათვლით: <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">A &gt; B+1</code> &nbsp;·&nbsp; <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">round(A/2) &gt;= B</code></div>
                     <div id="scaleCondChips" class="cond-chips" style="display:none;"></div>
                     <div id="scaleCondRows"></div>
                     <button type="button" class="nc-add" id="scaleAddCondBtn" onclick="addScaleCond()" style="display:none;">+ პირობის დამატება</button>
@@ -549,7 +549,12 @@
                     </div>
                     <div id="ncRows"></div>
                     <button type="button" class="nc-add" onclick="addNcRow()">+ ცვლადის დამატება</button>
-                    <div style="font-size:0.62rem;color:#94a3b8;margin-top:4px;">ƒ/± ღილაკი ცვლის ტიპს: შემთხვევითი → „გამოთვლილი" (მაგ. N1+3) → „ოპერატორი" (ით მეტი/ნაკლები, ჯერ მეტი/ნაკლები — ფორმულაში ნიშნად, ტექსტში სიტყვად გამოჩნდება)</div>
+                    <div style="font-size:0.62rem;color:#94a3b8;margin-top:4px;">ƒ/± ღილაკი ცვლის ტიპს: შემთხვევითი → „გამოთვლილი" (მაგ. N1+3) → „ოპერატორი" (ით მეტი/ნაკლები, ჯერ მეტი/ნაკლები — ფორმულაში ნიშნად, ტექსტში სიტყვად გამოჩნდება) → „პირობითი" (A&gt;B?X:Y)</div>
+                    <div style="font-size:0.62rem;color:#94a3b8;margin-top:2px;">
+                        „გამოთვლილი" და „პირობითი" ველებში: ოპერატორები <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">+ − × / %</code>,
+                        ფუნქციები <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">round(x) floor(x) ceil(x) abs(x) min(a,b) max(a,b) pow(a,b) sqrt(x)</code>,
+                        „პირობითი"-ში ასევე შედარება <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">&gt; &lt; &gt;= &lt;= == !=</code> და <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">?</code>/<code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">:</code> — მაგ. <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">N1&gt;N2?round(N1/2):max(N1,N2)</code>
+                    </div>
                     <label style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:0.75rem;font-weight:700;color:#374151;cursor:pointer;">
                         <input type="checkbox" id="uniqueNumVars" onchange="syncAll();previewDebounce();">
                         ყველა ცვლადი განსხვავებული
@@ -558,7 +563,7 @@
                     @error('num_config')<div class="err">{{ $message }}</div>@enderror
 
                     <div class="lbl" style="margin-top:10px;">პირობები <span style="color:#94a3b8;font-size:0.6rem;">(სურვილისამებრ)</span></div>
-                    <div class="hint" style="margin-bottom:6px;">ორივე მხარეს შეიძლება გამოთქმა: <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">N1 &gt; N2+N3</code></div>
+                    <div class="hint" style="margin-bottom:6px;">ორივე მხარეს შეიძლება გამოთქმა, ფუნქციების ჩათვლით: <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">N1 &gt; N2+N3</code> &nbsp;·&nbsp; <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">round(N1/2) &gt;= N2</code></div>
                     <div id="condChips" class="cond-chips" style="display:none;"></div>
                     <div id="condRows"></div>
                     <button type="button" class="nc-add" id="addCondBtn" onclick="addCond()" style="display:none;">+ პირობის დამატება</button>
@@ -596,12 +601,21 @@
                             <span class="chip chip-op" onclick="insertFormulaFn('round')" title="უახლოეს მთელამდე">round()</span>
                             <span class="chip chip-op" onclick="insertFormulaFn('floor')" title="ქვედა მთელამდე">floor()</span>
                             <span class="chip chip-op" onclick="insertFormulaFn('ceil')" title="ზედა მთელამდე">ceil()</span>
+                            <span class="chip chip-op" onclick="insertFormulaFn('abs')" title="აბსოლუტური მნიშვნელობა (ყოველთვის დადებითი)">abs()</span>
+                            <span class="chip chip-op" onclick="insertFormulaFn('min')" title="პატარა ორიდან — მაგ. min(N1,N2)">min()</span>
+                            <span class="chip chip-op" onclick="insertFormulaFn('max')" title="დიდი ორიდან — მაგ. max(N1,N2)">max()</span>
+                            <span class="chip chip-op" onclick="insertFormulaFn('pow')" title="ხარისხი — მაგ. pow(N1,2) = N1²">pow()</span>
+                            <span class="chip chip-op" onclick="insertFormulaFn('sqrt')" title="კვადრატული ფესვი">sqrt()</span>
                         </div>
                         <input type="text" id="correctFormula" class="fc"
                             placeholder="N1+N2"
                             value="{{ old('answer_type', $template?->answer_type) !== 'text' ? old('correct_formula', $template?->correct_formula) : '' }}"
                             oninput="previewDebounce()">
-                        <div class="hint">მაგ: N1+N2 &nbsp;·&nbsp; (N1+N2)*N3 &nbsp;·&nbsp; N1*N2-N3 &nbsp;·&nbsp; N1%N2</div>
+                        <div class="hint">
+                            ოპერატორები: <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">+ − × / %</code> და ფრჩხილები &nbsp;·&nbsp;
+                            ფუნქციები (ორარგუმენტიანებს მძიმით გამოყავით): <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">round(x) floor(x) ceil(x) abs(x) min(a,b) max(a,b) pow(a,b) sqrt(x)</code>
+                            <br>მაგ: N1+N2 &nbsp;·&nbsp; (N1+N2)*N3 &nbsp;·&nbsp; round((N1+N2)/2) &nbsp;·&nbsp; min(N1,N2)*2 &nbsp;·&nbsp; pow(N1,2)
+                        </div>
                         @error('correct_formula')<div class="err">{{ $message }}</div>@enderror
 
                         {{-- Only "numeric" (multiple-choice) needs distractors — "numeric_input"
@@ -638,7 +652,7 @@
                             <input type="text" id="textCondFormula" class="fc" placeholder="მაგ: TOTAL1>TOTAL2?CITY1:CITY2"
                                 oninput="syncAll();previewDebounce();">
                             <div class="chips" id="textCondChips"></div>
-                            <div class="hint">პირობა რიცხვით ცვლადებზე (&gt;, &lt;, &gt;=, &lt;=, ==, !=), მერე ? და : შორის — თითო მხარეს ცვლადის სახელი ან ტექსტი. ჯაჭვურადაც შეიძლება: A&gt;B?X:C&gt;D?Y:Z</div>
+                            <div class="hint">პირობა რიცხვით ცვლადებზე (&gt;, &lt;, &gt;=, &lt;=, ==, !=) — შედარების მხარეს ასევე გამოთქმა/ფუნქციებიც შეიძლება, მაგ. <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">round(N1/2)&gt;N2</code> — მერე ? და : შორის — თითო მხარეს ცვლადის სახელი ან ტექსტი. ჯაჭვურადაც შეიძლება: A&gt;B?X:C&gt;D?Y:Z</div>
                         </div>
 
                         <div class="lbl" style="margin-top:4px;display:flex;align-items:center;gap:6px;justify-content:space-between;">
@@ -2308,13 +2322,29 @@ function syncAll() {
     }
 }
 
-// ── Condition evaluator (supports expressions like N2+N3)
+// The only function names evalExpr() (and correct_formula's own inline
+// evaluator in genPreviewNumeric()) will call -- mirrors PHP's MATH_FNS
+// constant exactly, so the admin's preview and the real backend generation
+// accept identical formula syntax.
+const MATH_FNS = ['round', 'floor', 'ceil', 'abs', 'min', 'max', 'pow', 'sqrt'];
+
+// ── Condition evaluator (supports expressions like N2+N3, and the whitelisted
+// math functions above, e.g. round(N1/2))
 function evalExpr(expr, numVars) {
     let e = String(expr);
     Object.entries(numVars).forEach(([k, v]) => { e = e.replaceAll(k, String(v)); });
-    e = e.replace(/[^0-9+\-*/()\s%]/g, '');
-    try { const r = Function('return (' + e + ')')(); return Number.isFinite(r) ? Math.floor(r) : 0; }
-    catch(_) { return 0; }
+    // Any bare word surviving substitution must be a whitelisted function --
+    // everything else (an unresolved variable, a typo'd/foreign identifier)
+    // is dropped before Function() ever sees it. Mirrors PHP's evalExpr().
+    e = e.replace(/[a-zA-Z_][a-zA-Z0-9_]*/g, m => MATH_FNS.includes(m) ? m : '');
+    e = e.replace(/[^0-9a-zA-Z_+\-*/(),\s%.]/g, '');
+    const round = Math.round, floor = Math.floor, ceil = Math.ceil, abs = Math.abs,
+          min = Math.min, max = Math.max, pow = Math.pow, sqrt = Math.sqrt;
+    try {
+        const r = Function('round','floor','ceil','abs','min','max','pow','sqrt',
+            'return (' + e + ')')(round, floor, ceil, abs, min, max, pow, sqrt);
+        return Number.isFinite(r) ? Math.floor(r) : 0;
+    } catch(_) { return 0; }
 }
 // Scale's own conditions check — same evalExpr() engine, against scaleConditions
 // (letter-named: A, B, C...) instead of the generic numeric-vars conditions array.
@@ -3034,10 +3064,17 @@ function genPreviewNumeric(tmpl) {
     const { numVars, condOk } = pickNumVars(!formula ? null : (vars) => {
         let f = formula;
         Object.entries(vars).forEach(([k, v]) => { f = f.replaceAll(k, String(v)); });
-        f = f.replace(/[^0-9a-z+\-*/()\s%.]/gi, '');
+        // Mirrors evalExpr()/PHP's generateNumeric() -- any bare word
+        // surviving substitution must be a whitelisted function, everything
+        // else is dropped before Function() ever sees it (a bare identifier
+        // here can reach real browser globals, unlike PHP's eval()).
+        f = f.replace(/[a-zA-Z_][a-zA-Z0-9_]*/g, m => MATH_FNS.includes(m) ? m : '');
+        f = f.replace(/[^0-9a-zA-Z_+\-*/(),\s%.]/g, '');
         try {
-            const round = Math.round, floor = Math.floor, ceil = Math.ceil, abs = Math.abs;
-            const raw = Function('round', 'floor', 'ceil', 'abs', 'return (' + f + ')')(round, floor, ceil, abs);
+            const round = Math.round, floor = Math.floor, ceil = Math.ceil, abs = Math.abs,
+                  min = Math.min, max = Math.max, pow = Math.pow, sqrt = Math.sqrt;
+            const raw = Function('round','floor','ceil','abs','min','max','pow','sqrt',
+                'return (' + f + ')')(round, floor, ceil, abs, min, max, pow, sqrt);
             if (Number.isFinite(raw) && raw > 0 && Math.floor(raw) === raw) {
                 correct = raw; substituted = f; return true;
             }
