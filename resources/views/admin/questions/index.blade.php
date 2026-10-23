@@ -753,8 +753,12 @@ function renderLpScalePan(items) {
 }
 
 function renderLpScaleBlank(kind, symbol) {
-    if (kind === 'weight') return `<div class="lp-scale-wplate lp-scale-blank">?</div>`;
-    return `<div class="lp-scale-emoji lp-scale-blank">${symbol ? escHtmlLp(symbol) : '❓'}<span>?</span></div>`;
+    // MC mode never names the answer symbol in advance (null symbol) -- same
+    // as a weight-kind blank, a single "?" plate is the whole clue. Falling
+    // back to the generic "❓" emoji AND still appending the small "how
+    // many?" subscript below it prints two question marks.
+    if (kind === 'weight' || !symbol) return `<div class="lp-scale-wplate lp-scale-blank">?</div>`;
+    return `<div class="lp-scale-emoji lp-scale-blank">${escHtmlLp(symbol)}<span>?</span></div>`;
 }
 
 function renderLpScale(data) {

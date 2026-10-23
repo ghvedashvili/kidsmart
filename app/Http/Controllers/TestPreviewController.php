@@ -143,7 +143,11 @@ class TestPreviewController extends Controller
      * just the formula-specific QuestionGenerationException, in case a future bug
      * takes a different shape) — this is what a child would actually be served,
      * so it's the most direct way for an admin to find a broken template before
-     * a child does.
+     * a child does. Beyond a thrown exception, a successful-looking call can
+     * still hand back a question that's silently unusable (empty answer, an
+     * unresolved "{{...}}" token, a correct answer missing from its own
+     * multiple-choice options, duplicate options) — answerLooksSane() catches
+     * those too, since none of them throw.
      *
      * @return array<int, array{template: QuestionTemplate, error: string}>
      */
@@ -157,13 +161,16 @@ class TestPreviewController extends Controller
         foreach ($templates as $t) {
             try {
                 if ($t->isPyramid()) {
-                    $t->generatePyramid();
+                    $result = $t->generatePyramid();
                 } elseif ($t->isCode()) {
-                    $t->generateCode();
+                    $result = $t->generateCode();
                 } elseif ($t->isCrossword()) {
-                    $t->generateCrossword();
+                    $result = $t->generateCrossword();
                 } else {
-                    $t->generate($t->theme ?? Theme::first());
+                    $result = $t->generate($t->theme ?? Theme::first());
+                }
+                if ($issue = $this->answerLooksSane($result)) {
+                    $broken[] = ['template' => $t, 'error' => $issue];
                 }
             } catch (\Throwable $e) {
                 $broken[] = ['template' => $t, 'error' => $e->getMessage()];
@@ -171,5 +178,61 @@ class TestPreviewController extends Controller
         }
 
         return $broken;
+    }
+
+    /**
+     * Sanity-checks a generate() result that didn't throw — returns a
+     * Georgian description of the problem, or null if the answer looks usable.
+     */
+    private function answerLooksSane(array $result): ?string
+    {
+        $correct = $result['correct_answer'] ?? null;
+        if ($correct === null || $correct === '') {
+            return 'სწორი პასუხი არ დაგენერირდა (ცარიელია)';
+        }
+
+        // Pyramid/code/crossword encode a per-cell answer set as a JSON array
+        // string ("options" is always null for these) — decode it so an empty
+        // array or a leftover unresolved slot is caught too, not just a
+        // missing/empty top-level string.
+        if (is_string($correct) && (str_starts_with($correct, '[') || str_starts_with($correct, '{'))) {
+            $decoded = json_decode($correct, true);
+            if (is_array($decoded)) {
+                if (! $decoded) {
+                    return 'სწორი პასუხი ცარიელი მასივია';
+                }
+                foreach ($decoded as $v) {
+                    if ($v === null || $v === '' || $v === '?') {
+                        return 'სწორი პასუხის ერთი ველი ამოუხსნელია';
+                    }
+                }
+                return null;
+            }
+        }
+
+        $correctStr = (string) $correct;
+        if (str_contains($correctStr, '{{') || $correctStr === '?') {
+            return "სწორი პასუხი ბოლომდე არ ჩანაცვლდა: \"{$correctStr}\"";
+        }
+
+        $options = $result['options'] ?? null;
+        if (is_array($options) && $options) {
+            if (count($options) < 2) {
+                return 'ვარიანტები მხოლოდ ' . count($options) . ' ცალია (საჭიროა მინ. 2)';
+            }
+            if (count($options) !== count(array_unique($options))) {
+                return 'ვარიანტებში დუბლირებული პასუხია';
+            }
+            if (! in_array($correct, $options, true)) {
+                return 'სწორი პასუხი ვარიანტებში არ ფიგურირებს';
+            }
+            foreach ($options as $opt) {
+                if (is_string($opt) && (str_contains($opt, '{{') || $opt === '?')) {
+                    return "ვარიანტი ბოლომდე არ ჩანაცვლდა: \"{$opt}\"";
+                }
+            }
+        }
+
+        return null;
     }
 }

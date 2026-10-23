@@ -309,12 +309,16 @@ class ScaleService
 
     private static function renderBlankChip(string $kind, ?string $symbol): string
     {
-        if ($kind === 'weight') {
-            return '<div style="width:26px;height:26px;border-radius:6px;border:2.5px dashed #94a3b8;background:#f8fafc;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.75rem;color:#94a3b8;flex-shrink:0;">?</div>';
+        // MC mode never names the answer symbol in advance (null $symbol —
+        // that's the whole point of offering 4 "{emoji}×N" choices), same as
+        // a weight-kind blank — a single centered "?" is the whole clue.
+        // Falling back to the generic "❓" emoji AND still appending the
+        // small "how many?" subscript below it prints two question marks.
+        if ($kind === 'weight' || ! $symbol) {
+            return '<div style="width:26px;height:26px;border-radius:6px;border:2.5px dashed #94a3b8;background:#f8fafc;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.95rem;color:#94a3b8;flex-shrink:0;">?</div>';
         }
-        $sym = $symbol ? e($symbol) : '❓';
         return '<div style="font-size:1.15rem;line-height:1;text-align:center;border:2.5px dashed #94a3b8;border-radius:7px;padding:2px 4px;flex-shrink:0;">'
-            . $sym . '<span style="font-size:0.5rem;color:#94a3b8;display:block;line-height:1;">?</span></div>';
+            . e($symbol) . '<span style="font-size:0.5rem;color:#94a3b8;display:block;line-height:1;">?</span></div>';
     }
 
     private static function sumSide(array $items, array $weights): int
