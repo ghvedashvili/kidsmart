@@ -795,10 +795,15 @@ function applyGradeMaxLevel(gradeId) {
 }
 
 // ── Theme → variable chips
+// Cached so renderNcRows() can re-render the text-answer correct/distractor
+// var pickers (which also list numeric vars) whenever a numeric row is
+// added/removed/renamed, without needing a theme change to trigger it.
+let lastThemeData = { groups: [], standalone: [], varMap: {} };
 function onThemeChange(themeId) {
     const data = (themeId && _KS.allThemesData[themeId])
         ? _KS.allThemesData[themeId]
         : { groups: [], standalone: [], varMap: {} };
+    lastThemeData    = data;
     _KS.varGroups    = data.groups;
     _KS.themeVarMap  = data.varMap;
     renderStrVarSection(data);
@@ -848,12 +853,23 @@ function renderTextCorrectVar(data) {
         sa.forEach(function(v) { og.appendChild(new Option(v, v)); });
         sel.appendChild(og);
     }
+    // Numeric (N1, N2, DEL1...) vars -- NOT filtered by template_text usage
+    // like theme vars are above, since these typically drive the answer/
+    // distractors without necessarily appearing in the displayed question
+    // text itself (e.g. #91's DEL1/DEL2, computed but never shown directly).
+    const ncNames = ncRows.filter(function(r) { return r.name; }).map(function(r) { return r.name; });
+    if (ncNames.length) {
+        const ncOg = document.createElement('optgroup');
+        ncOg.label = 'რიცხვითი ცვლადები';
+        ncNames.forEach(function(n) { ncOg.appendChild(new Option(n, n)); });
+        sel.appendChild(ncOg);
+    }
     const specOg = document.createElement('optgroup');
     specOg.label = '──────';
     Object.entries(SPEC).forEach(function(e) { specOg.appendChild(new Option(e[1], e[0])); });
     sel.appendChild(specOg);
     if (prevVal) sel.value = prevVal;
-    const hasVars = data.groups.some(function(g) { return g.slots.some(function(s) { return used.has(s); }); }) || sa.length;
+    const hasVars = data.groups.some(function(g) { return g.slots.some(function(s) { return used.has(s); }); }) || sa.length || ncNames.length;
     var hint = document.getElementById('noVarsHint');
     if (hint) hint.style.display = (hasVars || !used.size) ? 'none' : '';
     syncAll();
@@ -878,6 +894,19 @@ function renderTextOptChips(data) {
         html += '<div class="chips">'
             + sa.map(function(v) {
                 return '<span class="chip chip-txt text-opt-chip' + (prevSel.has(v) ? ' sel' : '') + '" data-varname="' + v + '" onclick="toggleTextOpt(this)">' + v + '</span>';
+            }).join('')
+            + '</div>';
+    }
+    // Numeric (N1, N2, DEL1...) vars -- NOT filtered by template_text usage
+    // like theme vars are above (see renderTextCorrectVar()'s matching note).
+    // Part of the random pool (below "count" sampling), same as a plain
+    // theme-var chip -- only __ALL__/__NONE__/__EQUAL__ are pinned.
+    const ncNames = ncRows.filter(function(r) { return r.name; }).map(function(r) { return r.name; });
+    if (ncNames.length) {
+        html += '<div style="font-size:0.52rem;color:#7c3aed;letter-spacing:0.1em;text-transform:uppercase;margin:4px 0 2px;">რიცხვითი ცვლადები</div>'
+            + '<div class="chips" style="margin-bottom:4px;">'
+            + ncNames.map(function(n) {
+                return '<span class="chip chip-txt text-opt-chip' + (prevSel.has(n) ? ' sel' : '') + '" data-varname="' + n + '" onclick="toggleTextOpt(this)">' + n + '</span>';
             }).join('')
             + '</div>';
     }
@@ -2149,6 +2178,12 @@ function renderNcRows() {
     });
     syncAll();
     renderConds();
+    // Keeps the text-answer correct/distractor var pickers' "რიცხვითი
+    // ცვლადები" group in sync whenever a numeric row is added, removed or
+    // renamed -- not just on a theme change (same reasoning as renderConds()
+    // just above, which already does this for the generic conditions builder).
+    renderTextCorrectVar(lastThemeData);
+    renderTextOptChips(lastThemeData);
 }
 function updNc(id, field, val) {
     const r = ncRows.find(r => r.id === id);
@@ -2705,6 +2740,19 @@ function genPreviewCode() {
 }
 
 function genPreview() {
+    // A thrown error anywhere in a genPreview*() function used to abort
+    // silently (console-only) — the preview just stayed stale/blank with no
+    // clue why. Surfacing it in #prevWarn makes that failure visible instead
+    // of looking like "nothing happened".
+    try {
+        genPreviewInner();
+    } catch (e) {
+        const warn = document.getElementById('prevWarn');
+        if (warn) warn.innerHTML = '<span style="color:#f87171;">⚠ preview შეცდომა: ' + escHtmlFormLp(e.message || String(e)) + '</span>';
+        console.error('genPreview failed:', e);
+    }
+}
+function genPreviewInner() {
     const qt = document.getElementById('qtInput').value;
     if (qt === 'pyramid')   { genPreviewPyramid(); return; }
     if (qt === 'code')      { genPreviewCode();     return; }
@@ -2994,13 +3042,22 @@ function genPreviewText(tmpl) {
             return (name in allVarsForOpts) ? allVarsForOpts[name] : m;
         });
     };
-    const resolveOpt = v => v.includes('{{') ? resolvePattern(v) : (SPEC[v] || themeMap[v] || '?');
+    // A plain (non-template) var name must resolve against the SAME merged
+    // set resolvePattern() uses (numeric vars included) -- mirrors PHP's
+    // generateText(), where $vars already merges displayNumVars + themeVars.
+    // SPEC[v]/themeMap[v] alone would leave a bare numeric var name (e.g.
+    // "DEL1" picked directly, not inside a {{...}} template) unresolved.
+    const resolveOpt = v => v.includes('{{') ? resolvePattern(v) : ((v in allVarsForOpts) ? allVarsForOpts[v] : '?');
     // Two wildcard-filled renderings that pick the SAME numbers in a
     // different order (e.g. "6 და 2" vs "2 და 6") are the same answer in
     // disguise when the slots are interchangeable -- compared by their
     // sorted digit multiset rather than the literal string, so only one
     // ordering of any given pair ever shows up. Mirrors PHP's $digitKey.
-    const digitKey = s => (s.match(/\d+/g) || []).map(Number).sort((a,b) => a-b).join(',');
+    // String(s) first -- a bare numeric var (e.g. DEL1) picked directly as
+    // the correct answer resolves to a raw JS number, which has no .match();
+    // every other source (theme var, {{...}} template) was already a string,
+    // so this went unnoticed until a numeric var was used as the correct answer.
+    const digitKey = s => (String(s).match(/\d+/g) || []).map(Number).sort((a,b) => a-b).join(',');
 
     const seen = new Set([correct]);
     const seenWildcardKeys = new Set([digitKey(correct)]);
@@ -3486,6 +3543,44 @@ function array_key_exists_js(key, obj) { return obj && Object.prototype.hasOwnPr
     document.getElementById('atBtnInput').classList.toggle('at-sel', isInputInit);
     document.getElementById('atBtnTxt').classList.toggle('at-sel', isTxtInit);
 
+    // The numConfig/addNcRow() restore below must run BEFORE the isTxtInit
+    // block further down: it's what creates each numeric var's <option> in
+    // #textCorrectVar and its <span class="text-opt-chip"> distractor chip
+    // (via renderNcRows()'s renderTextCorrectVar()/renderTextOptChips() hook)
+    // — restoring a saved selection against those elements before they exist
+    // silently does nothing, so a bare numeric var name picked as the correct
+    // answer (or as a distractor) would never show up again after a reload.
+    const numCfg = _KS.numConfig;
+    if (document.getElementById('qtInput').value === 'scale') {
+        restoreScaleConfig(numCfg || {}, _KS.answerType, _KS.distractors, _KS.conditions);
+    } else if (numCfg && typeof numCfg === 'object' && Object.keys(numCfg).length) {
+        if (numCfg['_unique']) {
+            const cb = document.getElementById('uniqueNumVars');
+            if (cb) cb.checked = true;
+        }
+        Object.entries(numCfg).forEach(([name, conf]) => {
+            if (name.startsWith('_') || typeof conf !== 'object' || conf === null) return;
+            if (conf.operator) {
+                addNcRow(name, 1, 9, 1, 'operator', '', Array.isArray(conf.options) && conf.options.length ? conf.options : ['+']);
+            } else if ('derived' in conf) {
+                addNcRow(name, 1, 9, 1, 'derived', conf.derived ?? '');
+            } else if ('conditional' in conf) {
+                addNcRow(name, 1, 9, 1, 'conditional', '', [], conf.conditional ?? '');
+            } else {
+                addNcRow(name, conf.min ?? 1, conf.max ?? 9, conf.step ?? 1);
+            }
+        });
+        if (numCfg['_auto'] && numCfg['_auto'].enabled) {
+            document.getElementById('autoBuildFields').style.display = '';
+            document.getElementById('correctFormula').readOnly = true;
+            document.getElementById('exprHint').style.display = '';
+            document.getElementById('correctFormula').style.background = '#f8fafc';
+        }
+    } else if (!isTxtInit) {
+        addNcRow('N1', 1, 9, 1);
+        addNcRow('N2', 1, 9, 1);
+    }
+
     // For text mode: restore correct var (plain) or conditional formula + selected option vars
     if (isTxtInit) {
         if (_KS.editCorrectFormula) {
@@ -3523,37 +3618,6 @@ function array_key_exists_js(key, obj) { return obj && Object.prototype.hasOwnPr
         }
         const distCountEl = document.getElementById('textDistCount');
         if (distCountEl) distCountEl.value = (_KS.distractors && _KS.distractors.count) || 3;
-    }
-
-    const numCfg = _KS.numConfig;
-    if (document.getElementById('qtInput').value === 'scale') {
-        restoreScaleConfig(numCfg || {}, _KS.answerType, _KS.distractors, _KS.conditions);
-    } else if (numCfg && typeof numCfg === 'object' && Object.keys(numCfg).length) {
-        if (numCfg['_unique']) {
-            const cb = document.getElementById('uniqueNumVars');
-            if (cb) cb.checked = true;
-        }
-        Object.entries(numCfg).forEach(([name, conf]) => {
-            if (name.startsWith('_') || typeof conf !== 'object' || conf === null) return;
-            if (conf.operator) {
-                addNcRow(name, 1, 9, 1, 'operator', '', Array.isArray(conf.options) && conf.options.length ? conf.options : ['+']);
-            } else if ('derived' in conf) {
-                addNcRow(name, 1, 9, 1, 'derived', conf.derived ?? '');
-            } else if ('conditional' in conf) {
-                addNcRow(name, 1, 9, 1, 'conditional', '', [], conf.conditional ?? '');
-            } else {
-                addNcRow(name, conf.min ?? 1, conf.max ?? 9, conf.step ?? 1);
-            }
-        });
-        if (numCfg['_auto'] && numCfg['_auto'].enabled) {
-            document.getElementById('autoBuildFields').style.display = '';
-            document.getElementById('correctFormula').readOnly = true;
-            document.getElementById('exprHint').style.display = '';
-            document.getElementById('correctFormula').style.background = '#f8fafc';
-        }
-    } else if (!isTxtInit) {
-        addNcRow('N1', 1, 9, 1);
-        addNcRow('N2', 1, 9, 1);
     }
     const conds = _KS.conditions;
     if (Array.isArray(conds)) {
