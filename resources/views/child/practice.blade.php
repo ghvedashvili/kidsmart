@@ -13,16 +13,6 @@
     .title { font-family:'Fredoka One',cursive; font-size:1rem; color:#0c4a6e; }
     .topic-tag { font-family:'Nunito',sans-serif; font-weight:800; font-size:0.68rem; color:#2563eb; background:#eff6ff; border-radius:99px; padding:4px 12px; margin:8px 16px 0; display:inline-block; }
 
-    /* ── Progress bar ── */
-    .progress-wrap { padding:12px 16px 0; }
-    .prog-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
-    .level-badge { font-family:'Fredoka One',cursive; font-size:0.85rem; color:#4f46e5; }
-    .streak-dots { display:flex; gap:5px; }
-    .sdot { width:12px; height:12px; border-radius:50%; background:#e2e8f0; transition:background 0.2s; }
-    .sdot.filled { background:#f59e0b; }
-    .prog-bar { height:6px; background:#e0f2fe; border-radius:99px; overflow:hidden; }
-    .prog-fill { height:100%; background:linear-gradient(90deg,#38bdf8,#0284c7); border-radius:99px; transition:width 0.5s; }
-
     /* ── Question card ── */
     .q-card { background:white; border-radius:24px; margin:16px; padding:28px 20px 24px; box-shadow:0 8px 28px rgba(0,0,0,0.08); min-height:200px; }
     .q-label { font-family:'Nunito',sans-serif; font-weight:900; font-size:0.62rem; color:#94a3b8; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:16px; }
@@ -85,17 +75,6 @@
     }
     .next-btn:hover { transform:translateY(-1px); }
 
-    /* ── Level-up overlay ── */
-    .levelup-overlay {
-        display:none; position:fixed; inset:0; background:rgba(79,70,229,0.92);
-        z-index:100; flex-direction:column; align-items:center; justify-content:center; text-align:center;
-    }
-    .levelup-overlay.show { display:flex; }
-    .lu-emoji { font-size:4rem; margin-bottom:12px; }
-    .lu-title { font-family:'Fredoka One',cursive; font-size:2rem; color:white; margin-bottom:6px; }
-    .lu-sub { font-family:'Nunito',sans-serif; font-weight:800; font-size:0.9rem; color:rgba(255,255,255,0.7); margin-bottom:28px; }
-    .lu-btn { padding:14px 36px; background:white; border:none; border-radius:18px; font-family:'Fredoka One',cursive; font-size:1.05rem; color:#4f46e5; cursor:pointer; }
-
     /* ── Code question ── */
     .code-eq-box { background:#fff8e7;border-radius:12px;padding:12px 14px;margin-bottom:14px;border:1.5px dashed #ffe194; }
     .code-eq { font-family:'Fredoka One',cursive; font-size:1rem; color:#374151; margin:3px 0; }
@@ -136,18 +115,6 @@
     @if($type === 'auto')
     <div class="topic-tag" id="topicTag"></div>
     @endif
-
-    <div class="progress-wrap">
-        <div class="prog-row">
-            <span class="level-badge" id="levelBadge">{{ $session ? 'დონე ' . $session->level : '' }}</span>
-            <div class="streak-dots" id="streakDots">
-                <div class="sdot {{ ($session?->streak ?? 0) >= 1 ? 'filled' : '' }}"></div>
-                <div class="sdot {{ ($session?->streak ?? 0) >= 2 ? 'filled' : '' }}"></div>
-                <div class="sdot {{ ($session?->streak ?? 0) >= 3 ? 'filled' : '' }}"></div>
-            </div>
-        </div>
-        <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:{{ (($session?->level ?? 1) - 1) * 25 }}%"></div></div>
-    </div>
 
     <div class="spinner show" id="spinner">⏳ იტვირთება...</div>
 
@@ -197,13 +164,6 @@
     <button class="next-btn" id="nextBtn" onclick="loadQuestion()">შემდეგი კითხვა →</button>
 </div>
 
-<div class="levelup-overlay" id="levelupOverlay">
-    <div class="lu-emoji">🎉</div>
-    <div class="lu-title" id="luTitle">შემდეგი დონე!</div>
-    <div class="lu-sub" id="luSub"></div>
-    <button class="lu-btn" onclick="closeLevelUp()">გავაგრძელო →</button>
-</div>
-
 <script>
 const SLUG  = @json($slug);
 const CSRF  = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
@@ -235,7 +195,6 @@ function renderQuestion(q) {
 
     const topicTag = document.getElementById('topicTag');
     if (topicTag) topicTag.textContent = q.topic_name ? '📘 ' + q.topic_name : '';
-    if (q.level !== undefined) updateProgress(q.level, q.streak);
 
     document.getElementById('mcArea').style.display   = 'none';
     document.getElementById('pyrArea').style.display  = 'none';
@@ -533,46 +492,20 @@ function postAnswer(body) {
     });
 }
 
-// ── Show feedback + level-up ─────────────────────────────────────────────
+// ── Show feedback ─────────────────────────────────────────────────────────
 function showFeedback(data) {
     const fb = document.getElementById('feedback');
     fb.style.display = 'block';
 
     if (data.correct) {
         fb.className  = 'feedback correct';
-        fb.textContent = '🎉 სწორია! ' + '⭐'.repeat(Math.min(data.streak, 3)) + (data.coins > 0 ? ' +' + data.coins + ' 🪙' : '');
+        fb.textContent = '🎉 სწორია!' + (data.coins > 0 ? ' +' + data.coins + ' 🪙' : '');
     } else {
         fb.className   = 'feedback wrong';
         fb.textContent = '❌ არასწორია — სცადე თავიდან!';
     }
 
-    updateProgress(data.level, data.streak);
-
-    if (data.leveled_up) {
-        setTimeout(() => showLevelUp(data.level), 900);
-    } else {
-        document.getElementById('nextBtn').style.display = 'block';
-    }
-}
-
-// ── Progress UI ──────────────────────────────────────────────────────────
-function updateProgress(level, streak) {
-    document.getElementById('levelBadge').textContent = 'დონე ' + level;
-    document.getElementById('progFill').style.width   = ((level - 1) * 25) + '%';
-    const dots = document.querySelectorAll('.sdot');
-    dots.forEach((d, i) => d.classList.toggle('filled', i < streak));
-}
-
-// ── Level-up overlay ─────────────────────────────────────────────────────
-function showLevelUp(level) {
-    document.getElementById('luTitle').textContent = 'დონე ' + level + '-ზე გადახველ! 🚀';
-    document.getElementById('luSub').textContent   = '3 სწორი პასუხი — ახალ დონეზე ხარ!';
-    document.getElementById('levelupOverlay').classList.add('show');
-}
-
-function closeLevelUp() {
-    document.getElementById('levelupOverlay').classList.remove('show');
-    loadQuestion();
+    document.getElementById('nextBtn').style.display = 'block';
 }
 
 // ── Spinner ───────────────────────────────────────────────────────────────

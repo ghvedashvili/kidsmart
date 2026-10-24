@@ -10,14 +10,16 @@ class ChildSetting extends Model
     protected $fillable = [
         'user_id', 'grade_id', 'difficulty', 'tests_per_week', 'unlimited_tests', 'coins', 'difficulty_streak',
         'topic_rotation', 'tests_since_level_review', 'practice_topic_rotation', 'template_rotation',
+        'practice_template_rotation',
     ];
 
     protected $casts = [
-        'topic_rotation'          => 'array',
-        'practice_topic_rotation' => 'array',
-        'template_rotation'       => 'array',
-        'coins'                   => 'float',
-        'unlimited_tests'         => 'boolean',
+        'topic_rotation'              => 'array',
+        'practice_topic_rotation'     => 'array',
+        'template_rotation'           => 'array',
+        'practice_template_rotation'  => 'array',
+        'coins'                       => 'float',
+        'unlimited_tests'             => 'boolean',
     ];
 
     public function user(): BelongsTo

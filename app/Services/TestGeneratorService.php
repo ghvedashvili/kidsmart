@@ -30,78 +30,14 @@ class TestGeneratorService
         }
 
         $childTopicIds = $child->topics()->pluck('id')->toArray();
+        $childThemeIds = $child->themes()->pluck('id');
 
-        $baseQuery = fn () => QuestionTemplate::where('difficulty', $setting->difficulty)
-            ->where('is_olympiad', false)
-            ->where('is_active', true)
-            ->whereHas('topic', fn ($q) => $q->where('grade_id', $setting->grade_id))
-            ->when(! empty($childTopicIds), fn ($q) => $q->whereIn('topic_id', $childTopicIds));
-
-        // Pyramid, code, crossword, and scale templates are theme-independent — always included
-        $specialTemplates = $baseQuery()
-            ->whereIn('question_type', ['pyramid', 'code', 'crossword', 'scale'])
-            ->with('topic')
-            ->get();
-
-        // MC templates require a theme
-        $availableThemeIds = $baseQuery()->whereNotNull('theme_id')->pluck('theme_id')->unique();
-
-        $theme       = null;
-        $mcTemplates = collect();
-
-        if ($availableThemeIds->isNotEmpty()) {
-            $childThemeIds = $child->themes()->pluck('id');
-            $candidateIds  = $availableThemeIds->intersect($childThemeIds);
-            if ($candidateIds->isEmpty()) {
-                $candidateIds = $availableThemeIds;
-            }
-            $themeId = $candidateIds->random();
-            $theme   = Theme::find($themeId);
-            if ($theme) {
-                $mcTemplates = $baseQuery()->where('theme_id', $themeId)->with('topic')->get();
-            }
+        $selection = $this->selectTemplatesForChild($setting, $childTopicIds, $childThemeIds, 'topic_rotation', 'template_rotation');
+        if (isset($selection['error'])) {
+            return $selection;
         }
-
-        $pool = $mcTemplates->merge($specialTemplates);
-
-        if ($pool->isEmpty()) {
-            return ['error' => 'ამ პარამეტრებისთვის კითხვები ჯერ არ დამატებულა'];
-        }
-
-        // Group available templates by topic, so we can pick "one per topic" fairly
-        $templatesByTopic = $pool->groupBy('topic_id');
-        $availableTopicIds = $templatesByTopic->keys()->all();
-
-        $questionsNeeded = TestQuestionCount::resolve($setting->grade_id, $setting->difficulty, $theme?->id);
-
-        $topicPicks = $this->pickTopicIdsForTest($setting, $availableTopicIds, $questionsNeeded);
-
-        // For each picked topic occurrence, draw one template from that topic's own pool —
-        // cycling fairly across tests the same way topics themselves do (pickTemplateFromTopic()),
-        // while still avoiding reusing the same template twice within this one test.
-        $usedTemplateIds = [];
-        $selectedTemplates = collect();
-
-        foreach ($topicPicks as $topicId) {
-            $topicTemplates = $templatesByTopic->get($topicId, collect());
-            if ($topicTemplates->isEmpty()) continue;
-
-            $picked = $this->pickTemplateFromTopic($setting, $topicId, $topicTemplates, $usedTemplateIds);
-            if (! $picked) continue;
-
-            $usedTemplateIds[] = $picked->id;
-            $selectedTemplates->push($picked);
-        }
-
-        // Final question order follows each question's topic sequence (ascending,
-        // admin-assigned priority) — topics with no sequence are shuffled among
-        // themselves and appended after the sequenced ones, same policy as the
-        // topic/template rotations above. `topic` is already eager-loaded above.
-        $sequenced   = $selectedTemplates->filter(fn ($t) => $t->topic && $t->topic->sequence !== null)
-            ->sortBy(fn ($t) => $t->topic->sequence)->values();
-        $unsequenced = $selectedTemplates->filter(fn ($t) => ! $t->topic || $t->topic->sequence === null)
-            ->shuffle()->values();
-        $selectedTemplates = $sequenced->concat($unsequenced)->values();
+        $theme              = $selection['theme'];
+        $selectedTemplates  = $selection['templates'];
 
         $testAttrs = [
             'child_id'        => $child->id,
@@ -155,6 +91,146 @@ class TestGeneratorService
         }
 
         return ['test' => $test, 'questions' => $questions];
+    }
+
+    /**
+     * Shared selection pipeline behind both generate() (real tests) and
+     * generatePracticeBatch() (practice) — picks the theme, builds the
+     * difficulty-filtered template pool, picks topics fairly (honoring
+     * `sequence`) and one template per topic slot fairly (honoring
+     * `sequence`), then orders the result by topic `sequence` the same way.
+     * $topicRotationField/$templateRotationField select which ChildSetting
+     * columns persist the rotation cursors, so a caller can keep its own
+     * progress independent of the other's (see pickTopicIdsForTest()/
+     * pickTemplateFromTopic()).
+     *
+     * $excludeQuestionTypes lets a caller drop question types it can't render
+     * — practice excludes 'scale' here (its two-pan visual is only wired up
+     * in the real test views), while real tests pass none.
+     *
+     * @return array{error: string}|array{theme: ?Theme, templates: \Illuminate\Support\Collection}
+     */
+    private function selectTemplatesForChild(ChildSetting $setting, array $childTopicIds, \Illuminate\Support\Collection $childThemeIds, string $topicRotationField, string $templateRotationField, array $excludeQuestionTypes = []): array
+    {
+        $baseQuery = fn () => QuestionTemplate::where('difficulty', $setting->difficulty)
+            ->where('is_olympiad', false)
+            ->where('is_active', true)
+            ->whereHas('topic', fn ($q) => $q->where('grade_id', $setting->grade_id))
+            ->when(! empty($childTopicIds), fn ($q) => $q->whereIn('topic_id', $childTopicIds))
+            ->when(! empty($excludeQuestionTypes), fn ($q) => $q->whereNotIn('question_type', $excludeQuestionTypes));
+
+        // Pyramid, code, crossword, and scale templates are theme-independent — always included
+        $specialTemplates = $baseQuery()
+            ->whereIn('question_type', ['pyramid', 'code', 'crossword', 'scale'])
+            ->with('topic')
+            ->get();
+
+        // MC templates require a theme
+        $availableThemeIds = $baseQuery()->whereNotNull('theme_id')->pluck('theme_id')->unique();
+
+        $theme       = null;
+        $mcTemplates = collect();
+
+        if ($availableThemeIds->isNotEmpty()) {
+            $candidateIds = $availableThemeIds->intersect($childThemeIds);
+            if ($candidateIds->isEmpty()) {
+                $candidateIds = $availableThemeIds;
+            }
+            $themeId = $candidateIds->random();
+            $theme   = Theme::find($themeId);
+            if ($theme) {
+                $mcTemplates = $baseQuery()->where('theme_id', $themeId)->with('topic')->get();
+            }
+        }
+
+        $pool = $mcTemplates->merge($specialTemplates);
+
+        if ($pool->isEmpty()) {
+            return ['error' => 'ამ პარამეტრებისთვის კითხვები ჯერ არ დამატებულა'];
+        }
+
+        // Group available templates by topic, so we can pick "one per topic" fairly
+        $templatesByTopic = $pool->groupBy('topic_id');
+        $availableTopicIds = $templatesByTopic->keys()->all();
+
+        $questionsNeeded = TestQuestionCount::resolve($setting->grade_id, $setting->difficulty, $theme?->id);
+
+        $topicPicks = $this->pickTopicIdsForTest($setting, $availableTopicIds, $questionsNeeded, $topicRotationField);
+
+        // For each picked topic occurrence, draw one template from that topic's own pool —
+        // cycling fairly across tests the same way topics themselves do (pickTemplateFromTopic()),
+        // while still avoiding reusing the same template twice within this one batch.
+        $usedTemplateIds = [];
+        $selectedTemplates = collect();
+
+        foreach ($topicPicks as $topicId) {
+            $topicTemplates = $templatesByTopic->get($topicId, collect());
+            if ($topicTemplates->isEmpty()) continue;
+
+            $picked = $this->pickTemplateFromTopic($setting, $topicId, $topicTemplates, $usedTemplateIds, $templateRotationField);
+            if (! $picked) continue;
+
+            $usedTemplateIds[] = $picked->id;
+            $selectedTemplates->push($picked);
+        }
+
+        // Final question order follows each question's topic sequence (ascending,
+        // admin-assigned priority) — topics with no sequence are shuffled among
+        // themselves and appended after the sequenced ones, same policy as the
+        // topic/template rotations above. `topic` is already eager-loaded above.
+        $sequenced   = $selectedTemplates->filter(fn ($t) => $t->topic && $t->topic->sequence !== null)
+            ->sortBy(fn ($t) => $t->topic->sequence)->values();
+        $unsequenced = $selectedTemplates->filter(fn ($t) => ! $t->topic || $t->topic->sequence === null)
+            ->shuffle()->values();
+        $selectedTemplates = $sequenced->concat($unsequenced)->values();
+
+        return ['theme' => $theme, 'templates' => $selectedTemplates];
+    }
+
+    /**
+     * Builds one practice "round" using the exact same selection rules a real
+     * test uses (selectTemplatesForChild()) — same difficulty source
+     * ($setting->difficulty, never touched here), same topic-order and
+     * template-fairness rules — but against its OWN rotation columns
+     * (practice_topic_rotation/practice_template_rotation) so practice never
+     * consumes or disturbs the real test's rotation progress, and persists
+     * nothing to Test/TestQuestion. The caller is expected to cache the
+     * returned list and serve it one question at a time.
+     *
+     * @return array{error: string}|array{theme: ?Theme, items: array<int, array{template: QuestionTemplate, generated: array}>}
+     */
+    public function generatePracticeBatch(User $child): array
+    {
+        $setting = $child->childSetting;
+
+        if (! $setting || ! $setting->grade_id) {
+            return ['error' => 'მშობელმა ჯერ კლასი და დონე არ დააყენა'];
+        }
+
+        $childTopicIds = $child->topics()->pluck('id')->toArray();
+        $childThemeIds = $child->themes()->pluck('id');
+
+        $selection = $this->selectTemplatesForChild($setting, $childTopicIds, $childThemeIds, 'practice_topic_rotation', 'practice_template_rotation', ['scale']);
+        if (isset($selection['error'])) {
+            return $selection;
+        }
+        $theme             = $selection['theme'];
+        $selectedTemplates = $selection['templates'];
+
+        $items = [];
+        foreach ($selectedTemplates as $template) {
+            try {
+                $generated = $template->generate($theme);
+            } catch (QuestionGenerationException $e) {
+                Log::error('TestGeneratorService: skipping broken template (practice)', ['template_id' => $template->id, 'error' => $e->getMessage()]);
+                continue;
+            }
+            $items[] = ['template' => $template, 'generated' => $generated];
+        }
+
+        $setting->save(); // persist the practice_topic_rotation/practice_template_rotation state updated above
+
+        return ['theme' => $theme, 'items' => $items];
     }
 
     /**
@@ -281,8 +357,12 @@ class TestGeneratorService
      * topic is used at least once and the extra picks ("repeats") rotate too — the
      * topic that repeated in the previous test is pushed to the back of the repeat
      * queue so a different topic repeats next time.
+     *
+     * $rotationField selects which ChildSetting column stores this rotation's
+     * state — 'topic_rotation' for real tests, 'practice_topic_rotation' for
+     * practice, so the two never consume/disturb each other's progress.
      */
-    private function pickTopicIdsForTest(ChildSetting $setting, array $availableTopicIds, int $count): array
+    private function pickTopicIdsForTest(ChildSetting $setting, array $availableTopicIds, int $count, string $rotationField = 'topic_rotation'): array
     {
         $availableTopicIds = array_values(array_unique($availableTopicIds));
         $n = count($availableTopicIds);
@@ -293,7 +373,7 @@ class TestGeneratorService
         sort($signature);
         $signature = array_map(fn ($id) => [$id, $sequenceById[$id] ?? null], $signature);
 
-        $rotation     = $setting->topic_rotation ?? [];
+        $rotation     = $setting->{$rotationField} ?? [];
         $order        = $rotation['order'] ?? [];
         $cursor       = (int) ($rotation['cursor'] ?? 0);
         $lastRepeated = $rotation['last_repeated_topic_id'] ?? null;
@@ -335,7 +415,7 @@ class TestGeneratorService
             $cursor = 0;
         }
 
-        $setting->topic_rotation = [
+        $setting->{$rotationField} = [
             'order'                  => $order,
             'cursor'                 => $cursor,
             'last_repeated_topic_id' => $lastRepeated,
@@ -380,8 +460,12 @@ class TestGeneratorService
      * next not-yet-used-this-test template without disturbing the persisted cursor logic,
      * falling back to the next-in-line template (reuse unavoidable) if the topic's entire
      * pool has already appeared in this test.
+     *
+     * $rotationField selects which ChildSetting column stores this rotation's
+     * state — 'template_rotation' for real tests, 'practice_template_rotation'
+     * for practice (public so practice's single-topic path can call it directly).
      */
-    private function pickTemplateFromTopic(ChildSetting $setting, int $topicId, \Illuminate\Support\Collection $topicTemplates, array $usedTemplateIds): ?QuestionTemplate
+    public function pickTemplateFromTopic(ChildSetting $setting, int $topicId, \Illuminate\Support\Collection $topicTemplates, array $usedTemplateIds, string $rotationField = 'template_rotation'): ?QuestionTemplate
     {
         $n = $topicTemplates->count();
         if ($n === 0) return null;
@@ -392,7 +476,7 @@ class TestGeneratorService
             ->values()
             ->all();
 
-        $rotationAll = $setting->template_rotation ?? [];
+        $rotationAll = $setting->{$rotationField} ?? [];
         $rotation    = $rotationAll[$topicId] ?? [];
         $order       = $rotation['order'] ?? [];
         $cursor      = (int) ($rotation['cursor'] ?? 0);
@@ -419,7 +503,7 @@ class TestGeneratorService
         }
 
         $rotationAll[$topicId] = ['order' => $order, 'cursor' => $cursor, 'signature' => $signature];
-        $setting->template_rotation = $rotationAll;
+        $setting->{$rotationField} = $rotationAll;
 
         return $topicTemplates->first(fn ($t) => (int) $t->id === $pickedId);
     }

@@ -5,17 +5,17 @@ namespace App\Http\Controllers;
 use App\Models\ChildSetting;
 use App\Models\PointRule;
 use App\Models\PracticeAnswerLog;
-use App\Models\PracticeSession;
 use App\Models\QuestionTemplate;
 use App\Models\Theme;
 use App\Models\Topic;
+use App\Services\TestGeneratorService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class PracticeController extends Controller
 {
-    private const LEVEL_UP_STREAK = 3;
-    private const MAX_LEVEL       = 5;
+    private const QUEUE_TTL_HOURS    = 6;
+    private const ANSWER_TTL_MINUTES = 20;
 
     // ── Practice hub (topics screen was replaced by a single auto-rotating entry) ──
     public function topics()
@@ -38,189 +38,202 @@ class PracticeController extends Controller
         $child = auth()->user();
 
         if ($slug === 'pyramid') {
-            $session = PracticeSession::forChild($child->id, null, 'pyramid');
-            return view('child.practice', ['type' => 'pyramid', 'topic' => null, 'session' => $session, 'slug' => 'pyramid']);
+            return view('child.practice', ['type' => 'pyramid', 'topic' => null, 'slug' => 'pyramid']);
         }
 
         if ($slug === 'auto') {
-            return view('child.practice', ['type' => 'auto', 'topic' => null, 'session' => null, 'slug' => 'auto']);
+            return view('child.practice', ['type' => 'auto', 'topic' => null, 'slug' => 'auto']);
         }
 
         $topic = Topic::findOrFail((int) $slug);
         abort_if($topic->grade_id !== $child->childSetting?->grade_id, 403);
-        $session = PracticeSession::forChild($child->id, $topic->id, 'topic');
 
-        return view('child.practice', ['type' => 'topic', 'topic' => $topic, 'session' => $session, 'slug' => $slug]);
-    }
-
-    /**
-     * Picks the next topic for auto-rotating practice: a shuffled, persisted-cursor
-     * order that never repeats a topic until every available topic has had a turn —
-     * the same strategy as TestGeneratorService::pickTopicIdsForTest(), but consuming
-     * one topic per call instead of N upfront, and stored under its own rotation
-     * column (practice_topic_rotation) so it never interferes with test generation's.
-     */
-    private function pickNextPracticeTopicId(ChildSetting $setting, array $availableTopicIds): ?int
-    {
-        $availableTopicIds = array_values(array_unique($availableTopicIds));
-        $n = count($availableTopicIds);
-        if ($n === 0) return null;
-
-        $rotation = $setting->practice_topic_rotation ?? [];
-        $order    = $rotation['order']  ?? [];
-        $cursor   = (int) ($rotation['cursor'] ?? 0);
-
-        $sortedStored    = $order; sort($sortedStored);
-        $sortedAvailable = $availableTopicIds; sort($sortedAvailable);
-        if ($sortedStored !== $sortedAvailable) {
-            $order  = $availableTopicIds;
-            shuffle($order);
-            $cursor = 0;
-        }
-
-        $topicId = $order[$cursor % $n];
-        $setting->practice_topic_rotation = ['order' => $order, 'cursor' => ($cursor + 1) % $n];
-        $setting->save();
-
-        return $topicId;
+        return view('child.practice', ['type' => 'topic', 'topic' => $topic, 'slug' => $slug]);
     }
 
     // ── AJAX: next question ──────────────────────────────────────────────────
     public function question(string $slug): JsonResponse
     {
-        $child = auth()->user();
+        $child   = auth()->user();
+        $setting = $child->childSetting;
 
         if ($slug === 'pyramid') {
-            $session = PracticeSession::forChild($child->id, null, 'pyramid');
-            $config  = self::pyramidConfig($session->level);
-            $key     = "pq_{$child->id}_pyramid_" . uniqid();
+            if (! $setting) {
+                return response()->json(['error' => 'მშობელმა ჯერ კლასი და დონე არ დააყენა'], 404);
+            }
+            $config = self::pyramidConfig($setting->difficulty);
+            $key    = "pq_{$child->id}_pyramid_" . uniqid();
             return response()->json($this->buildPyramid($config, $key, '🔺 პირამიდა'));
         }
 
         if ($slug === 'auto') {
-            $setting = $child->childSetting;
-            $gradeId = $setting?->grade_id;
-            $availableTopicIds = Topic::where('grade_id', $gradeId)->whereHas('questionTemplates')->pluck('id')->all();
-            $topicId = $setting ? $this->pickNextPracticeTopicId($setting, $availableTopicIds) : null;
-
-            if (! $topicId) {
-                return response()->json(['error' => 'თემები ვერ მოიძებნა'], 404);
-            }
-            $topic = Topic::find($topicId);
-        } else {
-            $topic = Topic::findOrFail((int) $slug);
-            abort_if($topic->grade_id !== $child->childSetting?->grade_id, 403);
+            return $this->questionFromQueue($child);
         }
 
-        $session = PracticeSession::forChild($child->id, $topic->id, 'topic');
-        $diff    = min($session->level, 5);
+        $topic = Topic::findOrFail((int) $slug);
+        abort_if($topic->grade_id !== $setting?->grade_id, 403);
+        return $this->questionFromTopic($setting, $topic);
+    }
 
-        // "scale" has its own two-pan visual that this cache-based practice flow
-        // (and practice.blade.php's renderer) doesn't know how to draw — unlike
-        // pyramid/code/crossword, which DO have dedicated rendering below, scale
-        // questions are only ever served through real tests (TestGeneratorService).
-        $template = QuestionTemplate::where('topic_id', $topic->id)
-            ->where('difficulty', $diff)
+    /**
+     * "auto" practice — serves questions one at a time from a pre-built,
+     * test-like ordered batch (TestGeneratorService::generatePracticeBatch(),
+     * which picks topics/templates with the exact same difficulty/fairness/
+     * sequence rules a real test uses, against its OWN rotation columns so it
+     * never disturbs the real test's progress). A fresh batch is built once
+     * the cached one is exhausted.
+     */
+    private function questionFromQueue($child): JsonResponse
+    {
+        $queueKey = "practice_queue_{$child->id}";
+        $queue    = cache()->get($queueKey);
+
+        if (! $queue || ! isset($queue['items'][$queue['cursor']])) {
+            $result = (new TestGeneratorService())->generatePracticeBatch($child);
+            if (isset($result['error']) || empty($result['items'])) {
+                return response()->json(['error' => $result['error'] ?? 'კითხვები ვერ მოიძებნა'], 404);
+            }
+            $items = array_map(fn ($it) => [
+                'question_type' => $it['template']->question_type ?? 'multiple_choice',
+                'topic_id'      => $it['template']->topic_id,
+                'topic_name'    => $it['template']->topic?->name ?? '',
+                'generated'     => $it['generated'],
+            ], $result['items']);
+            $queue = ['items' => $items, 'cursor' => 0];
+            cache()->put($queueKey, $queue, now()->addHours(self::QUEUE_TTL_HOURS));
+        }
+
+        $item = $queue['items'][$queue['cursor']];
+        return response()->json($this->buildQuestionResponse($child->id, $item, $queueKey));
+    }
+
+    /**
+     * Topic-focused practice — one question at a time from a single topic,
+     * cycling fairly through that topic's whole template pool
+     * (TestGeneratorService::pickTemplateFromTopic(), same fairness real
+     * tests use) against its own rotation column, instead of the old pure
+     * `inRandomOrder()` pick.
+     */
+    private function questionFromTopic(?ChildSetting $setting, Topic $topic): JsonResponse
+    {
+        if (! $setting) {
+            return response()->json(['error' => 'მშობელმა ჯერ კლასი და დონე არ დააყენა'], 404);
+        }
+
+        $service = new TestGeneratorService();
+
+        $topicTemplates = QuestionTemplate::where('topic_id', $topic->id)
+            ->where('difficulty', $setting->difficulty)
+            ->where('is_olympiad', false)
             ->where('is_active', true)
             ->whereNotIn('question_type', ['scale'])
-            ->inRandomOrder()
-            ->first()
-            ?? QuestionTemplate::where('topic_id', $topic->id)->where('is_active', true)->whereNotIn('question_type', ['scale'])->inRandomOrder()->first();
+            ->with('theme')
+            ->get();
 
+        if ($topicTemplates->isEmpty()) {
+            $topicTemplates = QuestionTemplate::where('topic_id', $topic->id)
+                ->where('is_olympiad', false)
+                ->where('is_active', true)
+                ->whereNotIn('question_type', ['scale'])
+                ->with('theme')
+                ->get();
+        }
+
+        $template = $service->pickTemplateFromTopic($setting, $topic->id, $topicTemplates, [], 'practice_template_rotation');
         if (! $template) {
             return response()->json(['error' => 'კითხვები ვერ მოიძებნა'], 404);
         }
+        $setting->save(); // persist the practice_template_rotation cursor pickTemplateFromTopic() updated
 
-        $meta = ['topic_id' => $topic->id, 'topic_name' => $topic->name, 'level' => $session->level, 'streak' => $session->streak];
-
-        if ($template->isPyramid()) {
-            $key  = "pq_{$child->id}_{$topic->id}_" . uniqid();
-            $data = $template->generatePyramid();
-            cache()->put($key, ['topic_id' => $topic->id, 'qtype' => 'pyramid', 'data' => $data['solutions'], 'prompt' => "🔺 პირამიდა — {$topic->name}"], now()->addMinutes(20));
-            return response()->json(array_merge(['type' => 'pyramid', 'key' => $key, 'rows' => $data['rows'], 'height' => count($data['rows']), 'hint' => $data['hint_text'] ?? null], $meta));
+        $theme = $template->theme ?? Theme::first();
+        try {
+            $generated = $template->generate($theme);
+        } catch (\App\Exceptions\QuestionGenerationException $e) {
+            \Illuminate\Support\Facades\Log::error('PracticeController: broken template', ['template_id' => $template->id, 'error' => $e->getMessage()]);
+            return response()->json(['error' => 'კითხვა ვერ მოიძებნა — სცადე თავიდან'], 404);
         }
 
-        if ($template->isCode()) {
-            $key  = "pq_{$child->id}_{$topic->id}_" . uniqid();
-            $data = $template->generateCode();
-            $q    = json_decode($data['question_text'], true);
-            cache()->put($key, ['topic_id' => $topic->id, 'qtype' => 'code', 'data' => json_decode($data['correct_answer'], true), 'prompt' => "🔢 კოდური ამოცანა — მიზანი: {$q['target']}"], now()->addMinutes(20));
-            return response()->json(array_merge([
+        $item = [
+            'question_type' => $template->question_type ?? 'multiple_choice',
+            'topic_id'       => $topic->id,
+            'topic_name'     => $topic->name,
+            'generated'      => $generated,
+        ];
+        return response()->json($this->buildQuestionResponse($setting->user_id, $item, null));
+    }
+
+    /**
+     * Builds the per-type JSON the child-facing JS renders (pyramid/code/
+     * crossword/mc/input — mirrors generateScale()'s siblings' shapes) from
+     * an already-generated item, and caches its answer key. $advanceQueueKey,
+     * when given, is read back in answer() to move that queue's cursor to
+     * the next item once this one is graded.
+     */
+    private function buildQuestionResponse(int $childId, array $item, ?string $advanceQueueKey): array
+    {
+        $generated = $item['generated'];
+        $qtype     = $item['question_type'];
+        $topicName = $item['topic_name'];
+        $meta      = ['topic_id' => $item['topic_id'], 'topic_name' => $topicName];
+        $key       = "pq_{$childId}_{$item['topic_id']}_" . uniqid();
+
+        if ($qtype === 'pyramid') {
+            $rows      = json_decode($generated['question_text'], true) ?? [];
+            $solutions = json_decode($generated['correct_answer'], true) ?? [];
+            cache()->put($key, ['topic_id' => $item['topic_id'], 'qtype' => 'pyramid', 'data' => $solutions, 'prompt' => "🔺 პირამიდა — {$topicName}", 'advance_queue' => $advanceQueueKey], now()->addMinutes(self::ANSWER_TTL_MINUTES));
+            return array_merge(['type' => 'pyramid', 'key' => $key, 'rows' => $rows, 'height' => count($rows), 'hint' => $generated['hint_text'] ?? null], $meta);
+        }
+
+        if ($qtype === 'code') {
+            $q          = json_decode($generated['question_text'], true) ?? [];
+            $correctArr = json_decode($generated['correct_answer'], true) ?? [];
+            cache()->put($key, ['topic_id' => $item['topic_id'], 'qtype' => 'code', 'data' => $correctArr, 'prompt' => '🔢 კოდური ამოცანა — მიზანი: ' . ($q['target'] ?? ''), 'advance_queue' => $advanceQueueKey], now()->addMinutes(self::ANSWER_TTL_MINUTES));
+            return array_merge([
                 'type'      => 'code',
                 'key'       => $key,
-                'symbols'   => $q['symbols'],
-                'equations' => $q['equations'],
-                'target'    => $q['target'],
-                'hint'      => $data['hint_text'] ?? null,
-            ], $meta));
+                'symbols'   => $q['symbols'] ?? [],
+                'equations' => $q['equations'] ?? [],
+                'target'    => $q['target'] ?? [],
+                'hint'      => $generated['hint_text'] ?? null,
+            ], $meta);
         }
 
-        if ($template->isCrossword()) {
-            $key         = "pq_{$child->id}_{$topic->id}_" . uniqid();
-            $data        = $template->generateCrossword();
-            $q           = json_decode($data['question_text'], true);
-            $correctArr  = json_decode($data['correct_answer'], true) ?? [];
-            cache()->put($key, ['topic_id' => $topic->id, 'qtype' => 'crossword', 'data' => $correctArr, 'prompt' => "🧩 კროსვორდი — {$topic->name}"], now()->addMinutes(20));
+        if ($qtype === 'crossword') {
+            $q          = json_decode($generated['question_text'], true) ?? [];
+            $correctArr = json_decode($generated['correct_answer'], true) ?? [];
+            cache()->put($key, ['topic_id' => $item['topic_id'], 'qtype' => 'crossword', 'data' => $correctArr, 'prompt' => "🧩 კროსვორდი — {$topicName}", 'advance_queue' => $advanceQueueKey], now()->addMinutes(self::ANSWER_TTL_MINUTES));
             $revealed     = $q['revealed'] ?? [];
             $revealedVals = [];
             foreach ($revealed as $pos) {
-                $revealedVals[(string)$pos] = $correctArr[(string)$pos] ?? null;
+                $revealedVals[(string) $pos] = $correctArr[(string) $pos] ?? null;
             }
-            return response()->json(array_merge([
-                'type'           => 'crossword',
-                'key'            => $key,
-                'rows'           => $q['rows'] ?? 2,
-                'cols'           => $q['cols'] ?? 2,
-                'row_ops'        => $q['row_ops'] ?? ['+', '+'],
-                'col_ops'        => $q['col_ops'] ?? ['+', '+'],
-                'row_results'    => $q['row_results'] ?? [],
-                'col_results'    => $q['col_results'] ?? [],
-                'revealed'       => $revealed,
-                'revealed_values'=> $revealedVals,
-                'hint'           => $data['hint_text'] ?? null,
-            ], $meta));
-        }
-
-        // A broken template (formula never resolves) must never reach the child —
-        // try a few other MC/numeric templates from the same topic before giving up.
-        $theme = $template->theme ?? Theme::first();
-        $excludedIds = [];
-        $generated = null;
-        for ($attempt = 0; $attempt < 5; $attempt++) {
-            try {
-                $generated = $template->generate($theme);
-                break;
-            } catch (\App\Exceptions\QuestionGenerationException $e) {
-                \Illuminate\Support\Facades\Log::error('PracticeController: skipping broken template', ['template_id' => $template->id, 'error' => $e->getMessage()]);
-                $excludedIds[] = $template->id;
-                $template = QuestionTemplate::where('topic_id', $topic->id)
-                    ->where('is_active', true)
-                    ->whereNotIn('question_type', ['pyramid', 'code', 'crossword', 'scale'])
-                    ->whereNotIn('id', $excludedIds)
-                    ->inRandomOrder()
-                    ->first();
-                if (! $template) break;
-                $theme = $template->theme ?? Theme::first();
-            }
-        }
-        if ($generated === null) {
-            return response()->json(['error' => 'კითხვა ვერ მოიძებნა — სცადე თავიდან'], 404);
+            return array_merge([
+                'type'            => 'crossword',
+                'key'             => $key,
+                'rows'            => $q['rows'] ?? 2,
+                'cols'            => $q['cols'] ?? 2,
+                'row_ops'         => $q['row_ops'] ?? ['+', '+'],
+                'col_ops'         => $q['col_ops'] ?? ['+', '+'],
+                'row_results'     => $q['row_results'] ?? [],
+                'col_results'     => $q['col_results'] ?? [],
+                'revealed'        => $revealed,
+                'revealed_values' => $revealedVals,
+                'hint'            => $generated['hint_text'] ?? null,
+            ], $meta);
         }
 
         // "numeric_input" (⌨️ child types the number) has no options — same cached
         // shape as "mc" otherwise, just a different `type` so the frontend renders
         // a free-number field instead of option buttons.
         $isInput = empty($generated['options']);
-        $key = "pq_{$child->id}_{$topic->id}_" . uniqid();
-        cache()->put($key, ['topic_id' => $topic->id, 'qtype' => $isInput ? 'input' : 'mc', 'data' => ['type' => $isInput ? 'input' : 'mc', 'correct' => $generated['correct_answer']], 'prompt' => $generated['question_text']], now()->addMinutes(20));
-
-        return response()->json(array_merge([
+        cache()->put($key, ['topic_id' => $item['topic_id'], 'qtype' => $isInput ? 'input' : 'mc', 'data' => ['type' => $isInput ? 'input' : 'mc', 'correct' => $generated['correct_answer']], 'prompt' => $generated['question_text'], 'advance_queue' => $advanceQueueKey], now()->addMinutes(self::ANSWER_TTL_MINUTES));
+        return array_merge([
             'type'     => $isInput ? 'input' : 'mc',
             'key'      => $key,
             'question' => $generated['question_text'],
             'options'  => $generated['options'],
             'hint'     => $generated['hint_text'] ?? null,
-        ], $meta));
+        ], $meta);
     }
 
     // ── AJAX: submit answer ──────────────────────────────────────────────────
@@ -300,45 +313,32 @@ class PracticeController extends Controller
             'correct'    => $correct,
         ]);
 
-        // Update session
-        $session = $topicId
-            ? PracticeSession::forChild($child->id, $topicId, 'topic')
-            : PracticeSession::forChild($child->id, null, 'pyramid');
-
-        $session->total_answered++;
-        $leveledUp = false;
-
-        if ($isCorrect) {
-            $session->total_correct++;
-            $session->streak++;
-            if ($session->streak >= self::LEVEL_UP_STREAK && $session->level < self::MAX_LEVEL) {
-                $session->level++;
-                $session->streak  = 0;
-                $leveledUp        = true;
+        // A queue-backed ("auto") question advances that queue's cursor so the
+        // next loadQuestion() serves the next item in the pre-built, test-like
+        // ordered batch — practice never re-generates/reshuffles mid-batch.
+        if (! empty($cached['advance_queue'])) {
+            $queue = cache()->get($cached['advance_queue']);
+            if ($queue) {
+                $queue['cursor']++;
+                cache()->put($cached['advance_queue'], $queue, now()->addHours(self::QUEUE_TTL_HOURS));
             }
-        } else {
-            $session->streak = 0;
         }
 
-        $session->last_activity_at = now();
-        $session->save();
-
-        // Coins — points-per-correct is admin-configurable per grade/level for practice too
-        $points = 0;
+        // Coins — points-per-correct is admin-configurable per grade/level for practice too.
+        // Uses the child's REAL difficulty (same as AchievementService does for real tests) —
+        // practice never has its own level, and never changes this one.
+        $setting = $child->childSetting;
+        $points  = 0;
         if ($isCorrect) {
-            $setting = $child->childSetting;
-            $points  = PointRule::resolve($setting?->grade_id, $session->level, 'practice');
+            $points = PointRule::resolve($setting?->grade_id, $setting?->difficulty, 'practice');
             if ($setting && $points > 0) {
                 $setting->increment('coins', $points);
             }
         }
 
         return response()->json(array_merge($feedback, [
-            'correct'    => $isCorrect,
-            'level'      => $session->level,
-            'streak'     => $session->streak,
-            'leveled_up' => $leveledUp,
-            'coins'      => $points,
+            'correct' => $isCorrect,
+            'coins'   => $points,
         ]));
     }
 
@@ -363,7 +363,7 @@ class PracticeController extends Controller
             $config['hidden_count']
         );
 
-        cache()->put($key, ['topic_id' => null, 'qtype' => 'pyramid', 'data' => $result['solutions'], 'prompt' => $prompt], now()->addMinutes(20));
+        cache()->put($key, ['topic_id' => null, 'qtype' => 'pyramid', 'data' => $result['solutions'], 'prompt' => $prompt], now()->addMinutes(self::ANSWER_TTL_MINUTES));
 
         return ['type' => 'pyramid', 'key' => $key, 'rows' => $result['rows'], 'height' => $config['height']];
     }
