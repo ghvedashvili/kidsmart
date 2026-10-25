@@ -52,9 +52,10 @@
             <div style="font-size:0.6rem;color:#7c3aed;margin-bottom:2px;">{{ $ach->theme->icon ?? '' }} მხოლოდ {{ $ach->theme->name }}</div>
             @endif
             <div class="card-meta">
-                {{ \App\Models\Achievement::CONDITION_TYPES[$ach->condition_type] ?? $ach->condition_type }}
+                {{ \App\Models\Achievement::CONTEXTS[$ach->context] ?? $ach->context }}
+                @if($ach->game) · {{ $ach->game }} @endif
+                · {{ \App\Models\Achievement::CONDITION_TYPES[$ach->condition_type] ?? $ach->condition_type }}
                 @if($ach->tiers->count() > 1) · {{ $ach->tiers->count() }} დონე @endif
-                @if($ach->daily_limit) · დღეში 1-ჯერ @endif
             </div>
             <div class="card-actions">
                 <form method="POST" action="{{ route('admin.achievements.toggle', $ach) }}">

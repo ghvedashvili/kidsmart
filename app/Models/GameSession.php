@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class GameSession extends Model
 {
     protected $fillable = [
-        'child_id', 'game', 'player_score', 'computer_score', 'wins', 'losses', 'state',
+        'child_id', 'game', 'player_score', 'computer_score', 'wins', 'losses', 'current_streak', 'state',
     ];
 
     protected $casts = [

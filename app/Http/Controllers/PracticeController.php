@@ -336,9 +336,12 @@ class PracticeController extends Controller
             }
         }
 
+        $newAchievements = (new \App\Services\AchievementService())->handlePracticeAnswer($child, $isCorrect);
+
         return response()->json(array_merge($feedback, [
-            'correct' => $isCorrect,
-            'coins'   => $points,
+            'correct'          => $isCorrect,
+            'coins'            => $points,
+            'new_achievements' => $newAchievements,
         ]));
     }
 

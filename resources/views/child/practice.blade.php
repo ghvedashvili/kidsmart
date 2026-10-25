@@ -3,6 +3,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
 @endpush
 @section('content')
+@include('partials.achievement-toast')
 <style>
     body { background: transparent !important; }
     .wrap { max-width: 520px; margin: 0 auto; padding: 28px 0 80px; }
@@ -506,6 +507,8 @@ function showFeedback(data) {
     }
 
     document.getElementById('nextBtn').style.display = 'block';
+
+    showAchievementToasts(data.new_achievements);
 }
 
 // ── Spinner ───────────────────────────────────────────────────────────────

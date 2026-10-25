@@ -89,6 +89,7 @@ class GameController extends Controller
         $finalPlayer   = null;
         $finalComputer = null;
         $global    = GameGlobalStat::forGame('rock_paper_scissors');
+        $newAchievements = [];
 
         if ($session->player_score >= 3 || $session->computer_score >= 3) {
             $matchOver     = true;
@@ -97,13 +98,16 @@ class GameController extends Controller
             $won           = $session->player_score > $session->computer_score;
             if ($won) {
                 $session->wins++;
+                $session->current_streak++;
                 $global->increment('total_wins');
             } else {
                 $session->losses++;
+                $session->current_streak = 0;
                 $global->increment('total_losses');
             }
             $session->player_score   = 0;
             $session->computer_score = 0;
+            $newAchievements = (new \App\Services\AchievementService())->handleGameFinish($child, 'rock_paper_scissors');
         }
 
         $session->save();
@@ -118,6 +122,7 @@ class GameController extends Controller
             'won'                  => $won,
             'final_player_score'   => $finalPlayer,
             'final_computer_score' => $finalComputer,
+            'new_achievements'     => $newAchievements,
             'global'               => [
                 'total_wins'   => $global->total_wins,
                 'total_losses' => $global->total_losses,
@@ -164,22 +169,28 @@ class GameController extends Controller
 
         $session = GameSession::forChild($child->id, 'wolves_and_hare');
         $global  = GameGlobalStat::forGame('wolves_and_hare');
+        $won     = $data['result'] === 'win';
 
-        if ($data['result'] === 'win') {
+        if ($won) {
             $session->wins++;
+            $session->current_streak++;
             $global->increment('total_wins');
         } else {
             $session->losses++;
+            $session->current_streak = 0;
             $global->increment('total_losses');
         }
         $session->state = null;
         $session->save();
         $global->refresh();
 
+        $newAchievements = (new \App\Services\AchievementService())->handleGameFinish($child, 'wolves_and_hare');
+
         return response()->json([
-            'wins'   => $session->wins,
-            'losses' => $session->losses,
-            'global' => [
+            'wins'             => $session->wins,
+            'losses'           => $session->losses,
+            'new_achievements' => $newAchievements,
+            'global'           => [
                 'total_wins'   => $global->total_wins,
                 'total_losses' => $global->total_losses,
             ],
@@ -223,10 +234,16 @@ class GameController extends Controller
             ->where('player_score', '>', $session->player_score)
             ->count() + 1;
 
+        // Memory has no win/lose, so only all_games_tried (and any other
+        // game-scoped=null achievement) is reachable from here — game_wins/
+        // game_win_streak stay untouched since this never updates wins/losses.
+        $newAchievements = (new \App\Services\AchievementService())->handleGameFinish($child, 'memory');
+
         return response()->json([
-            'best_score' => $session->player_score,
-            'is_best'    => $isBest,
-            'rank'       => $rank,
+            'best_score'       => $session->player_score,
+            'is_best'          => $isBest,
+            'rank'             => $rank,
+            'new_achievements' => $newAchievements,
         ]);
     }
 
@@ -291,22 +308,28 @@ class GameController extends Controller
 
         $session = GameSession::forChild($child->id, 'quoridor');
         $global  = GameGlobalStat::forGame('quoridor');
+        $won     = $data['result'] === 'win';
 
-        if ($data['result'] === 'win') {
+        if ($won) {
             $session->wins++;
+            $session->current_streak++;
             $global->increment('total_wins');
         } else {
             $session->losses++;
+            $session->current_streak = 0;
             $global->increment('total_losses');
         }
         $session->state = null;
         $session->save();
         $global->refresh();
 
+        $newAchievements = (new \App\Services\AchievementService())->handleGameFinish($child, 'quoridor');
+
         return response()->json([
-            'wins'   => $session->wins,
-            'losses' => $session->losses,
-            'global' => [
+            'wins'             => $session->wins,
+            'losses'           => $session->losses,
+            'new_achievements' => $newAchievements,
+            'global'           => [
                 'total_wins'   => $global->total_wins,
                 'total_losses' => $global->total_losses,
             ],

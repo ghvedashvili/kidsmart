@@ -4,6 +4,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.3/TweenMax.min.js"></script>
 @endpush
 @section('content')
+@include('partials.achievement-toast')
 <style>
 * { box-sizing: border-box; }
 body { background: transparent !important; overflow: hidden; }
@@ -338,6 +339,7 @@ function reportFinish() {
                 document.getElementById('bestScoreLine').style.display = '';
             }
             resultModal.classList.add('open');
+            showAchievementToasts(data.new_achievements);
         })
         .catch(() => { resultModal.classList.add('open'); });
 }

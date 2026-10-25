@@ -3,6 +3,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Acme&display=swap" rel="stylesheet">
 @endpush
 @section('content')
+@include('partials.achievement-toast')
 <style>
 @keyframes changeOrder {
   from { z-index: 9; }
@@ -399,6 +400,7 @@ button:hover { background-color: #15803d; }
         scoreDisplay.textContent = `ანგარიში: შენ ${data.player_score} - ${data.computer_score} Kidsmart`;
         personalScoreDisplay.textContent = `${data.wins} - ${data.losses}`;
         overallScoreDisplay.textContent = `${data.global.total_wins} - ${data.global.total_losses}`;
+        showAchievementToasts(data.new_achievements);
 
         setTimeout(() => {
           resetSelections();

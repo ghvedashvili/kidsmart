@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('content')
+@include('partials.achievement-toast')
 <style>
 * { box-sizing: border-box; }
 body { background: transparent !important; font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
@@ -207,6 +208,7 @@ function reportFinish(userWon) {
         .then(data => {
             personalScoreDisplay.textContent = `${data.wins} - ${data.losses}`;
             overallScoreDisplay.textContent = `${data.global.total_wins} - ${data.global.total_losses}`;
+            showAchievementToasts(data.new_achievements);
         })
         .catch(() => {});
 }

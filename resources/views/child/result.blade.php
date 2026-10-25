@@ -192,7 +192,10 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
     @if(count($achievement_result['new_achievements']))
     <div class="ach-unlocked">
         @foreach($achievement_result['new_achievements'] as $ach)
-        <span class="ach-pill">{{ $ach['emoji'] }} {{ $ach['name'] }}</span>
+        <span class="ach-pill">
+            @if($ach['image'])<img src="{{ $ach['image'] }}" style="width:18px;height:18px;object-fit:contain;" alt="">@else 🏅 @endif
+            {{ $ach['name'] }}
+        </span>
         @endforeach
     </div>
     @endif

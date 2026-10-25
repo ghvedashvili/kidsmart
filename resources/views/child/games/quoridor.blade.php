@@ -3,6 +3,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
 @endpush
 @section('content')
+@include('partials.achievement-toast')
 <style>
 * { box-sizing: border-box; }
 body { background: transparent !important; overflow: hidden; }
@@ -253,6 +254,7 @@ function reportFinish(humanWon) {
         .then(data => {
             personalScoreDisplay.textContent = `${data.wins} - ${data.losses}`;
             overallScoreDisplay.textContent = `${data.global.total_wins} - ${data.global.total_losses}`;
+            showAchievementToasts(data.new_achievements);
         })
         .catch(() => {});
 }

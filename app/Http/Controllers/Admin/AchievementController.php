@@ -25,6 +25,7 @@ class AchievementController extends Controller
             'achievement' => null,
             'conditionTypes' => Achievement::CONDITION_TYPES,
             'binaryTypes' => Achievement::BINARY_TYPES,
+            'contexts' => Achievement::CONTEXTS,
             'themes' => Theme::orderBy('name')->get(),
         ]);
     }
@@ -49,6 +50,7 @@ class AchievementController extends Controller
             'achievement' => $achievement,
             'conditionTypes' => Achievement::CONDITION_TYPES,
             'binaryTypes' => Achievement::BINARY_TYPES,
+            'contexts' => Achievement::CONTEXTS,
             'themes' => Theme::orderBy('name')->get(),
         ]);
     }
@@ -93,11 +95,12 @@ class AchievementController extends Controller
                 Rule::unique('achievements', 'slug')->ignore($achievement?->id),
             ],
             'theme_id'         => ['nullable', Rule::exists('themes', 'id')],
+            'context'          => ['required', Rule::in(array_keys(Achievement::CONTEXTS))],
+            'game'             => 'nullable|string|max:40|alpha_dash',
             'description'      => 'nullable|string|max:200',
             'condition_type'   => ['required', Rule::in(array_keys(Achievement::CONDITION_TYPES))],
             'condition_before' => 'nullable|date_format:H:i',
             'condition_after'  => 'nullable|date_format:H:i',
-            'daily_limit'      => 'nullable|boolean',
             'is_active'        => 'nullable|boolean',
             'tiers'            => 'required|array|min:1',
             'tiers.*.label'    => 'required|string|max:80',
@@ -117,10 +120,11 @@ class AchievementController extends Controller
             'name'             => $data['name'],
             'slug'             => Str::slug($data['slug'], '_'),
             'theme_id'         => $data['theme_id'] ?? null,
+            'context'          => $data['context'],
+            'game'             => $data['context'] === 'games' ? ($data['game'] ?? null) : null,
             'description'      => $data['description'] ?? null,
             'condition_type'   => $data['condition_type'],
             'condition_config' => $conditionConfig,
-            'daily_limit'      => $request->boolean('daily_limit'),
             'is_active'        => $request->boolean('is_active', true),
             'tiers'            => array_values($data['tiers']),
         ];

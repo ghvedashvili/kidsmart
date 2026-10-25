@@ -55,6 +55,20 @@
             </select>
             @error('theme_id')<div class="err">{{ $message }}</div>@enderror
 
+            <div class="lbl">კატეგორია <span style="color:#cbd5e1;">(რომელი აქტივობა ამოწმებს ამ მიღწევას)</span></div>
+            <select name="context" id="achContext" class="fc" onchange="achOnContextChange()">
+                @foreach($contexts as $key => $label)
+                <option value="{{ $key }}" {{ old('context', $achievement?->context ?? 'test') === $key ? 'selected' : '' }}>{{ $label }}</option>
+                @endforeach
+            </select>
+            @error('context')<div class="err">{{ $message }}</div>@enderror
+
+            <div id="achGameField" style="display:none;">
+                <div class="lbl">თამაში <span style="color:#cbd5e1;">(ცარიელი = ყველა თამაშზე მოქმედებს)</span></div>
+                <input type="text" name="game" class="fc" value="{{ old('game', $achievement?->game) }}" placeholder="მაგ: memory, quoridor, rock_paper_scissors, wolves_and_hare">
+                @error('game')<div class="err">{{ $message }}</div>@enderror
+            </div>
+
             <div class="lbl">აღწერა <span style="color:#cbd5e1;">({n} შეიცვლება დონის ზღვრით)</span></div>
             <input type="text" name="description" class="fc" value="{{ old('description', $achievement?->description) }}" placeholder="მაგ: დაწერე {n} ტესტი">
 
@@ -80,10 +94,6 @@
                 <div class="hint">შეავსე მხოლოდ ერთ-ერთი — ან „საათამდე“ ან „საათის შემდეგ“.</div>
             </div>
 
-            <label class="check-row">
-                <input type="checkbox" name="daily_limit" value="1" {{ old('daily_limit', $achievement?->daily_limit) ? 'checked' : '' }}>
-                დღეში მხოლოდ 1 ახალი მიღწევის გახსნა შესაძლებელია (იზიარებს ლიმიტს სხვა ასეთ მიღწევებთან)
-            </label>
             <label class="check-row">
                 <input type="checkbox" name="is_active" value="1" {{ old('is_active', $achievement?->is_active ?? true) ? 'checked' : '' }}>
                 აქტიური
@@ -144,6 +154,11 @@ function achOnConditionChange() {
     });
 }
 
+function achOnContextChange() {
+    const context = document.getElementById('achContext').value;
+    document.getElementById('achGameField').style.display = context === 'games' ? 'block' : 'none';
+}
+
 function achAddTier() {
     const wrap = document.getElementById('tiersWrap');
     const i = tierIndex++;
@@ -172,5 +187,6 @@ function achRemoveTier(btn) {
 }
 
 achOnConditionChange();
+achOnContextChange();
 </script>
 @endsection
