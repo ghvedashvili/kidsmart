@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Achievement;
+use App\Models\Theme;
 use Illuminate\Database\Seeder;
 
 class AchievementSeeder extends Seeder
@@ -19,9 +20,25 @@ class AchievementSeeder extends Seeder
      * `game` further scopes a 'games' achievement to one specific game slug
      * (null = applies across all games) — new games just add new rows here,
      * no engine changes needed.
+     *
+     * Four achievements (perfect_score/speed_seconds/consecutive_correct/
+     * day_streak) have a real-footballer tier-1 label — these only make sense
+     * for a child assigned the "ფეხბურთი" theme, so they're scoped to it via
+     * `theme_id`, with a `_std` sibling (same condition_type, new slug, plain
+     * non-character labels) scoped to "სტანდარტი" for everyone else. A child
+     * with neither theme assigned sees neither variant — same pre-existing
+     * gap every other theme-scoped achievement already has, not new here.
+     *
+     * firstOrCreate() (not a hard Theme::where()->id lookup) so this seeder is
+     * self-sufficient on a brand-new database (e.g. a fresh Laravel Cloud
+     * deploy) — these two themes were previously only ever created by hand
+     * through the admin UI, never seeded.
      */
     public function run(): void
     {
+        $footballThemeId = Theme::firstOrCreate(['name' => 'ფეხბურთი'], ['icon' => '⚽'])->id;
+        $standardThemeId = Theme::firstOrCreate(['name' => 'სტანდარტი'], ['icon' => '😎'])->id;
+
         $catalog = [
             // ── Test ──────────────────────────────────────────────────────
             [
@@ -34,10 +51,17 @@ class AchievementSeeder extends Seeder
                 ],
             ],
             [
-                'slug' => 'perfect_score', 'name' => 'იდეალური შედეგი', 'context' => 'test',
+                'slug' => 'perfect_score', 'name' => 'იდეალური შედეგი', 'context' => 'test', 'theme_id' => $footballThemeId,
                 'description' => 'ყველა პასუხი პედრის პასებივით სწორეა', 'condition_type' => 'perfect_score',
                 'tiers' => [
                     ['level' => 1, 'label' => 'პედრი!', 'threshold' => null],
+                ],
+            ],
+            [
+                'slug' => 'perfect_score_std', 'name' => 'იდეალური შედეგი', 'context' => 'test', 'theme_id' => $standardThemeId,
+                'description' => 'ყველა პასუხი უშეცდომოდ', 'condition_type' => 'perfect_score',
+                'tiers' => [
+                    ['level' => 1, 'label' => 'ვარსკვლავური თამაში!', 'threshold' => null],
                 ],
             ],
             [
@@ -64,7 +88,7 @@ class AchievementSeeder extends Seeder
                 ],
             ],
             [
-                'slug' => 'speed_seconds', 'name' => 'სისწრაფე', 'context' => 'test',
+                'slug' => 'speed_seconds', 'name' => 'სისწრაფე', 'context' => 'test', 'theme_id' => $footballThemeId,
                 'description' => 'ტესტი {n} წამში დაასრულე', 'condition_type' => 'speed_seconds',
                 'tiers' => [
                     ['level' => 1, 'label' => 'კრისტიანო რონალდო', 'threshold' => 60],
@@ -73,10 +97,28 @@ class AchievementSeeder extends Seeder
                 ],
             ],
             [
-                'slug' => 'consecutive_correct', 'name' => 'ზედიზედ სწორი პასუხები', 'context' => 'test',
+                'slug' => 'speed_seconds_std', 'name' => 'სისწრაფე', 'context' => 'test', 'theme_id' => $standardThemeId,
+                'description' => 'ტესტი {n} წამში დაასრულე', 'condition_type' => 'speed_seconds',
+                'tiers' => [
+                    ['level' => 1, 'label' => 'სწრაფი გონება', 'threshold' => 60],
+                    ['level' => 2, 'label' => 'ელვასავით სწრაფი', 'threshold' => 30],
+                    ['level' => 3, 'label' => 'შუქის სისწრაფით', 'threshold' => 15],
+                ],
+            ],
+            [
+                'slug' => 'consecutive_correct', 'name' => 'ზედიზედ სწორი პასუხები', 'context' => 'test', 'theme_id' => $footballThemeId,
                 'description' => '{n} კითხვა ზედიზედ სწორად', 'condition_type' => 'consecutive_correct',
                 'tiers' => [
                     ['level' => 1, 'label' => 'ლამინე იამალი', 'threshold' => 19],
+                    ['level' => 2, 'label' => 'უცდომელი', 'threshold' => 30],
+                    ['level' => 3, 'label' => 'სრულყოფილი', 'threshold' => 50],
+                ],
+            ],
+            [
+                'slug' => 'consecutive_correct_std', 'name' => 'ზედიზედ სწორი პასუხები', 'context' => 'test', 'theme_id' => $standardThemeId,
+                'description' => '{n} კითხვა ზედიზედ სწორად', 'condition_type' => 'consecutive_correct',
+                'tiers' => [
+                    ['level' => 1, 'label' => 'სწორი სერია', 'threshold' => 19],
                     ['level' => 2, 'label' => 'უცდომელი', 'threshold' => 30],
                     ['level' => 3, 'label' => 'სრულყოფილი', 'threshold' => 50],
                 ],
@@ -143,10 +185,19 @@ class AchievementSeeder extends Seeder
 
             // ── Any (cross-category) ──────────────────────────────────────
             [
-                'slug' => 'day_streak', 'name' => 'ზედიზედ დღეები', 'context' => 'any',
+                'slug' => 'day_streak', 'name' => 'ზედიზედ დღეები', 'context' => 'any', 'theme_id' => $footballThemeId,
                 'description' => '{n} დღე ზედიზედ მინიმუმ 1 ტესტი ან ვარჯიში', 'condition_type' => 'day_streak',
                 'tiers' => [
                     ['level' => 1, 'label' => 'ლეო მესი', 'threshold' => 10],
+                    ['level' => 2, 'label' => 'სერიის ოსტატი', 'threshold' => 20],
+                    ['level' => 3, 'label' => 'დაუმარცხებელი', 'threshold' => 30],
+                ],
+            ],
+            [
+                'slug' => 'day_streak_std', 'name' => 'ზედიზედ დღეები', 'context' => 'any', 'theme_id' => $standardThemeId,
+                'description' => '{n} დღე ზედიზედ მინიმუმ 1 ტესტი ან ვარჯიში', 'condition_type' => 'day_streak',
+                'tiers' => [
+                    ['level' => 1, 'label' => 'დღიური გმირი', 'threshold' => 10],
                     ['level' => 2, 'label' => 'სერიის ოსტატი', 'threshold' => 20],
                     ['level' => 3, 'label' => 'დაუმარცხებელი', 'threshold' => 30],
                 ],
