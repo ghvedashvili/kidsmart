@@ -37,13 +37,34 @@ class QuestionTemplateController extends Controller
                 $query->where('difficulty', $request->difficulty)->where('is_olympiad', false);
             }
         }
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('template_text', 'like', "%{$search}%")
+                    ->orWhere('title', 'like', "%{$search}%")
+                    ->orWhere('hint_text', 'like', "%{$search}%")
+                    ->orWhere('correct_formula', 'like', "%{$search}%");
+            });
+        }
+
+        // Grouped by topic (grade, then the topic's admin-assigned `sequence`,
+        // then name) so the view can render collapsible topic sections instead
+        // of one long flat list — makes browsing/scanning for a specific
+        // question far easier than the old `latest()` order, which scattered
+        // every topic's questions randomly throughout the pages.
+        $query->join('topics', 'topics.id', '=', 'question_templates.topic_id')
+            ->orderBy('topics.grade_id')
+            ->orderByRaw('topics.sequence IS NULL, topics.sequence')
+            ->orderBy('topics.name')
+            ->orderBy('question_templates.id', 'desc')
+            ->select('question_templates.*');
 
         return view('admin.questions.index', [
-            'templates'   => $query->latest()->paginate(20),
+            'templates'   => $query->paginate(40),
             'grades'      => Grade::orderBy('number')->get(),
             'topics'      => Topic::with('grade')->orderBy('grade_id')->get(),
             'themes'      => Theme::orderBy('name')->get(),
-            'filters'     => $request->only('grade_id', 'topic_id', 'theme_id', 'difficulty'),
+            'filters'     => $request->only('grade_id', 'topic_id', 'theme_id', 'difficulty', 'search'),
             'themeVarMap' => $this->themeVarMap(),
             'showTrashed' => $showTrashed,
         ]);

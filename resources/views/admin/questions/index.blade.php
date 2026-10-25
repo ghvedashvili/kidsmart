@@ -12,6 +12,15 @@
     .btn-del { background: none; border: none; color: #cbd5e1; font-size: 0.72rem; cursor: pointer; padding: 0 4px; transition: color 0.2s; }
     .btn-del:hover { color: #ef4444; }
     .q-list { display: flex; flex-direction: column; gap: 12px; }
+    .topic-group { border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+    .topic-group-header { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: #f8fafc; cursor: pointer; user-select: none; }
+    .topic-group-header:hover { background: #f1f5f9; }
+    .topic-group-arrow { font-size: 0.6rem; color: #94a3b8; transition: transform 0.15s; flex-shrink: 0; }
+    .topic-group.collapsed .topic-group-arrow { transform: rotate(-90deg); }
+    .topic-group-title { font-size: 0.78rem; font-weight: 700; color: #1e293b; flex: 1; min-width: 0; }
+    .topic-group-count { font-size: 0.65rem; color: #64748b; background: #e2e8f0; border-radius: 99px; padding: 2px 9px; flex-shrink: 0; }
+    .topic-group-body { display: flex; flex-direction: column; gap: 10px; padding: 10px; }
+    .topic-group.collapsed .topic-group-body { display: none; }
     .q-row { padding: 14px; border-radius: 8px; background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: border-color 0.15s, box-shadow 0.15s; }
     .q-row:hover { border-color: #cbd5e1; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
     .q-row.trashed-row:hover { border-color: #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
@@ -132,6 +141,8 @@
     </div>
 
     <form method="GET" class="filters" id="filterForm">
+        <input type="text" name="search" class="fc" placeholder="🔍 ძებნა — ტექსტში, სათაურში, ფორმულაში..."
+            value="{{ $filters['search'] ?? '' }}" style="min-width:220px;">
         <select name="grade_id" class="fc" id="gradeFilter" onchange="onGradeChange(this.value)">
             <option value="">ყველა კლასი</option>
             @foreach($grades as $grade)
@@ -163,13 +174,43 @@
             @endfor
             <option value="olympiad" {{ ($filters['difficulty'] ?? '') === 'olympiad' ? 'selected' : '' }}>🏆 ოლიმპიადა</option>
         </select>
+        <button type="submit" class="btn">ძებნა</button>
         @if(array_filter($filters))
         <a href="{{ route('admin.questions.index') }}" style="color:#555;font-size:0.72rem;text-decoration:none;padding:9px 0;">× გასუფთავება</a>
         @endif
     </form>
 
+    @php
+        // Groups the CURRENT PAGE's results by topic -- the controller already
+        // orders the query by topic (grade, sequence, name) so each group's
+        // rows land together within a page. Grouping is skipped (flat list, one
+        // unlabeled "group" holding everything) ONLY when a specific topic is
+        // already selected, where a header for that one topic would just be
+        // noise -- NOT based on how many distinct topics happen to land on the
+        // current page, which made the grouping flicker on/off unpredictably
+        // whenever a filter (grade, theme, difficulty, search...) happened to
+        // narrow a page down to a single topic's worth of results.
+        $showGroups = $templates->isNotEmpty() && empty($filters['topic_id']);
+        $sections   = $showGroups ? $templates->getCollection()->groupBy('topic_id') : collect(['_all' => $templates->getCollection()]);
+    @endphp
+    @if($showGroups)
+    <div style="margin-bottom:10px;display:flex;gap:6px;">
+        <button type="button" class="btn" style="font-size:0.68rem;padding:5px 12px;" onclick="toggleAllTopicGroups(true)">▾ ყველას გაშლა</button>
+        <button type="button" class="btn" style="font-size:0.68rem;padding:5px 12px;" onclick="toggleAllTopicGroups(false)">▸ ყველას ჩაკეცვა</button>
+    </div>
+    @endif
     <div class="q-list">
-        @forelse($templates as $tpl)
+        @forelse($sections as $section)
+        @if($showGroups)
+        <div class="topic-group">
+            <div class="topic-group-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                <span class="topic-group-arrow">▾</span>
+                <span class="topic-group-title">{{ $section->first()->topic->grade->name }} / {{ $section->first()->topic->name }}</span>
+                <span class="topic-group-count">{{ $section->count() }}</span>
+            </div>
+            <div class="topic-group-body">
+        @endif
+        @foreach($section as $tpl)
         <div class="q-row {{ $showTrashed ? 'trashed-row' : '' }}" style="display:flex;gap:10px;align-items:flex-start;{{ (!$showTrashed && !$tpl->is_active) ? 'opacity:0.5;' : '' }}">
             @unless($showTrashed)
             <input type="checkbox" class="q-check q-item" value="{{ $tpl->id }}" style="margin-top:3px;" onchange="updateBar()">
@@ -244,6 +285,11 @@
             </div>
             </div>
         </div>
+        @endforeach
+        @if($showGroups)
+            </div>
+        </div>
+        @endif
         @empty
         <div class="q-row" style="color:#94a3b8;font-size:0.78rem;">შაბლონი არ არის</div>
         @endforelse
@@ -810,5 +856,9 @@ checkAll.addEventListener('change', function () {
     document.querySelectorAll('.q-item').forEach(c => { c.checked = this.checked; });
     updateBar();
 });
+
+function toggleAllTopicGroups(expand) {
+    document.querySelectorAll('.topic-group').forEach(g => g.classList.toggle('collapsed', !expand));
+}
 </script>
 @endsection
