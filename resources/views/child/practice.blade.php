@@ -17,7 +17,7 @@
     /* ── Question card ── */
     .q-card { background:white; border-radius:24px; margin:16px; padding:28px 20px 24px; box-shadow:0 8px 28px rgba(0,0,0,0.08); min-height:200px; }
     .q-label { font-family:'Nunito',sans-serif; font-weight:900; font-size:0.62rem; color:#94a3b8; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:16px; }
-    .q-text { font-family:'Fredoka One',cursive; font-size:1.15rem; color:#0c4a6e; line-height:1.5; margin-bottom:6px; }
+    .q-text { font-family:'Fredoka One',cursive; font-size:1.15rem; color:#0c4a6e; line-height:1.5; margin-bottom:6px; white-space: pre-line; }
     .q-hint { font-family:'Nunito',sans-serif; font-weight:700; font-size:0.75rem; color:#94a3b8; font-style:italic; margin-bottom:18px; }
 
     /* ── MC options ── */
