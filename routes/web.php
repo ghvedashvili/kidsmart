@@ -110,7 +110,12 @@ Route::middleware(['auth', 'role.permission'])->group(function () {
             'grades'         => Grade::where('is_active', true)->orderBy('number')->get(),
             'themes'         => Theme::all(),
             'topics'         => Topic::with('grade')->orderBy('grade_id')->get(),
-            'defaultThemeId' => Theme::where('name', 'სტანდარტი')->value('id'),
+            // Falls back to the first active theme by id if none is literally
+            // named "სტანდარტი" (e.g. renamed in admin) — the add/edit child
+            // forms pre-select this theme, so a null here would silently leave
+            // nothing checked instead of a reasonable default.
+            'defaultThemeId' => Theme::where('name', 'სტანდარტი')->value('id')
+                ?? Theme::where('is_active', true)->orderBy('id')->value('id'),
         ]);
     })->name('dashboard');
 

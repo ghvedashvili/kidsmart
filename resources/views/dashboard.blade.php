@@ -1192,7 +1192,7 @@
                 @error('name')<div class="merr">{{ $message }}</div>@enderror
                 <div class="merr" id="wizNameErr" style="display:none;">შეიყვანე სახელი</div>
 
-                <div class="mlbl">სქესი</div>
+                <div class="mlbl">სქესი <span>*</span></div>
                 <div class="mrow" id="genderRow">
                     <label class="mchip {{ old('avatar') == 'boy' ? 'sel' : '' }}"
                         onclick="chipSingle(this,'avatar_input','boy')">👦 ბიჭი</label>
@@ -1200,6 +1200,8 @@
                         onclick="chipSingle(this,'avatar_input','girl')">👧 გოგონა</label>
                 </div>
                 <input type="hidden" name="avatar" id="avatar_input" value="{{ old('avatar') }}">
+                @error('avatar')<div class="merr">{{ $message }}</div>@enderror
+                <div class="merr" id="wizGenderErr" style="display:none;">აირჩიე სქესი</div>
             </div>
 
             {{-- Step 2: Grade --}}
@@ -1455,9 +1457,11 @@ function wizGoTo(n) {
 
 function wizValidateStep(n) {
     if (n === 1) {
-        const ok = document.getElementById('wiz_name').value.trim().length > 0;
-        document.getElementById('wizNameErr').style.display = ok ? 'none' : 'block';
-        return ok;
+        const okName = document.getElementById('wiz_name').value.trim().length > 0;
+        document.getElementById('wizNameErr').style.display = okName ? 'none' : 'block';
+        const okGender = !!document.getElementById('avatar_input').value;
+        document.getElementById('wizGenderErr').style.display = okGender ? 'none' : 'block';
+        return okName && okGender;
     }
     if (n === 2) {
         const ok = !!document.getElementById('grade_id_input').value;
@@ -1476,6 +1480,7 @@ function wizPrev() {
 }
 function wizReset() {
     document.getElementById('wizNameErr').style.display = 'none';
+    document.getElementById('wizGenderErr').style.display = 'none';
     document.getElementById('wizGradeErr').style.display = 'none';
     wizGoTo(1);
 }
@@ -1487,7 +1492,7 @@ document.getElementById('addChildForm').addEventListener('submit', function(e) {
     }
 });
 
-@if($errors->hasAny(['name','grade_id','theme_ids']))
+@if($errors->hasAny(['name','avatar','grade_id','theme_ids']))
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('addChildModal').classList.add('open');
     @if($errors->has('grade_id'))

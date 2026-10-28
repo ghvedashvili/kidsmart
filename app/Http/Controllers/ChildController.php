@@ -17,7 +17,7 @@ class ChildController extends Controller
         $data = $request->validate([
             'name'           => 'required|string|max:50',
             'grade_id'       => ['required', Rule::exists('grades', 'id')->where('is_active', true)],
-            'avatar'         => 'nullable|in:boy,girl',
+            'avatar'         => 'required|in:boy,girl',
             'difficulty'     => 'nullable|integer|min:1|max:5',
             'tests_per_week' => 'nullable|integer|min:1|max:3',
             'theme_ids'      => 'nullable|array',
