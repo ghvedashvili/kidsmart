@@ -17,13 +17,16 @@ class ScaleService
      *     pan totals either way.
      *   - weight-kind candidate NOT on any pan: the deficit itself (classic
      *     shortcut, its "?" is a separately-appended blank chip).
-     *   - weight-kind candidate ALSO on a pan: solved ALGEBRAICALLY — its own
-     *     occurrences are excluded from both sides' "known" sums, leaving
-     *     (cLeft - cRight) copies of the unknown X, so
-     *     X = (knownRight - knownLeft) / (cLeft - cRight). Equal nonzero
-     *     counts on both sides make X cancel out of the equation entirely
-     *     (indeterminate), so that specific candidate is skipped. Its "?" is
-     *     rendered IN PLACE on the pan instead of appended separately.
+     *   - weight-kind candidate ALSO on a pan, but on ONLY ONE side: solved
+     *     ALGEBRAICALLY — its own occurrences are excluded from that side's
+     *     "known" sum, leaving (cLeft - cRight) copies of the unknown X, so
+     *     X = (knownRight - knownLeft) / (cLeft - cRight). Its "?" is
+     *     rendered IN PLACE on the pan instead of appended separately. If it
+     *     occurs on BOTH pans (with different counts — equal counts cancel
+     *     out of the deficit and fall to the classic-shortcut branch below),
+     *     that candidate is skipped entirely rather than solved: blanking
+     *     every occurrence on both sides at once would make the "?" appear
+     *     twice, once per side, which reads as two separate unknowns.
      *
      * An emoji-kind candidate's weight is never shown to the child directly, so
      * it's only eligible when $hasCustomPrompt is true — trusting the admin to
@@ -99,8 +102,7 @@ class ScaleService
                 $inline = false;
                 $thisBlankSide = $blankSide;
 
-                if ($kind === 'weight' && $coef !== 0) {
-                    if ($cLeft === $cRight) continue; // cancels out — indeterminate
+                if ($kind === 'weight' && $coef !== 0 && ($cLeft === 0 || $cRight === 0)) {
                     $knownLeft  = $totalLeft  - $weights[$answerKey] * $cLeft;
                     $knownRight = $totalRight - $weights[$answerKey] * $cRight;
                     $diff = $knownRight - $knownLeft;
@@ -112,6 +114,8 @@ class ScaleService
                     $answerValue   = $x;
                     $inline        = true;
                     $thisBlankSide = null;
+                } elseif ($kind === 'weight' && $coef !== 0) {
+                    continue; // on both pans with different counts — "?" would show on both sides, skip
                 } elseif ($kind === 'weight') {
                     $min = (int) ($conf['min'] ?? 1);
                     $max = max($min, (int) ($conf['max'] ?? 20));

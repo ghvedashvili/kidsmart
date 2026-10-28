@@ -1555,8 +1555,7 @@ function genPreviewScale() {
             const coef = cLeft - cRight;
             let answerValue, inline = false, thisBlankSide = blankSide;
 
-            if (kind === 'weight' && coef !== 0) {
-                if (cLeft === cRight) continue; // cancels out — indeterminate
+            if (kind === 'weight' && coef !== 0 && (cLeft === 0 || cRight === 0)) {
                 const knownLeft = totalLeft - weights[answerKey] * cLeft;
                 const knownRight = totalRight - weights[answerKey] * cRight;
                 const diff = knownRight - knownLeft;
@@ -1567,6 +1566,8 @@ function genPreviewScale() {
                 answerValue = x;
                 inline = true;
                 thisBlankSide = null;
+            } else if (kind === 'weight' && coef !== 0) {
+                continue; // on both pans with different counts — "?" would show on both sides, skip
             } else if (kind === 'weight') {
                 const min = conf.min || 1, max = Math.max(min, conf.max || 20);
                 if (need < min || need > max) continue;
