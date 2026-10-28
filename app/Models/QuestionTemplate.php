@@ -10,7 +10,7 @@ class QuestionTemplate extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['topic_id', 'theme_id', 'difficulty', 'is_olympiad', 'is_active', 'sequence', 'answer_type', 'question_type', 'title', 'template_text', 'hint_text', 'correct_formula', 'num_config', 'distractors', 'conditions'];
+    protected $fillable = ['topic_id', 'theme_id', 'question_group_id', 'difficulty', 'is_olympiad', 'is_active', 'sequence', 'answer_type', 'question_type', 'title', 'template_text', 'hint_text', 'correct_formula', 'num_config', 'distractors', 'conditions'];
 
     protected $casts = ['num_config' => 'array', 'distractors' => 'array', 'conditions' => 'array', 'is_olympiad' => 'boolean', 'is_active' => 'boolean', 'sequence' => 'integer'];
 
@@ -68,6 +68,11 @@ class QuestionTemplate extends Model
     public function theme(): BelongsTo
     {
         return $this->belongsTo(\App\Models\Theme::class);
+    }
+
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(QuestionGroup::class, 'question_group_id');
     }
 
     public function isPyramid(): bool    { return $this->question_type === 'pyramid'; }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Grade;
+use App\Models\QuestionGroup;
 use App\Models\QuestionTemplate;
 use App\Models\Theme;
 use App\Models\ThemeVarGroup;
@@ -18,8 +19,8 @@ class QuestionTemplateController extends Controller
         $showTrashed = $request->boolean('trashed');
 
         $query = $showTrashed
-            ? QuestionTemplate::onlyTrashed()->with('topic.grade', 'theme')
-            : QuestionTemplate::with('topic.grade', 'theme');
+            ? QuestionTemplate::onlyTrashed()->with('topic.grade', 'theme', 'group')
+            : QuestionTemplate::with('topic.grade', 'theme', 'group');
 
         if ($request->filled('grade_id')) {
             $query->whereHas('topic', fn($q) => $q->where('grade_id', $request->grade_id));
@@ -67,11 +68,24 @@ class QuestionTemplateController extends Controller
             'filters'     => $request->only('grade_id', 'topic_id', 'theme_id', 'difficulty', 'search'),
             'themeVarMap' => $this->themeVarMap(),
             'showTrashed' => $showTrashed,
+            // "ძველი სია" — bypasses group-card clustering entirely, every
+            // template (grouped or not) renders as its own row like before
+            // groups existed, for admins who'd rather filter the old way.
+            'flatView'    => $request->boolean('flat'),
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        $group = null;
+        $takenDifficulties = [];
+        if ($request->filled('group_id')) {
+            $group = QuestionGroup::with('templates')->find($request->input('group_id'));
+            if ($group) {
+                $takenDifficulties = $group->templates->pluck('difficulty')->all();
+            }
+        }
+
         return view('admin.questions.form', [
             'template'       => null,
             'grades'         => Grade::orderBy('number')->get(),
@@ -83,6 +97,8 @@ class QuestionTemplateController extends Controller
             'loadableTemplates' => QuestionTemplate::with('topic.grade')
                 ->orderBy('topic_id')->orderBy('id')
                 ->get(['id', 'topic_id', 'question_type', 'title', 'template_text']),
+            'group'             => $group,
+            'takenDifficulties' => $takenDifficulties,
         ]);
     }
 
@@ -126,6 +142,20 @@ class QuestionTemplateController extends Controller
     public function store(Request $request)
     {
         $data = $this->validated($request);
+
+        // Set via the "+ დონე" button on a group card (QuestionTemplateController::create())
+        // — not part of validated()'s big per-type branching since it's orthogonal to
+        // question_type and only ever applies on creation, never on edit/update.
+        if ($request->filled('question_group_id')) {
+            $group = QuestionGroup::findOrFail($request->input('question_group_id'));
+            if ($group->templates()->where('difficulty', $data['difficulty'])->exists()) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'difficulty' => 'ამ ჯგუფში ეს დონე უკვე დაკავებულია',
+                ]);
+            }
+            $data['question_group_id'] = $group->id;
+        }
+
         QuestionTemplate::create($data);
         return redirect()->route('admin.questions.index')->with('success', 'შაბლონი დაემატა');
     }
@@ -140,6 +170,8 @@ class QuestionTemplateController extends Controller
             'themeVarMap'    => $this->themeVarMap(),
             'allThemesData'  => $this->allThemesData(),
             'defaultThemeId' => null,
+            'group'             => null,
+            'takenDifficulties' => [],
         ]);
     }
 
@@ -285,6 +317,71 @@ class QuestionTemplateController extends Controller
         $copy->save();
 
         return response()->json(['success' => true, 'id' => $copy->id]);
+    }
+
+    /**
+     * Clusters >=2 existing templates into one named QuestionGroup (list view's
+     * multi-select "🔗 დააჯგუფე" bulk action) — the list then renders every
+     * member under one card with difficulty tabs instead of separate rows. If
+     * one (and only one) existing group is already represented among the
+     * selected templates, the rest are folded into that group instead of
+     * creating a new one, and no name is required.
+     */
+    public function merge(Request $request)
+    {
+        $data = $request->validate([
+            'ids'   => 'required|array|min:2',
+            'ids.*' => 'integer|exists:question_templates,id',
+            'name'  => 'nullable|string|max:150',
+        ]);
+
+        $templates = QuestionTemplate::whereIn('id', $data['ids'])->get();
+
+        $difficulties = $templates->pluck('difficulty');
+        if ($difficulties->count() !== $difficulties->unique()->count()) {
+            return response()->json(['error' => 'არჩეულებს შორის ერთი და იგივე დონე მეორდება'], 422);
+        }
+
+        $existingGroupIds = $templates->pluck('question_group_id')->filter()->unique();
+        if ($existingGroupIds->count() > 1) {
+            return response()->json(['error' => 'არჩეული შაბლონები სხვადასხვა ჯგუფს ეკუთვნის — ჯერ ერთში გააერთიანეთ'], 422);
+        }
+
+        if ($existingGroupIds->count() === 1) {
+            $group = QuestionGroup::findOrFail($existingGroupIds->first());
+            $otherDiffs = $group->templates()->whereNotIn('id', $data['ids'])->pluck('difficulty');
+            if ($otherDiffs->intersect($difficulties)->isNotEmpty()) {
+                return response()->json(['error' => 'ამ ჯგუფში ეს დონე უკვე დაკავებულია'], 422);
+            }
+        } else {
+            $name = trim((string) ($data['name'] ?? ''));
+            if ($name === '') {
+                return response()->json(['error' => 'საჭიროა ჯგუფის სახელი'], 422);
+            }
+            $group = QuestionGroup::create(['name' => $name]);
+        }
+
+        QuestionTemplate::whereIn('id', $data['ids'])->update(['question_group_id' => $group->id]);
+
+        return response()->json(['success' => true, 'group_id' => $group->id, 'name' => $group->name]);
+    }
+
+    /**
+     * Removes one template from its group — if that leaves <=1 member, the
+     * group is dissolved entirely (a "group" of one template makes no sense
+     * as a merged card) rather than left behind as an orphaned single-tab row.
+     */
+    public function ungroup(QuestionTemplate $question)
+    {
+        $groupId = $question->question_group_id;
+        $question->update(['question_group_id' => null]);
+
+        if ($groupId && QuestionGroup::find($groupId)?->templates()->count() <= 1) {
+            QuestionTemplate::where('question_group_id', $groupId)->update(['question_group_id' => null]);
+            QuestionGroup::destroy($groupId);
+        }
+
+        return response()->json(['success' => true]);
     }
 
     private function allThemesData(): array

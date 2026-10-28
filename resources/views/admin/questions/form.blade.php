@@ -34,6 +34,7 @@
     .diff-row { display: flex; gap: 5px; margin-bottom: 10px; }
     .diff-btn { background: #f8fafc; border: 1px solid #e2e8f0; color: #94a3b8; font-family: 'Goldman', monospace; font-size: 0.68rem; padding: 7px 0; width: 42px; text-align: center; border-radius: 3px; cursor: pointer; transition: all 0.15s; }
     .diff-btn.sel { border-color: #059669; color: #059669; background: #f0fdf4; }
+    .diff-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
     .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 9px; }
     .chip { font-family: 'Goldman', monospace; font-size: 0.6rem; letter-spacing: 0.04em; padding: 4px 8px; border-radius: 3px; cursor: pointer; transition: all 0.12s; user-select: none; white-space: nowrap; }
@@ -126,6 +127,13 @@
             @csrf
             @if($template) @method('PUT') @endif
 
+            @if($group ?? null)
+            <input type="hidden" name="question_group_id" value="{{ $group->id }}">
+            <div class="card" style="background:#eef2ff;border-color:#c7d2fe;padding:12px 16px;">
+                <span style="font-family:'Goldman',monospace;font-size:0.72rem;color:#4338ca;">➕ ემატება ჯგუფს: <b>{{ $group->name }}</b></span>
+            </div>
+            @endif
+
             @unless($template)
             {{-- Load an existing template as a starting point --}}
             <div class="card" style="background:#fafaff;border-color:#e0e7ff;">
@@ -205,7 +213,7 @@
                         <select name="topic_id" id="topicSelect" class="fc" style="margin-bottom:0;" required>
                             <option value="">— თემა —</option>
                             @foreach($topics as $topic)
-                            <option value="{{ $topic->id }}" {{ old('topic_id', $template?->topic_id) == $topic->id ? 'selected' : '' }}>
+                            <option value="{{ $topic->id }}" {{ old('topic_id', $template?->topic_id ?? ($group ?? null)?->templates->first()?->topic_id) == $topic->id ? 'selected' : '' }}>
                                 {{ $topic->name }}
                             </option>
                             @endforeach
@@ -228,15 +236,25 @@
                 </div>
 
                 <div class="lbl">სირთულე</div>
+                @php
+                    // In group-add context ($group set, no old()/edit value yet), the
+                    // default selection skips whatever difficulties that group's other
+                    // members already occupy instead of defaulting to 1 regardless.
+                    $defaultDiff = old('difficulty', $template?->difficulty);
+                    if (! $defaultDiff) {
+                        $defaultDiff = collect(range(1, 5))->first(fn($d) => ! in_array($d, $takenDifficulties ?? [])) ?? 1;
+                    }
+                @endphp
                 <div class="diff-row" id="diffRow">
                     @for($i=1;$i<=5;$i++)
-                    <button type="button" class="diff-btn {{ old('difficulty', $template?->difficulty ?? 1) == $i ? 'sel' : '' }}"
+                    @php $isTaken = in_array($i, $takenDifficulties ?? []); @endphp
+                    <button type="button" class="diff-btn {{ $defaultDiff == $i ? 'sel' : '' }}"
+                        @if($isTaken) disabled title="ეს დონე უკვე დაკავებულია ამ ჯგუფში" @endif
                         onclick="setDiff({{ $i }})">{{ $i }}</button>
                     @endfor
                 </div>
                 <div class="hint" id="diffMaxHint" style="display:none;"></div>
-                <input type="hidden" name="difficulty" id="diffInput"
-                    value="{{ old('difficulty', $template?->difficulty ?? 1) }}">
+                <input type="hidden" name="difficulty" id="diffInput" value="{{ $defaultDiff }}">
 
                 <div style="margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                     <button type="button" id="olyBtn" class="diff-btn {{ old('is_olympiad', $template?->is_olympiad) ? 'sel' : '' }}" style="width:auto;padding:7px 14px;"

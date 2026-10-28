@@ -49,6 +49,13 @@
     .q-status-btn.danger:hover { color: #ef4444; }
     .q-status-btn.restore { color: #059669; border-color: #86efac; background: #f0fdf4; }
     .diff { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+    .q-group-card { display: block; }
+    .q-group-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9; }
+    .q-group-name { font-weight: 700; color: #1e293b; font-size: 0.8rem; }
+    .q-tabs { display: flex; gap: 5px; flex-wrap: wrap; }
+    .q-tab { background: #f8fafc; border: 1px solid #e2e8f0; color: #94a3b8; font-family: 'Goldman', monospace; font-size: 0.68rem; padding: 5px 11px; border-radius: 99px; cursor: pointer; transition: all 0.15s; text-decoration: none; display: inline-block; }
+    .q-tab.active { border-color: #4f46e5; color: #4f46e5; background: #eef2ff; }
+    .q-group-member + .q-group-member { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #f1f5f9; }
     .msg { font-size: 0.75rem; color: #059669; margin-bottom: 16px; }
     .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
     .pagination-wrap { margin-top: 20px; display: flex; gap: 6px; flex-wrap: wrap; }
@@ -134,6 +141,11 @@
             @if($showTrashed)
             <a href="{{ route('admin.questions.index', request()->except('trashed', 'page')) }}" class="btn">← აქტიურები</a>
             @else
+            @if($flatView)
+            <a href="{{ route('admin.questions.index', request()->except('flat', 'page')) }}" class="btn">🔗 ჯგუფებით</a>
+            @else
+            <a href="{{ route('admin.questions.index', array_merge(request()->except('page'), ['flat' => 1])) }}" class="btn">📋 ძველი სია</a>
+            @endif
             <a href="{{ route('admin.questions.index', array_merge(request()->except('page'), ['trashed' => 1])) }}" class="btn">🗑 წაშლილები</a>
             <a href="{{ route('admin.questions.create') }}" class="btn">+ ახალი შაბლონი</a>
             @endif
@@ -210,81 +222,69 @@
             </div>
             <div class="topic-group-body">
         @endif
-        @foreach($section as $tpl)
+        @php
+            // Ungrouped templates render exactly as before, one per card.
+            // Grouped templates (question_group_id set) cluster into one
+            // merged card per group, members ordered by difficulty, with the
+            // whole card list re-sorted by each card's newest member id so
+            // a merged group slots in where its most recent member would
+            // have, instead of jumping to the top/bottom of the section.
+            // $flatView ("ძველი სია") bypasses all of this — every template,
+            // grouped or not, renders as its own card, exactly like before
+            // groups existed — for admins who'd rather filter the old way.
+            $cards = [];
+            if ($flatView) {
+                foreach ($section as $t) {
+                    $cards[] = ['type' => 'single', 'sort_id' => $t->id, 'tpl' => $t];
+                }
+            } else {
+                foreach ($section->whereNull('question_group_id') as $t) {
+                    $cards[] = ['type' => 'single', 'sort_id' => $t->id, 'tpl' => $t];
+                }
+                foreach ($section->whereNotNull('question_group_id')->groupBy('question_group_id') as $members) {
+                    $cards[] = [
+                        'type'    => 'group',
+                        'sort_id' => $members->max('id'),
+                        'group'   => $members->first()->group,
+                        'members' => $members->sortBy('difficulty')->values(),
+                    ];
+                }
+            }
+            usort($cards, fn($a, $b) => $b['sort_id'] <=> $a['sort_id']);
+        @endphp
+        @foreach($cards as $card)
+        @if($card['type'] === 'single')
+        @php $tpl = $card['tpl']; @endphp
         <div class="q-row {{ $showTrashed ? 'trashed-row' : '' }}" style="display:flex;gap:10px;align-items:flex-start;{{ (!$showTrashed && !$tpl->is_active) ? 'opacity:0.5;' : '' }}">
-            @unless($showTrashed)
-            <input type="checkbox" class="q-check q-item" value="{{ $tpl->id }}" style="margin-top:3px;" onchange="updateBar()">
-            @endunless
-            <div style="flex:1;min-width:0;">
-            @if($tpl->title)
-            <div class="q-title">★ {{ $tpl->title }}</div>
-            @endif
-            <div class="q-text q-preview"
-                data-tpl="{{ $tpl->template_text }}"
-                data-nc='@json($tpl->num_config ?? [])'>{{ $tpl->template_text }}</div>
-
-            <div class="q-meta">
-                <span class="q-tag muted">#{{ $tpl->id }}</span>
-                <span class="q-tag">{{ $tpl->topic->grade->name }}</span>
-                <span class="q-tag">{{ $tpl->topic->name }}</span>
-                @if($tpl->theme)
-                <span class="q-tag theme">{{ $tpl->theme->icon ?? '' }} {{ $tpl->theme->name }}</span>
-                @endif
-                @if($tpl->is_olympiad)
-                <span class="q-tag oly">🏆 ოლიმპიადა</span>
-                @else
-                <span class="q-tag">დონე {{ $tpl->difficulty }}</span>
-                @endif
-                <span class="q-tag muted">= {{ $tpl->correct_formula }}</span>
-            </div>
-
-            <div class="q-actions">
-                <div class="q-actions-left">
-                    @unless($showTrashed)
-                    <input type="number" class="q-seq" min="1" placeholder="—" value="{{ $tpl->sequence }}"
-                        data-tpl-id="{{ $tpl->id }}" onchange="saveQSequence(this)" title="რიგითობა თემაში">
-                    @endunless
-                    <button type="button" class="q-action-btn" onclick="regenPreview(this)" title="ახალი მაგალითი">↺</button>
-                    <button type="button" class="q-action-btn" onclick="openLivePreview({{ $tpl->id }})" title="ლაივ პრევიუ">👁</button>
-                    @unless($showTrashed)
-                    @php
-                        $rsData = [
-                            'data-id'         => $tpl->id,
-                            'data-grade'      => $tpl->topic->grade_id,
-                            'data-topic'      => $tpl->topic_id,
-                            'data-theme'      => $tpl->theme_id,
-                            'data-difficulty' => $tpl->difficulty,
-                            'data-qtype'      => $tpl->question_type,
-                            'data-olympiad'   => $tpl->is_olympiad ? 1 : 0,
-                        ];
-                    @endphp
-                    <button type="button" class="q-action-btn" @foreach($rsData as $k => $v) {{ $k }}="{{ $v }}" @endforeach
-                        onclick="openReassign(this,'move')" title="კლასის/თემის/თემატიკის/დონის შეცვლა">⇄</button>
-                    <button type="button" class="q-action-btn" @foreach($rsData as $k => $v) {{ $k }}="{{ $v }}" @endforeach
-                        onclick="openReassign(this,'copy')" title="დუბლირება სხვა კლასში/თემაში">⎘</button>
-                    @endunless
-                </div>
-                <div class="q-actions-right">
-                    @if($showTrashed)
-                    <form method="POST" action="{{ route('admin.questions.restore', $tpl->id) }}">
-                        @csrf
-                        <button type="submit" class="q-status-btn restore">↺ აღდგენა</button>
-                    </form>
-                    @else
-                    <form method="POST" action="{{ route('admin.questions.toggle-active', $tpl) }}">
-                        @csrf @method('PATCH')
-                        <button type="submit" class="q-status-btn {{ $tpl->is_active ? 'active' : 'inactive' }}" title="{{ $tpl->is_active ? 'გაჩერება' : 'გააქტიურება' }}">{{ $tpl->is_active ? '✓ აქტიური' : '⏸ გაჩერებული' }}</button>
-                    </form>
-                    <a href="{{ route('admin.questions.edit', $tpl) }}" class="q-status-btn">✎ რედ.</a>
-                    <form method="POST" action="{{ route('admin.questions.destroy', $tpl) }}">
-                        @csrf @method('DELETE')
-                        <button type="button" class="q-status-btn danger" onclick="confirmDeleteQuestion(this)">✕</button>
-                    </form>
-                    @endif
-                </div>
-            </div>
-            </div>
+            @include('admin.questions._row-body', ['tpl' => $tpl])
         </div>
+        @else
+        <div class="q-row q-group-card">
+            <div class="q-group-head">
+                <span class="q-group-name">🔗 {{ $card['group']->name }}</span>
+                <div class="q-tabs">
+                    @foreach($card['members'] as $i => $m)
+                    <button type="button" class="q-tab {{ $i === 0 ? 'active' : '' }}"
+                        data-group-tab-id="{{ $m->id }}" onclick="switchGroupTab(this)">დონე {{ $m->difficulty }}</button>
+                    @endforeach
+                    @unless($showTrashed)
+                    @if($card['members']->count() < 5)
+                    <a href="{{ route('admin.questions.create', ['group_id' => $card['group']->id]) }}" class="q-tab" title="ახალი დონის დამატება ამ ჯგუფში">+ დონე</a>
+                    @endif
+                    @endunless
+                </div>
+            </div>
+            @foreach($card['members'] as $i => $m)
+            <div class="q-group-member" data-group-member-id="{{ $m->id }}"
+                style="display:{{ $i === 0 ? 'flex' : 'none' }};gap:10px;align-items:flex-start;{{ (!$showTrashed && !$m->is_active) ? 'opacity:0.5;' : '' }}">
+                @include('admin.questions._row-body', ['tpl' => $m])
+                @unless($showTrashed)
+                <button type="button" class="q-action-btn" onclick="ungroupTemplate({{ $m->id }})" title="ჯგუფიდან მოხსნა">✂</button>
+                @endunless
+            </div>
+            @endforeach
+        </div>
+        @endif
         @endforeach
         @if($showGroups)
             </div>
@@ -308,6 +308,7 @@
         <div id="pdfInputs"></div>
         <button type="submit" class="pdf-btn">📄 PDF-ში</button>
     </form>
+    <button type="button" class="pdf-btn" id="mergeBtn" style="display:none;" onclick="openMergeModal()">🔗 დააჯგუფე</button>
     <button class="pdf-clear" onclick="clearAll()" title="გასუფთავება">✕</button>
 </div>
 
@@ -360,6 +361,25 @@
         <div class="lp-foot" style="display:flex;gap:8px;">
             <button type="button" class="btn" id="rsSaveBtn" onclick="saveReassign()">შენახვა</button>
             <button type="button" class="btn" onclick="closeReassign()">გაუქმება</button>
+        </div>
+    </div>
+</div>
+
+{{-- Merge modal: cluster >=2 checked templates into one named group --}}
+<div class="lp-overlay" id="mgOverlay" onclick="mgOverlayClick(event)">
+    <div class="lp-box">
+        <div class="lp-head">
+            <span>🔗 კითხვების დაჯგუფება</span>
+            <button type="button" class="lp-close" onclick="closeMergeModal()">✕</button>
+        </div>
+        <div class="lp-body">
+            <div class="rs-lbl">ჯგუფის სახელი</div>
+            <input type="text" id="mgName" class="fc" style="width:100%;" maxlength="150" placeholder="მაგ. შეკრება 1-დან 10-მდე">
+            <div class="rs-err" id="mgErr"></div>
+        </div>
+        <div class="lp-foot" style="display:flex;gap:8px;">
+            <button type="button" class="btn" onclick="saveMerge()">დაჯგუფება</button>
+            <button type="button" class="btn" onclick="closeMergeModal()">გაუქმება</button>
         </div>
     </div>
 </div>
@@ -844,6 +864,88 @@ function updateBar() {
     bar.classList.toggle('show', checked.length > 0);
     countEl.textContent = checked.length + ' მონიშნული';
     inputs.innerHTML = checked.map(c => `<input type="hidden" name="ids[]" value="${c.value}">`).join('');
+    document.getElementById('mergeBtn').style.display = checked.length >= 2 ? 'inline-block' : 'none';
+}
+
+// ── Group tabs — all members' markup is already rendered, so switching tabs
+// is pure show/hide, no fetch. A hidden member's checkbox keeps its checked
+// state (just display:none on its wrapper), so checking boxes across
+// different tabs of the same group still all land in updateBar()'s set.
+function switchGroupTab(btn) {
+    const card = btn.closest('.q-group-card');
+    card.querySelectorAll('.q-tab').forEach(t => t.classList.toggle('active', t === btn));
+    const id = btn.dataset.groupTabId;
+    card.querySelectorAll('.q-group-member').forEach(m => {
+        m.style.display = (m.dataset.groupMemberId === id) ? 'flex' : 'none';
+    });
+}
+
+// ── Merge modal — groups >=2 checked templates. Skips the name prompt and
+// merges immediately when exactly one existing group is already represented
+// among the checked items (reusing it); blocks with an error when 2+
+// different existing groups are checked at once, rather than guessing.
+function openMergeModal() {
+    const checked = [...document.querySelectorAll('.q-item:checked')];
+    if (checked.length < 2) return;
+    const groupIds = [...new Set(checked.map(c => c.dataset.groupId).filter(Boolean))];
+    if (groupIds.length > 1) {
+        alert('შერჩეული კითხვები სხვადასხვა ჯგუფს ეკუთვნის — ჯერ ერთში გააერთიანეთ');
+        return;
+    }
+    if (groupIds.length === 1) {
+        doMerge(checked.map(c => c.value), null);
+        return;
+    }
+    document.getElementById('mgName').value = '';
+    document.getElementById('mgErr').style.display = 'none';
+    document.getElementById('mgOverlay').classList.add('open');
+}
+function closeMergeModal() {
+    document.getElementById('mgOverlay').classList.remove('open');
+}
+function mgOverlayClick(e) {
+    if (e.target === document.getElementById('mgOverlay')) closeMergeModal();
+}
+function saveMerge() {
+    const name = document.getElementById('mgName').value.trim();
+    if (!name) {
+        const errEl = document.getElementById('mgErr');
+        errEl.textContent = 'სახელი საჭიროა';
+        errEl.style.display = 'block';
+        return;
+    }
+    doMerge([...document.querySelectorAll('.q-item:checked')].map(c => c.value), name);
+}
+async function doMerge(ids, name) {
+    try {
+        const r = await fetch('{{ route('admin.questions.merge') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ ids, name }),
+        });
+        const data = await r.json();
+        if (!r.ok) {
+            alert(data.error || 'შეცდომა — არ შეინახა');
+            return;
+        }
+        window.location.reload();
+    } catch (e) {
+        alert('დაკავშირების შეცდომა');
+    }
+}
+function ungroupTemplate(id) {
+    if (!confirm('მოხსნა ჯგუფიდან?')) return;
+    fetch(`/admin/questions/${id}/ungroup`, {
+        method: 'PATCH',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json',
+        },
+    }).then(() => window.location.reload());
 }
 
 function clearAll() {
