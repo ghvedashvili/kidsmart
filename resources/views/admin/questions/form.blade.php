@@ -132,6 +132,17 @@
             <div class="card" style="background:#eef2ff;border-color:#c7d2fe;padding:12px 16px;">
                 <span style="font-family:'Goldman',monospace;font-size:0.72rem;color:#4338ca;">➕ ემატება ჯგუფს: <b>{{ $group->name }}</b></span>
             </div>
+            @elseif($baseTemplate ?? null)
+            <input type="hidden" name="base_template_id" value="{{ $baseTemplate->id }}">
+            <div class="card" style="background:#eef2ff;border-color:#c7d2fe;padding:12px 16px;">
+                <div style="font-family:'Goldman',monospace;font-size:0.72rem;color:#4338ca;margin-bottom:8px;">
+                    ➕ ახალი ჯგუფის შექმნა — ამ კითხვასთან ({{ $baseTemplate->title ?: ('#'.$baseTemplate->id) }}, დონე {{ $baseTemplate->difficulty }}) ერთიანდება
+                </div>
+                <div class="lbl">ჯგუფის სახელი <span>*</span></div>
+                <input type="text" name="question_group_name" class="fc" style="margin-bottom:0;" maxlength="150"
+                    value="{{ old('question_group_name') }}" placeholder="მაგ. შეკრება 1-დან 10-მდე">
+                @error('question_group_name')<div class="err">{{ $message }}</div>@enderror
+            </div>
             @endif
 
             @unless($template)
@@ -213,7 +224,7 @@
                         <select name="topic_id" id="topicSelect" class="fc" style="margin-bottom:0;" required>
                             <option value="">— თემა —</option>
                             @foreach($topics as $topic)
-                            <option value="{{ $topic->id }}" {{ old('topic_id', $template?->topic_id ?? ($group ?? null)?->templates->first()?->topic_id) == $topic->id ? 'selected' : '' }}>
+                            <option value="{{ $topic->id }}" {{ old('topic_id', $template?->topic_id ?? ($group ?? null)?->templates->first()?->topic_id ?? ($baseTemplate ?? null)?->topic_id) == $topic->id ? 'selected' : '' }}>
                                 {{ $topic->name }}
                             </option>
                             @endforeach

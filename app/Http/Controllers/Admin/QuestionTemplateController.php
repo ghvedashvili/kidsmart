@@ -78,11 +78,21 @@ class QuestionTemplateController extends Controller
     public function create(Request $request)
     {
         $group = null;
+        $baseTemplate = null;
         $takenDifficulties = [];
         if ($request->filled('group_id')) {
             $group = QuestionGroup::with('templates')->find($request->input('group_id'));
             if ($group) {
                 $takenDifficulties = $group->templates->pluck('difficulty')->all();
+            }
+        } elseif ($request->filled('base_id')) {
+            // "+" on a standalone (ungrouped) question's card — no group exists
+            // yet, store() creates one (with an admin-given name) on save.
+            $baseTemplate = QuestionTemplate::find($request->input('base_id'));
+            if ($baseTemplate && ! $baseTemplate->question_group_id) {
+                $takenDifficulties = [$baseTemplate->difficulty];
+            } else {
+                $baseTemplate = null;
             }
         }
 
@@ -98,6 +108,7 @@ class QuestionTemplateController extends Controller
                 ->orderBy('topic_id')->orderBy('id')
                 ->get(['id', 'topic_id', 'question_type', 'title', 'template_text']),
             'group'             => $group,
+            'baseTemplate'      => $baseTemplate,
             'takenDifficulties' => $takenDifficulties,
         ]);
     }
@@ -143,16 +154,41 @@ class QuestionTemplateController extends Controller
     {
         $data = $this->validated($request);
 
-        // Set via the "+ დონე" button on a group card (QuestionTemplateController::create())
-        // — not part of validated()'s big per-type branching since it's orthogonal to
-        // question_type and only ever applies on creation, never on edit/update.
+        // Set via the "+ დონე" / "+" buttons on the questions list
+        // (QuestionTemplateController::create()) — not part of validated()'s
+        // big per-type branching since it's orthogonal to question_type and
+        // only ever applies on creation, never on edit/update.
         if ($request->filled('question_group_id')) {
+            // Adding another level to a group that already exists.
             $group = QuestionGroup::findOrFail($request->input('question_group_id'));
             if ($group->templates()->where('difficulty', $data['difficulty'])->exists()) {
                 throw \Illuminate\Validation\ValidationException::withMessages([
                     'difficulty' => 'ამ ჯგუფში ეს დონე უკვე დაკავებულია',
                 ]);
             }
+            $data['question_group_id'] = $group->id;
+        } elseif ($request->filled('base_template_id')) {
+            // "+" from a previously-standalone question — forms a brand new
+            // group out of it and this new one, named by the admin here.
+            $base = QuestionTemplate::findOrFail($request->input('base_template_id'));
+            if ($base->question_group_id) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'difficulty' => 'ეს კითხვა უკვე ჯგუფშია',
+                ]);
+            }
+            if ($base->difficulty === $data['difficulty']) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'difficulty' => 'ეს დონე უკვე დაკავებულია ამ კითხვის მიერ',
+                ]);
+            }
+            $name = trim((string) $request->input('question_group_name'));
+            if ($name === '') {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'question_group_name' => 'საჭიროა ჯგუფის სახელი',
+                ]);
+            }
+            $group = QuestionGroup::create(['name' => $name]);
+            $base->update(['question_group_id' => $group->id]);
             $data['question_group_id'] = $group->id;
         }
 
@@ -171,6 +207,7 @@ class QuestionTemplateController extends Controller
             'allThemesData'  => $this->allThemesData(),
             'defaultThemeId' => null,
             'group'             => null,
+            'baseTemplate'      => null,
             'takenDifficulties' => [],
         ]);
     }

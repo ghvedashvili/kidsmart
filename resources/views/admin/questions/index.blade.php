@@ -68,6 +68,8 @@
     .pdf-count { font-family: 'Goldman', monospace; font-size: 0.75rem; color: #94a3b8; letter-spacing: 0.06em; }
     .pdf-btn { background: #fff; border: none; border-radius: 6px; color: #1e293b; font-family: 'Goldman', monospace; font-size: 0.75rem; letter-spacing: 0.06em; padding: 8px 18px; cursor: pointer; }
     .pdf-btn:hover { background: #f1f5f9; }
+    .pdf-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .pdf-btn:disabled:hover { background: #fff; }
     .pdf-clear { background: none; border: none; color: #64748b; font-size: 0.8rem; cursor: pointer; padding: 0; }
     .pdf-clear:hover { color: #fff; }
 
@@ -257,6 +259,9 @@
         @php $tpl = $card['tpl']; @endphp
         <div class="q-row {{ $showTrashed ? 'trashed-row' : '' }}" style="display:flex;gap:10px;align-items:flex-start;{{ (!$showTrashed && !$tpl->is_active) ? 'opacity:0.5;' : '' }}">
             @include('admin.questions._row-body', ['tpl' => $tpl])
+            @unless($showTrashed)
+            <a href="{{ route('admin.questions.create', ['base_id' => $tpl->id]) }}" class="q-action-btn" title="ახალი დონის დამატება — ჯგუფად გაერთიანდება ამ კითხვასთან">+</a>
+            @endunless
         </div>
         @else
         <div class="q-row q-group-card">
@@ -859,12 +864,22 @@ const countEl  = document.getElementById('pdfCount');
 const inputs   = document.getElementById('pdfInputs');
 const checkAll = document.getElementById('checkAll');
 
+function hasDuplicateDifficulties(checked) {
+    const diffs = checked.map(c => c.dataset.difficulty);
+    return new Set(diffs).size !== diffs.length;
+}
+
 function updateBar() {
     const checked = [...document.querySelectorAll('.q-item:checked')];
     bar.classList.toggle('show', checked.length > 0);
     countEl.textContent = checked.length + ' მონიშნული';
     inputs.innerHTML = checked.map(c => `<input type="hidden" name="ids[]" value="${c.value}">`).join('');
-    document.getElementById('mergeBtn').style.display = checked.length >= 2 ? 'inline-block' : 'none';
+
+    const mergeBtn = document.getElementById('mergeBtn');
+    mergeBtn.style.display = checked.length >= 2 ? 'inline-block' : 'none';
+    const dup = checked.length >= 2 && hasDuplicateDifficulties(checked);
+    mergeBtn.disabled = dup;
+    mergeBtn.title = dup ? 'შერჩეულებს შორის ერთი და იგივე დონე მეორდება — გაერთიანება შეუძლებელია' : '';
 }
 
 // ── Group tabs — all members' markup is already rendered, so switching tabs
@@ -887,6 +902,10 @@ function switchGroupTab(btn) {
 function openMergeModal() {
     const checked = [...document.querySelectorAll('.q-item:checked')];
     if (checked.length < 2) return;
+    if (hasDuplicateDifficulties(checked)) {
+        alert('შერჩეულებს შორის ერთი და იგივე დონე მეორდება — გაერთიანება შეუძლებელია');
+        return;
+    }
     const groupIds = [...new Set(checked.map(c => c.dataset.groupId).filter(Boolean))];
     if (groupIds.length > 1) {
         alert('შერჩეული კითხვები სხვადასხვა ჯგუფს ეკუთვნის — ჯერ ერთში გააერთიანეთ');

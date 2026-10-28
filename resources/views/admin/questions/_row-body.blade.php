@@ -7,6 +7,7 @@
 @unless($showTrashed)
 <input type="checkbox" class="q-check q-item" value="{{ $tpl->id }}"
     data-group-id="{{ $tpl->question_group_id ?? '' }}"
+    data-difficulty="{{ $tpl->difficulty }}"
     style="margin-top:3px;" onchange="updateBar()">
 @endunless
 <div style="flex:1;min-width:0;">
