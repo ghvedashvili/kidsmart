@@ -235,22 +235,33 @@ class QuestionTemplateController extends Controller
             // A broken template (formula never resolves) shouldn't take down the
             // whole PDF export — note it instead of silently dropping or crashing,
             // since the admin explicitly picked this exact set of templates.
+            $broken = false;
             try {
                 $generated = $tpl->generate($theme);
                 $text   = $generated['question_text'];
                 $answer = $generated['correct_answer'];
+                $hint   = $generated['hint_text'] ?? null;
             } catch (\App\Exceptions\QuestionGenerationException $e) {
                 \Illuminate\Support\Facades\Log::error('QuestionTemplateController::exportPdf: broken template', ['template_id' => $tpl->id, 'error' => $e->getMessage()]);
                 $text   = "⚠ შაბლონი #{$tpl->id} ვერ დააგენერირდა — შეამოწმეთ ფორმულა";
                 $answer = '—';
+                $hint   = null;
+                $broken = true;
             }
             return [
-                'num'        => $i + 1,
-                'text'       => $text,
-                'answer'     => $answer,
-                'grade'      => $tpl->topic->grade->name,
-                'topic'      => $tpl->topic->name,
-                'difficulty' => $tpl->difficulty,
+                'num'           => $i + 1,
+                'text'          => $text,
+                'answer'        => $answer,
+                'hint_text'     => $hint,
+                // raw generate() output — pyramid/code/crossword/scale need this
+                // as JSON (not the plain-text $text above) to render visually,
+                // same shape ScaleService::renderPansHtml()/test-preview.blade.php
+                // already consume, so the PDF matches what the child actually sees.
+                'question_type' => $tpl->question_type ?? 'multiple_choice',
+                'broken'        => $broken,
+                'grade'         => $tpl->topic->grade->name,
+                'topic'         => $tpl->topic->name,
+                'difficulty'    => $tpl->difficulty,
             ];
         });
 

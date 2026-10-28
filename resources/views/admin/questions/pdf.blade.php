@@ -47,17 +47,128 @@
 <div class="q-block">
     <div class="q-header">
         <span class="q-num">{{ $q['num'] }}.</span>
-        <span class="q-text">{{ $q['text'] }}</span>
     </div>
     <div class="q-tags">
         <span class="q-tag">{{ $q['grade'] }}</span>
         <span class="q-tag">{{ $q['topic'] }}</span>
         <span class="q-tag">დონე {{ $q['difficulty'] }}</span>
     </div>
+
+    @if($q['broken'])
+    <div class="q-text">{{ $q['text'] }}</div>
+
+    @elseif($q['question_type'] === 'pyramid')
+    @php
+        $pyrRows = json_decode($q['text'], true) ?? [];
+        $pyrSols = json_decode($q['answer'], true) ?? [];
+    @endphp
+    <div class="q-text" style="margin-bottom:8px;">🔺 მათემატიკური პირამიდა</div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        @foreach($pyrRows as $r => $row)
+        <div style="display:flex;gap:4px;">
+            @foreach($row as $c => $val)
+            @php $pos = "$r,$c"; $sol = $pyrSols[$pos] ?? null; @endphp
+            @if($val === null)
+            <div style="width:36px;height:36px;border-radius:8px;border:1.5px dashed #a5b4fc;background:#eef2ff;display:flex;align-items:center;justify-content:center;font-size:11pt;color:#4f46e5;font-weight:700;">{{ $sol }}</div>
+            @else
+            <div style="width:36px;height:36px;border-radius:8px;background:#4f46e5;color:white;display:flex;align-items:center;justify-content:center;font-size:11pt;font-weight:700;">{{ $val }}</div>
+            @endif
+            @endforeach
+        </div>
+        @endforeach
+    </div>
+
+    @elseif($q['question_type'] === 'code')
+    @php
+        $codeQ   = json_decode($q['text'], true) ?? [];
+        $codeAns = json_decode($q['answer'], true) ?? [];
+    @endphp
+    <div class="q-text" style="margin-bottom:8px;">🕵️ კოდის გაშიფვრა</div>
+    <div style="background:#fff8e7;border-radius:6px;padding:6px 10px;margin-bottom:8px;border:1.5px dashed #ffe194;font-size:11pt;font-weight:700;color:#374151;">
+        @foreach($codeQ['equations'] ?? [] as $eq)
+        <div>{{ $eq }}</div>
+        @endforeach
+    </div>
+    <div style="font-size:8pt;color:#94a3b8;margin-bottom:5px;letter-spacing:0.05em;">სამიზნე კოდი</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        @foreach($codeQ['target'] ?? [] as $pos => $sym)
+        @php $cv = $codeAns[$pos] ?? '?'; @endphp
+        <div style="text-align:center;">
+            <div style="width:32px;height:32px;border-radius:6px;background:#4f46e5;color:white;display:flex;align-items:center;justify-content:center;font-size:10pt;margin-bottom:2px;">{{ $sym }}</div>
+            <div style="font-size:9pt;font-weight:800;color:#15803d;">{{ $cv }}</div>
+        </div>
+        @endforeach
+    </div>
+
+    @elseif($q['question_type'] === 'crossword')
+    @php
+        $cwQ = json_decode($q['text'], true) ?? [];
+        $cwR = (int) ($cwQ['rows'] ?? 2);
+        $cwC = (int) ($cwQ['cols'] ?? 2);
+        $cwRevealed = $cwQ['revealed'] ?? [];
+        $cwAns = json_decode($q['answer'], true) ?? [];
+        $_rops = $cwQ['row_ops'] ?? []; $_cops = $cwQ['col_ops'] ?? [];
+        $_rres = $cwQ['row_results'] ?? []; $_cres = $cwQ['col_results'] ?? [];
+        $_cp = []; for ($i = 0; $i < $cwC; $i++) { if ($i > 0) $_cp[] = '16px'; $_cp[] = '40px'; } $_cp[] = '16px'; $_cp[] = '40px';
+        $_rp = []; for ($i = 0; $i < $cwR; $i++) { if ($i > 0) $_rp[] = '12px'; $_rp[] = '40px'; } $_rp[] = '12px'; $_rp[] = '40px';
+    @endphp
+    <div class="q-text" style="margin-bottom:8px;">🧮 კროსვორდი</div>
+    <div style="overflow-x:auto;">
+    <div style="display:grid;grid-template-columns:{{ implode(' ', $_cp) }};grid-template-rows:{{ implode(' ', $_rp) }};gap:3px;align-items:center;justify-items:center;max-width:max-content;">
+    @for($dr = 0; $dr <= $cwR * 2; $dr++)
+    @for($dc = 0; $dc <= $cwC * 2; $dc++)
+    @php
+        $_r = (int) ($dr / 2); $_c = (int) ($dc / 2);
+        $_isDR = ($dr % 2 === 0 && $_r < $cwR); $_isDC = ($dc % 2 === 0 && $_c < $cwC);
+        $_isOR = ($dr % 2 === 1 && (int) (($dr - 1) / 2) < $cwR - 1);
+        $_isOC = ($dc % 2 === 1 && (int) (($dc - 1) / 2) < $cwC - 1);
+        $_isEqR = ($dr === 2 * $cwR - 1); $_isEqC = ($dc === 2 * $cwC - 1);
+        $_isRR = ($dr === 2 * $cwR); $_isRC = ($dc === 2 * $cwC);
+        $_gv = false; $_cv = ''; $_bg = ''; $_fg = ''; $_bd = '';
+        if ($_isDR && $_isDC) {
+            $_pos = $_r * $cwC + $_c; $_gv = in_array($_pos, $cwRevealed);
+            $_cv = $cwAns[(string) $_pos] ?? '?';
+            $_bg = $_gv ? '#d1fae5' : '#4f46e5';
+            $_fg = $_gv ? '#065f46' : 'white';
+            $_bd = $_gv ? '1.5px solid #6ee7b7' : 'none';
+        }
+    @endphp
+    @if($_isDR && $_isDC)
+        <div style="width:40px;height:40px;border-radius:8px;background:{{ $_bg }};color:{{ $_fg }};border:{{ $_bd }};display:flex;align-items:center;justify-content:center;font-size:10pt;font-weight:700;">{{ $_cv }}</div>
+    @elseif($_isDR && $_isOC)
+        <div style="font-size:9pt;color:#64748b;font-weight:700;">{{ $_rops[$_r] ?? '+' }}</div>
+    @elseif($_isDR && $_isEqC)
+        <div style="font-size:8pt;color:#94a3b8;">=</div>
+    @elseif($_isDR && $_isRC)
+        <div style="width:40px;height:40px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:10pt;font-weight:700;color:#374151;">{{ $_rres[$_r] ?? '' }}</div>
+    @elseif($_isOR && $_isDC)
+        <div style="font-size:8pt;color:#64748b;font-weight:700;">{{ $_cops[$_c] ?? '+' }}</div>
+    @elseif($_isEqR && $_isDC)
+        <div style="font-size:8pt;color:#94a3b8;">=</div>
+    @elseif($_isRR && $_isDC)
+        <div style="width:40px;height:40px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:10pt;font-weight:700;color:#374151;">{{ $_cres[$_c] ?? '' }}</div>
+    @else
+        <div></div>
+    @endif
+    @endfor
+    @endfor
+    </div></div>
+
+    @elseif($q['question_type'] === 'scale')
+    {!! \App\Services\ScaleService::renderPansHtml(json_decode($q['text'], true) ?? []) !!}
+    <div style="margin-top:6px;font-size:11pt;font-weight:800;color:#15803d;">✍️ სწორი პასუხი: {{ $q['answer'] }}</div>
+
+    @else
+    <div class="q-text">{{ $q['text'] }}</div>
     <div class="q-answer-row">
         <span class="q-answer-label">პასუხი:</span>
         <span class="q-answer">{{ $q['answer'] }}</span>
     </div>
+    @endif
+
+    @if(!empty($q['hint_text']))
+    <div style="font-size:9pt;color:#64748b;border-left:2px solid #e2e8f0;padding-left:8px;margin-top:6px;">{{ $q['hint_text'] }}</div>
+    @endif
 </div>
 @if(! $loop->last)<hr class="divider">@endif
 @endforeach
