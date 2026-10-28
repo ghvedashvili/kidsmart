@@ -1057,7 +1057,16 @@
             <div class="mrow">
                 @foreach($themes as $theme)
                 @if($theme->is_active)
-                <label class="mchip {{ in_array($theme->id, $eThemeIds) ? 'sel' : '' }}"
+                @php
+                    // Mirrors the add-wizard's fallback: a child with NO theme attached yet
+                    // (an older child, or one linked by code from another parent) still shows
+                    // the default theme as visually selected, matching what store() would
+                    // actually attach if the form is saved untouched.
+                    $eIsSelected = count($eThemeIds)
+                        ? in_array($theme->id, $eThemeIds)
+                        : ($theme->id == ($defaultThemeId ?? null) && $theme->is_active);
+                @endphp
+                <label class="mchip {{ $eIsSelected ? 'sel' : '' }}"
                     onclick="chipSingle(this,'etheme{{ $child->id }}','{{ $theme->id }}')">{{ $theme->icon }} {{ $theme->name }}</label>
                 @else
                 <span class="mchip" style="opacity:0.4;cursor:default;pointer-events:none;">{{ $theme->icon }} {{ $theme->name }}<span style="font-size:0.75em;margin-left:4px;color:#aaa;">მალე</span></span>
@@ -1209,22 +1218,8 @@
                 <div class="merr" id="wizGradeErr" style="display:none;">აირჩიე კლასი</div>
             </div>
 
-            {{-- Step 3: Tests per day --}}
+            {{-- Step 3: Theme (optional) --}}
             <div class="wiz-step" data-step="3">
-                <div class="wiz-step-title">რამდენი ტესტი გავიდეს დღეში?</div>
-
-                <div class="mlbl">ტესტი დღეში</div>
-                <div class="mrow" id="tpwRow">
-                    @for($i=1; $i<=3; $i++)
-                    <label class="mchip {{ old('tests_per_week', 3) == $i ? 'sel' : '' }}"
-                        onclick="chipSingle(this,'tpw_input','{{ $i }}')">{{ $i }}</label>
-                    @endfor
-                </div>
-                <input type="hidden" name="tests_per_week" id="tpw_input" value="{{ old('tests_per_week', 3) }}">
-            </div>
-
-            {{-- Step 4: Theme (optional) --}}
-            <div class="wiz-step" data-step="4">
                 <div class="wiz-step-title">ბოლო ნაბიჯი — თემატიკა</div>
 
                 @if($themes->count())
@@ -1444,7 +1439,7 @@ function chipMulti(el, name, value) {
 }
 
 // ── Add-child wizard ──
-const WIZ_TOTAL = 4;
+const WIZ_TOTAL = 3;
 let wizStep = 1;
 
 function wizGoTo(n) {
@@ -1492,7 +1487,7 @@ document.getElementById('addChildForm').addEventListener('submit', function(e) {
     }
 });
 
-@if($errors->hasAny(['name','grade_id','tests_per_week','theme_ids']))
+@if($errors->hasAny(['name','grade_id','theme_ids']))
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('addChildModal').classList.add('open');
     @if($errors->has('grade_id'))
