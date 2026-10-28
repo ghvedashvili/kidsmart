@@ -243,7 +243,13 @@ class ScaleService
         $prompt      = e((string) ($data['prompt'] ?? ''));
         $left        = $data['left']  ?? [];
         $right       = $data['right'] ?? [];
-        $blankSide   = $data['blank_side'] ?? 'right';
+        // array_key_exists, not ?? — build() deliberately stores blank_side as
+        // NULL (not merely absent) when the answer is already rendered in place
+        // on a pan (the inline/algebraic case), meaning no separate chip at all.
+        // ?? treats that stored null the same as a missing key and falls back to
+        // 'right', which wrongly appends a second "?" there on top of the real
+        // in-place one — see renderItems()'s 'blank' flag for the correct one.
+        $blankSide   = array_key_exists('blank_side', $data) ? $data['blank_side'] : 'right';
         $blankKind   = $data['blank_kind'] ?? 'emoji';
         $blankSymbol = $data['blank_symbol'] ?? null;
 
