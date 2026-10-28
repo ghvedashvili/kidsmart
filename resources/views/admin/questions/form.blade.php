@@ -534,7 +534,11 @@
                                 <div>
                                     <div class="lbl">ცვლადების რაოდენობა</div>
                                     <select class="pyr-inp" id="autoVarCount" onchange="applyAutoBuild()">
-                                        @php $autoCfg = ($template?->num_config ?? [])['_auto'] ?? []; $autoVarCount = count(array_filter($template?->num_config ?? [], fn($k) => !str_starts_with($k, '_'), ARRAY_FILTER_USE_KEY)) ?: 2; @endphp
+                                        @php
+                                            $autoCfg = ($template?->num_config ?? [])['_auto'] ?? [];
+                                            $autoVarCount = count(array_filter($template?->num_config ?? [], fn($k) => !str_starts_with($k, '_') && !preg_match('/^R\d+$/', $k), ARRAY_FILTER_USE_KEY)) ?: 2;
+                                            $autoRightCount = count(array_filter($template?->num_config ?? [], fn($k) => preg_match('/^R\d+$/', $k), ARRAY_FILTER_USE_KEY));
+                                        @endphp
                                         @foreach([2,3,4,5] as $n)
                                         <option value="{{ $n }}" {{ $autoVarCount == $n ? 'selected' : '' }}>{{ $n }} ცვლადი</option>
                                         @endforeach
@@ -545,6 +549,19 @@
                                         <input type="checkbox" id="autoParens" onchange="syncAll();previewDebounce();" {{ !empty($autoCfg['parens']) ? 'checked' : '' }}>
                                         ფრჩხილები
                                     </label>
+                                </div>
+                            </div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+                                <div>
+                                    <div class="lbl">მარჯვენა მხარის ცვლადები <span style="color:#94a3b8;font-size:0.9em;">(სურვილისამებრ)</span></div>
+                                    <select class="pyr-inp" id="autoRightCount" onchange="onAutoRightCountChange()">
+                                        @foreach([0,2,3] as $rn)
+                                        <option value="{{ $rn }}" {{ $autoRightCount == $rn ? 'selected' : '' }}>{{ $rn == 0 ? 'გამორთული (= რიცხვი)' : $rn . ' ცვლადი' }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div style="font-size:0.62rem;color:#4b8a63;display:flex;align-items:flex-end;padding-bottom:4px;">
+                                    მარჯვენა მხარეც გამოთვლადი გამოსახულება იქნება (მაგ. 4 + ? = 3 + 6) — ბლანკი ყოველთვის მარცხენა მხარეს რჩება.
                                 </div>
                             </div>
                             <div class="lbl">მოქმედებები</div>
@@ -565,11 +582,13 @@
                             </label>
                             <label style="display:flex;align-items:center;gap:7px;font-size:0.74rem;font-weight:700;color:#374151;cursor:pointer;margin-bottom:10px;">
                                 <input type="checkbox" id="autoMixBlank" onchange="syncAll();previewDebounce();"
-                                    {{ !array_key_exists('mix_blank', $autoCfg) || $autoCfg['mix_blank'] ? 'checked' : '' }}>
+                                    {{ (!array_key_exists('mix_blank', $autoCfg) || $autoCfg['mix_blank'] || $autoRightCount >= 2) ? 'checked' : '' }}
+                                    {{ $autoRightCount >= 2 ? 'disabled' : '' }}>
                                 ცვლადი დავმალოთ შედეგის მაგივრად — მაგ. 4 + ? = 9 (გამორთული = ყოველთვის "...= ?")
+                                <span id="autoMixBlankLockedNote" style="color:#94a3b8;font-weight:600;{{ $autoRightCount >= 2 ? '' : 'display:none;' }}">(სავალდებულოა მარჯვენა მხარის ცვლადებთან)</span>
                             </label>
                             <button type="button" class="nc-add" onclick="applyAutoBuild()">⚡ ცვლადების შექმნა</button>
-                            <div style="font-size:0.62rem;color:#4b8a63;margin-top:6px;">აწყობს ქვემოთ ცვლადების მწკრივებს (N1, N2, ...) — თქვენ მხოლოდ min/max/ნაბიჯი დააზუსტეთ.</div>
+                            <div style="font-size:0.62rem;color:#4b8a63;margin-top:6px;">აწყობს ქვემოთ ცვლადების მწკრივებს (N1, N2, ... და, თუ არჩეულია, R1, R2, ...) — თქვენ მხოლოდ min/max/ნაბიჯი დააზუსტეთ.</div>
                         </div>
                     </div>
 
@@ -2078,13 +2097,40 @@ function toggleAutoBuild() {
 }
 function applyAutoBuild() {
     const count = parseInt(document.getElementById('autoVarCount').value) || 2;
+    const rightCount = parseInt(document.getElementById('autoRightCount')?.value) || 0;
     ncRows = [];
     for (let i = 1; i <= count; i++) addNcRow('N' + i, 1, 9, 1);
+    if (rightCount >= 2) {
+        for (let i = 1; i <= rightCount; i++) addNcRow('R' + i, 1, 9, 1);
+    }
     renderNcRows();
     syncAll(); previewDebounce();
 }
+
+// A revealed multi-term right side only pairs with a left-operand blank
+// (mix_blank) — never with "...= ?" — so the checkbox is locked on whenever
+// right-side variables exist, same spirit as toggleAutoBuild()'s own
+// contextual field-locking for #correctFormula.
+let _mixBlankPreRightState = null;
+function onAutoRightCountChange() {
+    const rightCount = parseInt(document.getElementById('autoRightCount')?.value) || 0;
+    const mixBlankEl = document.getElementById('autoMixBlank');
+    const note = document.getElementById('autoMixBlankLockedNote');
+    if (rightCount >= 2) {
+        if (_mixBlankPreRightState === null) _mixBlankPreRightState = mixBlankEl.checked;
+        mixBlankEl.checked = true;
+        mixBlankEl.disabled = true;
+        if (note) note.style.display = '';
+    } else {
+        mixBlankEl.disabled = false;
+        if (_mixBlankPreRightState !== null) mixBlankEl.checked = _mixBlankPreRightState;
+        _mixBlankPreRightState = null;
+        if (note) note.style.display = 'none';
+    }
+    applyAutoBuild();
+}
 function applyAutoPreviewText(ncObj, autoCfg) {
-    const names = Object.keys(ncObj).filter(k => !k.startsWith('_'));
+    const names = Object.keys(ncObj).filter(k => !k.startsWith('_') && !/^R\d+$/.test(k));
     if (!names.length) return;
     const op = autoCfg.operators[0];
     const formulaOp = op === '×' ? '*' : (op === '÷' ? '/' : op);
@@ -2150,7 +2196,15 @@ function toggleOpOption(id, symbol, checked) {
 function renderNcRows() {
     const c = document.getElementById('ncRows');
     c.innerHTML = '';
+    let rightHeaderShown = false;
     ncRows.forEach(row => {
+        if (!rightHeaderShown && /^R\d+$/.test(row.name)) {
+            const hdr = document.createElement('div');
+            hdr.style.cssText = 'font-size:0.66rem;font-weight:700;color:#6b21a8;margin:8px 0 4px;grid-column:1/-1;';
+            hdr.textContent = '→ მარჯვენა მხარე';
+            c.appendChild(hdr);
+            rightHeaderShown = true;
+        }
         const div = document.createElement('div');
         div.className = 'nc-row';
         if (row.mode === 'derived') {
@@ -2855,7 +2909,7 @@ function evalArithmeticStepsJs(names, numVars, chosenOps, parenStart) {
 // success" race far more often than a harder one (e.g. '-'), skewing the output even
 // when both are equally selected. Returns null if nothing qualified within maxAttempts.
 function attemptArithmeticJs(operators, useParens, noNegSteps, maxAttempts) {
-    const names = ncRows.filter(r => r.name).map(r => r.name);
+    const names = ncRows.filter(r => r.name && !/^R\d+$/.test(r.name)).map(r => r.name);
     const n = names.length;
     if (n < 2) return null;
 
@@ -2888,6 +2942,64 @@ function attemptArithmeticJs(operators, useParens, noNegSteps, maxAttempts) {
     return null;
 }
 
+// Mirrors QuestionTemplate::rollRightLeadingTerms() — rolls the first m-1
+// right-side terms within their own min/max/step, randomly (or, when
+// forcePlus, always '+') signed from the second term on, folding them
+// left-to-right into a running total for the caller to derive the last term from.
+function rollRightLeadingTermsJs(rightRows, m, forcePlus) {
+    const values = {}; const ops = []; let running = 0;
+    rightRows.forEach((row, i) => {
+        if (i === m - 1) return;
+        const min = +row.min || 1, max = +row.max || 9, step = Math.max(1, +row.step || 1);
+        const steps = Math.max(0, Math.floor((Math.max(min, max) - min) / step));
+        values[row.name] = min + Math.floor(Math.random() * (steps + 1)) * step;
+        if (i === 0) {
+            running = values[row.name];
+        } else {
+            const op = forcePlus ? '+' : (Math.random() < 0.5 ? '+' : '-');
+            ops.push(op);
+            running = op === '+' ? running + values[row.name] : running - values[row.name];
+        }
+    });
+    return { values, ops, running };
+}
+
+// Mirrors QuestionTemplate::attemptRightArithmetic() exactly — see its
+// docblock for why the right side is always a +/- chain with its last term
+// algebraically derived, and why this never returns null.
+function attemptRightArithmeticJs(rightRows, target, noNegSteps, maxAttempts) {
+    const m = rightRows.length;
+    const lastRow = rightRows[m - 1];
+    const lastMin = +lastRow.min || 1, lastMax = +lastRow.max || 9, lastStep = Math.max(1, +lastRow.step || 1);
+    const names = rightRows.map(r => r.name);
+
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        const { values, ops, running } = rollRightLeadingTermsJs(rightRows, m, false);
+
+        let lastOp = Math.random() < 0.5 ? '+' : '-';
+        let derived = lastOp === '+' ? target - running : running - target;
+        if (lastOp === '-' && derived < 0) { lastOp = '+'; derived = target - running; }
+
+        if (derived < lastMin || derived > lastMax) continue;
+        if ((derived - lastMin) % lastStep !== 0) continue;
+
+        values[lastRow.name] = derived;
+        ops.push(lastOp);
+
+        if (noNegSteps) {
+            const evaluated = evalArithmeticStepsJs(names, values, ops, null);
+            if (!evaluated || !evaluated.noNegative) continue;
+        }
+
+        return { values, ops, names };
+    }
+
+    const { values, ops, running } = rollRightLeadingTermsJs(rightRows, m, true);
+    values[lastRow.name] = target - running;
+    ops.push('+');
+    return { values, ops, names };
+}
+
 function genPreviewAuto() {
     const ops = [];
     if (document.getElementById('autoOpPlus').checked)  ops.push('+');
@@ -2897,7 +3009,7 @@ function genPreviewAuto() {
     const operators = ops.length ? ops : ['+'];
     const useParens = document.getElementById('autoParens').checked;
     const noNegSteps = document.getElementById('autoNoNegSteps').checked;
-    if (!ncRows.filter(r => r.name).length) { clearPreview(); return; }
+    if (!ncRows.filter(r => r.name && !/^R\d+$/.test(r.name)).length) { clearPreview(); return; }
 
     // mix_blank's "sometimes hide an operand instead of the result" relies on
     // {{EXPR}} to correctly render either "...= ?" or "...= <result>" depending on
@@ -2907,6 +3019,13 @@ function genPreviewAuto() {
     const customText = (document.getElementById('templateText').value || '').trim();
     const hasExprToken = customText.includes('{{EXPR}}');
     const mixBlank = document.getElementById('autoMixBlank').checked && (!customText || hasExprToken);
+
+    // Right-side rows (R1, R2, ...) form an optional second, always-revealed
+    // expression that the left side's blank must match — see
+    // QuestionTemplate::generateAutoArithmetic()'s $useRightExpr/$mixBlank lines.
+    const rightRows = ncRows.filter(r => r.name && /^R\d+$/.test(r.name));
+    const useRightExpr = rightRows.length >= 2 && (!customText || hasExprToken);
+    const mixBlankFinal = mixBlank || useRightExpr;
 
     // Same two-tier approach as the PHP generator: try with every constraint as
     // configured first; if the ranges make that impossible (e.g. only '-' with no
@@ -2920,7 +3039,7 @@ function genPreviewAuto() {
         ({ correct, chosenOps, parenStart, numVars, names } = found);
     } else {
         ({ numVars } = pickNumVars());
-        names = Object.keys(numVars);
+        names = Object.keys(numVars).filter(k => !/^R\d+$/.test(k));
         const n = names.length;
         if (n < 2) { clearPreview(); return; }
         chosenOps = Array(n - 1).fill('+'); parenStart = null;
@@ -2928,13 +3047,13 @@ function genPreviewAuto() {
     }
     const n = names.length;
 
-    // When mixBlank is on, the hidden slot is always one of the operands (never
-    // the result) — "4 + ? = 9" instead of "4 + 5 = ?". When it's off, the result
-    // is always what's hidden (the classic style). Operand slots inside the paren
-    // pair are excluded (an extra algebra step a child hasn't been shown). Mirrors
-    // QuestionTemplate::generateAutoArithmetic().
+    // When mixBlankFinal is on, the hidden slot is always one of the operands
+    // (never the result) — "4 + ? = 9" instead of "4 + 5 = ?". When it's off, the
+    // result is always what's hidden (the classic style). Operand slots inside the
+    // paren pair are excluded (an extra algebra step a child hasn't been shown).
+    // Mirrors QuestionTemplate::generateAutoArithmetic().
     let blankPos = null;
-    if (mixBlank) {
+    if (mixBlankFinal) {
         let blankCandidates = Array.from({ length: n }, (_, i) => i);
         if (parenStart !== null) {
             blankCandidates = blankCandidates.filter(i => i !== parenStart && i !== parenStart + 1);
@@ -2945,6 +3064,15 @@ function genPreviewAuto() {
     }
     const answer = blankPos === null ? correct : numVars[names[blankPos]];
 
+    let rightResult = null, rightDisplay = '';
+    if (useRightExpr && blankPos !== null) {
+        rightResult = attemptRightArithmeticJs(rightRows, correct, noNegSteps, 200);
+        rightResult.names.forEach((name, i) => {
+            rightDisplay += rightResult.values[name];
+            if (i < rightResult.names.length - 1) rightDisplay += ' ' + rightResult.ops[i] + ' ';
+        });
+    }
+
     let display = '';
     for (let i = 0; i < n; i++) {
         if (parenStart !== null && i === parenStart) display += '(';
@@ -2952,7 +3080,7 @@ function genPreviewAuto() {
         if (parenStart !== null && i === parenStart + 1) display += ')';
         if (i < n - 1) display += ' ' + chosenOps[i] + ' ';
     }
-    const equation = display + (blankPos === null ? ' = ?' : ' = ' + correct);
+    const equation = display + (blankPos === null ? ' = ?' : ' = ' + (rightResult ? rightDisplay : correct));
 
     // Admin can wrap the generated equation in their own instruction text (e.g.
     // "ამოხსენი: {{EXPR}}"). {{EXPR}} is replaced with the full equation; any

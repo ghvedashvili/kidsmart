@@ -824,16 +824,29 @@ class QuestionTemplate extends Model
         $hasExprToken = str_contains($customText, '{{EXPR}}');
         $mixBlank     = $mixBlank && ($customText === '' || $hasExprToken);
 
+        // Right-side rows (R1, R2, ...) are a separate, optional multi-term
+        // expression on the other side of "=" — never carries the blank itself
+        // (see attemptRightArithmetic()'s docblock), so it only activates
+        // alongside a left-operand blank, same guard as mix_blank above.
         $varConfigs = [];
+        $rightConfigs = [];
         foreach ($numConf as $key => $conf) {
             if (! is_array($conf) || str_starts_with((string) $key, '_')) continue;
-            $varConfigs[$key] = $conf;
+            if (preg_match('/^R\d+$/', (string) $key)) {
+                $rightConfigs[$key] = $conf;
+            } else {
+                $varConfigs[$key] = $conf;
+            }
         }
         if (count($varConfigs) < 2) {
             $varConfigs = ['N1' => ['min' => 1, 'max' => 9, 'step' => 1], 'N2' => ['min' => 1, 'max' => 9, 'step' => 1]];
         }
         $varNames = array_keys($varConfigs);
         $n = count($varNames);
+
+        $rightNames   = array_keys($rightConfigs);
+        $useRightExpr = count($rightNames) >= 2 && ($customText === '' || $hasExprToken);
+        $mixBlank     = $mixBlank || $useRightExpr;
 
         // Try with every constraint as configured first; if the ranges make that
         // combination impossible (e.g. only '-' with no room to stay non-negative),
@@ -862,6 +875,10 @@ class QuestionTemplate extends Model
             $correct = (int) array_sum($values);
         }
 
+        $rightResult = $useRightExpr
+            ? $this->attemptRightArithmetic($rightConfigs, $rightNames, $correct, $noNegSteps, 200)
+            : null;
+
         // When $mixBlank is on, the hidden slot is always one of the operands
         // (never the result) — "4 + ? = 9" instead of "4 + 5 = ?". When it's off,
         // the result is always what's hidden (the classic style). Operand slots
@@ -883,7 +900,10 @@ class QuestionTemplate extends Model
             $equation = $this->buildArithmeticExpr($varNames, $values, $opsChosen, $parenStart) . ' = ?';
             $answer = $correct;
         } else {
-            $equation = $this->buildArithmeticExpr($varNames, $values, $opsChosen, $parenStart, $blankPos) . ' = ' . $correct;
+            $rightSide = $rightResult !== null
+                ? $this->buildArithmeticExpr($rightNames, $rightResult['values'], $rightResult['ops'], null)
+                : (string) $correct;
+            $equation = $this->buildArithmeticExpr($varNames, $values, $opsChosen, $parenStart, $blankPos) . ' = ' . $rightSide;
             $answer = (int) $values[$varNames[$blankPos]];
         }
 
@@ -980,6 +1000,97 @@ class QuestionTemplate extends Model
         }
 
         return null;
+    }
+
+    /**
+     * Right-side counterpart to attemptArithmetic(): the right expression never
+     * carries the blank, so instead of free-rolling every value and checking the
+     * result is merely well-formed, it must hit an EXACT pre-computed $target.
+     * The first m-1 terms are rolled randomly within their own min/max/step,
+     * randomly signed; the last is algebraically derived (target minus/plus the
+     * running total) — only +/- invert this cleanly in one step, which is why
+     * the right side never offers × or ÷. If the derived term doesn't fit its
+     * own range/step within $maxAttempts, degrade to an always-resolving
+     * fallback (derived term forced even if out of range) rather than ever
+     * leaving the question unsolvable — same "never throw" precedent
+     * generateAutoArithmetic()'s own left-chain '+'-fallback already sets.
+     */
+    private function attemptRightArithmetic(array $rightConfigs, array $rightNames, int $target, bool $noNegSteps, int $maxAttempts): array
+    {
+        $m = count($rightNames);
+        $lastName = $rightNames[$m - 1];
+        $lastConf = $rightConfigs[$lastName];
+        $lastStep = max(1, (int) ($lastConf['step'] ?? 1));
+        $lastMin  = (int) ($lastConf['min'] ?? 1);
+        $lastMax  = (int) ($lastConf['max'] ?? 9);
+
+        for ($attempt = 0; $attempt < $maxAttempts; $attempt++) {
+            [$values, $ops, $running] = $this->rollRightLeadingTerms($rightConfigs, $rightNames, $m);
+
+            // '-' needing a negative derived value isn't representable as a plain
+            // addend this engine renders — retry that case as '+' instead.
+            $lastOp  = rand(0, 1) ? '+' : '-';
+            $derived = $lastOp === '+' ? $target - $running : $running - $target;
+            if ($lastOp === '-' && $derived < 0) {
+                $lastOp  = '+';
+                $derived = $target - $running;
+            }
+
+            if ($derived < $lastMin || $derived > $lastMax) continue;
+            if (($derived - $lastMin) % $lastStep !== 0) continue;
+
+            $values[$lastName] = $derived;
+            $ops[] = $lastOp;
+
+            if ($noNegSteps) {
+                $evaluated = $this->evalArithmeticSteps($rightNames, $values, $ops, null);
+                if ($evaluated === null || ! $evaluated['no_negative']) continue;
+            }
+
+            return ['values' => $values, 'ops' => $ops];
+        }
+
+        // Exhausted attempts — an always-resolving fallback: roll every term but
+        // the last fresh with all '+' joins, force the last to whatever closes
+        // the gap exactly, even outside its own configured range. A visually odd
+        // number here beats ever leaving the question unsolvable.
+        [$values, $ops, $running] = $this->rollRightLeadingTerms($rightConfigs, $rightNames, $m, forcePlus: true);
+        $values[$lastName] = $target - $running;
+        $ops[] = '+';
+
+        return ['values' => $values, 'ops' => $ops];
+    }
+
+    /**
+     * Rolls the first m-1 right-side terms (random value within each one's own
+     * min/max/step; random +/- join from the second term on, or always '+' when
+     * $forcePlus — used by attemptRightArithmetic()'s fallback path) and folds
+     * them left-to-right into a running total, for the caller to then derive the
+     * final term from. Returns [$values, $ops, $running] — $values/$ops cover
+     * only these leading terms; the caller appends the derived last term/op.
+     */
+    private function rollRightLeadingTerms(array $rightConfigs, array $rightNames, int $m, bool $forcePlus = false): array
+    {
+        $values = [];
+        $ops = [];
+        $running = 0;
+        foreach ($rightNames as $i => $name) {
+            if ($i === $m - 1) continue;
+            $conf  = $rightConfigs[$name];
+            $step  = max(1, (int) ($conf['step'] ?? 1));
+            $min   = (int) ($conf['min'] ?? 1);
+            $max   = (int) ($conf['max'] ?? 9);
+            $steps = max(0, intdiv(max($min, $max) - $min, $step));
+            $values[$name] = $min + rand(0, $steps) * $step;
+            if ($i === 0) {
+                $running = $values[$name];
+            } else {
+                $op = $forcePlus ? '+' : (rand(0, 1) ? '+' : '-');
+                $ops[] = $op;
+                $running = $op === '+' ? $running + $values[$name] : $running - $values[$name];
+            }
+        }
+        return [$values, $ops, $running];
     }
 
     /**
