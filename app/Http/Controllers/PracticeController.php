@@ -47,6 +47,7 @@ class PracticeController extends Controller
 
         $topic = Topic::findOrFail((int) $slug);
         abort_if($topic->grade_id !== $child->childSetting?->grade_id, 403);
+        abort_if(! $topic->is_active, 404);
 
         return view('child.practice', ['type' => 'topic', 'topic' => $topic, 'slug' => $slug]);
     }
@@ -72,6 +73,7 @@ class PracticeController extends Controller
 
         $topic = Topic::findOrFail((int) $slug);
         abort_if($topic->grade_id !== $setting?->grade_id, 403);
+        abort_if(! $topic->is_active, 404);
         return $this->questionFromTopic($setting, $topic);
     }
 

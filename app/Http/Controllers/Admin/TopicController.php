@@ -65,6 +65,20 @@ class TopicController extends Controller
         return back()->with('success', 'წაიშალა');
     }
 
+    /**
+     * Pauses/resumes a topic — an inactive topic is excluded from everything a
+     * child receives NEW questions from (TestGeneratorService's real-test,
+     * practice, and olympiad selection all filter on topics.is_active), while
+     * existing history (Test/TestQuestion/PracticeAnswerLog rows already
+     * reference topic_id directly) and admin question-authoring for this topic
+     * are both untouched.
+     */
+    public function toggleActive(Topic $topic)
+    {
+        $topic->update(['is_active' => ! $topic->is_active]);
+        return back();
+    }
+
     public function moveToGrade(Request $request)
     {
         $data = $request->validate([

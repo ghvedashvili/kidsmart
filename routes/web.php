@@ -250,6 +250,7 @@ Route::middleware(['auth', 'admin', 'role.permission'])->group(function () {
     Route::post('/admin/topics/move',         [TopicController::class, 'moveToGrade'])->name('admin.topics.move');
     Route::put('/admin/topics/{topic}',       [TopicController::class, 'update'])->name('admin.topics.update');
     Route::delete('/admin/topics/{topic}',    [TopicController::class, 'destroy'])->name('admin.topics.destroy');
+    Route::patch('/admin/topics/{topic}/toggle-active', [TopicController::class, 'toggleActive'])->name('admin.topics.toggle-active');
 
     // კითხვების შაბლონები
     Route::get('/admin/questions',                     [QuestionTemplateController::class, 'index'])->name('admin.questions.index');

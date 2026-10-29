@@ -133,13 +133,16 @@
                 <div class="grade-group grade-hdr" data-grade="{{ $topic->grade_id }}">{{ $topic->grade->name }}</div>
                 @php $lastGrade = $topic->grade_id; @endphp
             @endif
-            <div class="row topic-row" id="topic-row-{{ $topic->id }}" data-grade="{{ $topic->grade_id }}" style="flex-direction:column;align-items:stretch;gap:0;">
+            <div class="row topic-row" id="topic-row-{{ $topic->id }}" data-grade="{{ $topic->grade_id }}" style="flex-direction:column;align-items:stretch;gap:0;{{ $topic->is_active ? '' : 'opacity:0.5;' }}">
                 <div style="display:flex;align-items:center;gap:4px;">
                     <div class="row-view" style="flex:1;">
                         <span>{{ $topic->name }}</span>
                         @if($topic->sequence)
                         <span class="badge" style="color:#2563eb;border-color:#bfdbfe;">#{{ $topic->sequence }}</span>
                         @endif
+                        @unless($topic->is_active)
+                        <span class="badge" style="color:#b91c1c;border-color:#fecaca;">⏸ გაჩერებული</span>
+                        @endunless
                         @if($topic->question_templates_count)
                         <button type="button" class="badge-btn" onclick="toggleTplPanel({{ $topic->id }})">{{ $topic->question_templates_count }} შაბლონი</button>
                         @else
@@ -151,6 +154,10 @@
                         📹 {{ $topic->videos->count() ?: '' }}
                     </button>
                     <div style="display:flex;gap:2px;flex-shrink:0;">
+                        <form method="POST" action="{{ route('admin.topics.toggle-active', $topic) }}" style="display:inline;">
+                            @csrf @method('PATCH')
+                            <button type="submit" class="btn-edit" title="{{ $topic->is_active ? 'გაჩერება — ბავშვები ახალ კითხვებს ვეღარ მიიღებენ' : 'გააქტიურება' }}">{{ $topic->is_active ? '⏸' : '▶' }}</button>
+                        </form>
                         <button type="button" class="btn-edit" onclick="editTopic({{ $topic->id }})">✎</button>
                         <form method="POST" action="{{ route('admin.topics.destroy', $topic) }}" style="display:inline;">
                             @csrf @method('DELETE')

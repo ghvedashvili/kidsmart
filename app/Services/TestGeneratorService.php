@@ -115,7 +115,7 @@ class TestGeneratorService
         $baseQuery = fn () => QuestionTemplate::where('difficulty', $setting->difficulty)
             ->where('is_olympiad', false)
             ->where('is_active', true)
-            ->whereHas('topic', fn ($q) => $q->where('grade_id', $setting->grade_id))
+            ->whereHas('topic', fn ($q) => $q->where('grade_id', $setting->grade_id)->where('is_active', true))
             ->when(! empty($childTopicIds), fn ($q) => $q->whereIn('topic_id', $childTopicIds))
             ->when(! empty($excludeQuestionTypes), fn ($q) => $q->whereNotIn('question_type', $excludeQuestionTypes));
 
@@ -252,7 +252,7 @@ class TestGeneratorService
 
         $baseQuery = fn () => QuestionTemplate::where('is_olympiad', true)
             ->where('is_active', true)
-            ->whereHas('topic', fn ($q) => $q->where('grade_id', $setting->grade_id))
+            ->whereHas('topic', fn ($q) => $q->where('grade_id', $setting->grade_id)->where('is_active', true))
             ->when(! empty($childTopicIds), fn ($q) => $q->whereIn('topic_id', $childTopicIds));
 
         $specialTemplates = $baseQuery()
