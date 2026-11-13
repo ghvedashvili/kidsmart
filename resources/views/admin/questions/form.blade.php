@@ -190,8 +190,10 @@
                     $isExistingCode     = $existingQType === 'code';
                     $isExistingCw       = $existingQType === 'crossword';
                     $isExistingScale    = $existingQType === 'scale';
+                    $isExistingDataTable = $existingQType === 'data_table';
                     $codeCfg = ($existingQType === 'code') ? ($template->num_config ?? []) : [];
                     $cwCfg   = ($existingQType === 'crossword') ? ($template->num_config ?? []) : [];
+                    $dtCfg   = ($existingQType === 'data_table') ? ($template->num_config ?? []) : [];
                 @endphp
 
                 <div class="lbl">სათაური <span style="color:#94a3b8;font-size:0.6rem;">(მხოლოდ ადმინისთვის — ტესტში ბავშვს არ გამოუჩნდება)</span></div>
@@ -201,11 +203,12 @@
 
                 <div class="lbl">კითხვის ტიპი</div>
                 <div class="qt-row">
-                    <button type="button" class="qt-btn {{ !$isExistingPyramid && !$isExistingCode && !$isExistingCw && !$isExistingScale ? 'sel' : '' }}" onclick="setQType('multiple_choice')">📝 Multiple Choice</button>
+                    <button type="button" class="qt-btn {{ !$isExistingPyramid && !$isExistingCode && !$isExistingCw && !$isExistingScale && !$isExistingDataTable ? 'sel' : '' }}" onclick="setQType('multiple_choice')">📝 Multiple Choice</button>
                     <button type="button" class="qt-btn {{ $isExistingPyramid ? 'sel' : '' }}" onclick="setQType('pyramid')">🔺 პირამიდა</button>
                     <button type="button" class="qt-btn {{ $isExistingCode ? 'sel' : '' }}" onclick="setQType('code')">🕵️ კოდი</button>
                     <button type="button" class="qt-btn {{ $isExistingCw ? 'sel' : '' }}" onclick="setQType('crossword')">🧮 კროსვორდი</button>
                     <button type="button" class="qt-btn {{ $isExistingScale ? 'sel' : '' }}" onclick="setQType('scale')">⚖ სასწორი</button>
+                    <button type="button" class="qt-btn {{ $isExistingDataTable ? 'sel' : '' }}" onclick="setQType('data_table')">📊 ცხრილის ანალიზი</button>
                 </div>
                 <input type="hidden" name="question_type" id="qtInput" value="{{ $existingQType }}">
 
@@ -483,6 +486,54 @@
                         </div>
                     </div>
                 </div>{{-- /scaleFields --}}
+
+                {{-- Data table config --}}
+                <div id="dtFields" style="display:none;margin-top:14px;border-top:1px solid #f1f5f9;padding-top:14px;">
+                    <div class="sec-title" style="margin-bottom:10px;">📊 ცხრილის ანალიზის პარამეტრები</div>
+
+                    <div class="lbl">კითხვის ტექსტი <span style="color:#94a3b8;font-size:0.6rem;">(სავალდებულო)</span></div>
+                    <textarea id="dtTemplateText" class="fc" rows="2" placeholder="რომელ თვეში იყო ყველაზე მაღალი ტემპერატურა?"
+                        oninput="document.getElementById('templateText').value = this.value; previewDebounce();"></textarea>
+                    @error('template_text')<div class="err">{{ $message }}</div>@enderror
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                        <div>
+                            <div class="lbl">მწკრივები</div>
+                            <input type="number" class="pyr-inp" id="dtRows" min="2" max="8"
+                                value="{{ $dtCfg['rows'] ?? 3 }}" onchange="onDtGridChange()">
+                        </div>
+                        <div>
+                            <div class="lbl">სვეტები</div>
+                            <input type="number" class="pyr-inp" id="dtCols" min="1" max="6"
+                                value="{{ $dtCfg['cols'] ?? 1 }}" onchange="onDtGridChange()">
+                        </div>
+                    </div>
+
+                    <div class="lbl" style="margin-top:10px;">მწკრივების სახელები</div>
+                    <div id="dtRowLabelRows"></div>
+
+                    <div class="lbl" style="margin-top:10px;">სვეტების სათაურები</div>
+                    <div id="dtColHeaderRows"></div>
+
+                    <div id="dtAnalyzedColWrap" style="margin-top:10px;display:none;">
+                        <div class="lbl">ანალიზის სვეტი <span style="color:#94a3b8;font-size:0.6rem;">(რომელშიც იძებნება მაქსიმუმი)</span></div>
+                        <select class="fc" id="dtAnalyzedCol" style="margin-bottom:0;" onchange="syncDtConfig()"></select>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+                        <div>
+                            <div class="lbl">მნიშვნელობა min</div>
+                            <input type="number" class="pyr-inp" id="dtMinVal" min="0"
+                                value="{{ $dtCfg['min_val'] ?? 1 }}" onchange="syncDtConfig()">
+                        </div>
+                        <div>
+                            <div class="lbl">მნიშვნელობა max</div>
+                            <input type="number" class="pyr-inp" id="dtMaxVal"
+                                value="{{ $dtCfg['max_val'] ?? 100 }}" onchange="syncDtConfig()">
+                        </div>
+                    </div>
+                    <div style="font-size:0.6rem;color:#94a3b8;margin-top:6px;">ბავშვს ეკითხება, რომელ მწკრივშია ანალიზის სვეტში ყველაზე მაღალი რიცხვი — სავარაუდო პასუხები ყოველთვის ამ ცხრილის სხვა რეალური მწკრივის სახელებია (არასდროს გამოგონილი).</div>
+                </div>{{-- /dtFields --}}
             </div>
 
             <div id="mcSections">
@@ -991,7 +1042,8 @@ function setQType(type) {
             (type === 'multiple_choice' && b.textContent.includes('Multiple'))    ||
             (type === 'code'            && b.textContent.includes('კოდი'))        ||
             (type === 'crossword'       && b.textContent.includes('კროსვორდი'))   ||
-            (type === 'scale'           && b.textContent.includes('სასწორი'))) {
+            (type === 'scale'           && b.textContent.includes('სასწორი'))     ||
+            (type === 'data_table'      && b.textContent.includes('ცხრილის'))) {
             b.classList.add('sel');
         }
     });
@@ -1002,17 +1054,20 @@ function applyQType(type) {
     const isCode  = type === 'code';
     const isCw    = type === 'crossword';
     const isScale = type === 'scale';
-    const isMC    = !isPyr && !isCode && !isCw && !isScale;
+    const isDt    = type === 'data_table';
+    const isMC    = !isPyr && !isCode && !isCw && !isScale && !isDt;
     document.getElementById('pyrFields').style.display      = isPyr   ? 'block' : 'none';
     document.getElementById('codeFields').style.display     = isCode  ? 'block' : 'none';
     document.getElementById('cwFields').style.display       = isCw    ? 'block' : 'none';
     document.getElementById('scaleFields').style.display     = isScale ? 'block' : 'none';
+    document.getElementById('dtFields').style.display       = isDt    ? 'block' : 'none';
     document.getElementById('themeFieldWrap').style.display = isMC    ? 'block' : 'none';
     document.getElementById('mcSections').style.display     = isMC    ? 'block' : 'none';
     if (isPyr)   { syncPyrConfig();   return; }
     if (isCode)  { syncCodeConfig();  return; }
     if (isCw)    { syncCwConfig();    return; }
     if (isScale) { syncScaleConfig(); return; }
+    if (isDt)    { onDtGridChange();  return; }
 }
 function syncPyrConfig() {
     const h    = document.getElementById('pyrHeight').value;
@@ -1840,6 +1895,146 @@ function genPreviewScale() {
     document.getElementById('prevFormula').innerHTML = '';
     document.getElementById('prevVars').innerHTML = escHtmlFormLp(letterDebug.join(' · '));
 }
+
+// ── Data table analysis
+let dtRowLabels  = []; // string[]
+let dtColHeaders = []; // string[]
+
+function onDtGridChange() {
+    const rows = Math.max(2, Math.min(8, parseInt(document.getElementById('dtRows').value) || 3));
+    const cols = Math.max(1, Math.min(6, parseInt(document.getElementById('dtCols').value) || 1));
+    document.getElementById('dtRows').value = rows;
+    document.getElementById('dtCols').value = cols;
+    while (dtRowLabels.length < rows) dtRowLabels.push('');
+    dtRowLabels.length = rows;
+    while (dtColHeaders.length < cols) dtColHeaders.push('');
+    dtColHeaders.length = cols;
+    renderDtRowLabels();
+    renderDtColHeaders();
+    updateDtAnalyzedColSelect();
+    syncDtConfig();
+}
+function renderDtRowLabels() {
+    const el = document.getElementById('dtRowLabelRows');
+    el.innerHTML = dtRowLabels.map((v, i) => `
+        <input type="text" class="nc-inp" style="margin-bottom:4px;" placeholder="მწკრივი ${i + 1}" value="${escHtmlFormLp(v).replace(/"/g, '&quot;')}"
+            onchange="dtRowLabels[${i}] = this.value; syncDtConfig();">
+    `).join('');
+}
+function renderDtColHeaders() {
+    const el = document.getElementById('dtColHeaderRows');
+    el.innerHTML = dtColHeaders.map((v, i) => `
+        <input type="text" class="nc-inp" style="margin-bottom:4px;" placeholder="სვეტი ${i + 1}" value="${escHtmlFormLp(v).replace(/"/g, '&quot;')}"
+            onchange="dtColHeaders[${i}] = this.value; syncDtConfig(); updateDtAnalyzedColSelect();">
+    `).join('');
+}
+// Shown only when cols>1 (a single-column table has only one possible choice —
+// mirrors QuestionTemplate::generateDataTable()'s implicit analyzedColIndex=0).
+function updateDtAnalyzedColSelect() {
+    const cols = dtColHeaders.length;
+    const wrap = document.getElementById('dtAnalyzedColWrap');
+    wrap.style.display = cols > 1 ? '' : 'none';
+    const sel = document.getElementById('dtAnalyzedCol');
+    const prev = sel.value;
+    sel.innerHTML = dtColHeaders.map((h, i) => `<option value="${i}">${escHtmlFormLp(h || ('სვეტი ' + (i + 1)))}</option>`).join('');
+    if (prev !== '' && +prev < cols) sel.value = prev;
+}
+function syncDtConfig() {
+    const rows = dtRowLabels.length;
+    const cols = dtColHeaders.length;
+    const analyzedColIndex = cols > 1 ? (parseInt(document.getElementById('dtAnalyzedCol').value) || 0) : 0;
+    const minVal = parseInt(document.getElementById('dtMinVal').value) || 0;
+    const maxVal = Math.max(minVal + 1, parseInt(document.getElementById('dtMaxVal').value) || 100);
+    document.getElementById('numConfigJson').value = JSON.stringify({
+        rows, cols,
+        row_labels: dtRowLabels,
+        col_headers: dtColHeaders,
+        analyzed_col_index: analyzedColIndex,
+        min_val: minVal, max_val: maxVal,
+    });
+    if (document.getElementById('qtInput').value === 'data_table') genPreviewDt();
+}
+function restoreDtConfig(numCfg) {
+    const rows = Math.max(2, Math.min(8, numCfg.rows || 3));
+    const cols = Math.max(1, Math.min(6, numCfg.cols || 1));
+    document.getElementById('dtRows').value = rows;
+    document.getElementById('dtCols').value = cols;
+    dtRowLabels = (numCfg.row_labels || []).slice(0, rows);
+    while (dtRowLabels.length < rows) dtRowLabels.push('');
+    dtColHeaders = (numCfg.col_headers || []).slice(0, cols);
+    while (dtColHeaders.length < cols) dtColHeaders.push('');
+    document.getElementById('dtTemplateText').value = document.getElementById('templateText').value || '';
+    document.getElementById('dtMinVal').value = numCfg.min_val ?? 1;
+    document.getElementById('dtMaxVal').value = numCfg.max_val ?? 100;
+    renderDtRowLabels();
+    renderDtColHeaders();
+    updateDtAnalyzedColSelect();
+    if (cols > 1) document.getElementById('dtAnalyzedCol').value = numCfg.analyzed_col_index || 0;
+    syncDtConfig();
+}
+
+/**
+ * Client-side mirror of QuestionTemplate::generateDataTable() (PHP) — rolls a
+ * fresh matrix and finds the winning row (no retry loop needed: see
+ * DataTableService::build()'s doc comment for why).
+ */
+function genPreviewDt() {
+    let cfg;
+    try { cfg = JSON.parse(document.getElementById('numConfigJson').value); } catch (e) { cfg = null; }
+    const rowLabels  = (cfg && cfg.row_labels)  || [];
+    const colHeaders = (cfg && cfg.col_headers) || [];
+    const rows = rowLabels.length, cols = colHeaders.length;
+    if (!rows || !cols || rowLabels.some(l => !String(l).trim()) || colHeaders.some(h => !String(h).trim())) {
+        document.getElementById('prevQ').innerHTML = '<span style="color:#94a3b8;font-size:0.72rem;">შეავსეთ მწკრივების/სვეტების სახელები preview-სთვის</span>';
+        document.getElementById('prevOpts').innerHTML = '';
+        document.getElementById('prevHint').innerHTML = '';
+        document.getElementById('prevFormula').innerHTML = '';
+        document.getElementById('prevVars').innerHTML = '';
+        document.getElementById('prevWarn').innerHTML = '';
+        return;
+    }
+
+    const minVal = cfg.min_val ?? 1;
+    const maxVal = Math.max(minVal, cfg.max_val ?? 100);
+    const analyzedColIndex = Math.max(0, Math.min(cols - 1, cfg.analyzed_col_index || 0));
+
+    const data = [];
+    for (let r = 0; r < rows; r++) {
+        const row = [];
+        for (let c = 0; c < cols; c++) row.push(minVal + Math.floor(Math.random() * (maxVal - minVal + 1)));
+        data.push(row);
+    }
+    let winnerRowIndex = 0, best = data[0][analyzedColIndex];
+    for (let r = 1; r < rows; r++) {
+        if (data[r][analyzedColIndex] > best) { best = data[r][analyzedColIndex]; winnerRowIndex = r; }
+    }
+    const correctLabel = rowLabels[winnerRowIndex];
+    const otherIndexes = Array.from({ length: rows }, (_, i) => i)
+        .filter(i => i !== winnerRowIndex).sort(() => Math.random() - 0.5);
+    const wrongLabels = otherIndexes.slice(0, 3).map(i => rowLabels[i]);
+    const options = [correctLabel, ...wrongLabels].sort(() => Math.random() - 0.5);
+
+    document.getElementById('prevQ').innerHTML = '📊 ' + escHtmlFormLp(document.getElementById('templateText').value.trim());
+    document.getElementById('prevHint').innerHTML = escHtmlFormLp(document.getElementById('hintText').value || '');
+    document.getElementById('prevWarn').innerHTML = '';
+
+    let tableHtml = '<div style="grid-column:1/-1;overflow-x:auto;"><table style="border-collapse:collapse;margin:0 auto;font-size:0.8rem;">';
+    tableHtml += '<tr><th style="border:1px solid #cbd5e1;background:#f1f5f9;padding:5px 8px;"></th>'
+        + colHeaders.map(h => `<th style="border:1px solid #cbd5e1;background:#f1f5f9;padding:5px 8px;">${escHtmlFormLp(h)}</th>`).join('')
+        + '</tr>';
+    data.forEach((row, i) => {
+        tableHtml += `<tr><th style="border:1px solid #cbd5e1;background:#f8fafc;padding:5px 8px;text-align:left;">${escHtmlFormLp(rowLabels[i])}</th>`
+            + row.map(v => `<td style="border:1px solid #cbd5e1;padding:5px 8px;text-align:center;">${v}</td>`).join('')
+            + '</tr>';
+    });
+    tableHtml += '</table></div>';
+
+    const optsHtml = tableHtml + options.map(o => `<div class="preview-opt ${o === correctLabel ? 'c' : ''}">${escHtmlFormLp(o)}</div>`).join('');
+    document.getElementById('prevOpts').innerHTML = optsHtml;
+    document.getElementById('prevFormula').innerHTML = '';
+    document.getElementById('prevVars').innerHTML = '';
+}
+
 function escHtmlFormLp(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
@@ -2400,6 +2595,7 @@ function syncAll() {
     if (_qt === 'code')      { syncCodeConfig();  return; }
     if (_qt === 'crossword') { syncCwConfig();    return; }
     if (_qt === 'scale')     { syncScaleConfig(); return; }
+    if (_qt === 'data_table') { syncDtConfig();   return; }
     const ncObj = {};
     ncRows.forEach(r => {
         if (!r.name) return;
@@ -2895,6 +3091,7 @@ function genPreviewInner() {
     if (qt === 'code')      { genPreviewCode();     return; }
     if (qt === 'crossword') { genPreviewCw();       return; }
     if (qt === 'scale')     { genPreviewScale();    return; }
+    if (qt === 'data_table') { genPreviewDt();      return; }
     const autoEl = document.getElementById('autoBuildEnabled');
     if (autoEl && autoEl.checked) { genPreviewAuto(); return; }
     const tmpl = document.getElementById('templateText').value;
@@ -3625,6 +3822,8 @@ function loadIntoForm(data) {
         syncCwConfig();
     } else if (data.question_type === 'scale') {
         restoreScaleConfig(numCfg, data.answer_type, data.distractors || null, data.conditions || []);
+    } else if (data.question_type === 'data_table') {
+        restoreDtConfig(numCfg);
     } else {
         // multiple_choice (numeric AND text) — rebuild ncRows from num_config
         // the same way the page-load restore does. Numeric vars matter for
@@ -3781,6 +3980,8 @@ function array_key_exists_js(key, obj) { return obj && Object.prototype.hasOwnPr
     const numCfg = _KS.numConfig;
     if (document.getElementById('qtInput').value === 'scale') {
         restoreScaleConfig(numCfg || {}, _KS.answerType, _KS.distractors, _KS.conditions);
+    } else if (document.getElementById('qtInput').value === 'data_table') {
+        restoreDtConfig(numCfg || {});
     } else if (numCfg && typeof numCfg === 'object' && Object.keys(numCfg).length) {
         if (numCfg['_unique']) {
             const cb = document.getElementById('uniqueNumVars');

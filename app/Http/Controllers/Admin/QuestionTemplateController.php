@@ -326,7 +326,7 @@ class QuestionTemplateController extends Controller
 
         // pyramid/code/crossword/scale never use a theme — keep that invariant
         // regardless of what the modal happened to send.
-        if (in_array($question->question_type, ['pyramid', 'code', 'crossword', 'scale'], true)) {
+        if (in_array($question->question_type, ['pyramid', 'code', 'crossword', 'scale', 'data_table'], true)) {
             $data['theme_id'] = null;
         }
 
@@ -353,7 +353,7 @@ class QuestionTemplateController extends Controller
             return response()->json(['error' => "ამ კლასს მაქსიმუმ {$grade->max_level} დონე აქვს"], 422);
         }
 
-        if (in_array($question->question_type, ['pyramid', 'code', 'crossword', 'scale'], true)) {
+        if (in_array($question->question_type, ['pyramid', 'code', 'crossword', 'scale', 'data_table'], true)) {
             $data['theme_id'] = null;
         }
 
@@ -502,7 +502,8 @@ class QuestionTemplateController extends Controller
         $isCode      = $qType === 'code';
         $isCrossword = $qType === 'crossword';
         $isScale     = $qType === 'scale';
-        $isSpecial   = $isPyramid || $isCode || $isCrossword || $isScale;
+        $isDataTable = $qType === 'data_table';
+        $isSpecial   = $isPyramid || $isCode || $isCrossword || $isScale || $isDataTable;
 
         $raw = $request->validate([
             'topic_id'        => 'required|exists:topics,id',
@@ -511,10 +512,10 @@ class QuestionTemplateController extends Controller
             'is_olympiad'     => 'nullable|boolean',
             'is_active'       => 'nullable|boolean',
             'sequence'        => 'nullable|integer|min:1',
-            'question_type'   => 'required|in:multiple_choice,pyramid,code,crossword,scale',
+            'question_type'   => 'required|in:multiple_choice,pyramid,code,crossword,scale,data_table',
             'answer_type'     => $isScale ? 'required|in:numeric,numeric_input' : ($isSpecial ? 'nullable' : 'required|in:numeric,text,numeric_input'),
             'title'           => 'nullable|string|max:150',
-            'template_text'   => $isSpecial ? 'nullable|string' : 'required|string',
+            'template_text'   => ($isSpecial && ! $isDataTable) ? 'nullable|string' : 'required|string',
             'hint_text'       => 'nullable|string',
             'correct_formula' => $isSpecial ? 'nullable|string' : 'required|string|max:200',
             'num_config'      => 'required|string',
@@ -586,6 +587,59 @@ class QuestionTemplateController extends Controller
                 'hint_text'       => $raw['hint_text'] ?? null,
                 'correct_formula' => '',
                 'num_config'      => ['min_val' => $minVal, 'max_val' => $maxVal, 'operators' => $ops, 'rows' => $rows, 'cols' => $cols, 'revealed_count' => $revealedCount],
+                'distractors'     => null,
+                'conditions'      => null,
+            ];
+        }
+
+        if ($isDataTable) {
+            $rows = max(2, min(8, (int) ($numConfig['rows'] ?? 3)));
+            $cols = max(1, min(6, (int) ($numConfig['cols'] ?? 1)));
+
+            $rowLabels = array_values(array_map('strval', (array) ($numConfig['row_labels'] ?? [])));
+            $rowLabels = array_slice(array_pad($rowLabels, $rows, ''), 0, $rows);
+
+            $colHeaders = array_values(array_map('strval', (array) ($numConfig['col_headers'] ?? [])));
+            $colHeaders = array_slice(array_pad($colHeaders, $cols, ''), 0, $cols);
+
+            if (in_array('', $rowLabels, true) || in_array('', $colHeaders, true)) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'num_config' => 'ყველა მწკრივს და სვეტს უნდა ჰქონდეს სახელი',
+                ]);
+            }
+
+            if (trim((string) ($raw['template_text'] ?? '')) === '') {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'template_text' => 'საჭიროა კითხვის ტექსტი',
+                ]);
+            }
+
+            $analyzedColIndex = max(0, min($cols - 1, (int) ($numConfig['analyzed_col_index'] ?? 0)));
+            $minVal = (int) ($numConfig['min_val'] ?? 1);
+            $maxVal = max($minVal + 1, (int) ($numConfig['max_val'] ?? 100));
+
+            return [
+                'topic_id'        => $raw['topic_id'],
+                'theme_id'        => null,
+                'difficulty'      => $raw['difficulty'],
+                'is_olympiad'     => $isOlympiad,
+                'is_active'       => $isActive,
+                'sequence'        => $sequence,
+                'question_type'   => 'data_table',
+                'answer_type'     => 'text',
+                'title'           => $raw['title'] ?? null,
+                'template_text'   => $raw['template_text'],
+                'hint_text'       => $raw['hint_text'] ?? null,
+                'correct_formula' => '',
+                'num_config'      => [
+                    'rows'                => $rows,
+                    'cols'                => $cols,
+                    'row_labels'          => $rowLabels,
+                    'col_headers'         => $colHeaders,
+                    'analyzed_col_index'  => $analyzedColIndex,
+                    'min_val'             => $minVal,
+                    'max_val'             => $maxVal,
+                ],
                 'distractors'     => null,
                 'conditions'      => null,
             ];

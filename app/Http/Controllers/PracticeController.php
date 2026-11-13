@@ -128,7 +128,7 @@ class PracticeController extends Controller
             ->where('difficulty', $setting->difficulty)
             ->where('is_olympiad', false)
             ->where('is_active', true)
-            ->whereNotIn('question_type', ['scale'])
+            ->whereNotIn('question_type', ['scale', 'data_table'])
             ->with('theme')
             ->get();
 
@@ -136,7 +136,7 @@ class PracticeController extends Controller
             $topicTemplates = QuestionTemplate::where('topic_id', $topic->id)
                 ->where('is_olympiad', false)
                 ->where('is_active', true)
-                ->whereNotIn('question_type', ['scale'])
+                ->whereNotIn('question_type', ['scale', 'data_table'])
                 ->with('theme')
                 ->get();
         }

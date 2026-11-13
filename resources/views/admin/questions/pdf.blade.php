@@ -154,6 +154,10 @@
     @endfor
     </div></div>
 
+    @elseif($q['question_type'] === 'data_table')
+    {!! \App\Services\DataTableService::renderTableHtml(json_decode($q['text'], true) ?? []) !!}
+    <div style="margin-top:6px;font-size:11pt;font-weight:800;color:#15803d;">✍️ სწორი პასუხი: {{ $q['answer'] }}</div>
+
     @elseif($q['question_type'] === 'scale')
     {!! \App\Services\ScaleService::renderPansHtml(json_decode($q['text'], true) ?? []) !!}
     <div style="margin-top:6px;font-size:11pt;font-weight:800;color:#15803d;">✍️ სწორი პასუხი: {{ $q['answer'] }}</div>

@@ -618,7 +618,7 @@ function openReassign(btn, mode) {
     setRsDiff(rsDiff);
 
     const themeSel = document.getElementById('rsTheme');
-    const isSpecial = ['pyramid', 'code', 'crossword', 'scale'].includes(rsQType);
+    const isSpecial = ['pyramid', 'code', 'crossword', 'scale', 'data_table'].includes(rsQType);
     themeSel.disabled = isSpecial;
     document.getElementById('rsThemeWrap').style.opacity = isSpecial ? '0.4' : '1';
     themeSel.value = isSpecial ? '' : (themeId || '');
@@ -735,6 +735,7 @@ function renderLivePreview(data) {
     if (qt === 'code')      return renderLpCode(data);
     if (qt === 'crossword') return renderLpCrossword(data);
     if (qt === 'scale')     return renderLpScale(data);
+    if (qt === 'data_table') return renderLpDataTable(data);
     return renderLpMc(data);
 }
 
@@ -846,6 +847,33 @@ function renderLpScale(data) {
         + `<div class="lp-scale-pan" style="flex:1;">${leftHtml}</div>`
         + `<div class="lp-scale-pan" style="flex:1;">${rightHtml}</div>`
         + `</div>${scaleSvgHtmlLp()}</div>`;
+
+    if (Array.isArray(data.options) && data.options.length) {
+        html += '<div class="lp-opts">' + data.options.map(o =>
+            `<div class="lp-opt ${o === data.correct_answer ? 'correct' : ''}">${escHtmlLp(o)}</div>`
+        ).join('') + '</div>';
+    } else {
+        html += `<div class="lp-answer">✍️ პასუხი: <b>${escHtmlLp(data.correct_answer)}</b></div>`;
+    }
+    return html;
+}
+
+function renderLpDataTable(data) {
+    let q;
+    try { q = JSON.parse(data.question_text); }
+    catch (e) { return '<div class="lp-err">პარსინგის შეცდომა</div>'; }
+
+    let html = `<div class="lp-q">📊 ${escHtmlLp(q.prompt || '')}</div>`;
+    html += '<div style="overflow-x:auto;"><table style="border-collapse:collapse;margin:0 auto;font-size:0.85rem;">';
+    html += '<tr><th style="border:1px solid #cbd5e1;background:#f1f5f9;padding:5px 8px;"></th>'
+        + (q.col_headers || []).map(h => `<th style="border:1px solid #cbd5e1;background:#f1f5f9;padding:5px 8px;">${escHtmlLp(h)}</th>`).join('')
+        + '</tr>';
+    (q.data || []).forEach((row, i) => {
+        html += `<tr><th style="border:1px solid #cbd5e1;background:#f8fafc;padding:5px 8px;text-align:left;">${escHtmlLp((q.row_labels || [])[i] ?? '')}</th>`
+            + row.map(v => `<td style="border:1px solid #cbd5e1;padding:5px 8px;text-align:center;">${escHtmlLp(String(v))}</td>`).join('')
+            + '</tr>';
+    });
+    html += '</table></div>';
 
     if (Array.isArray(data.options) && data.options.length) {
         html += '<div class="lp-opts">' + data.options.map(o =>

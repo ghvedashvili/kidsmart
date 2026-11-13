@@ -79,6 +79,7 @@ class QuestionTemplate extends Model
     public function isCode(): bool       { return $this->question_type === 'code'; }
     public function isCrossword(): bool  { return $this->question_type === 'crossword'; }
     public function isScale(): bool      { return $this->question_type === 'scale'; }
+    public function isDataTable(): bool  { return $this->question_type === 'data_table'; }
 
     public function generate(?Theme $theme = null): array
     {
@@ -86,6 +87,7 @@ class QuestionTemplate extends Model
         if ($this->isCode())      return $this->generateCode();
         if ($this->isCrossword()) return $this->generateCrossword();
         if ($this->isScale())     return $this->generateScale();
+        if ($this->isDataTable()) return $this->generateDataTable();
         return $this->answer_type === 'text'
             ? $this->generateText($theme)
             : $this->generateNumeric($theme);
@@ -219,6 +221,64 @@ class QuestionTemplate extends Model
             (int)  ($cfg['revealed_count'] ?? 0)
         );
         return array_merge($result, ['hint_text' => $this->hint_text ?: null]);
+    }
+
+    /**
+     * Data-table analysis: an admin-authored rows×cols table (row labels,
+     * column headers, min/max value range, and which column is analyzed) gets
+     * freshly rolled numbers every generation (see DataTableService::build()).
+     * The child must pick which row has the highest value in the analyzed
+     * column — a standard MC answer (a row label), not a numeric one.
+     * Distractor options are always OTHER REAL row labels from this same
+     * table (never fabricated) — up to 3, so a table with under 4 rows
+     * simply offers fewer options (minimum 2, since rows >= 2).
+     */
+    public function generateDataTable(): array
+    {
+        $cfg  = $this->num_config ?? [];
+        $rows = max(2, min(8, (int) ($cfg['rows'] ?? 3)));
+        $cols = max(1, min(6, (int) ($cfg['cols'] ?? 1)));
+
+        $rowLabels = array_values((array) ($cfg['row_labels'] ?? []));
+        for ($i = count($rowLabels); $i < $rows; $i++) $rowLabels[] = (string) ($i + 1);
+        $rowLabels = array_slice($rowLabels, 0, $rows);
+
+        $colHeaders = array_values((array) ($cfg['col_headers'] ?? []));
+        for ($i = count($colHeaders); $i < $cols; $i++) $colHeaders[] = (string) ($i + 1);
+        $colHeaders = array_slice($colHeaders, 0, $cols);
+
+        $analyzedColIndex = max(0, min($cols - 1, (int) ($cfg['analyzed_col_index'] ?? 0)));
+        $minVal = (int) ($cfg['min_val'] ?? 1);
+        $maxVal = max($minVal, (int) ($cfg['max_val'] ?? 100));
+
+        $result = \App\Services\DataTableService::build($rows, $cols, $rowLabels, $colHeaders, $analyzedColIndex, $minVal, $maxVal);
+
+        $winnerIndex = $result['winner_row_index'];
+        $correctLabel = $rowLabels[$winnerIndex];
+
+        $otherIndexes = array_values(array_diff(range(0, $rows - 1), [$winnerIndex]));
+        shuffle($otherIndexes);
+        $wrongLabels = array_map(fn ($i) => $rowLabels[$i], array_slice($otherIndexes, 0, 3));
+
+        $options = array_merge([$correctLabel], $wrongLabels);
+        shuffle($options);
+
+        $questionData = [
+            'type'               => 'data_table',
+            'prompt'             => $this->template_text,
+            'row_labels'         => $rowLabels,
+            'col_headers'        => $colHeaders,
+            'data'               => $result['data'],
+            'analyzed_col_index' => $analyzedColIndex,
+            'winner_row_index'   => $winnerIndex,
+        ];
+
+        return [
+            'question_text'  => json_encode($questionData),
+            'correct_answer' => $correctLabel,
+            'options'        => array_values($options),
+            'hint_text'      => $this->hint_text ?: null,
+        ];
     }
 
     public function generateCode(): array

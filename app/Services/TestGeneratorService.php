@@ -119,9 +119,9 @@ class TestGeneratorService
             ->when(! empty($childTopicIds), fn ($q) => $q->whereIn('topic_id', $childTopicIds))
             ->when(! empty($excludeQuestionTypes), fn ($q) => $q->whereNotIn('question_type', $excludeQuestionTypes));
 
-        // Pyramid, code, crossword, and scale templates are theme-independent — always included
+        // Pyramid, code, crossword, scale, and data_table templates are theme-independent — always included
         $specialTemplates = $baseQuery()
-            ->whereIn('question_type', ['pyramid', 'code', 'crossword', 'scale'])
+            ->whereIn('question_type', ['pyramid', 'code', 'crossword', 'scale', 'data_table'])
             ->with('topic')
             ->get();
 
@@ -210,7 +210,7 @@ class TestGeneratorService
         $childTopicIds = $child->topics()->pluck('id')->toArray();
         $childThemeIds = $child->themes()->pluck('id');
 
-        $selection = $this->selectTemplatesForChild($setting, $childTopicIds, $childThemeIds, 'practice_topic_rotation', 'practice_template_rotation', ['scale']);
+        $selection = $this->selectTemplatesForChild($setting, $childTopicIds, $childThemeIds, 'practice_topic_rotation', 'practice_template_rotation', ['scale', 'data_table']);
         if (isset($selection['error'])) {
             return $selection;
         }
@@ -256,7 +256,7 @@ class TestGeneratorService
             ->when(! empty($childTopicIds), fn ($q) => $q->whereIn('topic_id', $childTopicIds));
 
         $specialTemplates = $baseQuery()
-            ->whereIn('question_type', ['pyramid', 'code', 'crossword', 'scale'])
+            ->whereIn('question_type', ['pyramid', 'code', 'crossword', 'scale', 'data_table'])
             ->with('topic')
             ->get();
 

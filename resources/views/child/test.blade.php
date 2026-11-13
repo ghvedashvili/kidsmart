@@ -285,6 +285,8 @@ body {
         @elseif(empty($q->options))
         @if($qType === 'scale')
         {!! \App\Services\ScaleService::renderPansHtml(json_decode($q->question_text, true) ?? []) !!}
+        @elseif($qType === 'data_table')
+        {!! \App\Services\DataTableService::renderTableHtml(json_decode($q->question_text, true) ?? []) !!}
         @else
         <div class="q-text">{!! nl2br(e($q->question_text)) !!}</div>
         @endif
@@ -298,6 +300,8 @@ body {
         @else
         @if($qType === 'scale')
         {!! \App\Services\ScaleService::renderPansHtml(json_decode($q->question_text, true) ?? []) !!}
+        @elseif($qType === 'data_table')
+        {!! \App\Services\DataTableService::renderTableHtml(json_decode($q->question_text, true) ?? []) !!}
         @else
         <div class="q-text">{!! nl2br(e($q->question_text)) !!}</div>
         @endif

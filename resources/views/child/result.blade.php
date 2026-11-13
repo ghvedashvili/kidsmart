@@ -364,6 +364,8 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
         @else
         @if($qType === 'scale')
         {!! \App\Services\ScaleService::renderPansHtml(json_decode($q->question_text, true) ?? []) !!}
+        @elseif($qType === 'data_table')
+        {!! \App\Services\DataTableService::renderTableHtml(json_decode($q->question_text, true) ?? []) !!}
         @else
         <div class="q-text-r">{!! nl2br(e($q->question_text)) !!}</div>
         @endif
