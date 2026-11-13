@@ -608,13 +608,46 @@ class QuestionTemplateController extends Controller
                 ]);
             }
 
+            // Two rows (or columns) sharing the same label would make two
+            // DIFFERENT MC options read identically — confusing or outright
+            // ambiguous for the child, whichever axis ends up being the answer.
+            if (count($rowLabels) !== count(array_unique($rowLabels)) || count($colHeaders) !== count(array_unique($colHeaders))) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'num_config' => 'მწკრივების სახელები (და ასევე სვეტების სათაურები) ერთმანეთს არ უნდა იმეორებდეს',
+                ]);
+            }
+
             if (trim((string) ($raw['template_text'] ?? '')) === '') {
                 throw \Illuminate\Validation\ValidationException::withMessages([
                     'template_text' => 'საჭიროა კითხვის ტექსტი',
                 ]);
             }
 
-            $analyzedColIndex = max(0, min($cols - 1, (int) ($numConfig['analyzed_col_index'] ?? 0)));
+            // 'answer_axis' picks whether the child chooses a ROW or a COLUMN;
+            // 'analyzed_indices' is 1+ indices along the OTHER axis, combined
+            // (when >1) by 'analysis_op' into one derived value per candidate
+            // — see QuestionTemplate::generateDataTable()'s doc comment. A
+            // column-answer question needs 2+ columns to choose between.
+            $rawAxis = $numConfig['answer_axis'] ?? 'row';
+            $answerAxis = in_array($rawAxis, ['row', 'col'], true) ? $rawAxis : 'row';
+            if ($answerAxis === 'col' && $cols < 2) $answerAxis = 'row';
+            $isCol = $answerAxis === 'col';
+            $otherAxisSize = $isCol ? $rows : $cols;
+
+            $rawIndices = is_array($numConfig['analyzed_indices'] ?? null) && count($numConfig['analyzed_indices'])
+                ? $numConfig['analyzed_indices']
+                : ((! $isCol && is_array($numConfig['analyzed_cols'] ?? null) && count($numConfig['analyzed_cols']))
+                    ? $numConfig['analyzed_cols']
+                    : [$isCol ? 0 : ($numConfig['analyzed_col_index'] ?? 0)]);
+            $analyzedIndices = array_values(array_unique(array_map(fn ($i) => max(0, min($otherAxisSize - 1, (int) $i)), $rawIndices)));
+            sort($analyzedIndices);
+            if (! $analyzedIndices) $analyzedIndices = [0];
+            $rawAnalysisOp = $numConfig['analysis_op'] ?? 'sum';
+            $analysisOp = in_array($rawAnalysisOp, ['sum', 'diff', 'max', 'min'], true) ? $rawAnalysisOp : 'sum';
+
+            $rawWinnerMode = $numConfig['winner_mode'] ?? 'max';
+            $winnerMode = in_array($rawWinnerMode, ['max', 'min'], true) ? $rawWinnerMode : 'max';
+
             $minVal = (int) ($numConfig['min_val'] ?? 1);
             $maxVal = max($minVal + 1, (int) ($numConfig['max_val'] ?? 100));
 
@@ -632,13 +665,16 @@ class QuestionTemplateController extends Controller
                 'hint_text'       => $raw['hint_text'] ?? null,
                 'correct_formula' => '',
                 'num_config'      => [
-                    'rows'                => $rows,
-                    'cols'                => $cols,
-                    'row_labels'          => $rowLabels,
-                    'col_headers'         => $colHeaders,
-                    'analyzed_col_index'  => $analyzedColIndex,
-                    'min_val'             => $minVal,
-                    'max_val'             => $maxVal,
+                    'rows'           => $rows,
+                    'cols'           => $cols,
+                    'row_labels'     => $rowLabels,
+                    'col_headers'    => $colHeaders,
+                    'answer_axis'      => $answerAxis,
+                    'analyzed_indices' => $analyzedIndices,
+                    'analysis_op'      => $analysisOp,
+                    'winner_mode'      => $winnerMode,
+                    'min_val'          => $minVal,
+                    'max_val'          => $maxVal,
                 ],
                 'distractors'     => null,
                 'conditions'      => null,

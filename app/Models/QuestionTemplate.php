@@ -225,13 +225,21 @@ class QuestionTemplate extends Model
 
     /**
      * Data-table analysis: an admin-authored rows×cols table (row labels,
-     * column headers, min/max value range, and which column is analyzed) gets
-     * freshly rolled numbers every generation (see DataTableService::build()).
-     * The child must pick which row has the highest value in the analyzed
-     * column — a standard MC answer (a row label), not a numeric one.
-     * Distractor options are always OTHER REAL row labels from this same
-     * table (never fabricated) — up to 3, so a table with under 4 rows
-     * simply offers fewer options (minimum 2, since rows >= 2).
+     * column headers, min/max value range) gets freshly rolled numbers every
+     * generation (see DataTableService::build(), which also retries to keep
+     * every candidate's derived value distinct — two tied numbers would make
+     * the "winner" look arbitrary). The child picks a ROW (e.g. "which club
+     * has the most girls?") or, when $answerAxis is 'col', a COLUMN (e.g.
+     * "which gender has more children, summed across both clubs?") — a
+     * standard MC answer (a row label or column header), not a numeric one.
+     * $analyzedIndices are indices along the OTHER axis, combined by
+     * $analysisOp — sum/diff/max/min — into one derived value per row (or
+     * column); "best" is highest by default, or lowest when $winnerMode is
+     * 'min' (e.g. "which club has the FEWEST children?"). With a single
+     * analyzed index, every op is equivalent to just reading that one value
+     * directly. Distractor options are always OTHER REAL labels along the
+     * answer axis (never fabricated) — up to 3, so fewer than 4 candidates
+     * simply offers fewer options (minimum 2).
      */
     public function generateDataTable(): array
     {
@@ -247,30 +255,62 @@ class QuestionTemplate extends Model
         for ($i = count($colHeaders); $i < $cols; $i++) $colHeaders[] = (string) ($i + 1);
         $colHeaders = array_slice($colHeaders, 0, $cols);
 
-        $analyzedColIndex = max(0, min($cols - 1, (int) ($cfg['analyzed_col_index'] ?? 0)));
+        $rawAxis = $cfg['answer_axis'] ?? 'row';
+        $answerAxis = in_array($rawAxis, ['row', 'col'], true) ? $rawAxis : 'row';
+        // A column-answer question needs 2+ columns to choose between — with
+        // only 1, there's nothing to quiz on, so fall back to the always-valid
+        // row axis (rows is already clamped to a minimum of 2, above).
+        if ($answerAxis === 'col' && $cols < 2) $answerAxis = 'row';
+        $isCol = $answerAxis === 'col';
+        $otherAxisSize = $isCol ? $rows : $cols;
+
+        // 'analyzed_indices' (new) is 1+ indices along the OTHER axis; for the
+        // original row-answer axis, falls back to the older 'analyzed_cols'
+        // (array) or 'analyzed_col_index' (single int) keys for any template
+        // saved before this generalization — neither applies to the brand new
+        // column-answer axis, which has no legacy data to be compatible with.
+        $rawIndices = is_array($cfg['analyzed_indices'] ?? null) && count($cfg['analyzed_indices'])
+            ? $cfg['analyzed_indices']
+            : ((! $isCol && is_array($cfg['analyzed_cols'] ?? null) && count($cfg['analyzed_cols']))
+                ? $cfg['analyzed_cols']
+                : [$isCol ? 0 : ($cfg['analyzed_col_index'] ?? 0)]);
+        $analyzedIndices = array_values(array_unique(array_map(fn ($i) => max(0, min($otherAxisSize - 1, (int) $i)), $rawIndices)));
+        sort($analyzedIndices);
+        if (! $analyzedIndices) $analyzedIndices = [0];
+
+        $rawOp = $cfg['analysis_op'] ?? 'sum';
+        $analysisOp = in_array($rawOp, ['sum', 'diff', 'max', 'min'], true) ? $rawOp : 'sum';
+
+        $rawWinnerMode = $cfg['winner_mode'] ?? 'max';
+        $winnerMode = in_array($rawWinnerMode, ['max', 'min'], true) ? $rawWinnerMode : 'max';
+
         $minVal = (int) ($cfg['min_val'] ?? 1);
         $maxVal = max($minVal, (int) ($cfg['max_val'] ?? 100));
 
-        $result = \App\Services\DataTableService::build($rows, $cols, $rowLabels, $colHeaders, $analyzedColIndex, $minVal, $maxVal);
+        $result = \App\Services\DataTableService::build($rows, $cols, $rowLabels, $colHeaders, $answerAxis, $analyzedIndices, $analysisOp, $winnerMode, $minVal, $maxVal);
 
-        $winnerIndex = $result['winner_row_index'];
-        $correctLabel = $rowLabels[$winnerIndex];
+        $winnerIndex = $result['winner_index'];
+        $labelPool = $isCol ? $colHeaders : $rowLabels;
+        $correctLabel = $labelPool[$winnerIndex];
 
-        $otherIndexes = array_values(array_diff(range(0, $rows - 1), [$winnerIndex]));
+        $otherIndexes = array_values(array_diff(range(0, count($labelPool) - 1), [$winnerIndex]));
         shuffle($otherIndexes);
-        $wrongLabels = array_map(fn ($i) => $rowLabels[$i], array_slice($otherIndexes, 0, 3));
+        $wrongLabels = array_map(fn ($i) => $labelPool[$i], array_slice($otherIndexes, 0, 3));
 
         $options = array_merge([$correctLabel], $wrongLabels);
         shuffle($options);
 
         $questionData = [
-            'type'               => 'data_table',
-            'prompt'             => $this->template_text,
-            'row_labels'         => $rowLabels,
-            'col_headers'        => $colHeaders,
-            'data'               => $result['data'],
-            'analyzed_col_index' => $analyzedColIndex,
-            'winner_row_index'   => $winnerIndex,
+            'type'              => 'data_table',
+            'prompt'            => $this->template_text,
+            'row_labels'        => $rowLabels,
+            'col_headers'       => $colHeaders,
+            'data'              => $result['data'],
+            'answer_axis'       => $answerAxis,
+            'analyzed_indices'  => $analyzedIndices,
+            'analysis_op'       => $analysisOp,
+            'winner_mode'       => $winnerMode,
+            'winner_index'      => $winnerIndex,
         ];
 
         return [

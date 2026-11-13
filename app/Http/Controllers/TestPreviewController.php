@@ -95,7 +95,7 @@ class TestPreviewController extends Controller
             if ($templates->isEmpty()) {
                 $error = 'ამ პარამეტრებისთვის კითხვები ჯერ არ დამატებულა';
             } else {
-                $mcTemplates = $templates->filter(fn($t) => !$t->isPyramid() && !$t->isCode() && !$t->isCrossword());
+                $mcTemplates = $templates->filter(fn($t) => !$t->isPyramid() && !$t->isCode() && !$t->isCrossword() && !$t->isScale() && !$t->isDataTable());
 
                 if ($mcTemplates->isNotEmpty()) {
                     $selectedTheme = $themeId

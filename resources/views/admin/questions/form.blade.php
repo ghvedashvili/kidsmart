@@ -515,10 +515,34 @@
                     <div class="lbl" style="margin-top:10px;">სვეტების სათაურები</div>
                     <div id="dtColHeaderRows"></div>
 
-                    <div id="dtAnalyzedColWrap" style="margin-top:10px;display:none;">
-                        <div class="lbl">ანალიზის სვეტი <span style="color:#94a3b8;font-size:0.6rem;">(რომელშიც იძებნება მაქსიმუმი)</span></div>
-                        <select class="fc" id="dtAnalyzedCol" style="margin-bottom:0;" onchange="syncDtConfig()"></select>
+                    <div id="dtAxisWrap" style="margin-top:10px;display:none;">
+                        <div class="lbl">პასუხი იქნება <span style="color:#94a3b8;font-size:0.6rem;">(რას ირჩევს ბავშვი)</span></div>
+                        <select class="fc" id="dtAnswerAxis" style="margin-bottom:0;" onchange="onDtAxisChange()">
+                            <option value="row">მწკრივი (მაგ: "რომელ წრეზე...")</option>
+                            <option value="col">სვეტი (მაგ: "რომელ სქესს...")</option>
+                        </select>
                     </div>
+
+                    <div id="dtAnalyzedColWrap" style="margin-top:10px;display:none;">
+                        <div class="lbl" id="dtAnalyzedLbl">ანალიზის სვეტ(ებ)ი <span style="color:#94a3b8;font-size:0.6rem;">(რომელი სვეტ(ებ)ის მიხედვით ვეძებთ გამარჯვებულ მწკრივს)</span></div>
+                        <div id="dtAnalyzedColChecks" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;"></div>
+                        <div id="dtAnalysisOpWrap" style="display:none;">
+                            <div class="lbl">ოპერაცია</div>
+                            <select class="fc" id="dtAnalysisOp" style="margin-bottom:0;" onchange="syncDtConfig()">
+                                <option value="sum">ჯამი (მაგ: ბიჭი + გოგო)</option>
+                                <option value="diff">სხვაობა (პირველი მონიშნული − დანარჩენები)</option>
+                                <option value="max">მაქსიმუმი</option>
+                                <option value="min">მინიმუმი</option>
+                            </select>
+                            <div style="font-size:0.58rem;color:#94a3b8;margin-top:4px;" id="dtOpHint"></div>
+                        </div>
+                    </div>
+
+                    <div class="lbl" style="margin-top:10px;" id="dtWinnerLbl">გამარჯვებული მწკრივი <span style="color:#94a3b8;font-size:0.6rem;">(რომელ მნიშვნელობას ვეძებთ)</span></div>
+                    <select class="fc" id="dtWinnerMode" style="margin-bottom:0;" onchange="syncDtConfig()">
+                        <option value="max">ყველაზე მაღალი (მაგ: "ყველაზე მეტი")</option>
+                        <option value="min">ყველაზე დაბალი (მაგ: "ყველაზე ცოტა")</option>
+                    </select>
 
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
                         <div>
@@ -532,7 +556,7 @@
                                 value="{{ $dtCfg['max_val'] ?? 100 }}" onchange="syncDtConfig()">
                         </div>
                     </div>
-                    <div style="font-size:0.6rem;color:#94a3b8;margin-top:6px;">ბავშვს ეკითხება, რომელ მწკრივშია ანალიზის სვეტში ყველაზე მაღალი რიცხვი — სავარაუდო პასუხები ყოველთვის ამ ცხრილის სხვა რეალური მწკრივის სახელებია (არასდროს გამოგონილი).</div>
+                    <div style="font-size:0.6rem;color:#94a3b8;margin-top:6px;" id="dtExplainHint"></div>
                 </div>{{-- /dtFields --}}
             </div>
 
@@ -1897,8 +1921,10 @@ function genPreviewScale() {
 }
 
 // ── Data table analysis
-let dtRowLabels  = []; // string[]
-let dtColHeaders = []; // string[]
+let dtRowLabels      = []; // string[]
+let dtColHeaders     = []; // string[]
+let dtAnswerAxis     = 'row'; // 'row' | 'col' — what the child picks
+let dtAnalyzedIndices = [0]; // indices along the OTHER axis, combined by dtAnalysisOp, ascending
 
 function onDtGridChange() {
     const rows = Math.max(2, Math.min(8, parseInt(document.getElementById('dtRows').value) || 3));
@@ -1909,47 +1935,113 @@ function onDtGridChange() {
     dtRowLabels.length = rows;
     while (dtColHeaders.length < cols) dtColHeaders.push('');
     dtColHeaders.length = cols;
+    // A column-answer question needs 2+ columns to choose between — with only
+    // 1, fall back to the always-valid row axis (mirrors the PHP guard).
+    if (dtAnswerAxis === 'col' && cols < 2) { dtAnswerAxis = 'row'; document.getElementById('dtAnswerAxis').value = 'row'; }
+    document.getElementById('dtAxisWrap').style.display = cols > 1 ? '' : 'none';
     renderDtRowLabels();
     renderDtColHeaders();
-    updateDtAnalyzedColSelect();
+    renderDtAnalyzedIndexChecks();
+    syncDtConfig();
+}
+function onDtAxisChange() {
+    dtAnswerAxis = document.getElementById('dtAnswerAxis').value;
+    dtAnalyzedIndices = [0]; // switching axis changes what the indices even mean — start fresh
+    renderDtAnalyzedIndexChecks();
     syncDtConfig();
 }
 function renderDtRowLabels() {
     const el = document.getElementById('dtRowLabelRows');
     el.innerHTML = dtRowLabels.map((v, i) => `
         <input type="text" class="nc-inp" style="margin-bottom:4px;" placeholder="მწკრივი ${i + 1}" value="${escHtmlFormLp(v).replace(/"/g, '&quot;')}"
-            onchange="dtRowLabels[${i}] = this.value; syncDtConfig();">
+            onchange="dtRowLabels[${i}] = this.value; syncDtConfig(); if (dtAnswerAxis === 'col') renderDtAnalyzedIndexChecks();">
     `).join('');
 }
 function renderDtColHeaders() {
     const el = document.getElementById('dtColHeaderRows');
     el.innerHTML = dtColHeaders.map((v, i) => `
         <input type="text" class="nc-inp" style="margin-bottom:4px;" placeholder="სვეტი ${i + 1}" value="${escHtmlFormLp(v).replace(/"/g, '&quot;')}"
-            onchange="dtColHeaders[${i}] = this.value; syncDtConfig(); updateDtAnalyzedColSelect();">
+            onchange="dtColHeaders[${i}] = this.value; syncDtConfig(); if (dtAnswerAxis === 'row') renderDtAnalyzedIndexChecks();">
     `).join('');
 }
-// Shown only when cols>1 (a single-column table has only one possible choice —
-// mirrors QuestionTemplate::generateDataTable()'s implicit analyzedColIndex=0).
-function updateDtAnalyzedColSelect() {
-    const cols = dtColHeaders.length;
+// The checkbox list picks indices along the OTHER axis from dtAnswerAxis —
+// column headers when answering by row (original behavior), row labels when
+// answering by column. Shown only when that other axis has 2+ items (a
+// single one has only one possible choice — mirrors QuestionTemplate::
+// generateDataTable()'s implicit analyzedIndices=[0]). The op selector
+// (sum/diff/max/min) only matters — and only shows — once 2+ are checked,
+// since every op agrees on 1.
+function renderDtAnalyzedIndexChecks() {
+    const isCol = dtAnswerAxis === 'col';
+    const items = isCol ? dtRowLabels : dtColHeaders;
+    const n = items.length;
+    const fallbackPrefix = isCol ? 'მწკრივი ' : 'სვეტი ';
+
+    document.getElementById('dtAnalyzedLbl').innerHTML = isCol
+        ? 'ანალიზის მწკრივ(ებ)ი <span style="color:#94a3b8;font-size:0.6rem;">(რომელი მწკრივ(ებ)ის მიხედვით ვეძებთ გამარჯვებულ სვეტს)</span>'
+        : 'ანალიზის სვეტ(ებ)ი <span style="color:#94a3b8;font-size:0.6rem;">(რომელი სვეტ(ებ)ის მიხედვით ვეძებთ გამარჯვებულ მწკრივს)</span>';
+    document.getElementById('dtWinnerLbl').innerHTML = (isCol ? 'გამარჯვებული სვეტი' : 'გამარჯვებული მწკრივი')
+        + ' <span style="color:#94a3b8;font-size:0.6rem;">(რომელ მნიშვნელობას ვეძებთ)</span>';
+    document.getElementById('dtExplainHint').textContent = isCol
+        ? 'ბავშვს ეკითხება, რომელ სვეტშია (მონიშნული მწკრივების მიხედვით) საძიებელი მნიშვნელობა — სავარაუდო პასუხები ყოველთვის ამ ცხრილის სხვა რეალური სვეტის სათაურებია (არასდროს გამოგონილი).'
+        : 'ბავშვს ეკითხება, რომელ მწკრივშია (მონიშნული სვეტების მიხედვით) საძიებელი მნიშვნელობა — სავარაუდო პასუხები ყოველთვის ამ ცხრილის სხვა რეალური მწკრივის სახელებია (არასდროს გამოგონილი).';
+
     const wrap = document.getElementById('dtAnalyzedColWrap');
-    wrap.style.display = cols > 1 ? '' : 'none';
-    const sel = document.getElementById('dtAnalyzedCol');
-    const prev = sel.value;
-    sel.innerHTML = dtColHeaders.map((h, i) => `<option value="${i}">${escHtmlFormLp(h || ('სვეტი ' + (i + 1)))}</option>`).join('');
-    if (prev !== '' && +prev < cols) sel.value = prev;
+    wrap.style.display = n > 1 ? '' : 'none';
+    if (n <= 1) { dtAnalyzedIndices = [0]; return; }
+
+    dtAnalyzedIndices = dtAnalyzedIndices.filter(i => i < n);
+    if (!dtAnalyzedIndices.length) dtAnalyzedIndices = [0];
+
+    const checksEl = document.getElementById('dtAnalyzedColChecks');
+    checksEl.innerHTML = items.map((v, i) => `
+        <label style="display:flex;align-items:center;gap:5px;font-size:0.75rem;font-weight:700;color:#374151;cursor:pointer;">
+            <input type="checkbox" ${dtAnalyzedIndices.includes(i) ? 'checked' : ''} onchange="toggleDtAnalyzedIndex(${i}, this.checked)">
+            ${escHtmlFormLp(v || (fallbackPrefix + (i + 1)))}
+        </label>
+    `).join('');
+
+    const opWrap = document.getElementById('dtAnalysisOpWrap');
+    opWrap.style.display = dtAnalyzedIndices.length > 1 ? '' : 'none';
+    const hint = document.getElementById('dtOpHint');
+    if (hint) {
+        hint.textContent = dtAnalyzedIndices.length > 1
+            ? 'მონიშნული (მარცხნიდან მარჯვნივ): ' + dtAnalyzedIndices.map(i => items[i] || (fallbackPrefix + (i + 1))).join(', ')
+            : '';
+    }
+}
+function toggleDtAnalyzedIndex(i, checked) {
+    if (!checked && dtAnalyzedIndices.length <= 1) {
+        // can't deselect the last remaining one — re-render to restore its checkbox
+        renderDtAnalyzedIndexChecks();
+        return;
+    }
+    if (checked) {
+        if (!dtAnalyzedIndices.includes(i)) dtAnalyzedIndices.push(i);
+    } else {
+        dtAnalyzedIndices = dtAnalyzedIndices.filter(c => c !== i);
+    }
+    dtAnalyzedIndices.sort((a, b) => a - b);
+    renderDtAnalyzedIndexChecks();
+    syncDtConfig();
 }
 function syncDtConfig() {
     const rows = dtRowLabels.length;
     const cols = dtColHeaders.length;
-    const analyzedColIndex = cols > 1 ? (parseInt(document.getElementById('dtAnalyzedCol').value) || 0) : 0;
+    const otherAxisSize = dtAnswerAxis === 'col' ? rows : cols;
+    const analyzedIndices = otherAxisSize > 1 ? dtAnalyzedIndices.slice() : [0];
+    const analysisOp = document.getElementById('dtAnalysisOp').value || 'sum';
+    const winnerMode = document.getElementById('dtWinnerMode').value || 'max';
     const minVal = parseInt(document.getElementById('dtMinVal').value) || 0;
     const maxVal = Math.max(minVal + 1, parseInt(document.getElementById('dtMaxVal').value) || 100);
     document.getElementById('numConfigJson').value = JSON.stringify({
         rows, cols,
         row_labels: dtRowLabels,
         col_headers: dtColHeaders,
-        analyzed_col_index: analyzedColIndex,
+        answer_axis: dtAnswerAxis,
+        analyzed_indices: analyzedIndices,
+        analysis_op: analysisOp,
+        winner_mode: winnerMode,
         min_val: minVal, max_val: maxVal,
     });
     if (document.getElementById('qtInput').value === 'data_table') genPreviewDt();
@@ -1966,17 +2058,56 @@ function restoreDtConfig(numCfg) {
     document.getElementById('dtTemplateText').value = document.getElementById('templateText').value || '';
     document.getElementById('dtMinVal').value = numCfg.min_val ?? 1;
     document.getElementById('dtMaxVal').value = numCfg.max_val ?? 100;
+    document.getElementById('dtAxisWrap').style.display = cols > 1 ? '' : 'none';
+
+    dtAnswerAxis = (numCfg.answer_axis === 'col' && cols > 1) ? 'col' : 'row';
+    document.getElementById('dtAnswerAxis').value = dtAnswerAxis;
+    const otherAxisSize = dtAnswerAxis === 'col' ? rows : cols;
+
+    // 'analyzed_indices' (new) falls back to the older 'analyzed_cols' array
+    // or 'analyzed_col_index' single-int keys — both row-axis-only, from any
+    // template saved before this generalization.
+    const rawIndices = Array.isArray(numCfg.analyzed_indices) && numCfg.analyzed_indices.length
+        ? numCfg.analyzed_indices
+        : ((dtAnswerAxis === 'row' && Array.isArray(numCfg.analyzed_cols) && numCfg.analyzed_cols.length)
+            ? numCfg.analyzed_cols
+            : [dtAnswerAxis === 'col' ? 0 : (numCfg.analyzed_col_index || 0)]);
+    dtAnalyzedIndices = [...new Set(rawIndices.map(c => +c).filter(c => c >= 0 && c < otherAxisSize))].sort((a, b) => a - b);
+    if (!dtAnalyzedIndices.length) dtAnalyzedIndices = [0];
+    document.getElementById('dtAnalysisOp').value = numCfg.analysis_op || 'sum';
+    document.getElementById('dtWinnerMode').value = numCfg.winner_mode || 'max';
+
     renderDtRowLabels();
     renderDtColHeaders();
-    updateDtAnalyzedColSelect();
-    if (cols > 1) document.getElementById('dtAnalyzedCol').value = numCfg.analyzed_col_index || 0;
+    renderDtAnalyzedIndexChecks();
     syncDtConfig();
+}
+
+// Mirrors DataTableService::combine() (PHP) — combines a set of values into
+// a single number per $op; with 1 value every op agrees.
+function dtCombineJs(vals, op) {
+    if (!vals.length) return 0;
+    if (op === 'diff') return vals.slice(1).reduce((acc, v) => acc - v, vals[0]);
+    if (op === 'max') return Math.max(...vals);
+    if (op === 'min') return Math.min(...vals);
+    return vals.reduce((a, v) => a + v, 0);
+}
+// Mirrors DataTableService::pickWinnerIndex() (PHP).
+function dtPickWinnerIndexJs(derived, mode) {
+    let winnerIndex = 0, best = derived[0];
+    for (let i = 1; i < derived.length; i++) {
+        const better = mode === 'min' ? (derived[i] < best) : (derived[i] > best);
+        if (better) { best = derived[i]; winnerIndex = i; }
+    }
+    return winnerIndex;
 }
 
 /**
  * Client-side mirror of QuestionTemplate::generateDataTable() (PHP) — rolls a
- * fresh matrix and finds the winning row (no retry loop needed: see
- * DataTableService::build()'s doc comment for why).
+ * fresh matrix, retrying up to 200 times to keep every candidate's derived
+ * value distinct (see DataTableService::build()'s doc comment for why), then
+ * finds the winning row or column (highest derived value, or lowest when
+ * winnerMode='min').
  */
 function genPreviewDt() {
     let cfg;
@@ -1996,22 +2127,37 @@ function genPreviewDt() {
 
     const minVal = cfg.min_val ?? 1;
     const maxVal = Math.max(minVal, cfg.max_val ?? 100);
-    const analyzedColIndex = Math.max(0, Math.min(cols - 1, cfg.analyzed_col_index || 0));
+    const isCol = cfg.answer_axis === 'col' && cols > 1;
+    const otherAxisSize = isCol ? rows : cols;
+    const analyzedIndices = (Array.isArray(cfg.analyzed_indices) && cfg.analyzed_indices.length ? cfg.analyzed_indices : [0])
+        .map(i => Math.max(0, Math.min(otherAxisSize - 1, +i)));
+    const analysisOp = cfg.analysis_op || 'sum';
+    const winnerMode = cfg.winner_mode || 'max';
+    const slots = isCol ? cols : rows;
 
-    const data = [];
-    for (let r = 0; r < rows; r++) {
-        const row = [];
-        for (let c = 0; c < cols; c++) row.push(minVal + Math.floor(Math.random() * (maxVal - minVal + 1)));
-        data.push(row);
+    let data = [], winnerIndex = 0;
+    for (let attempt = 0; attempt < 200; attempt++) {
+        data = [];
+        for (let r = 0; r < rows; r++) {
+            const row = [];
+            for (let c = 0; c < cols; c++) row.push(minVal + Math.floor(Math.random() * (maxVal - minVal + 1)));
+            data.push(row);
+        }
+        const derived = [];
+        for (let i = 0; i < slots; i++) {
+            const vals = isCol
+                ? analyzedIndices.map(r => data[r][i] ?? 0)
+                : analyzedIndices.map(c => data[i][c] ?? 0);
+            derived.push(dtCombineJs(vals, analysisOp));
+        }
+        winnerIndex = dtPickWinnerIndexJs(derived, winnerMode);
+        if (new Set(derived).size === slots) break; // every candidate's value is distinct — done
     }
-    let winnerRowIndex = 0, best = data[0][analyzedColIndex];
-    for (let r = 1; r < rows; r++) {
-        if (data[r][analyzedColIndex] > best) { best = data[r][analyzedColIndex]; winnerRowIndex = r; }
-    }
-    const correctLabel = rowLabels[winnerRowIndex];
-    const otherIndexes = Array.from({ length: rows }, (_, i) => i)
-        .filter(i => i !== winnerRowIndex).sort(() => Math.random() - 0.5);
-    const wrongLabels = otherIndexes.slice(0, 3).map(i => rowLabels[i]);
+    const labelPool = isCol ? colHeaders : rowLabels;
+    const correctLabel = labelPool[winnerIndex];
+    const otherIndexes = Array.from({ length: labelPool.length }, (_, i) => i)
+        .filter(i => i !== winnerIndex).sort(() => Math.random() - 0.5);
+    const wrongLabels = otherIndexes.slice(0, 3).map(i => labelPool[i]);
     const options = [correctLabel, ...wrongLabels].sort(() => Math.random() - 0.5);
 
     document.getElementById('prevQ').innerHTML = '📊 ' + escHtmlFormLp(document.getElementById('templateText').value.trim());

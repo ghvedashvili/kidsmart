@@ -6,39 +6,105 @@ class DataTableService
 {
     /**
      * Rolls a fresh rows×cols matrix of random values and finds the winning
-     * row (highest value in $analyzedColIndex; a tie resolves to the lowest
-     * row index — deterministic, so unlike CrosswordService::build() this
-     * never needs a retry loop: a random fill always has SOME max).
+     * slot along $answerAxis — a ROW (the original behavior: picking the row
+     * with the best combined value across some COLUMNS), or, with
+     * $answerAxis='col', a COLUMN (symmetric: picking the column with the
+     * best combined value across some ROWS — e.g. "which gender has more
+     * children, summed across both clubs?"). $analyzedIndices are indices
+     * along the OTHER axis from $answerAxis, combined by $analysisOp into one
+     * number per slot; "best" is highest for $winnerMode='max' (default) or
+     * lowest for 'min'. A tie still resolves to the lowest index if one
+     * happens anyway, but every derived value is retried up to 200 times to
+     * come out DISTINCT first — two slots showing the same number would make
+     * the "winner" look arbitrary to a child reading the table. Never throws:
+     * if $minVal..$maxVal is too narrow to fit that many distinct values
+     * (e.g. 8 rows, range of only 2), the last attempt is used as-is, tie and
+     * all, rather than blocking generation.
      */
     public static function build(
         int $rows,
         int $cols,
         array $rowLabels,
         array $colHeaders,
-        int $analyzedColIndex,
+        string $answerAxis,
+        array $analyzedIndices,
+        string $analysisOp,
+        string $winnerMode,
         int $minVal,
         int $maxVal
     ): array {
+        $isCol = $answerAxis === 'col';
+        $slots = $isCol ? $cols : $rows;
+
         $data = [];
-        for ($r = 0; $r < $rows; $r++) {
-            $row = [];
-            for ($c = 0; $c < $cols; $c++) {
-                $row[] = rand($minVal, $maxVal);
+        $winnerIndex = 0;
+
+        for ($attempt = 0; $attempt < 200; $attempt++) {
+            $data = [];
+            for ($r = 0; $r < $rows; $r++) {
+                $row = [];
+                for ($c = 0; $c < $cols; $c++) {
+                    $row[] = rand($minVal, $maxVal);
+                }
+                $data[] = $row;
             }
-            $data[] = $row;
+
+            $derived = [];
+            for ($i = 0; $i < $slots; $i++) {
+                // Row-axis: combine columns $analyzedIndices within row $i.
+                // Col-axis: combine rows $analyzedIndices within column $i.
+                $vals = $isCol
+                    ? array_map(fn ($r) => (int) ($data[$r][$i] ?? 0), $analyzedIndices)
+                    : array_map(fn ($c) => (int) ($data[$i][$c] ?? 0), $analyzedIndices);
+                $derived[$i] = self::combine($vals, $analysisOp);
+            }
+
+            $winnerIndex = self::pickWinnerIndex($derived, $winnerMode);
+
+            if (count(array_unique($derived)) === $slots) break; // every slot's value is distinct — done
         }
 
-        $winnerRowIndex = 0;
-        $best = $data[0][$analyzedColIndex] ?? 0;
-        for ($r = 1; $r < $rows; $r++) {
-            $v = $data[$r][$analyzedColIndex] ?? 0;
-            if ($v > $best) {
-                $best = $v;
-                $winnerRowIndex = $r;
+        return ['data' => $data, 'winner_index' => $winnerIndex];
+    }
+
+    /**
+     * Index of the slot (row or column, whichever is being decided) whose
+     * derived value is "best" — highest for $mode='max' (the default), lowest
+     * for $mode='min' (e.g. "which club has the FEWEST children?"). A tie
+     * resolves to the lowest index either way, for a deterministic result.
+     */
+    private static function pickWinnerIndex(array $derived, string $mode): int
+    {
+        $winnerIndex = 0;
+        $best = $derived[0];
+        $n = count($derived);
+        for ($i = 1; $i < $n; $i++) {
+            $better = $mode === 'min' ? ($derived[$i] < $best) : ($derived[$i] > $best);
+            if ($better) {
+                $best = $derived[$i];
+                $winnerIndex = $i;
             }
         }
+        return $winnerIndex;
+    }
 
-        return ['data' => $data, 'winner_row_index' => $winnerRowIndex];
+    /**
+     * Combines a set of values into a single number, per $op:
+     *   - 'sum':  total of all of them (e.g. ბიჭი+გოგო = ბავშვები)
+     *   - 'diff': the first value minus every other, left to right
+     *   - 'max'/'min': the largest/smallest of them
+     * With a single value, every op produces that same value — exactly the
+     * original "pick one column" (or one row) behavior.
+     */
+    private static function combine(array $vals, string $op): int
+    {
+        if (! $vals) return 0;
+        return match ($op) {
+            'diff' => array_reduce(array_slice($vals, 1), fn ($acc, $v) => $acc - $v, $vals[0]),
+            'max'  => max($vals),
+            'min'  => min($vals),
+            default => array_sum($vals),
+        };
     }
 
     /**
