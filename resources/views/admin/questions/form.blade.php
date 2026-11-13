@@ -3625,9 +3625,16 @@ function loadIntoForm(data) {
         syncCwConfig();
     } else if (data.question_type === 'scale') {
         restoreScaleConfig(numCfg, data.answer_type, data.distractors || null, data.conditions || []);
-    } else if (data.answer_type !== 'text') {
-        // multiple_choice, numeric — rebuild ncRows from num_config the same way
-        // the page-load restore does, then separately restore _unique/_auto.
+    } else {
+        // multiple_choice (numeric AND text) — rebuild ncRows from num_config
+        // the same way the page-load restore does. Numeric vars matter for
+        // text-answer templates too: the correct/distractor variable dropdown
+        // and chips are populated from these rows (via addNcRow()'s
+        // renderNcRows() hook), and conditions restoration below silently
+        // drops every condition when ncRows is empty (see addCond()) — so
+        // skipping this for text type (as a previous version of this function
+        // did) broke both conditions and the saved answer/distractor
+        // selection for any text template built on numeric variables.
         ncRows = [];
         const uq = document.getElementById('uniqueNumVars');
         if (uq) uq.checked = !!numCfg['_unique'];
@@ -3643,7 +3650,10 @@ function loadIntoForm(data) {
                 addNcRow(name, conf.min ?? 1, conf.max ?? 9, conf.step ?? 1);
             }
         });
-        if (!Object.keys(numCfg).filter(k => !k.startsWith('_')).length) {
+        // Mirrors init()'s own "default to N1/N2 only when not text" rule —
+        // a text-type template may legitimately have zero numeric vars
+        // (purely theme-string-driven), so it shouldn't get two invented ones.
+        if (data.answer_type !== 'text' && !Object.keys(numCfg).filter(k => !k.startsWith('_')).length) {
             addNcRow('N1', 1, 9, 1);
             addNcRow('N2', 1, 9, 1);
         }
