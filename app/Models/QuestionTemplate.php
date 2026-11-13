@@ -747,7 +747,7 @@ class QuestionTemplate extends Model
 
         return array_merge(
             ['question_text' => $text, 'hint_text' => $hint],
-            $this->buildMcOptions($correct)
+            $this->buildMcOptions($correct, $numVars)
         );
     }
 
@@ -757,8 +757,17 @@ class QuestionTemplate extends Model
      * Shared by the manual-formula and auto-built arithmetic generators.
      * For answer_type "numeric_input" there are no options at all — the child
      * types the number in directly — so distractor generation is skipped.
+     *
+     * $vars (this generation's own rolled numeric variables — the same map
+     * correct_formula itself was substituted against) lets the admin's
+     * optional distractor "formulas" produce wrong answers mathematically
+     * related to the correct one (e.g. "N1*N2" as a common multiplication
+     * slip), instead of only ever a random offset. They're evaluated first
+     * and fill as many of the 3 slots as they validly can; the random range
+     * below backfills whatever's left — an empty/absent formula list (every
+     * template saved before this feature) reproduces the old behavior exactly.
      */
-    private function buildMcOptions(int $correct): array
+    private function buildMcOptions(int $correct, array $vars = []): array
     {
         if ($this->answer_type === 'numeric_input') {
             return ['options' => null, 'correct_answer' => (string) $correct];
@@ -767,14 +776,31 @@ class QuestionTemplate extends Model
         $dist        = $this->distractors;
         $dMin        = max(1, (int) ($dist['min'] ?? 1));
         $dMax        = max($dMin, (int) ($dist['max'] ?? 10));
+        $dStep       = max(1, (int) ($dist['step'] ?? 1));
         $noneCorrect = (bool) ($dist['none_correct'] ?? false);
+        $formulas    = array_values(array_filter((array) ($dist['formulas'] ?? []), fn ($f) => trim((string) $f) !== ''));
 
         $wrong = [];
+
+        // Not retried on a bad roll (result <= 0, matches the correct answer,
+        // or duplicates another formula's result this round) — just skipped
+        // and silently backfilled by the random range below, same
+        // "never block generation" precedent the rest of this class sets.
+        foreach ($formulas as $formula) {
+            if (count($wrong) >= 3) break;
+            $value = $this->evalExpr((string) $formula, $vars);
+            if ($value > 0 && $value !== $correct && ! in_array($value, $wrong, true)) {
+                $wrong[] = $value;
+            }
+        }
+
+        $dSteps = max(0, intdiv($dMax - $dMin, $dStep));
+
         $attempts = 0;
         $wrongCount = 3;
         while (count($wrong) < $wrongCount && $attempts < 100) {
             $attempts++;
-            $delta     = rand($dMin, $dMax);
+            $delta     = $dMin + rand(0, $dSteps) * $dStep;
             $sign      = rand(0, 1) ? 1 : -1;
             $candidate = $correct + ($sign * $delta);
             if ($candidate > 0 && !in_array($candidate, $wrong) && $candidate !== $correct) {
@@ -940,7 +966,7 @@ class QuestionTemplate extends Model
 
         return array_merge(
             ['question_text' => $text, 'hint_text' => $hint],
-            $this->buildMcOptions($answer)
+            $this->buildMcOptions($answer, $values)
         );
     }
 

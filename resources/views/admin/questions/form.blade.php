@@ -677,9 +677,22 @@
                                 <div class="lbl" style="margin:0;white-space:nowrap;">max</div>
                                 <input type="number" id="distMax" class="nc-inp" style="width:76px;" min="1"
                                     value="{{ $template?->answer_type !== 'text' ? ($template?->distractors['max'] ?? 10) : 10 }}" oninput="previewDebounce()">
+                                <div class="lbl" style="margin:0;white-space:nowrap;">ნაბიჯი</div>
+                                <input type="number" id="distStep" class="nc-inp" style="width:60px;" min="1" title="ნაბიჯი: 1=ნებ, 2=ლუწი, 5=მრ5"
+                                    value="{{ $template?->answer_type !== 'text' ? ($template?->distractors['step'] ?? 1) : 1 }}" oninput="previewDebounce()">
                             </div>
                             <div style="margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9;">
                                 <button type="button" id="noneCorrectBtn" class="at-btn" onclick="toggleNoneCorrect()">☐ არცერთი სწორეა</button>
+                            </div>
+                            <div style="margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9;">
+                                <div class="lbl">ფორმულებით არასწორი პასუხები <span style="color:#94a3b8;font-size:0.6rem;">(სურვილისამებრ)</span></div>
+                                <div class="hint" style="margin:-2px 0 6px;">იგივე სინტაქსი, რაც ზემოთ "სწორი ფორმულა" ველშია — მაგ. <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">N1*N2</code>, <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">N1+N2+1</code>. ეს ფორმულები პირველად ივსება, დარჩენილ ადგილებს ზემოთა დიაპაზონი შეავსებს.</div>
+                                <div style="display:flex;gap:4px;">
+                                    <input type="text" id="distFormulaInput" class="fc" style="margin:0;" placeholder="მაგ: N1*N2"
+                                        onkeydown="if(event.key==='Enter'){event.preventDefault();addDistFormula();}">
+                                    <button type="button" class="btn-cancel" style="padding:6px 10px;white-space:nowrap;" onclick="addDistFormula()">+ დამატება</button>
+                                </div>
+                                <div class="chips" id="distFormulaChips" style="margin-top:4px;"></div>
                             </div>
                         </div>
                     </div>
@@ -1932,6 +1945,32 @@ function renderTextOptCustomChips() {
     ).join('');
 }
 
+// Formula-based distractors (numeric MC only) — mirrors QuestionTemplate::
+// buildMcOptions()'s $formulas handling exactly: evaluated first against this
+// generation's own variables, backfilled by the min/max range on a bad roll.
+let distFormulas = [];
+function addDistFormula() {
+    const inp = document.getElementById('distFormulaInput');
+    const val = inp.value.trim();
+    if (!val || distFormulas.includes(val)) return;
+    distFormulas.push(val);
+    inp.value = '';
+    renderDistFormulaChips();
+    syncAll(); previewDebounce();
+}
+function removeDistFormula(idx) {
+    distFormulas.splice(idx, 1);
+    renderDistFormulaChips();
+    syncAll(); previewDebounce();
+}
+function renderDistFormulaChips() {
+    const el = document.getElementById('distFormulaChips');
+    if (!el) return;
+    el.innerHTML = distFormulas.map((v, i) =>
+        `<span class="chip chip-txt sel">${escHtmlFormLp(v)} <a href="javascript:void(0)" onclick="removeDistFormula(${i})" style="color:#ef4444;font-weight:800;margin-left:3px;">×</a></span>`
+    ).join('');
+}
+
 // ── Text answer: plain-variable dropdown vs conditional formula ("A>B?X:Y").
 // The hidden `correct_formula` field carries whichever mode is active — the
 // backend's resolveTextFormula() treats a plain name and a conditional formula
@@ -2437,7 +2476,8 @@ function syncAll() {
         document.getElementById('correctFormulaHidden').value = document.getElementById('correctFormula').value;
         const dMin = +document.getElementById('distMin').value || 1;
         const dMax = +document.getElementById('distMax').value || 10;
-        document.getElementById('distractorsJson').value = JSON.stringify({ min: dMin, max: dMax, none_correct: noneCorrect || false });
+        const dStep = Math.max(1, +document.getElementById('distStep').value || 1);
+        document.getElementById('distractorsJson').value = JSON.stringify({ min: dMin, max: dMax, step: dStep, none_correct: noneCorrect || false, formulas: distFormulas });
     }
 }
 
@@ -2464,6 +2504,19 @@ function evalExpr(expr, numVars) {
             'return (' + e + ')')(round, floor, ceil, abs, min, max, pow, sqrt);
         return Number.isFinite(r) ? Math.floor(r) : 0;
     } catch(_) { return 0; }
+}
+
+// Mirrors QuestionTemplate::buildMcOptions()'s formula-based distractors loop
+// exactly — evaluated first, in order, skipping (not retrying) a bad result
+// (<=0, matches the correct answer, or a duplicate), up to 3 slots.
+function applyDistFormulas(correct, vars) {
+    const out = [];
+    for (const formula of distFormulas) {
+        if (out.length >= 3) break;
+        const v = evalExpr(formula, vars);
+        if (v > 0 && v !== correct && !out.includes(v)) out.push(v);
+    }
+    return out;
 }
 // Scale's own conditions check — same evalExpr() engine, against scaleConditions
 // (letter-named: A, B, C...) instead of the generic numeric-vars conditions array.
@@ -3115,11 +3168,13 @@ function genPreviewAuto() {
 
     const dMin = +document.getElementById('distMin').value || 1;
     const dMax = +document.getElementById('distMax').value || 10;
-    const wrong = [];
+    const dStep = Math.max(1, +document.getElementById('distStep').value || 1);
+    const dSteps = Math.max(0, Math.floor((dMax - dMin) / dStep));
+    const wrong = applyDistFormulas(answer, numVars);
     let attempts = 0;
     while (wrong.length < 3 && attempts < 100) {
         attempts++;
-        const delta = dMin + Math.floor(Math.random() * (dMax - dMin + 1));
+        const delta = dMin + Math.floor(Math.random() * (dSteps + 1)) * dStep;
         const candidate = answer + (Math.random() < 0.5 ? delta : -delta);
         if (candidate > 0 && candidate !== answer && !wrong.includes(candidate)) wrong.push(candidate);
     }
@@ -3268,6 +3323,8 @@ function genPreviewNumeric(tmpl) {
     const formula = document.getElementById('correctFormula').value.trim();
     const dMin    = +document.getElementById('distMin').value || 1;
     const dMax    = +document.getElementById('distMax').value || 10;
+    const dStep   = Math.max(1, +document.getElementById('distStep').value || 1);
+    const dSteps  = Math.max(0, Math.floor((dMax - dMin) / dStep));
     const themeMap = pickThemeVars();
 
     // The formula/clean-division check runs INSIDE the same retry loop as the
@@ -3340,12 +3397,12 @@ function genPreviewNumeric(tmpl) {
 
     const f = substituted;
 
-    const wrong = new Set();
+    const wrong = new Set(applyDistFormulas(correct, numVars));
     let tries = 0;
     const wrongCount = noneCorrect ? 3 : 3;
     while (wrong.size < wrongCount && tries < 80) {
         tries++;
-        const delta = dMin + Math.floor(Math.random() * (dMax - dMin + 1));
+        const delta = dMin + Math.floor(Math.random() * (dSteps + 1)) * dStep;
         const cand  = correct + (Math.random() < 0.5 ? 1 : -1) * delta;
         if (cand > 0 && cand !== correct) wrong.add(cand);
     }
@@ -3638,12 +3695,15 @@ function loadIntoForm(data) {
         renderTextCondChips();
     } else {
         const dist = data.distractors || {};
-        const dMinEl = document.getElementById('distMin'), dMaxEl = document.getElementById('distMax');
+        const dMinEl = document.getElementById('distMin'), dMaxEl = document.getElementById('distMax'), dStepEl = document.getElementById('distStep');
         if (dMinEl) dMinEl.value = dist.min ?? 1;
         if (dMaxEl) dMaxEl.value = dist.max ?? 10;
+        if (dStepEl) dStepEl.value = dist.step ?? 1;
         noneCorrect = !!dist.none_correct;
         const btn = document.getElementById('noneCorrectBtn');
         if (btn) { btn.classList.toggle('at-sel', noneCorrect); btn.textContent = noneCorrect ? '☑ არცერთი სწორეა' : '☐ არცერთი სწორეა'; }
+        distFormulas = Array.isArray(dist.formulas) ? dist.formulas.slice() : [];
+        renderDistFormulaChips();
     }
 
     syncAll();
@@ -3776,6 +3836,9 @@ function array_key_exists_js(key, obj) { return obj && Object.prototype.hasOwnPr
         }
         const distCountEl = document.getElementById('textDistCount');
         if (distCountEl) distCountEl.value = (_KS.distractors && _KS.distractors.count) || 3;
+    } else if (_KS.distractors && Array.isArray(_KS.distractors.formulas)) {
+        distFormulas = _KS.distractors.formulas.slice();
+        renderDistFormulaChips();
     }
     const conds = _KS.conditions;
     if (Array.isArray(conds)) {
