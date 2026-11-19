@@ -273,6 +273,16 @@ button:hover { background-color: #15803d; }
   label { width: 80px; height: 80px; line-height: 80px; font-size: 2.5rem; }
 }
 </style>
+<style>
+/* redesign-kidsmart: ახალი დიზაინის ფერები (ორიგინალ სტილზე ზემოდან) */
+.wrap button { background: #1D1A17 !important; border-radius: 24px !important; font-family: 'Noto Sans Georgian', system-ui, sans-serif !important; font-weight: 800 !important; padding: 10px 20px !important; }
+.wrap button:hover { background: #000 !important; }
+.wrap label { background: #fff !important; border: 2px solid #F1E3D3 !important; }
+#overall-stats { background: #fff !important; border-radius: 18px !important; box-shadow: 0 2px 0 #F1E3D3; }
+#overall-stats h3, #score-display, #message, #game-over h2 { font-family: 'Noto Sans Georgian', system-ui, sans-serif !important; }
+#game-over h2 { color: #C24A0A !important; }
+.wrap h1 { text-align: center !important; }
+</style>
 
 <div class="wrap">
     <form onsubmit="return false;">

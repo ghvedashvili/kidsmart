@@ -1,935 +1,410 @@
 @extends('layouts.app')
 
-@push('head')
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
-@endpush
-
 @section('content')
+@php
+    // ფასები პირდაპირ ბაზიდან (ადმინის „პაკეტები“ გვერდიდან იმართება)
+    $__plans = \App\Models\Package::where('is_active', true)->orderBy('sort_order')->orderBy('price_monthly')->get();
+    $__featuredId = $__plans->first(fn($p) => !$p->is_free)?->id;
+    $__money = fn($v) => rtrim(rtrim(number_format((float) $v, 2, '.', ''), '0'), '.');
+@endphp
 <style>
-:root {
-    --green:  #059669;
-    --lg:     #10b981;
-    --yellow: #f59e0b;
-    --orange: #f97316;
-    --dark:   #020917;
-    --ink:    #0f172a;
-    --muted:  #64748b;
-    --bg2:    #f8fafc;
-    --spring: cubic-bezier(0.16,1,0.3,1);
-}
-body {
-    font-family: 'Nunito', sans-serif;
-    background-color: #fff;
-    background-image:
-        linear-gradient(rgba(148,163,184,0.13) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(148,163,184,0.13) 1px, transparent 1px);
-    background-size: 32px 32px;
-    padding: 0 !important;
-    overflow-x: clip;
-    -webkit-font-smoothing: antialiased;
-}
-
-/* ── Hero ── */
-.hero-mod {
-    min-height: 92dvh;
-    background: linear-gradient(150deg, #020917 0%, #081221 42%, #0c1e14 72%, #030e08 100%);
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    text-align: center;
-    padding: 100px 24px 88px;
-    position: relative; overflow: hidden;
-}
-@media (max-width: 640px) {
-    .hero-mod { min-height: auto; padding: 72px 22px 56px; }
-}
-.hero-mod::before {
-    content: '';
-    position: absolute; inset: 0; pointer-events: none;
-    background:
-        radial-gradient(ellipse 55% 50% at 8% 70%, rgba(16,185,129,0.22) 0%, transparent 58%),
-        radial-gradient(ellipse 45% 40% at 92% 15%, rgba(124,58,237,0.18) 0%, transparent 55%),
-        radial-gradient(ellipse 35% 32% at 55% 100%, rgba(245,158,11,0.11) 0%, transparent 50%);
-}
-/* Floating orbs */
-.hero-orb {
-    position: absolute; border-radius: 50%; pointer-events: none;
-    filter: blur(72px); will-change: transform;
-}
-.hero-orb-1 {
-    width: 480px; height: 480px; left: -6%; top: 22%;
-    background: radial-gradient(circle, rgba(16,185,129,0.28) 0%, transparent 70%);
-    animation: orbFloat 9s ease-in-out infinite;
-}
-.hero-orb-2 {
-    width: 380px; height: 380px; right: -4%; top: 4%;
-    background: radial-gradient(circle, rgba(124,58,237,0.22) 0%, transparent 70%);
-    animation: orbFloat 11s ease-in-out infinite reverse;
-}
-.hero-orb-3 {
-    width: 280px; height: 280px; left: 38%; bottom: -4%;
-    background: radial-gradient(circle, rgba(245,158,11,0.16) 0%, transparent 70%);
-    animation: orbFloat 13s ease-in-out infinite 2s;
-}
-@keyframes orbFloat {
-    0%,100% { transform: translateY(0) scale(1); }
-    33%      { transform: translateY(-16px) scale(1.04); }
-    66%      { transform: translateY(10px) scale(0.97); }
-}
-.hero-badge {
-    display: inline-flex; align-items: center; gap: 10px;
-    background: rgba(16,185,129,0.08);
-    border: 1px solid rgba(16,185,129,0.28);
-    color: #6ee7b7;
-    font-family: 'Fredoka One', cursive;
-    font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase;
-    padding: 8px 22px; border-radius: 99px;
-    margin-bottom: 34px;
-    backdrop-filter: blur(16px);
-    position: relative; z-index: 1;
-    box-shadow: 0 0 28px rgba(16,185,129,0.1), inset 0 1px 0 rgba(255,255,255,0.04);
-}
-.hero-badge-dot {
-    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
-    background: #10b981; box-shadow: 0 0 10px #10b981;
-    animation: dotPulse 2.2s ease-in-out infinite;
-}
-@keyframes dotPulse { 0%,100%{opacity:1;box-shadow:0 0 10px #10b981} 50%{opacity:0.4;box-shadow:0 0 4px #10b981} }
-.hero-h1 {
-    font-family: 'Fredoka One', cursive;
-    font-size: clamp(2.6rem, 6.5vw, 4.8rem);
-    line-height: 1.1; color: #fff;
-    margin-bottom: 22px;
-    position: relative; z-index: 1;
-}
-.hero-h1 em {
-    font-style: normal;
-    background: linear-gradient(125deg, #fbbf24 0%, #f97316 45%, #ec4899 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-.hero-sub {
-    font-size: clamp(1rem, 2.4vw, 1.18rem); font-weight: 700;
-    color: rgba(255,255,255,0.5);
-    max-width: 460px; margin: 0 auto 50px; line-height: 1.8;
-    position: relative; z-index: 1;
-}
-.hero-btns {
-    display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
-    position: relative; z-index: 1;
-}
-.btn-main {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: #fff; border: none; border-radius: 16px;
-    font-family: 'Fredoka One', cursive; font-size: 1.1rem;
-    padding: 15px 36px; cursor: pointer;
-    box-shadow: 0 8px 28px rgba(16,185,129,0.45);
-    transition: all 0.25s var(--spring); text-decoration: none; display: inline-block;
-}
-.btn-main:hover { transform: translateY(-3px); box-shadow: 0 16px 44px rgba(16,185,129,0.55); color: #fff; }
-.btn-ghost {
-    background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.82);
-    border: 1px solid rgba(255,255,255,0.15); border-radius: 16px;
-    font-family: 'Fredoka One', cursive; font-size: 1.1rem;
-    padding: 15px 36px; cursor: pointer;
-    transition: all 0.25s; text-decoration: none; display: inline-block;
-    backdrop-filter: blur(12px);
-}
-.btn-ghost:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.25); color: #fff; }
-
-.scroll-cue {
-    position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-    color: rgba(255,255,255,0.18); font-size: 20px; z-index: 1;
-    animation: cue 2s ease-in-out infinite;
-}
-@keyframes cue { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(10px)} }
-
-/* ── Section layout ── */
-.sec {
-    padding: 96px 24px;
-    max-width: 1100px; margin: 0 auto;
-}
-.sec-bg {
-    background-color: #f1f5f9;
-    background-image:
-        linear-gradient(rgba(148,163,184,0.16) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(148,163,184,0.16) 1px, transparent 1px);
-    background-size: 32px 32px;
-}
-.sec-bg .sec { max-width: 100%; padding: 96px max(24px, calc(50% - 530px)); }
-.eyebrow {
-    display: inline-flex; align-items: center; gap: 10px;
-    font-family: 'Fredoka One', cursive; font-size: 12px;
-    letter-spacing: 0.18em; text-transform: uppercase;
-    color: var(--green); margin-bottom: 14px;
-}
-.eyebrow::before {
-    content: '';
-    width: 18px; height: 2.5px;
-    background: linear-gradient(90deg, var(--lg), transparent);
-    border-radius: 2px; flex-shrink: 0;
-}
-.sec-h2 {
-    font-family: 'Fredoka One', cursive;
-    font-size: clamp(1.9rem, 4vw, 2.8rem);
-    color: var(--ink); margin-bottom: 14px; line-height: 1.2;
-}
-.sec-sub {
-    font-size: 15px; color: var(--muted);
-    margin-bottom: 0; line-height: 1.75; max-width: 600px; font-weight: 600;
-}
-
-/* ── Drag carousel (shared) ── */
-.dc {
-    display: flex; gap: 16px;
-    overflow-x: auto; scroll-snap-type: none;
-    padding: 24px 24px 20px; scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-    cursor: grab; user-select: none;
-}
-.dc::-webkit-scrollbar { display: none; }
-.dc.dragging { cursor: grabbing; }
-/* ── Question cards ── */
-.car-outer { margin: 0 -24px; padding: 0 24px; overflow: hidden; }
-.ac-outer   { overflow: hidden; }
-.mkt-outer  { overflow: hidden; }
-.car-track { }
-
-.qc {
-    flex: 0 0 min(296px, 82vw); scroll-snap-align: start;
-    background: #fff; border-radius: 20px;
-    padding: 28px 18px 18px; position: relative;
-    box-shadow: 0 6px 24px rgba(26,122,60,0.12);
-    border-top: 6px solid var(--green);
-    display: flex; flex-direction: column; gap: 10px;
-    min-height: 290px;
-}
-.qc.qc-y { border-top-color: #c89800; }
-.qc.qc-o { border-top-color: var(--orange); }
-.qc-badge {
-    position: absolute; top: -14px; left: 18px;
-    background: var(--green); color: #fff;
-    font-family: 'Fredoka One', cursive; font-size: 0.88rem;
-    padding: 3px 14px; border-radius: 99px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-}
-.qc.qc-y .qc-badge { background: #c89800; }
-.qc.qc-o .qc-badge { background: var(--orange); }
-.qc-icon { font-size: 1.8rem; display: block; }
-.qc-text {
-    font-family: 'Nunito', sans-serif; font-size: 1rem;
-    font-weight: 800; color: var(--ink); line-height: 1.6; flex: 1;
-}
-.qc-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.qc-opt {
-    display: flex; align-items: center; justify-content: center;
-    background: #f0faf4; border: 2.5px solid #c5e8d0;
-    border-radius: 12px; padding: 11px 8px;
-    font-family: 'Fredoka One', cursive; font-size: 1rem;
-    color: #3a7a50; cursor: pointer;
-    transition: all 0.15s; text-align: center;
-    border-style: solid;
-}
-.qc.qc-y .qc-opt { background: #fffbea; border-color: #f0d960; color: #7a6000; }
-.qc.qc-o .qc-opt { background: #fff5f0; border-color: #ffc4a0; color: #7a3010; }
-.qc-opt:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-.qc-opt.correct { border-color: var(--green) !important; background: var(--green) !important; color: #fff !important; }
-.qc-opt.wrong   { border-color: #ef4444 !important; background: #fee2e2 !important; color: #991b1b !important; }
-.qc-opt.reveal  { border-color: var(--green) !important; background: var(--green) !important; color: #fff !important; }
-.qc-fb { font-family: 'Fredoka One', cursive; font-size: 13px; min-height: 18px; color: var(--muted); }
-
-/* ── Adaptive / Detective drag carousel ── */
-.adapt-grid, .detect-grid {
-    display: flex; gap: 16px;
-    overflow-x: auto; scroll-snap-type: none;
-    padding: 8px 24px 20px; scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-    cursor: grab; user-select: none;
-}
-.adapt-grid::-webkit-scrollbar, .detect-grid::-webkit-scrollbar { display: none; }
-.adapt-card {
-    flex: 0 0 min(280px, 82vw); scroll-snap-align: start;
-    background: #fff; border-radius: 16px; padding: 24px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-    border-left: 4px solid var(--green);
-}
-.adapt-t { font-family: 'Fredoka One', cursive; font-size: 1.2rem; color: var(--ink); margin-bottom: 8px; }
-.adapt-b { font-size: 14px; color: var(--muted); line-height: 1.7; font-weight: 700; }
-
-/* ── Detective ── */
-.detect-card {
-    flex: 0 0 min(300px, 84vw); scroll-snap-align: start;
-    background: #fff; border-radius: 16px; padding: 24px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-}
-.hint-row {
-    display: flex; gap: 8px; align-items: flex-start;
-    padding: 8px 12px; border-radius: 10px; margin-bottom: 6px;
-    font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 800;
-}
-.hint-vis  { background: #f0faf4; color: var(--ink); }
-.hint-lock { background: #f8f8f8; color: #bbb; font-weight: 600; font-size: 13px; }
-
-/* ── Market drag carousel ── */
-.mkt-track {
-    display: flex; gap: 16px;
-    overflow-x: auto; scroll-snap-type: none;
-    padding: 4px 20px 16px; scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-    cursor: grab; user-select: none;
-}
-.mkt-track::-webkit-scrollbar { display: none; }
-.mkt-card {
-    flex: 0 0 44vw; scroll-snap-align: start;
-    background: #fff; border-radius: 16px; padding: 20px 14px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.07); text-align: center;
-    transition: transform 0.15s;
-}
-.mkt-card:hover { transform: translateY(-4px); }
-@media (min-width: 641px) { .mkt-card { flex: 0 0 190px; } }
-
-@keyframes cardSlide {
-    from { opacity: 0; transform: translateX(40px) scale(0.96); }
-    to   { opacity: 1; transform: translateX(0)   scale(1);    }
-}
-.qc, .adapt-card, .detect-card, .mkt-card { opacity: 0; }
-.track-in > .qc,
-.track-in > .adapt-card,
-.track-in > .detect-card,
-.track-in > .mkt-card {
-    animation: cardSlide 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-.track-in > :nth-child(1) { animation-delay: 0s; }
-.track-in > :nth-child(2) { animation-delay: 0.07s; }
-.track-in > :nth-child(3) { animation-delay: 0.14s; }
-.track-in > :nth-child(4) { animation-delay: 0.21s; }
-.track-in > :nth-child(5) { animation-delay: 0.28s; }
-.track-in > :nth-child(6) { animation-delay: 0.35s; }
-.track-in > :nth-child(7) { animation-delay: 0.42s; }
-.mkt-ico   { font-size: 2.2rem; margin-bottom: 8px; }
-.mkt-name  { font-family: 'Fredoka One', cursive; font-size: 14px; color: var(--ink); margin-bottom: 6px; line-height: 1.3; }
-.mkt-price { font-family: 'Fredoka One', cursive; font-size: 20px; color: var(--green); }
-
-/* ── Scroll reveal ── */
-.reveal {
-    opacity: 0;
-    transform: translateY(24px);
-    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.reveal.in { opacity: 1; transform: translateY(0); }
-.reveal:nth-child(2) { transition-delay: 0.08s; }
-.reveal:nth-child(3) { transition-delay: 0.16s; }
-.reveal:nth-child(4) { transition-delay: 0.24s; }
-
-/* ── Info blocks ── */
-.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 44px; }
-@media (max-width: 640px) { .info-grid { grid-template-columns: 1fr; } }
-.info-card {
-    background: #fff; border-radius: 22px; padding: 28px 24px;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.055), 0 0 0 1px rgba(0,0,0,0.04);
-    transition: transform 0.25s var(--spring), box-shadow 0.25s;
-    position: relative; overflow: hidden;
-}
-.info-card::after {
-    content: '';
-    position: absolute; top: 0; left: 0; right: 0; height: 3px;
-    background: linear-gradient(90deg, var(--lg), #34d399);
-    border-radius: 22px 22px 0 0;
-}
-.info-card:hover { transform: translateY(-5px); box-shadow: 0 14px 44px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.04); }
-.info-card-icon {
-    font-size: 1.8rem;
-    width: 50px; height: 50px; border-radius: 14px;
-    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 16px;
-}
-.info-card-grade {
-    display: inline-block;
-    background: #ecfdf5; color: #059669;
-    font-family: 'Fredoka One', cursive;
-    font-size: 11px; letter-spacing: 0.08em;
-    padding: 4px 12px; border-radius: 99px; margin-bottom: 12px;
-    border: 1px solid rgba(5,150,105,0.18);
-}
-.info-card-h { font-family: 'Fredoka One', cursive; font-size: 1.15rem; color: var(--ink); margin-bottom: 10px; }
-.info-card-p { font-size: 14px; color: var(--muted); line-height: 1.75; font-weight: 600; }
-
-/* ── Feature grid (2×2) ── */
-.feat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; margin-top: 44px; }
-@media (max-width: 640px) { .feat-grid { grid-template-columns: 1fr; } }
-.feat-card {
-    background: #fff; border-radius: 22px; padding: 28px 22px;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.055), 0 0 0 1px rgba(0,0,0,0.04);
-    transition: transform 0.25s var(--spring), box-shadow 0.25s;
-    position: relative; overflow: hidden;
-}
-.feat-card:hover { transform: translateY(-5px); box-shadow: 0 14px 44px rgba(0,0,0,0.1); }
-.feat-icon {
-    font-size: 1.7rem;
-    width: 50px; height: 50px; border-radius: 14px;
-    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 16px;
-}
-.feat-h { font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: var(--ink); margin-bottom: 8px; }
-.feat-tag {
-    display: inline-block; font-size: 10px; font-weight: 800;
-    letter-spacing: 0.1em; text-transform: uppercase;
-    padding: 4px 10px; border-radius: 99px; margin-bottom: 12px;
-    background: #ecfdf5; color: #059669;
-    border: 1px solid rgba(5,150,105,0.18);
-}
-.feat-p { font-size: 14px; color: var(--muted); line-height: 1.75; font-weight: 600; }
-
-/* ── Pricing ── */
-.price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 48px; }
-@media (max-width: 768px) { .price-grid { grid-template-columns: 1fr; } }
-.price-card {
-    background: #fff; border-radius: 28px; padding: 36px 28px;
-    box-shadow: 0 2px 20px rgba(0,0,0,0.055), 0 0 0 1px rgba(0,0,0,0.04);
-    display: flex; flex-direction: column;
-    position: relative; transition: transform 0.25s var(--spring), box-shadow 0.25s;
-}
-.price-card:hover { transform: translateY(-6px); box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
-.price-card.featured {
-    background: linear-gradient(165deg, #f0fdf8 0%, #fff 65%);
-    box-shadow: 0 4px 28px rgba(5,150,105,0.18), 0 0 0 2px #059669;
-}
-.price-card.featured:hover { box-shadow: 0 20px 60px rgba(5,150,105,0.25), 0 0 0 2px #059669; }
-.price-badge {
-    position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
-    background: linear-gradient(135deg, var(--lg), var(--green));
-    color: #fff; font-family: 'Fredoka One', cursive;
-    font-size: 12px; letter-spacing: 0.06em;
-    padding: 5px 20px; border-radius: 99px;
-    white-space: nowrap;
-    box-shadow: 0 4px 16px rgba(5,150,105,0.4);
-}
-.price-name { font-family: 'Fredoka One', cursive; font-size: 1.35rem; color: var(--ink); margin-bottom: 4px; }
-.price-sub  { font-size: 13px; color: var(--muted); margin-bottom: 20px; font-weight: 700; }
-.price-val  { font-family: 'Fredoka One', cursive; font-size: 2.5rem; color: var(--ink); line-height: 1; }
-.price-val span { font-size: 1rem; color: var(--muted); font-family: 'Nunito', sans-serif; font-weight: 700; }
-.price-divider { height: 1px; background: #f1f5f9; margin: 24px 0; }
-.price-features { list-style: none; padding: 0; margin: 0 0 28px; display: flex; flex-direction: column; gap: 12px; }
-.price-features li { font-size: 14px; color: #475569; display: flex; gap: 9px; align-items: flex-start; font-weight: 700; }
-.price-features li::before { content: '✓'; color: var(--green); font-weight: 900; flex-shrink: 0; margin-top: 1px; }
-.price-btn {
-    display: block; text-align: center; margin-top: auto;
-    padding: 14px 0; border-radius: 14px; font-family: 'Fredoka One', cursive;
-    font-size: 1rem; cursor: pointer; text-decoration: none; border: none;
-    transition: all 0.22s var(--spring);
-}
-.price-btn-free { background: #f1f5f9; color: #475569; }
-.price-btn-free:hover { background: #e2e8f0; color: #1e293b; }
-.price-btn-main { background: linear-gradient(135deg, var(--lg) 0%, var(--green) 100%); color: #fff; box-shadow: 0 6px 24px rgba(5,150,105,0.35); }
-.price-btn-main:hover { box-shadow: 0 10px 36px rgba(5,150,105,0.5); transform: translateY(-2px); }
-.price-btn-year { background: var(--ink); color: #fff; }
-.price-btn-year:hover { background: #1e293b; transform: translateY(-2px); }
-.save-pill { display: inline-block; background: #fef3c7; color: #92400e; font-size: 11px; font-weight: 800; padding: 2px 9px; border-radius: 99px; margin-left: 8px; vertical-align: middle; }
-
-
-/* ── CTA ── */
-.cta-wrap {
-    background: linear-gradient(150deg, #020917 0%, #081221 42%, #0c1e14 72%, #030e08 100%);
-    padding: 100px 24px; text-align: center;
-    position: relative; overflow: hidden;
-}
-.cta-wrap::before {
-    content: '';
-    position: absolute; inset: 0; pointer-events: none;
-    background:
-        radial-gradient(ellipse 55% 50% at 15% 65%, rgba(16,185,129,0.18) 0%, transparent 58%),
-        radial-gradient(ellipse 45% 40% at 85% 25%, rgba(124,58,237,0.14) 0%, transparent 55%);
-}
-.cta-h2 {
-    font-family: 'Fredoka One', cursive;
-    font-size: clamp(2rem,4.5vw,3.2rem); color: #fff; margin-bottom: 14px; line-height: 1.2;
-    position: relative; z-index: 1;
-}
-.cta-sub { font-size: 16px; color: rgba(255,255,255,0.45); margin-bottom: 40px; font-weight: 700; position: relative; z-index: 1; }
-
-/* ── Footer ── */
-.nb-footer {
-    background: #020917;
-    border-top: 1px solid rgba(255,255,255,0.07);
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 14px 40px;
-    gap: 12px;
-}
-.footer-left { display: flex; align-items: center; gap: 16px; }
-.footer-logo { font-family: 'Fredoka One', cursive; font-size: 1rem; color: rgba(255,255,255,0.65); }
-.footer-divider { width: 1px; height: 14px; background: rgba(255,255,255,0.12); }
-.footer-copy { font-size: 11px; color: rgba(255,255,255,0.22); letter-spacing: 0.04em; margin: 0; }
-.footer-right { font-size: 11px; color: rgba(255,255,255,0.18); letter-spacing: 0.04em; }
+    body.ks-landing { padding-top: 0 !important; background: #FFF8F1 !important; }
+    html:has(body.ks-landing) { background: #FFF8F1 !important; background-image: none !important; scroll-padding-top: 80px; }
+    body.ks-landing > nav.fixed-top, body.ks-landing #mobileNav { display: none !important; }
+    .ksl { font-family: 'Noto Sans Georgian', system-ui, sans-serif; color: #1D1A17; overflow-x: clip; }
+    .ksl a { color: inherit; }
+    .ksl-in { max-width: 1200px; margin: 0 auto; padding: clamp(32px, 6vw, 80px) clamp(16px, 4vw, 40px); box-sizing: border-box; }
+    .ksl-head { position: sticky; top: 0; z-index: 50; background: rgba(255,248,241,.94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid #F1E3D3; }
+    .ksl-head-in { max-width: 1200px; margin: 0 auto; padding: 12px clamp(16px, 4vw, 40px); display: flex; align-items: center; gap: 12px 20px; }
+    .ksl-brand { text-decoration: none; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .ksl-brand-mark { width: 40px; height: 40px; border-radius: 12px; background: #1D1A17; display: flex; align-items: center; justify-content: center; }
+    .ksl-brand b { font-weight: 800; font-size: 20px; }
+    .ksl-nav { flex: 1; min-width: 0; display: flex; gap: 2px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+    .ksl-nav::-webkit-scrollbar { display: none; }
+    .ksl-nav a { text-decoration: none; color: #4F473F; font-size: 14px; font-weight: 700; padding: 10px 12px; border-radius: 12px; }
+    .ksl-nav a:hover { background: #FFE3CC; color: #8A3407; }
+    .ksl-head-act { display: flex; gap: 8px; flex-shrink: 0; margin-left: auto; }
+    .ksl-btn { height: 44px; padding: 0 18px; border-radius: 22px; border: none; font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; white-space: nowrap; }
+    .ksl-btn.ghost { background: #fff; border: 2px solid #F1E3D3; color: #1D1A17; }
+    .ksl-btn.ghost:hover { border-color: #1D1A17; }
+    .ksl-btn.primary { background: #C24A0A; color: #fff; }
+    .ksl-btn.primary:hover { background: #A53E08; color: #fff; }
+    .ksl-btn.dark { background: #1D1A17; color: #fff; }
+    .ksl-btn.dark:hover { background: #000; color: #fff; }
+    .ksl-btn.big { height: 58px; padding: 0 28px; border-radius: 29px; font-size: 18px; }
+    .ksl-eyebrow { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #B6460A; }
+    .ksl-h1 { margin: 0; font-size: clamp(54px, 9vw, 104px); line-height: .9; font-weight: 900; font-stretch: 66%; text-transform: uppercase; }
+    .ksl-h2 { margin: 0; font-size: clamp(40px, 5.5vw, 64px); line-height: .92; font-weight: 900; font-stretch: 68%; text-transform: uppercase; }
+    .ksl-p { margin: 0; font-size: 17px; line-height: 1.55; color: #4F473F; }
+    .ksl-sec-head { display: flex; flex-direction: column; gap: 12px; max-width: 760px; margin-bottom: 28px; }
+    .ksl-hero { display: flex; flex-wrap: wrap; align-items: center; gap: 32px; }
+    .ksl-hero-txt { flex: 1 1 420px; display: flex; flex-direction: column; gap: 20px; }
+    .ksl-pill { align-self: flex-start; font-size: 13px; font-weight: 700; color: #8A3407; background: #FFE3CC; border-radius: 999px; padding: 6px 14px; }
+    .ksl-hero-art { flex: 1 1 340px; position: relative; min-height: 340px; display: flex; align-items: center; justify-content: center; }
+    .ksl-blob1 { position: absolute; width: min(420px, 90%); aspect-ratio: 1; border-radius: 48% 52% 40% 60% / 45% 40% 60% 55%; background: #FFB27A; }
+    .ksl-blob2 { position: absolute; width: min(300px, 66%); aspect-ratio: 1; border-radius: 60% 40% 55% 45% / 50% 55% 45% 50%; background: #F7883E; }
+    .ksl-hero-art svg { position: relative; width: min(280px, 70%); height: auto; }
+    .ksl-float { position: absolute; background: #fff; border-radius: 18px; padding: 10px 14px; box-shadow: 0 8px 20px rgba(150,80,20,.15); font-size: 14px; font-weight: 800; }
+    .ksl-float.a { left: 4%; top: 12%; color: #14612F; transform: rotate(-6deg); }
+    .ksl-float.b { right: 4%; bottom: 12%; transform: rotate(4deg); }
+    .ksl-band { background: #fff; border-top: 1px solid #F1E3D3; border-bottom: 1px solid #F1E3D3; }
+    .ksl-split { display: flex; flex-wrap: wrap; gap: 32px; align-items: center; }
+    .ksl-split > * { flex: 1 1 380px; min-width: 0; }
+    .ksl-try { background: #FFE3CC; border-radius: 32px; padding: clamp(18px, 3vw, 28px); display: flex; flex-direction: column; gap: 16px; }
+    .ksl-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+    .ksl-tab { height: 42px; padding: 0 16px; border-radius: 999px; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; background: #fff; color: #1D1A17; border: 2px solid #fff; }
+    .ksl-tab[aria-selected="true"] { background: #1D1A17; color: #fff; border-color: #1D1A17; }
+    .ksl-q { margin: 0; font-size: clamp(19px, 2vw, 24px); line-height: 1.4; font-weight: 700; }
+    .ksl-opts { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; }
+    .ksl-opt { height: 68px; border-radius: 20px; font-family: inherit; font-size: 26px; font-weight: 800; cursor: pointer; background: #fff; color: #1D1A17; border: 3px solid #fff; }
+    .ksl-opt:hover { border-color: #FFC49A; }
+    .ksl-opt.ok { background: #DFF5E3; color: #14612F; border-color: #1E8A4C; }
+    .ksl-opt.bad { background: #FDE2E2; color: #A12626; border-color: #D93B3B; }
+    .ksl-fb { border-radius: 16px; padding: 12px 16px; font-size: 15px; font-weight: 800; display: none; }
+    .ksl-fb.ok { display: block; background: #fff; color: #14612F; }
+    .ksl-fb.bad { display: block; background: #fff; color: #A12626; }
+    .ksl-levels { flex: 1 1 320px; background: #fff; border-radius: 28px; padding: 24px; display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 10px; align-items: end; box-shadow: 0 2px 0 #F1E3D3; }
+    .ksl-levels div { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .ksl-levels i { display: block; width: 100%; border-radius: 12px; background: #EEE8FF; }
+    .ksl-levels .on i { background: #7B5CF0; }
+    .ksl-levels span { font-size: 12px; font-weight: 700; }
+    .ksl-cards2 { flex: 1 1 280px; display: flex; flex-direction: column; gap: 16px; }
+    .ksl-note { border-radius: 24px; padding: 22px; display: flex; flex-direction: column; gap: 6px; }
+    .ksl-note b { font-size: 20px; font-weight: 800; }
+    .ksl-note span { font-size: 15px; line-height: 1.5; }
+    .ksl-dark { background: #1D1A17; color: #fff; }
+    .ksl-dark .ksl-p { color: #E8DCCF; }
+    .ksl-dark .ksl-eyebrow { color: #FFC49A; }
+    .ksl-grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; }
+    .ksl-game { border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 8px; color: #1D1A17; }
+    .ksl-game-ic { width: 48px; height: 48px; border-radius: 14px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+    .ksl-game b { font-size: 17px; font-weight: 800; line-height: 1.25; }
+    .ksl-game span { font-size: 13px; line-height: 1.45; color: #3A332D; }
+    .ksl-grade { border-radius: 24px; padding: 20px; display: flex; flex-direction: column; gap: 6px; }
+    .ksl-grade-n { font-size: 44px; line-height: 1; font-weight: 900; font-stretch: 68%; }
+    .ksl-grade-k { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; }
+    .ksl-grade b { font-size: 17px; font-weight: 800; }
+    .ksl-grade span:last-child { font-size: 13px; line-height: 1.5; color: #3A332D; }
+    .ksl-peach { background: #FFE3CC; }
+    .ksl-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .ksl-chips span { background: #fff; border-radius: 999px; padding: 8px 14px; font-size: 13px; font-weight: 700; }
+    .ksl-rewards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+    .ksl-reward { background: #fff; border-radius: 20px; padding: 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 14px; font-weight: 700; }
+    .ksl-reward b { display: flex; align-items: center; gap: 4px; font-weight: 800; white-space: nowrap; }
+    .ksl-feats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .ksl-feat { background: #fff; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 4px; box-shadow: 0 2px 0 #F1E3D3; }
+    .ksl-feat b { font-size: 16px; font-weight: 800; }
+    .ksl-feat span { font-size: 14px; line-height: 1.5; color: #4F473F; }
+    .ksl-mock { background: #fff; border-radius: 28px; padding: 22px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 12px 30px rgba(150,80,20,.12); }
+    .ksl-mock-bars { height: 130px; display: grid; grid-template-columns: repeat(7, minmax(0,1fr)); gap: 8px; align-items: end; }
+    .ksl-mock-bars i { display: block; border-radius: 8px; background: #B9A8F5; }
+    .ksl-mock-bars i.z { background: #EFE3D6; }
+    .ksl-mock-bars i.t { background: #E2590F; }
+    .ksl-mock-row { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; }
+    .ksl-mock-bar { height: 8px; border-radius: 4px; background: #F4ECE3; overflow: hidden; }
+    .ksl-mock-bar span { display: block; height: 8px; border-radius: 4px; }
+    .ksl-plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; align-items: stretch; }
+    .ksl-plan { border-radius: 28px; padding: 26px; display: flex; flex-direction: column; gap: 16px; background: #FFF8F1; border: 2px solid #F1E3D3; }
+    .ksl-plan.feat { background: #1D1A17; color: #fff; border-color: #1D1A17; }
+    .ksl-plan-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .ksl-plan-h b { font-size: 22px; font-weight: 800; }
+    .ksl-plan-badge { font-size: 12px; font-weight: 800; border-radius: 999px; padding: 6px 10px; background: #F7883E; color: #1D1A17; }
+    .ksl-price { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+    .ksl-price b { font-size: 44px; font-weight: 900; font-stretch: 70%; }
+    .ksl-price span { font-size: 14px; font-weight: 700; color: #6B625A; }
+    .ksl-plan.feat .ksl-price span { color: #E8DCCF; }
+    .ksl-plan ul { margin: 0; padding: 0 0 0 18px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 1.45; }
+    .ksl-plan .ksl-btn { margin-top: auto; height: 54px; border-radius: 27px; justify-content: center; font-size: 16px; }
+    .ksl-plan.feat .ksl-btn { background: #F7883E; color: #1D1A17; }
+    .ksl-plan.feat .ksl-btn:hover { background: #FFA766; }
+    .ksl-cta { position: relative; overflow: hidden; background: #F7883E; border-radius: 36px; padding: clamp(28px, 5vw, 56px); display: flex; flex-wrap: wrap; align-items: center; gap: 24px; }
+    .ksl-cta::before { content: ''; position: absolute; right: -60px; top: -60px; width: 300px; height: 300px; border-radius: 50%; background: #FFA766; }
+    .ksl-cta > * { position: relative; }
+    .ksl-foot { border-top: 1px solid #F1E3D3; }
+    .ksl-foot-in { max-width: 1200px; margin: 0 auto; padding: 24px clamp(16px, 4vw, 40px); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 13px; color: #6B625A; }
+    .ksl-foot a { font-weight: 700; color: #B6460A; }
+    @media (max-width: 900px) {
+        .ksl-nav { display: none; }
+        .ksl-head-act .ghost { display: none; }
+        .ksl-hero-art { min-height: 260px; }
+        .ksl-opt { height: 60px; font-size: 22px; }
+    }
+    @media (prefers-reduced-motion: no-preference) { html:has(body.ks-landing) { scroll-behavior: smooth; } }
 </style>
 
-{{-- ── Hero ── --}}
-<section class="hero-mod">
-    <div class="hero-orb hero-orb-1"></div>
-    <div class="hero-orb hero-orb-2"></div>
-    <div class="hero-orb hero-orb-3"></div>
+<div class="ksl" id="top">
+    <header class="ksl-head">
+        <div class="ksl-head-in">
+            <a href="#top" class="ksl-brand">
+                <span class="ksl-brand-mark">@include('partials.ks-fox', ['size' => 26])</span>
+                <b>KidSmart</b>
+            </a>
+            <nav class="ksl-nav" aria-label="გვერდის ნავიგაცია">
+                <a href="#try">ამოცანები</a>
+                <a href="#adaptive">სწავლება</a>
+                <a href="#games">თამაშები</a>
+                <a href="#audience">აუდიტორია</a>
+                <a href="#rewards">ჯილდოები</a>
+                <a href="#parent">მშობელი</a>
+                <a href="#pricing">ფასები</a>
+            </nav>
+            <div class="ksl-head-act">
+                <button type="button" class="ksl-btn ghost" onclick="toggleLoginModal(event); lmSwitch('child')">ბავშვის შესვლა</button>
+                <button type="button" class="ksl-btn primary" onclick="toggleLoginModal(event)">დაიწყე</button>
+            </div>
+        </div>
+    </header>
 
-    <h1 class="hero-h1">
-        ბავშვი სწავლობს იმ ენაზე,<br>
-        <em>რომელიც მას უყვარს.</em>
-    </h1>
-    <p class="hero-sub">ჩვენ ვქმნით ამოცანებს ბავშვის სამყაროდან — ფეხბურთიდან, კოსმოსიდან, სუპერგმირებიდან.</p>
-    <div class="hero-btns">
-        <button class="btn-main" onclick="toggleLoginModal(event)">
-            დაიწყე ახლა ✏️
-        </button>
-        <a class="btn-ghost" href="#questions" onclick="secScroll(event,'questions')">სცადე ამოცანა ↓</a>
-    </div>
-    <div class="scroll-cue">↓</div>
-</section>
+    {{-- ── Hero ── --}}
+    <section class="ksl-in ksl-hero">
+        <div class="ksl-hero-txt">
+            <span class="ksl-pill">II–V კლასის მოსწავლეებისთვის</span>
+            <h1 class="ksl-h1">მათემატიკა ბავშვის ენაზე</h1>
+            <p class="ksl-p" style="font-size:clamp(16px,1.6vw,19px);max-width:520px;">ბავშვი სწავლობს იმ ენაზე, რომელიც მას უყვარს — ამოცანები ფეხბურთიდან, კოსმოსიდან და სუპერგმირების სამყაროდან.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:12px;">
+                <button type="button" class="ksl-btn big" style="background:#E2590F;color:#fff;" onclick="toggleLoginModal(event)">დაიწყე უფასოდ <i class="bi bi-arrow-right"></i></button>
+                <a href="#try" class="ksl-btn big ghost" style="font-size:16px;">სცადე ამოცანა <i class="bi bi-arrow-down"></i></a>
+            </div>
+            <span style="font-size:13px;color:#6B625A;">Google-ით შესვლა · ბარათი არ სჭირდება</span>
+        </div>
+        <div class="ksl-hero-art" aria-hidden="true">
+            <div class="ksl-blob1"></div>
+            <div class="ksl-blob2"></div>
+            @include('partials.ks-fox', ['size' => 280, 'color' => '#E2590F', 'smile' => true])
+            <span class="ksl-float a">✓ 5 სწორი ზედიზედ!</span>
+            <span class="ksl-float b">🪙 +30 მონეტა</span>
+        </div>
+    </section>
 
-{{-- ── Question cards carousel ── --}}
-<div id="questions">
-<div class="sec" style="padding-bottom:48px;">
-    <div class="eyebrow reveal">მათემატიკა ბავშვის ენაზე</div>
-    <h2 class="sec-h2 reveal">ფეხბურთი, კოსმოსი თუ სუპერგმირები?</h2>
-    <p class="sec-sub reveal">როცა ამოცანები ბავშვის სამყაროდანაა, სწავლა თავგადასავალია.</p>
-    <div class="car-outer">
-        <div class="car-track dc" id="qCar"></div>
-    </div>
-</div>
-</div>
+    {{-- ── სცადე ამოცანა ── --}}
+    <section id="try" class="ksl-band">
+        <div class="ksl-in ksl-split">
+            <div style="display:flex;flex-direction:column;gap:14px;">
+                <span class="ksl-eyebrow">სცადე ამოცანა</span>
+                <h2 class="ksl-h2">ფეხბურთი, კოსმოსი თუ სუპერგმირები?</h2>
+                <p class="ksl-p">როცა ამოცანები ბავშვის სამყაროდანაა, სწავლა თავგადასავალია. აირჩიე თემა და უპასუხე.</p>
+            </div>
+            <div class="ksl-try">
+                <div class="ksl-tabs" role="tablist" aria-label="თემატიკა" id="kslTabs"></div>
+                <p class="ksl-q" id="kslQ"></p>
+                <div class="ksl-opts" role="radiogroup" aria-label="პასუხები" id="kslOpts"></div>
+                <div class="ksl-fb" id="kslFb" aria-live="polite"></div>
+            </div>
+        </div>
+    </section>
 
-{{-- ── Adaptive ── --}}
-<div class="sec-bg" id="adaptive">
-<div class="sec">
-    <div class="eyebrow reveal">ადაპტირებული სწავლება</div>
-    <h2 class="sec-h2 reveal">ჭკვიანი სისტემა, რომელიც ბავშვთან ერთად იზრდება</h2>
-    <p class="sec-sub reveal">არანაირი გადაწვა ან მოწყენილობა. KidSmart-ის ადაპტური ალგორითმი ავტომატურად აფასებს ბავშვის ცოდნას და სთავაზობს სირთულის 5 დონეს. სისტემა ფეხდაფეხ მიჰყვება მის პროგრესს — ამოცანები რთულდება და ვითარდება ბავშვთან ერთად.</p>
-    <div class="ac-outer">
-    <div class="adapt-grid" id="adaptTrack">
-        <div class="adapt-card">
-            <div class="adapt-t">3 ტესტი 95% და მეტი?</div>
-            <p class="adapt-b">ავტომატურად შეიცვლება დონე — ბავშვს რომ არ მობეზრდეს.</p>
+    {{-- ── ადაპტირებული სწავლება ── --}}
+    <section id="adaptive" class="ksl-in">
+        <div class="ksl-sec-head">
+            <span class="ksl-eyebrow" style="color:#5B3FD0;">ადაპტირებული სწავლება</span>
+            <h2 class="ksl-h2">სისტემა, რომელიც ბავშვთან ერთად იზრდება</h2>
+            <p class="ksl-p">არანაირი გადაწვა ან მოწყენილობა. დონე ავტომატურად ერგება ბავშვის შედეგებს.</p>
         </div>
-        <div class="adapt-card">
-            <div class="adapt-t">ხშირად უშვებს შეცდომებს?</div>
-            <p class="adapt-b">ამ თემაში შესაბამის დონის ამოცანებს ვთავაზობთ და ვავითარებთ ბავშვის უნარს.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:20px;">
+            <div class="ksl-levels" role="img" aria-label="სირთულის 5 დონე">
+                @foreach([50, 80, 110, 140, 170] as $__i => $__h)
+                <div class="{{ $__i === 2 ? 'on' : '' }}"><i style="height:{{ $__h }}px"></i><span>დონე {{ $__i + 1 }}</span></div>
+                @endforeach
+            </div>
+            <div class="ksl-cards2">
+                <div class="ksl-note" style="background:#DFF5E3;"><b style="color:#14612F;">კარგად წერს ტესტებს?</b><span style="color:#14612F;">დონე ავტომატურად იწევა, რომ ბავშვს არ მოსწყინდეს.</span></div>
+                <div class="ksl-note" style="background:#FFF1C2;"><b style="color:#6B4A00;">ხშირად უშვებს შეცდომებს?</b><span style="color:#6B4A00;">ვთავაზობთ შესაბამისი დონის ამოცანებს და ვავითარებთ ნაბიჯ-ნაბიჯ.</span></div>
+            </div>
         </div>
-    </div>
-    </div>
-</div>
-</div>
+    </section>
 
-{{-- ── KidSmart Games ── --}}
-<div class="sec" id="games">
-    <div class="eyebrow reveal">KidSmart თამაშები</div>
-    <h2 class="sec-h2 reveal">🎮 ისწავლე თამაშით — არა მხოლოდ ტესტებით</h2>
-    <p class="sec-sub reveal">ტესტებს შორის ბავშვი შესვენებას თამაშით იღებს — ეთამაშება პირდაპირ KidSmart-ს, ინახავს პირად რეკორდს და ადარებს თავს ყველა სხვა ბავშვს. სწავლა არ წყდება, უბრალოდ სახალისო ხდება.</p>
-    <div class="ac-outer">
-    <div class="detect-grid" id="gamesTrack">
-        <div class="detect-card">
-            <div style="font-family:'Fredoka One',cursive;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#aaa;margin-bottom:10px;">✊ თამაში #1</div>
-            <div style="font-family:'Fredoka One',cursive;font-size:1.25rem;color:var(--ink);margin-bottom:10px;">ქვა-ქაღალდი-მაკრატელი</div>
-            <p style="font-size:14px;color:var(--muted);line-height:1.7;font-weight:600;margin-bottom:14px;">კლასიკური თამაში KidSmart-ის წინააღმდეგ, საუკეთესო 3-დან. მოიგე და შენი გამარჯვება დაემატება საერთო ტაბლოს.</p>
-            <div class="hint-row hint-vis"><span style="min-width:20px;color:var(--green);">✓</span><span>პირადი W/L რეკორდი</span></div>
-            <div class="hint-row hint-vis"><span style="min-width:20px;color:var(--green);">✓</span><span>გვერდის განახლებისასაც გრძელდება</span></div>
+    {{-- ── თამაშები ── --}}
+    <section id="games" class="ksl-dark">
+        <div class="ksl-in">
+            <div class="ksl-sec-head">
+                <span class="ksl-eyebrow">KidSmart თამაშები</span>
+                <h2 class="ksl-h2">ისწავლე თამაშით — არა მხოლოდ ტესტებით</h2>
+                <p class="ksl-p">ტესტებს შორის ბავშვი შესვენებას თამაშით იღებს და KidSmart-ს ეჯიბრება.</p>
+            </div>
+            <div class="ksl-grid4">
+                @foreach([
+                    ['✊', 'ქვა-ქაღალდი-მაკრატელი', 'კლასიკური თამაში KidSmart-ის წინააღმდეგ — პირადი რეკორდით.', '#FFE3CC'],
+                    ['🐰', 'ბაჭია და მგლები', 'ლოგიკური სამაგიდო თამაში: მართე მგლები და დაიჭირე ბაჭია.', '#DCEBFF'],
+                    ['🧠', 'მეხსიერება', 'იპოვე წყვილები რაც შეიძლება სწრაფად და მოხვდი ტაბლოზე.', '#EEE8FF'],
+                    ['🧱', 'კვორიდორი', 'ააშენე კედლები და პირველმა მიაღწიე მეორე მხარეს.', '#DFF5E3'],
+                ] as [$__gi, $__gn, $__gt, $__gb])
+                <div class="ksl-game" style="background:{{ $__gb }}">
+                    <span class="ksl-game-ic" aria-hidden="true">{{ $__gi }}</span>
+                    <b>{{ $__gn }}</b>
+                    <span>{{ $__gt }}</span>
+                </div>
+                @endforeach
+            </div>
         </div>
-        <div class="detect-card">
-            <div style="font-family:'Fredoka One',cursive;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#aaa;margin-bottom:10px;">🐺 თამაში #2</div>
-            <div style="font-family:'Fredoka One',cursive;font-size:1.25rem;color:var(--ink);margin-bottom:10px;">ბაჭია და მგლები</div>
-            <p style="font-size:14px;color:var(--muted);line-height:1.7;font-weight:600;margin-bottom:14px;">ლოგიკური სამაგიდო თამაში — მართე მგლები და დაიჭირე ბაჭია, სანამ ის კარამდე მიაღწევს. სტრატეგია და წინდახედულობა გადამწყვეტია.</p>
-            <div class="hint-row hint-vis"><span style="min-width:20px;color:var(--green);">✓</span><span>საერთო ტაბლო ყველა ბავშვთან</span></div>
-            <div class="hint-row hint-vis"><span style="min-width:20px;color:var(--green);">✓</span><span>ლოგიკური აზროვნების ვარჯიში</span></div>
-        </div>
-    </div>
-    </div>
-</div>
+    </section>
 
-{{-- ── Block 1: Target audience ── --}}
-<div class="sec-bg" id="audience">
-<div class="sec">
-    <div class="eyebrow reveal">სამიზნე აუდიტორია</div>
-    <h2 class="sec-h2 reveal">🎒 ზუსტად იმ ასაკისთვის,<br>როცა ლოგიკა იბადება</h2>
-    <p class="sec-sub reveal">KidSmart შექმნილია II, III, IV და V კლასის მოსწავლეებისთვის.</p>
-    <div class="info-grid">
-        <div class="info-card reveal">
-            <div class="info-card-icon">🌱</div>
-            <div class="info-card-grade">II კლასი</div>
-            <div class="info-card-h">პირველი ნაბიჯები</div>
-            <p class="info-card-p">საბაზისო არითმეტიკა, სივრცითი აღქმა და მარტივი ლოგიკური ამოცანები. ბავშვი მათემატიკას შიშის გარეშე სწავლობს.</p>
+    {{-- ── აუდიტორია ── --}}
+    <section id="audience" class="ksl-in">
+        <div class="ksl-sec-head">
+            <span class="ksl-eyebrow" style="color:#1F4E9C;">სამიზნე აუდიტორია</span>
+            <h2 class="ksl-h2">იმ ასაკისთვის, როცა ლოგიკა იბადება</h2>
         </div>
-        <div class="info-card reveal">
-            <div class="info-card-icon">🔍</div>
-            <div class="info-card-grade">III კლასი</div>
-            <div class="info-card-h">ლოგიკის გამყარება</div>
-            <p class="info-card-p">შაბლონები, კრებები და მცირე დეტექტიური ამოცანები. ეს კლასი ლოგიკური აზროვნების საძირკველია.</p>
+        <div class="ksl-grid4">
+            @foreach([
+                ['II', 'პირველი ნაბიჯები', 'საბაზისო არითმეტიკა, სივრცითი აღქმა და მარტივი ლოგიკა.', '#FFE3CC'],
+                ['III', 'ლოგიკის გამყარება', 'შაბლონები, კრებები და მცირე დეტექტიური ამოცანები.', '#EEE8FF'],
+                ['IV', 'ნამდვილი გამოწვევები', 'საიდუმლო კოდები, პირამიდები და ლოგიკური ჯაჭვები.', '#DCEBFF'],
+                ['V', 'ელიტური დეტექტივი', 'მრავალეტაპიანი ამოცანები და სტრატეგიული აზროვნება.', '#DFF5E3'],
+            ] as [$__n, $__t, $__x, $__b])
+            <div class="ksl-grade" style="background:{{ $__b }}">
+                <span class="ksl-grade-n">{{ $__n }}</span>
+                <span class="ksl-grade-k">კლასი</span>
+                <b>{{ $__t }}</b>
+                <span>{{ $__x }}</span>
+            </div>
+            @endforeach
         </div>
-        <div class="info-card reveal">
-            <div class="info-card-icon">🚀</div>
-            <div class="info-card-grade">IV კლასი</div>
-            <div class="info-card-h">ნამდვილი გამოწვევები</div>
-            <p class="info-card-p">კოორდინატები, საიდუმლო კოდები და ლოგიკური ჯაჭვები. ამოცანები სკოლის პროგრამას სცდება.</p>
-        </div>
-        <div class="info-card reveal">
-            <div class="info-card-icon">🏆</div>
-            <div class="info-card-grade">V კლასი</div>
-            <div class="info-card-h">ელიტური დეტექტივი</div>
-            <p class="info-card-p">მულტი-ეტაპური გამოძიებები, სტრატეგიული აზროვნება და კოდები. ყველაზე ამბიციური ამოცანების დონე.</p>
-        </div>
-    </div>
-</div>
-</div>
+    </section>
 
-{{-- ── Parent Market ── --}}
-<div id="market">
-<div class="sec">
-    <div class="eyebrow reveal">ჯილდოების სისტემა</div>
-    <h2 class="sec-h2 reveal">მშობელი ადგენს მიზანს · ბავშვი ირჩევს გზას</h2>
-    <p class="sec-sub reveal">შექმენით თქვენი ოჯახური „საკუთარი მარკეტი“, სადაც თავად დააწესებთ ჯილდოებს (მაგალითად: ველოსიპედით გასეირნება, დამატებითი საათი თამაშისთვის ან საყვარელი ტკბილეული). ყოველ ამოხსნილ ამოცანაში ბავშვი აგროვებს ქულებს და სწავლობს, რომ შრომას ყოველთვის მოაქვს დამსახურებული აღიარება.</p>
-    <div class="mkt-outer">
-        <div class="mkt-track">
-            <div class="mkt-card"><div class="mkt-ico">🍕</div><div class="mkt-name">პიცა სახლში</div><div class="mkt-price">10 🪙</div></div>
-            <div class="mkt-card"><div class="mkt-ico">🎬</div><div class="mkt-name">კინოში წასვლა</div><div class="mkt-price">20 🪙</div></div>
-            <div class="mkt-card"><div class="mkt-ico">🎁</div><div class="mkt-name">სიურპრიზი</div><div class="mkt-price">50 🪙</div></div>
-            <div class="mkt-card"><div class="mkt-ico">🎮</div><div class="mkt-name">თამაში (2 სთ)</div><div class="mkt-price">15 🪙</div></div>
-            <div class="mkt-card"><div class="mkt-ico">🍦</div><div class="mkt-name">ნაყინი</div><div class="mkt-price">5 🪙</div></div>
-            <div class="mkt-card"><div class="mkt-ico">🏆</div><div class="mkt-name">სპეც. გასეირნება</div><div class="mkt-price">30 🪙</div></div>
-            <div class="mkt-card"><div class="mkt-ico">📚</div><div class="mkt-name">წიგნი საჩუქრად</div><div class="mkt-price">25 🪙</div></div>
+    {{-- ── ჯილდოები ── --}}
+    <section id="rewards" class="ksl-peach">
+        <div class="ksl-in ksl-split">
+            <div style="display:flex;flex-direction:column;gap:14px;">
+                <span class="ksl-eyebrow" style="color:#8A3407;">ჯილდოების სისტემა</span>
+                <h2 class="ksl-h2">მშობელი ადგენს მიზანს, ბავშვი ირჩევს გზას</h2>
+                <p class="ksl-p" style="color:#4A2A12;">შექმენით ოჯახის მარკეტი და თავად დააწესეთ ჯილდოები. სწორი პასუხებით ბავშვი მონეტებს აგროვებს და ჯილდოს თავად ირჩევს.</p>
+                <div class="ksl-chips">
+                    <span>მედლები და დონეები</span><span>მონეტები</span><span>ზედიზედ დღეები</span><span>ოლიმპიადა</span>
+                </div>
+            </div>
+            <div class="ksl-rewards">
+                @foreach([['🍕', 'პიცა სახლში', 10], ['🎬', 'კინოში წასვლა', 20], ['🎁', 'სიურპრიზი', 50], ['🎮', 'თამაში (2 სთ)', 15], ['🍦', 'ნაყინი', 5], ['📚', 'წიგნი საჩუქრად', 25]] as [$__ri, $__rn, $__rp])
+                <div class="ksl-reward">
+                    <span>{{ $__ri }} {{ $__rn }}</span>
+                    <b><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#F5B301"/><circle cx="12" cy="12" r="6.5" fill="none" stroke="#FFE08A" stroke-width="2"/></svg>{{ $__rp }}</b>
+                </div>
+                @endforeach
+            </div>
         </div>
-    </div>
-</div>
-</div>
+    </section>
 
-{{-- ── Block 3: Gamification ── --}}
-<div class="sec-bg" id="gamification">
-<div class="sec">
-    <div class="eyebrow reveal">გეიმიფიკაცია</div>
-    <h2 class="sec-h2 reveal">🏠 ჩემი ვირტუალური ოთახი —<br>ჩემი სამყარო</h2>
-    <p class="sec-sub reveal">ყოველი ამოხსნილი ამოცანა შენი ოთახის ახალი აქსესუარია!</p>
-    <div class="feat-grid">
-        <div class="feat-card reveal">
-            <div class="feat-icon">🏅</div>
-            <div class="feat-tag">Medals & Trophies</div>
-            <div class="feat-h">დიდების კედელი</div>
-            <p class="feat-p">ყველა წარმატებული დეტექტიური გამოძიებისთვის ბავშვი იღებს უნიკალურ მედლებსა და თასებს, რომლებსაც თავის ვირტუალურ კედელზე ანთავსებს.</p>
+    {{-- ── მშობლის პანელი ── --}}
+    <section id="parent" class="ksl-in ksl-split">
+        <div style="display:flex;flex-direction:column;gap:18px;">
+            <span class="ksl-eyebrow" style="color:#5B3FD0;">მშობლის პანელი</span>
+            <h2 class="ksl-h2">შენ აწესებ წესებს, ჩვენ ვაკეთებთ ანალიზს</h2>
+            <div class="ksl-feats">
+                <div class="ksl-feat"><b>მოქნილი გრაფიკი</b><span>შენ განსაზღვრავ, დღეში რამდენი ტესტი უნდა დაწეროს.</span></div>
+                <div class="ksl-feat"><b>სრული კონტროლი</b><span>ნახე ყველა ტესტი, სად შეცდა და რა იყო სწორი პასუხი.</span></div>
+                <div class="ksl-feat"><b>ზრდის დინამიკა</b><span>შედეგები თემებისა და დონეების მიხედვით.</span></div>
+                <div class="ksl-feat"><b>შეტყობინებები</b><span>გაუგზავნე შეხსენება შვილს ერთი ღილაკით.</span></div>
+            </div>
         </div>
-        <div class="feat-card reveal">
-            <div class="feat-icon">🎨</div>
-            <div class="feat-tag">Customization</div>
-            <div class="feat-h">პერსონალიზაცია სტიკერებით</div>
-            <p class="feat-p">დააგროვე ქულები და გახსენი სტიკერები, პოსტერები და ავეჯი შენი საყვარელი თემატიკიდან (ფეხბურთი, კოსმოსი). მოაწყვე ოთახი ისე, როგორც შენ გინდა!</p>
+        <div class="ksl-mock" aria-hidden="true">
+            <div style="display:flex;align-items:center;gap:10px;"><span style="width:40px;height:40px;border-radius:50%;background:#DCEBFF;display:flex;align-items:center;justify-content:center;font-size:20px;">👦</span><b style="font-size:16px;">ნიკა · ბოლო 7 დღე</b></div>
+            <div class="ksl-mock-bars">
+                <i style="height:66px"></i><i style="height:78px"></i><i class="z" style="height:6px"></i><i style="height:52px"></i><i style="height:96px"></i><i style="height:40px"></i><i class="t" style="height:84px"></i>
+            </div>
+            <div class="ksl-mock-row"><span>შეკრება</span><span>92%</span></div><div class="ksl-mock-bar"><span style="width:92%;background:#1E8A4C;"></span></div>
+            <div class="ksl-mock-row"><span>ლოგიკა</span><span>58%</span></div><div class="ksl-mock-bar"><span style="width:58%;background:#F5B301;"></span></div>
         </div>
-        <div class="feat-card reveal">
-            <div class="feat-icon">🔓</div>
-            <div class="feat-tag">Mystery Boxes</div>
-            <div class="feat-h">საიდუმლო ყუთები</div>
-            <p class="feat-p">გარკვეული დონის მიღწევისას ოთახში ჩნდება საიდუმლო ყუთი, რომლის გახსნაც მხოლოდ ახალი მათემატიკური კოდის გატეხვითაა შესაძლებელი.</p>
-        </div>
-        <div class="feat-card reveal">
-            <div class="feat-icon">⭐</div>
-            <div class="feat-tag">XP & Levels</div>
-            <div class="feat-h">დონეებისა და XP სისტემა</div>
-            <p class="feat-p">ყოველი სწორი პასუხი XP ქულებს მატებს. დააგროვე XP, ამაღლდი დონეში და გახსენი ახალი ფუნქციები, რომლებიც მეგობრებს ჯერ არ აქვთ.</p>
-        </div>
-    </div>
-</div>
-</div>
+    </section>
 
-{{-- ── Block 2: Parent dashboard ── --}}
-<div id="parentdash">
-<div class="sec">
-    <div class="eyebrow reveal">მშობლის პანელი</div>
-    <h2 class="sec-h2 reveal">📊 მართე პროცესი და ადევნე<br>თვალი პროგრესს</h2>
-    <p class="sec-sub reveal">შენ აწესებ წესებს, KidSmart აკეთებს ანალიზს.</p>
-    <div class="feat-grid">
-        <div class="feat-card reveal">
-            <div class="feat-icon">🕒</div>
-            <div class="feat-tag">Task Manager</div>
-            <div class="feat-h">მოქნილი გრაფიკი</div>
-            <p class="feat-p">შენ განსაზღვრავ, კვირაში რამდენჯერ ან დღეში რამდენი ტესტი უნდა შეასრულოს ბავშვმა. არანაირი გადატვირთვა — მხოლოდ ჯანსაღი რუტინა.</p>
+    {{-- ── ფასები ── --}}
+    <section id="pricing" class="ksl-band">
+        <div class="ksl-in">
+            <div class="ksl-sec-head">
+                <span class="ksl-eyebrow">ტარიფები</span>
+                <h2 class="ksl-h2">აირჩიე შენზე მორგებული პაკეტი</h2>
+                <p class="ksl-p">დაიწყე უფასოდ, გადადი უფრო დიდ პაკეტზე, როცა მზად იქნები.</p>
+            </div>
+            <div class="ksl-plans">
+                @foreach($__plans as $__pl)
+                @php $__feat = $__pl->id === $__featuredId; @endphp
+                <div class="ksl-plan {{ $__feat ? 'feat' : '' }}">
+                    <div class="ksl-plan-h"><b>{{ $__pl->name }}</b>@if($__feat)<span class="ksl-plan-badge">ყველაზე პოპულარული</span>@endif</div>
+                    <div class="ksl-price">
+                        @if($__pl->is_free)
+                            <b>0 ₾</b><span>მუდამ უფასო</span>
+                        @elseif($__pl->price_monthly > 0)
+                            <b>{{ $__money($__pl->price_monthly) }} ₾</b><span>/ თვეში</span>
+                        @elseif($__pl->price_yearly > 0)
+                            <b>{{ $__money($__pl->price_yearly) }} ₾</b><span>/ წელიწადში</span>
+                        @endif
+                    </div>
+                    <ul>
+                        <li>{{ $__pl->max_children === 0 ? 'შეუზღუდავი რაოდენობის შვილი' : $__pl->max_children . ' შვილის პროფილი' }}</li>
+                        @if($__pl->max_difficulty)<li>სირთულის {{ $__pl->max_difficulty }} დონემდე</li>@endif
+                        @if(!$__pl->is_free && $__pl->price_monthly > 0 && $__pl->price_yearly > 0)<li>ან {{ $__money($__pl->price_yearly) }} ₾ წელიწადში</li>@endif
+                        @foreach(preg_split('/\r\n|\r|\n/', trim((string) $__pl->description)) as $__line)
+                            @if(trim($__line) !== '')<li>{{ trim($__line) }}</li>@endif
+                        @endforeach
+                    </ul>
+                    <button type="button" class="ksl-btn {{ $__feat ? '' : 'dark' }}" onclick="toggleLoginModal(event)">{{ $__pl->is_free ? 'დაიწყე უფასოდ' : 'აირჩიე ' . $__pl->name }}</button>
+                </div>
+                @endforeach
+            </div>
         </div>
-        <div class="feat-card reveal">
-            <div class="feat-icon">👁️</div>
-            <div class="feat-tag">Live Feed</div>
-            <div class="feat-h">სრული კონტროლი</div>
-            <p class="feat-p">მიიღე მყისიერი წვდომა ყველა შესრულებულ დავალებაზე. ნახე, სად გაუჭირდა, სად გამოიყენა მინიშნება და რა ამოხსნა მარტივად.</p>
-        </div>
-        <div class="feat-card reveal">
-            <div class="feat-icon">📈</div>
-            <div class="feat-tag">Smart Analytics</div>
-            <div class="feat-h">ზრდის დინამიკა</div>
-            <p class="feat-p">დეტალური რეპორტები მშობლისთვის. სისტემა გაჩვენებს: „რა სირთულით დაიწყო, სად აქვს პროგრესი და რა დონეზეა ახლა".</p>
-        </div>
-        <div class="feat-card reveal">
-            <div class="feat-icon">🔔</div>
-            <div class="feat-tag">Instant Alerts</div>
-            <div class="feat-h">მყისიერი შეტყობინება</div>
-            <p class="feat-p">მიიღე Push-შეტყობინება, როგორც კი ბავშვი ტესტს დაასრულებს. ყოველთვის იცი, რა ხდება — სადაც არ უნდა იყო.</p>
-        </div>
-    </div>
-</div>
-</div>
+    </section>
 
-
-
-{{-- ── Block 4: Pricing ── --}}
-<div class="sec-bg" id="pricing">
-<div class="sec">
-    <div class="eyebrow reveal">ტარიფები</div>
-    <h2 class="sec-h2 reveal">💎 აირჩიე შენზე მორგებული პაკეტი</h2>
-    <p class="sec-sub reveal">დაიწყე უფასოდ, გადადი პრემიუმზე, როცა მზად იქნები.</p>
-    <div class="price-grid">
-        <div class="price-card reveal">
-            <div class="price-name">სცადე</div>
-            <div class="price-sub">Free</div>
-            <div class="price-val">0 ₾ <span>/ მუდამ უფასო</span></div>
-            <div class="price-divider"></div>
-            <ul class="price-features">
-                <li>1 საბაზისო თემატიკა</li>
-                <li>დღეში 1 ტესტი</li>
-                <li>მარტივი სტატისტიკა</li>
-            </ul>
-            <button class="price-btn price-btn-free" onclick="toggleLoginModal(event)">დაიწყე უფასოდ</button>
+    {{-- ── CTA ── --}}
+    <section class="ksl-in">
+        <div class="ksl-cta">
+            <div style="flex:1 1 360px;display:flex;flex-direction:column;gap:10px;">
+                <h2 class="ksl-h1" style="font-size:clamp(44px,6vw,76px);color:#fff;">დაიწყე დღეს</h2>
+                <span style="font-size:18px;font-weight:700;color:#3D1A04;">პირველი ამოცანა — 2 წუთში.</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+                <button type="button" class="ksl-btn big dark" onclick="toggleLoginModal(event)">შექმენი პროფილი — უფასოდ</button>
+                <span style="font-size:13px;font-weight:700;color:#3D1A04;text-align:center;">Google-ით შესვლა · ბარათი არ სჭირდება</span>
+            </div>
         </div>
-        <div class="price-card featured reveal">
-            <div class="price-badge">✨ ყველაზე პოპულარული</div>
-            <div class="price-name">დეტექტივი</div>
-            <div class="price-sub">Premium</div>
-            <div class="price-val">XX ₾ <span>/ თვეში</span></div>
-            <div class="price-divider"></div>
-            <ul class="price-features">
-                <li>ყველა თემატიკა (ფეხბურთი, კოსმოსი…)</li>
-                <li>ლიმიტის გარეშე ტესტები და მინიშნებები</li>
-                <li>მშობლის სრული ანალიტიკა და გრაფიკები</li>
-                <li>ვირტუალური ოთახის სრული წვდომა</li>
-            </ul>
-            <button class="price-btn price-btn-main" onclick="toggleLoginModal(event)">გახდი პრემიუმი</button>
-        </div>
-        <div class="price-card reveal">
-            <div class="price-name">ჩემპიონი</div>
-            <div class="price-sub">Yearly <span class="save-pill">დაზოგე 30%</span></div>
-            <div class="price-val">XX ₾ <span>/ წელიწადში</span></div>
-            <div class="price-divider"></div>
-            <ul class="price-features">
-                <li>პრემიუმის ყველა ფუნქცია მთელი წლის განმავლობაში</li>
-                <li>პერსონალური სერტიფიკატი წლის ბოლოს</li>
-                <li>პრიორიტეტული მხარდაჭერა</li>
-            </ul>
-            <button class="price-btn price-btn-year" onclick="toggleLoginModal(event)">დაზოგე ახლავე</button>
-        </div>
-    </div>
-</div>
-</div>
+    </section>
 
-{{-- ── CTA ── --}}
-<div class="cta-wrap">
-    <h2 class="cta-h2">დაიწყე დღეს.<br>პირველი ამოცანა — 2 წუთში.</h2>
-    <p class="cta-sub">Google-ით შესვლა · ბარათი არ სჭირდება.</p>
-    <button class="btn-main" style="font-size:1.15rem;padding:16px 44px;"
-        onclick="toggleLoginModal(event)">
-        შექმენი პროფილი — უფასოდ ✏️
-    </button>
+    <footer class="ksl-foot">
+        <div class="ksl-foot-in">
+            <span>© {{ date('Y') }} KidSmart · საქართველო · Developed by Ghvedashvili</span>
+            <a href="#top">ზემოთ დაბრუნება ↑</a>
+        </div>
+    </footer>
 </div>
-
-{{-- ── Footer ── --}}
-<footer class="nb-footer">
-    <div class="footer-left">
-        <span class="footer-logo">KidSmart</span>
-        <!-- <span class="footer-divider"></span>
-        <p class="footer-copy">© 2025 KidSmart · საქართველო</p> -->
-    </div>
-    <span class="footer-right">Developed by Ghvedashvili</span>
-</footer>
 
 <script>
-if (history.scrollRestoration) history.scrollRestoration = 'manual';
-window.addEventListener('load', function() { window.scrollTo(0, 0); });
-
-var QDATA = [
-    { theme:'⚽ ფეხბურთი', icon:'⚽', clr:'',
-      q:'კვარამ-მ პირველ თამაშში გაიტანა 3 გოლი, მეორე თამაშში 2-ით მეტი. სულ რამდენი გოლი ორივე თამაშში?',
-      opts:['6','8','10','5'], ans:'8' },
-    { theme:'🦸 სუპ-გმირი', icon:'🦸', clr:'qc-y',
-      q:'სუპ.მენს 5 ბოროტმოქმედი დაამარცხა, ბეთმენს — 3-ით ნაკლები. ბეთმენმა რამდენი?',
-      opts:['2','3','8','4'], ans:'2' },
-    { theme:'🚀 კოსმოსი', icon:'🚀', clr:'qc-o',
-      q:'რაკეტა 5 წუთში 600 კმ გაივლის. 1 წუთში რამდენ კმ-ს გაივლის?',
-      opts:['100','120','150','60'], ans:'120' },
-    { theme:'⚽ ფეხბურთი', icon:'🥅', clr:'',
-      q:'ორ გუნდს ჯამში 9 გოლი. ერთმა 6 გაიტანა. მეორემ რამდენი გაიტანა?',
-      opts:['2','3','4','5'], ans:'3' },
-    { theme:'🦸 სუპ-გმირი', icon:'💥', clr:'qc-y',
-      q:'გმირს 4 კოსტუმი. ყოველ კოსტუმს 3 ნიღბი. სულ რამდენი ნიღბი?',
-      opts:['7','10','12','8'], ans:'12' },
-    { theme:'🚀 კოსმოსი', icon:'🌍', clr:'qc-o',
-      q:'კოსმოსური სადგური 92 წუთში ბრუნავს. 3 ბრუნვა — რამდენ წუთს?',
-      opts:['184','276','366','280'], ans:'276' },
-];
-
-(function() {
-    var track = document.getElementById('qCar');
-    if (!track) return;
-
-    function buildSet(prefix) {
-        QDATA.forEach(function(c, i) {
-            var uid = prefix + i;
-            var div = document.createElement('div');
-            div.className = 'qc' + (c.clr ? ' ' + c.clr : '');
-            div.innerHTML =
-                '<div class="qc-badge">' + c.theme + '</div>' +
-                '<span class="qc-icon">' + c.icon + '</span>' +
-                '<div class="qc-text">' + c.q + '</div>' +
-                '<div class="qc-opts" id="qo' + uid + '"></div>' +
-                '<div class="qc-fb" id="qf' + uid + '"></div>';
-            track.appendChild(div);
-
-            var el = div.querySelector('#qo' + uid);
-            c.opts.forEach(function(opt) {
-                var b = document.createElement('button');
-                b.className = 'qc-opt';
-                b.textContent = opt;
-                b.onclick = function() {
-                    if (el.dataset.done) return;
-                    el.dataset.done = '1';
-                    el.querySelectorAll('.qc-opt').forEach(function(btn) {
-                        btn.disabled = true;
-                        if (btn.textContent === c.ans) btn.classList.add('correct');
-                        else if (btn.textContent === opt) btn.classList.add('wrong');
-                    });
-                    div.querySelector('#qf' + uid).innerHTML = opt === c.ans
-                        ? '<span style="color:var(--green);">✓ სწორია! +10 🪙</span>'
-                        : '<span style="color:#ef4444;">✗ სწ: ' + c.ans + '</span>';
-                };
-                el.appendChild(b);
-            });
+(function () {
+    var Q = {
+        football: { label: '⚽ ფეხბურთი', q: 'ორმა გუნდმა ჯამში 9 გოლი გაიტანა. ერთმა — 6. მეორემ რამდენი?', opts: ['2', '3', '4'], a: '3' },
+        hero:     { label: '🦸 სუპერგმირები', q: 'გმირს 4 კოსტიუმი აქვს, თითოეულს — 3 ნიღაბი. სულ რამდენი ნიღაბია?', opts: ['7', '12', '14'], a: '12' },
+        space:    { label: '🚀 კოსმოსი', q: 'რაკეტა 5 წუთში 600 კმ-ს გადის. 1 წუთში რამდენ კმ-ს გაივლის?', opts: ['100', '120', '150'], a: '120' }
+    };
+    var cur = 'football';
+    var tabs = document.getElementById('kslTabs'), qEl = document.getElementById('kslQ'),
+        opts = document.getElementById('kslOpts'), fb = document.getElementById('kslFb');
+    if (!tabs) return;
+    function render() {
+        tabs.innerHTML = '';
+        Object.keys(Q).forEach(function (id) {
+            var b = document.createElement('button');
+            b.type = 'button'; b.className = 'ksl-tab'; b.setAttribute('role', 'tab');
+            b.setAttribute('aria-selected', id === cur ? 'true' : 'false');
+            b.textContent = Q[id].label;
+            b.onclick = function () { cur = id; render(); };
+            tabs.appendChild(b);
+        });
+        var item = Q[cur];
+        qEl.textContent = item.q;
+        opts.innerHTML = ''; fb.className = 'ksl-fb'; fb.textContent = '';
+        item.opts.forEach(function (v) {
+            var o = document.createElement('button');
+            o.type = 'button'; o.className = 'ksl-opt'; o.setAttribute('role', 'radio'); o.setAttribute('aria-checked', 'false');
+            o.textContent = v;
+            o.onclick = function () {
+                Array.prototype.forEach.call(opts.children, function (c) {
+                    c.classList.remove('ok', 'bad'); c.setAttribute('aria-checked', 'false');
+                    if (c.textContent === item.a) c.classList.add('ok');
+                });
+                o.setAttribute('aria-checked', 'true');
+                if (v === item.a) { fb.className = 'ksl-fb ok'; fb.textContent = '✓ სწორია! KidSmart-ში ასეთ პასუხებზე მონეტებს მოიგებ.'; }
+                else { o.classList.add('bad'); fb.className = 'ksl-fb bad'; fb.textContent = '✗ თითქმის! სწორი პასუხია ' + item.a + '.'; }
+            };
+            opts.appendChild(o);
         });
     }
-
-    buildSet('a');
-})();
-
-(function() {
-    if (!('IntersectionObserver' in window)) {
-        document.querySelectorAll('.reveal').forEach(function(el) { el.classList.add('in'); });
-        return;
-    }
-    var obs = new IntersectionObserver(function(entries) {
-        entries.forEach(function(e) {
-            if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); }
-        });
-    }, { threshold: 0.12 });
-    document.querySelectorAll('.reveal').forEach(function(el) { obs.observe(el); });
-})();
-
-(function() {
-    var tracks = document.querySelectorAll('#qCar, #adaptTrack, #gamesTrack, .mkt-track');
-    if (!('IntersectionObserver' in window)) {
-        tracks.forEach(function(t) { t.classList.add('track-in'); });
-        return;
-    }
-    var obs = new IntersectionObserver(function(entries) {
-        entries.forEach(function(e) {
-            if (!e.isIntersecting) return;
-            e.target.classList.add('track-in');
-            obs.unobserve(e.target);
-        });
-    }, { threshold: 0.08 });
-    tracks.forEach(function(t) { obs.observe(t); });
-})();
-
-// Drag-to-scroll with momentum for all carousels
-// Drag-to-scroll with desktop momentum, click prevention, and CSS Snap handling
-(function() {
-    var sel = '.dc, .adapt-grid, .detect-grid, .mkt-track';
-    document.querySelectorAll(sel).forEach(function(el) {
-        var raf, vel = 0;
-        var isDragging = false;
-
-        function momentum() {
-            if (Math.abs(vel) < 0.3) return;
-            el.scrollLeft += vel;
-            vel *= 0.94;
-            raf = requestAnimationFrame(momentum);
-        }
-
-        // ── Mouse Events ──
-        var down = false, mX, mSL, mLastX, mLastT;
-        
-        el.addEventListener('mousedown', function(e) {
-            cancelAnimationFrame(raf); 
-            vel = 0;
-            down = true; 
-            isDragging = false;
-            el.classList.add('dragging');
-            
-            mX = mLastX = e.pageX; 
-            mSL = el.scrollLeft; 
-            mLastT = Date.now();
-        });
-
-        document.addEventListener('mouseup', function(e) {
-            if (!down) return;
-            down = false; 
-            el.classList.remove('dragging');
-            
-            if (isDragging) requestAnimationFrame(momentum);
-        });
-
-        el.addEventListener('mousemove', function(e) {
-            if (!down) return;
-            
-            var deltaX = Math.abs(e.pageX - mX);
-            if (deltaX > 4) {
-                isDragging = true;
-            }
-
-            var now = Date.now();
-            var dt = Math.max(now - mLastT, 1);
-            
-            // ვანგარიშობთ სიჩქარეს
-            vel = -(e.pageX - mLastX) / dt * 15; 
-            
-            el.scrollLeft = mSL - (e.pageX - mX);
-            mLastX = e.pageX; 
-            mLastT = now;
-            e.preventDefault(); 
-        });
-
-        // კლიკის ბლოკირება, თუ მომხმარებელი რეალურად სქროლავდა
-        el.addEventListener('click', function(e) {
-            if (isDragging) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-        }, true);
-
-        // ── Touch Events ──
-        var tX, tY, tSL, tLastX, tLastT, tDir;
-        el.addEventListener('touchstart', function(e) {
-            cancelAnimationFrame(raf); vel = 0;
-            tX = tLastX = e.touches[0].clientX;
-            tY = e.touches[0].clientY;
-            tSL = el.scrollLeft;
-            tLastT = Date.now();
-            tDir = null;
-        }, { passive: true });
-
-        el.addEventListener('touchmove', function(e) {
-            var x = e.touches[0].clientX;
-            var y = e.touches[0].clientY;
-            if (tDir === null) {
-                var dx = Math.abs(x - tX), dy = Math.abs(y - tY);
-                if (dx < 4 && dy < 4) return;
-                tDir = dx >= dy ? 'h' : 'v';
-            }
-            if (tDir !== 'h') return;
-            e.preventDefault();
-            var now = Date.now(), dt = Math.max(now - tLastT, 1);
-            vel = -(x - tLastX) / dt * 15;
-            el.scrollLeft = tSL - (x - tX);
-            tLastX = x; tLastT = now;
-        }, { passive: false });
-
-        el.addEventListener('touchend', function() {
-            if (tDir === 'h') requestAnimationFrame(momentum);
-        }, { passive: true });
-    });
+    render();
 })();
 </script>
 @endsection

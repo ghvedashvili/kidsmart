@@ -4,144 +4,84 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
 <title>შედეგი</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wdth,wght@62.5..100,100..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh; }
+body { font-family: 'Noto Sans Georgian', system-ui, sans-serif; background: #FFF8F1; min-height: 100vh; color: #1D1A17; }
 
 .hero {
-    padding: 40px 20px 32px;
-    text-align: center;
-    background: linear-gradient(135deg, #4f46e5, #7c3aed);
-    color: white;
+    position: relative; overflow: hidden;
+    max-width: 760px; margin: 16px auto 0; border-radius: 32px;
+    padding: 34px 24px 30px; text-align: center;
+    background: #F7883E; color: #fff;
 }
+.hero::before { content: ''; position: absolute; right: -70px; top: -90px; width: 300px; height: 300px; border-radius: 50%; background: rgba(255,255,255,.2); }
+.hero > * { position: relative; }
 .score-circle {
-    width: 130px; height: 130px;
-    border-radius: 50%;
-    border: 5px solid rgba(255,255,255,0.4);
-    background: rgba(255,255,255,0.15);
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    margin: 0 auto 20px;
-    backdrop-filter: blur(4px);
+    width: 136px; height: 136px; border-radius: 50%;
+    background: #fff; color: #1D1A17;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    margin: 0 auto 16px; box-shadow: 0 6px 0 rgba(0,0,0,.08);
 }
-.score-num {
-    font-size: 2.8rem;
-    font-weight: 900;
-    line-height: 1;
-}
-.score-total {
-    font-size: 0.85rem;
-    font-weight: 700;
-    opacity: 0.75;
-}
-.score-label {
-    font-size: 1.1rem;
-    font-weight: 800;
-    margin-bottom: 6px;
-    opacity: 0.9;
-}
-.score-pct {
-    font-size: 0.82rem;
-    opacity: 0.65;
-    margin-bottom: 20px;
-}
-.stars {
-    font-size: 1.8rem;
-    letter-spacing: 6px;
-    margin-bottom: 6px;
-}
-.theme-badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: rgba(255,255,255,0.15); border-radius: 99px;
-    padding: 5px 14px; font-size: 0.78rem; font-weight: 700;
-}
+.score-num { font-size: 3rem; font-weight: 900; line-height: 1; }
+.score-total { font-size: .9rem; font-weight: 800; color: #6B625A; }
+.score-label { font-size: 2.6rem; line-height: .95; font-weight: 900; font-stretch: 66%; text-transform: uppercase; margin-bottom: 8px; }
+.score-pct { font-size: .95rem; font-weight: 700; color: #3D1A04; margin-bottom: 14px; }
+.stars { font-size: 1.7rem; letter-spacing: 4px; margin-bottom: 10px; }
+.theme-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,.85); color: #3D1A04; border-radius: 99px; padding: 6px 14px; font-size: .82rem; font-weight: 800; }
 
 /* Review */
-.review-wrap { max-width: 640px; margin: 0 auto; padding: 20px 16px 80px; }
-.section-title {
-    font-size: 0.72rem; font-weight: 800; color: #94a3b8;
-    letter-spacing: 0.1em; text-transform: uppercase;
-    margin: 20px 0 12px;
-}
-.q-review {
-    background: white; border-radius: 14px; padding: 16px 18px;
-    margin-bottom: 10px;
-    border-left: 4px solid #e2e8f0;
-    box-shadow: 0 1px 6px rgba(0,0,0,0.04);
-}
-.q-review.correct { border-left-color: #16a34a; }
-.q-review.wrong   { border-left-color: #ef4444; }
-.q-review.skipped { border-left-color: #f59e0b; }
-.q-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.q-badge {
-    font-size: 0.68rem; font-weight: 900; padding: 2px 9px;
-    border-radius: 99px; color: white;
-}
-.q-badge.correct { background: #16a34a; }
-.q-badge.wrong   { background: #ef4444; }
-.q-badge.skipped { background: #f59e0b; }
-.q-text-r { font-size: 0.92rem; font-weight: 700; color: #334155; line-height: 1.5; margin-bottom: 8px; }
-.ans-row { font-size: 0.8rem; font-weight: 700; }
-.ans-correct { color: #16a34a; }
-.ans-wrong   { color: #ef4444; }
-.ans-note    { color: #64748b; }
+.review-wrap { max-width: 760px; margin: 0 auto; padding: 8px 16px 40px; }
+.section-title { font-size: 1.35rem; font-weight: 800; color: #1D1A17; margin: 22px 0 12px; }
+.q-review { background: #fff; border-radius: 22px; padding: 16px 18px; margin-bottom: 12px; border-left: 6px solid #EFE6DC; box-shadow: 0 2px 0 #F1E3D3; }
+.q-review.correct { border-left-color: #3FAE6E; }
+.q-review.wrong   { border-left-color: #E5484D; }
+.q-review.skipped { border-left-color: #F5B301; }
+.q-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.q-badge { font-size: .76rem; font-weight: 800; padding: 3px 11px; border-radius: 99px; color: #fff; }
+.q-badge.correct { background: #1E8A4C; }
+.q-badge.wrong   { background: #C62828; }
+.q-badge.skipped { background: #F5B301; color: #3D2A00; }
+.q-text-r { font-size: 1rem; font-weight: 700; color: #1D1A17; line-height: 1.55; margin-bottom: 8px; }
+.ans-row { font-size: .9rem; font-weight: 700; }
+.ans-correct { color: #1E7A45; }
+.ans-wrong   { color: #B42318; }
+.ans-note    { color: #6B625A; }
 
 /* Coins + achievements banner */
-.reward-bar {
-    max-width: 640px; margin: 0 auto;
-    padding: 16px 16px 0;
-}
-.coins-pill {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: linear-gradient(135deg, #f59e0b, #fbbf24);
-    color: white; border-radius: 99px;
-    padding: 10px 20px; font-size: 1rem; font-weight: 900;
-    box-shadow: 0 4px 14px rgba(245,158,11,0.35);
-    margin-bottom: 12px;
-}
-.ach-unlocked {
-    display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;
-}
-.ach-pill {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    color: white; border-radius: 99px;
-    padding: 8px 16px; font-size: 0.78rem; font-weight: 800;
-    box-shadow: 0 3px 10px rgba(99,102,241,0.3);
-    animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
-}
-@keyframes popIn {
-    from { transform: scale(0.5); opacity: 0; }
-    to   { transform: scale(1);   opacity: 1; }
-}
-.ach-pill:nth-child(2) { animation-delay: 0.1s; }
-.ach-pill:nth-child(3) { animation-delay: 0.2s; }
-.ach-pill:nth-child(4) { animation-delay: 0.3s; }
+.reward-bar { max-width: 760px; margin: 0 auto; padding: 16px 16px 0; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.coins-pill { display: inline-flex; align-items: center; gap: 8px; background: #1D1A17; color: #fff; border-radius: 99px; padding: 10px 20px; font-size: 1rem; font-weight: 900; box-shadow: 0 2px 0 #F1E3D3; }
+.ach-unlocked { display: flex; flex-wrap: wrap; gap: 8px; }
+.ach-pill { display: inline-flex; align-items: center; gap: 6px; background: #6D4FE0; color: #fff; border-radius: 99px; padding: 8px 16px; font-size: .84rem; font-weight: 800; animation: popIn .4s cubic-bezier(0.34,1.56,0.64,1) both; }
+@keyframes popIn { from { transform: scale(.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.ach-pill:nth-child(2) { animation-delay: .1s; }
+.ach-pill:nth-child(3) { animation-delay: .2s; }
+.ach-pill:nth-child(4) { animation-delay: .3s; }
 
 /* Bottom */
 .bottom-btns {
     position: fixed; bottom: 0; left: 0; right: 0;
-    background: white; border-top: 1px solid #e2e8f0;
-    padding: 14px 20px;
-    display: flex; gap: 8px; max-width: 640px; margin: 0 auto;
+    background: #fff; border-top: 1px solid #F1E3D3;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    display: flex; gap: 8px; justify-content: center;
 }
 .btn-retry, .btn-home, .btn-hist {
-    flex: 1; border-radius: 12px; padding: 13px;
-    font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 800;
-    cursor: pointer; border: none; transition: all 0.18s;
-    text-decoration: none; display: flex; align-items: center; justify-content: center;
+    flex: 1; max-width: 300px; border-radius: 26px; height: 52px; padding: 0 16px;
+    font-family: inherit; font-size: .95rem; font-weight: 800;
+    cursor: pointer; border: none; transition: background .15s;
+    text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px;
 }
-.btn-retry {
-    background: linear-gradient(135deg, #4f46e5, #7c3aed);
-    color: white;
-    box-shadow: 0 4px 14px rgba(79,70,229,0.3);
+.btn-retry { background: #1D1A17; color: #fff; }
+.btn-retry:hover { background: #000; }
+.btn-hist { background: #FFE3CC; color: #8A3407; }
+.btn-hist:hover { background: #FFD2AE; }
+.btn-home { background: #F5EFE8; color: #1D1A17; flex: 0 0 52px; padding: 0; }
+.btn-home:hover { background: #EADFD3; }
+@media (max-width: 600px) {
+    .hero { margin: 12px 12px 0; border-radius: 28px; }
+    .score-label { font-size: 2.1rem; }
 }
-.btn-retry:hover { transform: translateY(-1px); }
-.btn-home { background: #f1f5f9; color: #64748b; }
-.btn-home:hover { background: #e2e8f0; }
-.btn-hist { background: #e0f2fe; color: #0284c7; }
-.btn-hist:hover { background: #bae6fd; }
 </style>
 </head>
 <body>
@@ -199,7 +139,7 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
         @endforeach
     </div>
     @endif
-    <a href="{{ route('achievements') }}" style="font-size:0.72rem;color:#6366f1;font-weight:700;text-decoration:none;display:inline-block;margin-bottom:8px;">🏆 ჩემი მიღწევები →</a>
+    <a href="{{ route('achievements') }}" style="font-size:0.72rem;color:#4B33B8;font-weight:800;text-decoration:none;display:inline-block;margin-bottom:4px;">ჩემი მედლები →</a>
 </div>
 @endif
 
@@ -251,7 +191,7 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
                     $bg = $hidden ? ($cellOk ? '#dcfce7' : '#fee2e2') : '#4f46e5';
                     $color = $hidden ? ($cellOk ? '#15803d' : '#dc2626') : 'white';
                 @endphp
-                <div style="width:40px;height:40px;border-radius:10px;background:{{ $bg }};color:{{ $color }};display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-weight:900;font-size:0.85rem;">
+                <div style="width:40px;height:40px;border-radius:10px;background:{{ $bg }};color:{{ $color }};display:flex;align-items:center;justify-content:center;font-weight:900;font-size:0.85rem;">
                     {{ $hidden ? $sol : $val }}
                 </div>
                 @endforeach
@@ -386,9 +326,9 @@ body { font-family: 'Nunito', sans-serif; background: #f1f5f9; min-height: 100vh
 
 <div style="height:80px;"></div>
 <div class="bottom-btns">
-    <a href="{{ route('test.start') }}" class="btn-retry">ახალი ტესტი →</a>
-    <a href="{{ route('my.test.show', $test) }}" class="btn-hist">📋 გადახედვა</a>
-    <a href="{{ route('dashboard') }}" class="btn-home">🏠</a>
+    <a href="{{ route('test.start') }}" class="btn-retry">ახალი ტესტი <i class="bi bi-arrow-right"></i></a>
+    <a href="{{ route('my.test.show', $test) }}" class="btn-hist"><i class="bi bi-clipboard-check"></i> გადახედვა</a>
+    <a href="{{ route('dashboard') }}" class="btn-home" aria-label="მთავარი"><i class="bi bi-house-door" style="font-size:1.2rem;"></i></a>
 </div>
 
 </body>

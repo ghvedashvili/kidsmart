@@ -1,114 +1,108 @@
 @extends('layouts.app')
+{{-- redesign-kidsmart: მომხმარებლები (დიზაინი A5) --}}
 @section('content')
 <style>
-    body { background: transparent !important; }
-    .aw { max-width: 1020px; margin: 0 auto; padding: 32px 16px 64px; font-family: 'Goldman', monospace; }
-    .card-dark { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); overflow: hidden; }
-    .fc { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; color: #374151; font-family: 'Goldman', monospace; font-size: 0.78rem; padding: 7px 11px; outline: none; box-sizing: border-box; }
-    .fc:focus { border-color: #94a3b8; }
-    .btn { background: #f8fafc; border: 1px solid #e2e8f0; color: #64748b; font-family: 'Goldman', monospace; font-size: 0.78rem; letter-spacing: 0.08em; padding: 7px 18px; border-radius: 4px; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
-    .btn:hover { border-color: #94a3b8; color: #1e293b; }
-    .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
-    .msg { font-size: 0.75rem; color: #059669; margin-bottom: 16px; }
-    .u-table { width: 100%; border-collapse: collapse; }
-    .u-table th { font-size: 0.6rem; color: #94a3b8; letter-spacing: 0.1em; text-transform: uppercase; padding: 9px 12px; border-bottom: 1px solid #f1f5f9; text-align: left; background: #f8fafc; font-weight: 400; }
-    .u-table td { padding: 9px 12px; border-bottom: 1px solid #f8fafc; font-size: 0.76rem; color: #374151; vertical-align: middle; }
-    .u-table tr:last-child td { border-bottom: none; }
-    .u-table tr:hover td { background: #fafafa; }
-    .role-sel { font-family: 'Goldman', monospace; font-size: 0.7rem; border: 1px solid #e2e8f0; border-radius: 3px; padding: 3px 6px; background: #f8fafc; color: #374151; cursor: pointer; outline: none; max-width: 100px; }
-    .role-sel:focus { border-color: #94a3b8; }
-    .save-icon { color: #059669; font-size: 0.7rem; display: none; margin-left: 4px; }
-    .pkg-badge { display: inline-block; font-size: 0.6rem; padding: 2px 7px; border-radius: 8px; font-weight: 500; white-space: nowrap; }
-    .pkg-free    { background: #dcfce7; color: #166534; }
-    .pkg-paid    { background: #dbeafe; color: #1e40af; }
-    .pkg-expired { background: #fee2e2; color: #991b1b; }
-    .sub-btn { background: none; border: 1px solid #e2e8f0; color: #64748b; font-family: 'Goldman', monospace; font-size: 0.62rem; padding: 2px 8px; border-radius: 3px; cursor: pointer; white-space: nowrap; text-decoration: none; display: inline-block; }
-    .sub-btn:hover { border-color: #94a3b8; color: #1e293b; }
-    .pagination-wrap { margin-top: 16px; display: flex; gap: 6px; flex-wrap: wrap; }
-    .pagination-wrap a, .pagination-wrap span { font-family: 'Goldman', monospace; font-size: 0.68rem; color: #64748b; border: 1px solid #e2e8f0; border-radius: 3px; padding: 4px 10px; text-decoration: none; }
-    .pagination-wrap a:hover { color: #1e293b; border-color: #94a3b8; }
-    /* Modal */
-    .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 200; flex-direction: column; align-items: center; justify-content: flex-start; overflow-y: auto; padding: 80px 16px 48px; }
+    /* redesign-kidsmart: მომხმარებლები (დიზაინი A5) — იგივე კლასები, რასაც გვერდის JS იყენებს */
+    .u-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .u-table th { text-align: left; font-size: 12px; font-weight: 700; color: var(--ks-muted); padding: 10px 12px; white-space: nowrap; }
+    .u-table td { padding: 10px 12px; border-top: 1px solid var(--ks-line-soft); vertical-align: middle; }
+    .u-table tr:hover td { background: #FFF8F1; }
+    .table-scroll { overflow-x: auto; }
+    .role-sel { min-height: 34px; border-radius: 999px; border: 1px solid var(--ks-line); background: #fff; padding: 0 10px; font-family: var(--ks-font); font-size: 12px; font-weight: 800; cursor: pointer; }
+    .role-sel:focus { border-color: var(--ks-orange); outline: none; }
+    .save-icon { display: none; margin-left: 4px; color: var(--ks-green); font-weight: 800; }
+    .pkg-badge { display: inline-flex; font-size: 12px; font-weight: 800; border-radius: 999px; padding: 4px 10px; }
+    .pkg-paid { background: var(--ks-purple-soft); color: var(--ks-purple-dark); }
+    .pkg-free { background: #F1E8DE; color: var(--ks-ink-2); }
+    .pkg-expired { background: var(--ks-red-soft); color: var(--ks-red-dark); }
+    .sub-btn { display: inline-flex; align-items: center; min-height: 32px; padding: 0 10px; border-radius: 10px; border: none; background: #F1E8DE; color: var(--ks-ink); font-family: var(--ks-font); font-size: 12px; font-weight: 800; cursor: pointer; text-decoration: none; white-space: nowrap; }
+    .sub-btn:hover { background: #E9DDD0; color: var(--ks-ink); }
+    .filter-banner { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--ks-blue-soft); color: var(--ks-blue-dark); border-radius: 14px; padding: 10px 14px; font-size: 14px; }
+    .filter-banner a { font-weight: 800; color: var(--ks-blue-dark); }
+    .pagination-wrap { display: flex; justify-content: center; }
+    .pagination-wrap a, .pagination-wrap span { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; min-height: 40px; padding: 0 10px; margin: 0 3px; border-radius: 12px; border: 1px solid var(--ks-line); background: #fff; color: var(--ks-ink); text-decoration: none; font-weight: 700; font-family: var(--ks-font); }
+    .pagination-wrap a:hover { border-color: #D8CEC3; }
+    /* მოდალები */
+    .modal-bg { position: fixed; inset: 0; z-index: 2000; background: rgba(29, 26, 23, .45); display: none; align-items: center; justify-content: center; padding: 16px; }
     .modal-bg.open { display: flex; }
-    .sub-box { background: #fff; border-radius: 10px; padding: 26px; width: 360px; max-width: 100%; box-shadow: 0 8px 32px rgba(0,0,0,0.18); font-family: 'Goldman', monospace; flex-shrink: 0; }
-    .sub-box-title { font-size: 0.8rem; font-weight: 600; color: #1e293b; margin-bottom: 18px; }
-    .lbl { font-size: 0.6rem; color: #94a3b8; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; margin-top: 10px; }
-    .sub-box select.fc, .sub-box input.fc { width: 100%; }
-    .sub-box-actions { display: flex; gap: 8px; margin-top: 18px; }
-    .btn-primary { background: #1e293b; border: none; color: #fff; font-family: 'Goldman', monospace; font-size: 0.75rem; padding: 8px 20px; border-radius: 4px; cursor: pointer; }
-    .btn-primary:hover { background: #334155; }
-    .btn-cancel { background: none; border: 1px solid #e2e8f0; color: #64748b; font-family: 'Goldman', monospace; font-size: 0.75rem; padding: 8px 14px; border-radius: 4px; cursor: pointer; }
-    .history-list { margin-top: 14px; font-size: 0.68rem; max-height: 160px; overflow-y: auto; }
-    .history-item { padding: 5px 0; border-bottom: 1px solid #f1f5f9; color: #374151; }
-    .history-item:last-child { border-bottom: none; }
-    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    .filter-banner { background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 6px; padding: 8px 12px; font-size: 0.74rem; color: #3730a3; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-    .filter-banner a { color: #3730a3; text-decoration: underline; }
-    .cm-diff-row { display: flex; gap: 6px; margin: 2px 0 4px; }
-    .cm-diff-btn { background: #f8fafc; border: 1px solid #e2e8f0; color: #94a3b8; font-family: 'Goldman', monospace; font-size: 0.74rem; padding: 6px 12px; border-radius: 4px; cursor: pointer; transition: all 0.15s; }
-    .cm-diff-btn.sel { border-color: #4f46e5; color: #4f46e5; background: #eef2ff; }
-    .cm-unlimited-row { margin-top: 12px; display: flex; align-items: center; gap: 8px; }
-    .cm-unlimited-row label { font-size: 0.72rem; color: #374151; cursor: pointer; }
-    .cm-err { font-size: 0.72rem; color: #ef4444; margin-top: 8px; display: none; }
-    .cm-reset-wrap { margin-top: 14px; border-top: 1px solid #f1f5f9; padding-top: 12px; }
-    .rel-chip-list { display: flex; flex-wrap: wrap; gap: 6px; min-height: 28px; }
-    .rel-chip { display: inline-flex; align-items: center; gap: 6px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; padding: 4px 6px 4px 12px; font-size: 0.72rem; color: #374151; }
-    .rel-chip button { background: none; border: none; color: #cbd5e1; cursor: pointer; font-size: 0.8rem; padding: 0 4px; line-height: 1; }
-    .rel-chip button:hover { color: #ef4444; }
-    .rel-empty { font-size: 0.7rem; color: #94a3b8; padding: 4px 0; }
-    .rel-search-wrap { position: relative; margin-top: 10px; }
-    .rel-search-results { display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 210; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; box-shadow: 0 6px 20px rgba(0,0,0,0.1); max-height: 220px; overflow-y: auto; margin-top: 2px; }
-    .rel-search-item { padding: 8px 12px; font-size: 0.74rem; color: #374151; cursor: pointer; border-bottom: 1px solid #f1f5f9; }
+    .sub-box { width: 100%; max-width: 480px; max-height: calc(100vh - 32px); overflow-y: auto; background: #fff; border-radius: 22px; padding: 20px; display: flex; flex-direction: column; gap: 6px; font-family: var(--ks-font); }
+    .sub-box-title { font-size: 18px; font-weight: 800; margin-bottom: 6px; }
+    .lbl { font-size: 13px; font-weight: 700; color: var(--ks-ink-2); margin-top: 6px; }
+    .fc { width: 100%; min-height: 44px; box-sizing: border-box; border-radius: 12px; border: 1px solid var(--ks-line); background: var(--ks-bg-admin); padding: 0 12px; font-family: var(--ks-font); font-size: 14px; color: var(--ks-ink); outline: none; }
+    textarea.fc { padding: 10px 12px; }
+    .fc:focus { border-color: var(--ks-orange); box-shadow: 0 0 0 3px rgba(226, 89, 15, .15); }
+    .sub-box-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--ks-line); background: #fff; color: var(--ks-ink); font-family: var(--ks-font); font-size: 14px; font-weight: 800; cursor: pointer; }
+    .btn:hover { border-color: #D8CEC3; }
+    .btn-primary { background: var(--ks-orange-strong) !important; border-color: var(--ks-orange-strong) !important; color: #fff !important; }
+    .btn-primary:hover { background: #A63E07 !important; }
+    .btn-cancel { background: #fff; }
+    .btn-warn { background: #fff; border-color: #F3B4B4; color: var(--ks-red-dark); }
+    .btn-warn:hover { background: var(--ks-red-soft); }
+    .history-list { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+    .history-item { font-size: 13px; padding: 8px 10px; border-radius: 10px; background: var(--ks-bg-admin); }
+    .cm-diff-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .cm-diff-btn { min-width: 44px; min-height: 40px; border-radius: 10px; border: 1px solid #D9CFFC; background: #fff; color: var(--ks-purple-dark); font-family: var(--ks-font); font-size: 14px; font-weight: 800; cursor: pointer; }
+    .cm-diff-btn.sel { background: var(--ks-purple); border-color: var(--ks-purple); color: #fff; }
+    .cm-unlimited-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+    .cm-unlimited-row label { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .cm-reset-wrap { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--ks-line-soft); }
+    .cm-err { font-size: 12px; font-weight: 700; color: var(--ks-red-dark); margin-top: 4px; }
+    .rel-chip-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0; }
+    .rel-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; background: var(--ks-purple-soft); color: var(--ks-purple-dark); border-radius: 999px; padding: 4px 6px 4px 12px; }
+    .rel-chip button { width: 24px; height: 24px; border-radius: 50%; border: none; background: transparent; color: inherit; font-weight: 800; cursor: pointer; }
+    .rel-chip button:hover { background: rgba(0,0,0,.08); }
+    .rel-empty, .rel-search-empty { font-size: 13px; color: var(--ks-muted); }
+    .rel-search-wrap { position: relative; }
+    .rel-search-results { margin-top: 4px; border: 1px solid var(--ks-line); border-radius: 12px; overflow: hidden; }
+    .rel-search-item { padding: 10px 12px; font-size: 14px; cursor: pointer; border-bottom: 1px solid var(--ks-line-soft); }
     .rel-search-item:last-child { border-bottom: none; }
-    .rel-search-item:hover { background: #eef2ff; }
-    .rel-search-empty { padding: 10px 12px; font-size: 0.72rem; color: #94a3b8; }
-    .btn-warn { background: #fffbeb; border: 1px solid #fde68a; color: #b45309; font-family: 'Goldman', monospace; font-size: 0.74rem; padding: 8px 14px; border-radius: 4px; cursor: pointer; width: 100%; }
-    .btn-warn:hover { border-color: #d97706; }
-    @media (max-width: 640px) {
-        .aw { padding: 14px 10px 48px; }
-        .filters { flex-direction: column; align-items: stretch; }
-        .filters input, .filters select { width: 100%; }
-        .filters > span { display: none; }
-        .u-table { font-size: 0.68rem; min-width: 560px; }
-        .u-table th, .u-table td { padding: 7px 8px; }
-        .role-sel { font-size: 0.65rem; max-width: 80px; }
-        .sub-box { width: calc(100vw - 32px); padding: 18px 14px; }
-    }
+    .rel-search-item:hover { background: #FFF8F1; }
+    .msg { font-weight: 700; }
 </style>
 
-<div class="aw">
-    <a href="javascript:history.back()" style="font-family:'Goldman',monospace;font-size:0.72rem;color:#999;letter-spacing:0.06em;text-decoration:none;display:inline-block;margin-bottom:24px;">← back</a>
-
-    @if(session('success'))<div class="msg">{{ session('success') }}</div>@endif
-
-    @if($filterParentsOf)
-    <div class="filter-banner">
-        <span>👪 ვაჩვენებ <b>{{ $filterParentsOf->name }}</b>-ის მშობლებს</span>
-        <a href="{{ route('admin.users.index') }}">გასუფთავება ×</a>
+@php $__roleNames = ['parent' => 'მშობელი', 'child' => 'ბავშვი', 'teacher' => 'მასწავლებელი', 'staff' => 'სტაფი', 'admin' => 'ადმინი']; @endphp
+<header class="ks-page-head">
+    <div class="ks-page-title">
+        <span class="ks-eyebrow">სულ: {{ $users->total() }} მომხმარებელი</span>
+        <h1 class="ks-display ks-h1">მომხმარებლები</h1>
     </div>
-    @elseif($filterChildrenOf)
-    <div class="filter-banner">
-        <span>🧒 ვაჩვენებ <b>{{ $filterChildrenOf->name }}</b>-ის შვილებს</span>
-        <a href="{{ route('admin.users.index') }}">გასუფთავება ×</a>
-    </div>
-    @endif
-
-    <form method="GET" class="filters">
-        <input type="text" name="search" class="fc" placeholder="სახელი ან email" value="{{ $filters['search'] ?? '' }}" style="width:210px;">
-        <select name="role" class="fc" onchange="this.form.submit()">
-            <option value="">ყველა როლი</option>
-            @foreach($roles as $r)
-            <option value="{{ $r }}" {{ ($filters['role'] ?? '') === $r ? 'selected' : '' }}>{{ $r }}</option>
-            @endforeach
-        </select>
-        <button type="submit" class="btn">ძება</button>
-        @if(array_filter($filters))
-        <a href="{{ route('admin.users.index') }}" style="color:#555;font-size:0.72rem;text-decoration:none;padding:7px 0;">× გასუფთავება</a>
-        @endif
-        <span style="margin-left:auto;font-size:0.7rem;color:#94a3b8;">სულ: {{ $users->total() }}</span>
+    <form method="GET" style="display:flex;gap:8px;flex:0 1 420px;">
+        @if(!empty($filters['role']))<input type="hidden" name="role" value="{{ $filters['role'] }}">@endif
+        <label for="uSearch" style="flex-grow:1;min-height:46px;border-radius:14px;background:#fff;border:1px solid var(--ks-line);display:flex;align-items:center;gap:8px;padding:0 12px;color:var(--ks-muted);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            <input type="text" id="uSearch" name="search" placeholder="სახელი ან ელფოსტა" value="{{ $filters['search'] ?? '' }}" style="flex-grow:1;min-width:0;border:none;outline:none;background:transparent;font-family:var(--ks-font);font-size:14px;color:var(--ks-ink);">
+        </label>
+        <button type="submit" class="ks-btn ks-btn-dark">ძებნა</button>
     </form>
+</header>
 
-    <div class="card-dark">
+@if(session('success'))<div class="ks-note" style="background:var(--ks-green-soft);color:var(--ks-green-dark);font-weight:700;">{{ session('success') }}</div>@endif
+
+@if($filterParentsOf)
+<div class="filter-banner">
+    <span>ნაჩვენებია <b>{{ $filterParentsOf->name }}</b>-ის მშობლები</span>
+    <a href="{{ route('admin.users.index') }}">გასუფთავება ×</a>
+</div>
+@elseif($filterChildrenOf)
+<div class="filter-banner">
+    <span>ნაჩვენებია <b>{{ $filterChildrenOf->name }}</b>-ის შვილები</span>
+    <a href="{{ route('admin.users.index') }}">გასუფთავება ×</a>
+</div>
+@endif
+
+<nav aria-label="როლი" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+    @php $__curRole = $filters['role'] ?? ''; @endphp
+    <a href="{{ route('admin.users.index', array_filter(['search' => $filters['search'] ?? null])) }}" class="ks-btn ks-btn-sm {{ $__curRole === '' ? 'ks-btn-dark' : 'ks-btn-ghost' }}">ყველა</a>
+    @foreach($roles as $r)
+    <a href="{{ route('admin.users.index', array_filter(['role' => $r, 'search' => $filters['search'] ?? null])) }}" class="ks-btn ks-btn-sm {{ $__curRole === $r ? 'ks-btn-dark' : 'ks-btn-ghost' }}">{{ $__roleNames[$r] ?? $r }}</a>
+    @endforeach
+    @if(array_filter($filters))
+    <a href="{{ route('admin.users.index') }}" style="margin-left:6px;font-size:13px;font-weight:700;color:var(--ks-orange-dark);">× ფილტრის გასუფთავება</a>
+    @endif
+</nav>
+
+<div class="ks-card ks-card-tight">
         <div class="table-scroll">
         <table class="u-table">
             <thead>
@@ -133,14 +127,14 @@
                 <td>
                     {{ $user->name }}
                     @if($user->role === 'child' && $user->child_code)
-                    <div style="font-size:0.62rem;color:#94a3b8;margin-top:2px;">კოდი: {{ $user->child_code }}</div>
+                    <div class="ks-mono" style="font-size:12px;color:var(--ks-muted);margin-top:2px;">კოდი: {{ $user->child_code }}</div>
                     @endif
                 </td>
-                <td style="color:#64748b;font-size:0.7rem;">{{ $user->email }}</td>
+                <td style="color:var(--ks-muted);font-size:13px;">{{ $user->email }}</td>
                 <td>
                     <select class="role-sel" data-id="{{ $user->id }}" data-orig="{{ $user->role }}">
                         @foreach($roles as $r)
-                        <option value="{{ $r }}" {{ $user->role === $r ? 'selected' : '' }}>{{ $r }}</option>
+                        <option value="{{ $r }}" {{ $user->role === $r ? 'selected' : '' }}>{{ $__roleNames[$r] ?? $r }}</option>
                         @endforeach
                     </select>
                     <span class="save-icon" id="saved-{{ $user->id }}">✓</span>
@@ -168,30 +162,30 @@
                     <div style="display:grid;grid-template-columns:repeat(2, auto);gap:4px;width:max-content;">
                     <button type="button" class="sub-btn"
                         onclick="openSubModal({{ $user->id }}, '{{ addslashes($user->name) }}')">
-                        📦 პაკეტი
+                        პაკეტი
                     </button>
                     @if($user->role === 'child')
                     <button type="button" class="sub-btn"
                         onclick="openChildModal({{ $user->id }}, '{{ addslashes($user->name) }}', {{ $user->childSetting?->grade_id ?? 'null' }}, {{ $user->childSetting?->difficulty ?? 1 }}, {{ $user->childSetting?->tests_per_week ?? 3 }}, {{ $user->childSetting?->unlimited_tests ? 'true' : 'false' }}, {{ $user->themes->pluck('id') }})">
-                        ⚙ მართვა
+                        მართვა
                     </button>
                     <button type="button" class="sub-btn"
                         onclick="openRelModal({{ $user->id }}, '{{ addslashes($user->name) }}', 'parent', {{ $user->parents->map->only(['id', 'name']) }})">
-                        ✎ მშობლები
+                        მშობლების რედ.
                     </button>
                     @if($user->parents_count)
                     <a href="{{ route('admin.users.index', ['parents_of' => $user->id]) }}" class="sub-btn">
-                        👪 მშობლები ({{ $user->parents_count }})
+                        მშობლები ({{ $user->parents_count }})
                     </a>
                     @endif
                     @elseif($user->role === 'parent')
                     <button type="button" class="sub-btn"
                         onclick="openRelModal({{ $user->id }}, '{{ addslashes($user->name) }}', 'child', {{ $user->children->map->only(['id', 'name']) }})">
-                        ✎ შვილები
+                        შვილების რედ.
                     </button>
                     @if($user->children_count)
                     <a href="{{ route('admin.users.index', ['children_of' => $user->id]) }}" class="sub-btn">
-                        🧒 შვილები ({{ $user->children_count }})
+                        შვილები ({{ $user->children_count }})
                     </a>
                     @endif
                     @endif
@@ -206,9 +200,8 @@
         </div>
     </div>
 
-    <div class="pagination-wrap">
-        {{ $users->withQueryString()->links('admin.pagination') }}
-    </div>
+<div class="pagination-wrap">
+    {{ $users->withQueryString()->links('admin.pagination') }}
 </div>
 
 {{-- Subscription modal --}}

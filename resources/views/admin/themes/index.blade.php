@@ -1,76 +1,55 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
+{{-- redesign-kidsmart: თემატიკა (დიზაინი A6) --}}
 @section('content')
-<style>
-    body { background: transparent !important; }
-    .aw { max-width: 680px; margin: 0 auto; padding: 32px 16px 64px; font-family: 'Goldman', monospace; }
-    .card-dark { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-    .card-label { font-size: 0.68rem; color: #94a3b8; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px; }
-    .fc { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; color: #374151; font-family: 'Goldman', monospace; font-size: 0.82rem; padding: 9px 13px; width: 100%; outline: none; margin-bottom: 10px; box-sizing: border-box; }
-    .fc:focus { border-color: #94a3b8; }
-    .fc::placeholder { color: #cbd5e1; }
-    .btn { background: #f8fafc; border: 1px solid #e2e8f0; color: #64748b; font-family: 'Goldman', monospace; font-size: 0.78rem; letter-spacing: 0.08em; padding: 9px 22px; border-radius: 4px; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
-    .btn:hover { border-color: #94a3b8; color: #1e293b; }
-    .btn-del { background: none; border: none; color: #cbd5e1; font-size: 0.72rem; cursor: pointer; padding: 0 4px; transition: color 0.2s; }
-    .btn-del:hover { color: #ef4444; }
-    .row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.8rem; color: #374151; }
-    .row:last-child { border-bottom: none; }
-    .msg { font-size: 0.75rem; color: #059669; margin-bottom: 16px; }
-    .toggle-btn { display:inline-flex;align-items:center;gap:5px;font-family:'Goldman',monospace;font-size:0.64rem;letter-spacing:0.06em;border-radius:20px;padding:4px 12px;cursor:pointer;border:none;transition:all 0.2s;white-space:nowrap; }
-    .toggle-btn.on  { background:#dcfce7;color:#15803d; }
-    .toggle-btn.off { background:#f1f5f9;color:#94a3b8; }
-    @media (max-width: 640px) {
-        .aw { padding: 14px 10px 48px; }
-        .card-dark { padding: 14px; }
-    }
-</style>
-
-<div class="aw">
-    <a href="javascript:history.back()" style="font-family:'Goldman',monospace;font-size:0.72rem;color:#999;letter-spacing:0.06em;text-decoration:none;display:inline-block;margin-bottom:24px;">← back</a>
-
-    @if(session('success'))
-    <div class="msg">{{ session('success') }}</div>
-    @endif
-
-    <div class="card-dark">
-        <div class="card-label">თემის დამატება</div>
-        <form method="POST" action="{{ route('admin.themes.store') }}">
-            @csrf
-            <div style="display:flex;gap:10px;align-items:flex-start;">
-                <input type="text" name="icon" class="fc" placeholder="🎯" style="width:70px;text-align:center;font-size:1.3rem;margin-bottom:0;" maxlength="5" required>
-                <input type="text" name="name" class="fc" placeholder="თემის სახელი (ფეხბურთი)" style="flex:1;margin-bottom:0;" required>
-                <button type="submit" class="btn">+ დამატება</button>
-            </div>
-        </form>
+<header class="ks-page-head">
+    <div class="ks-page-title">
+        <span class="ks-eyebrow">თემატიკის სიტყვები ავტომატურად ჩაჯდება კითხვებში — {NAME}, {TEAM}, {CITY}</span>
+        <h1 class="ks-display ks-h1">თემატიკა და ცვლადები</h1>
     </div>
+</header>
 
-    <div class="card-dark">
-        <div class="card-label">თემები · {{ $themes->count() }}</div>
+@if(session('success'))
+<div class="ks-note" style="background:var(--ks-green-soft);color:var(--ks-green-dark);font-weight:700;">{{ session('success') }}</div>
+@endif
+
+@php $__thBg = ['#DFF5E3', '#DCEBFF', '#FDE2EC', '#FFF1C2', '#EEE8FF', '#FFE3CC']; @endphp
+
+<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;">
+    <div style="flex:3 1 440px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">
         @forelse($themes as $theme)
-        <div class="row">
+        <div class="ks-card ks-card-tight" style="display:flex;flex-direction:column;gap:12px;{{ $theme->is_active ? '' : 'opacity:.65;' }}">
             <div style="display:flex;align-items:center;gap:12px;">
-                <span style="font-size:1.3rem;{{ !$theme->is_active ? 'opacity:0.4;' : '' }}">{{ $theme->icon }}</span>
-                <div>
-                    <div style="color:{{ $theme->is_active ? '#374151' : '#aaa' }};">{{ $theme->name }}</div>
-                    <div style="font-size:0.68rem;color:#aaa;">{{ $theme->variables_count }} ცვლადი</div>
-                </div>
-            </div>
-            <div style="display:flex;align-items:center;gap:10px;">
+                <span style="width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;background:{{ $__thBg[$loop->index % count($__thBg)] }};">{{ $theme->icon }}</span>
+                <span style="flex-grow:1;min-width:0;display:flex;flex-direction:column;">
+                    <span style="font-size:16px;font-weight:800;">{{ $theme->name }}</span>
+                    <span class="ks-muted" style="font-size:12px;">{{ $theme->variables_count }} ცვლადი</span>
+                </span>
                 <form method="POST" action="{{ route('admin.themes.toggle', $theme) }}">
                     @csrf @method('PATCH')
-                    <button type="submit" class="toggle-btn {{ $theme->is_active ? 'on' : 'off' }}">
-                        {{ $theme->is_active ? '● აქტიური' : '○ გათიშული' }}
-                    </button>
+                    <button type="submit" class="ks-switch" role="switch" aria-checked="{{ $theme->is_active ? 'true' : 'false' }}" aria-label="{{ $theme->name }} — აქტიური"></button>
                 </form>
-                <a href="{{ route('admin.themes.variables', $theme) }}" class="btn" style="padding:5px 14px;font-size:0.7rem;">ცვლადები →</a>
-                <form method="POST" action="{{ route('admin.themes.destroy', $theme) }}">
+            </div>
+            <div style="display:flex;gap:8px;">
+                <a href="{{ route('admin.themes.variables', $theme) }}" class="ks-btn ks-btn-dark ks-btn-sm" style="flex-grow:1;">ცვლადების მართვა</a>
+                <form method="POST" action="{{ route('admin.themes.destroy', $theme) }}" style="display:inline;">
                     @csrf @method('DELETE')
-                    <button type="submit" class="btn-del" onclick="return confirm('წაიშალოს?')">✕</button>
+                    <button type="submit" class="ks-btn ks-btn-danger ks-btn-sm" onclick="return confirm('წაიშალოს?')" aria-label="წაშლა">×</button>
                 </form>
             </div>
         </div>
         @empty
-        <div style="color:#444;font-size:0.78rem;">თემა არ არის</div>
+        <div class="ks-card ks-muted">თემატიკა ჯერ არ არის დამატებული</div>
         @endforelse
     </div>
+
+    <form method="POST" action="{{ route('admin.themes.store') }}" class="ks-card" style="flex:1 1 260px;display:flex;flex-direction:column;gap:10px;">
+        @csrf
+        <h2 class="ks-h2">ახალი თემატიკა</h2>
+        <div style="display:flex;gap:8px;align-items:flex-end;">
+            <div class="ks-field" style="width:80px;"><label class="ks-label" for="thIcon">აიკონი</label><input type="text" id="thIcon" name="icon" class="ks-input" placeholder="⚽" maxlength="5" style="text-align:center;font-size:20px;" required></div>
+            <div class="ks-field" style="flex-grow:1;"><label class="ks-label" for="thName">სახელი</label><input type="text" id="thName" name="name" class="ks-input" placeholder="მაგ: ფეხბურთი" required></div>
+        </div>
+        <button type="submit" class="ks-btn ks-btn-primary">+ დამატება</button>
+    </form>
 </div>
 @endsection

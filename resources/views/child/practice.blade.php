@@ -6,111 +6,110 @@
 @include('partials.achievement-toast')
 <style>
     body { background: transparent !important; }
-    .wrap { max-width: 520px; margin: 0 auto; padding: 28px 0 80px; }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 4px 0 40px; font-family: 'Noto Sans Georgian', system-ui, sans-serif; color: #1D1A17; }
 
     /* ── Header ── */
     .topbar { display:flex; align-items:center; justify-content:space-between; padding:0 16px; }
-    .back { font-family:'Nunito',sans-serif; font-size:0.78rem; font-weight:800; color:#0284c7; text-decoration:none; padding:5px 14px; background:white; border-radius:99px; box-shadow:0 2px 8px rgba(0,0,0,0.07); }
-    .title { font-family:'Fredoka One',cursive; font-size:1rem; color:#0c4a6e; }
-    .topic-tag { font-family:'Nunito',sans-serif; font-weight:800; font-size:0.68rem; color:#2563eb; background:#eff6ff; border-radius:99px; padding:4px 12px; margin:8px 16px 0; display:inline-block; }
+    .back { font-size:0.86rem; font-weight:800; color:#1D1A17; text-decoration:none; padding:8px 14px; background:white; border-radius:14px; border:1px solid #F1E3D3; }
+    .title { margin: 0; font-size: 48px; line-height: .95; font-weight: 900; font-stretch: 66%; text-transform: uppercase; color: #1D1A17; }
+    .topic-tag { font-weight:800; font-size:0.82rem; color:#8A3407; background:#FFE3CC; border-radius:99px; padding:5px 14px; margin:10px 16px 0; display:inline-block; }
+    .topic-tag:empty { display: none; }
 
     /* ── Question card ── */
-    .q-card { background:white; border-radius:24px; margin:16px; padding:28px 20px 24px; box-shadow:0 8px 28px rgba(0,0,0,0.08); min-height:200px; }
-    .q-label { font-family:'Nunito',sans-serif; font-weight:900; font-size:0.62rem; color:#94a3b8; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:16px; }
-    .q-text { font-family:'Fredoka One',cursive; font-size:1.15rem; color:#0c4a6e; line-height:1.5; margin-bottom:6px; white-space: pre-line; }
-    .q-hint { font-family:'Nunito',sans-serif; font-weight:700; font-size:0.75rem; color:#94a3b8; font-style:italic; margin-bottom:18px; }
+    .q-card { background:white; border-radius:28px; margin:16px; padding:28px 22px 24px; box-shadow:0 2px 0 #F1E3D3; min-height:200px; }
+    .q-label { font-weight:800; font-size:0.78rem; color:#6B625A; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:14px; }
+    .q-text { font-size:clamp(1.05rem,3.4vw,1.25rem); font-weight:700; color:#1D1A17; line-height:1.6; margin-bottom:6px; white-space: pre-line; }
+    .q-hint { font-weight:600; font-size:0.86rem; color:#6B625A; margin-bottom:18px; border-left:3px solid #FFE3CC; padding-left:10px; }
 
     /* ── MC options ── */
-    .opts { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .opts { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top: 16px; }
     .opt-btn {
-        padding:14px 10px; border-radius:16px; border:2.5px solid #e2e8f0;
-        font-family:'Fredoka One',cursive; font-size:1rem; color:#334155;
-        background:white; cursor:pointer; transition:all 0.15s; text-align:center;
+        padding:14px 10px; min-height:62px; border-radius:18px; border:2.5px solid #F1E3D3;
+        font-family:inherit; font-weight:900; font-size:clamp(1.1rem,4.2vw,1.35rem); color:#1D1A17;
+        background:#FFF8F1; cursor:pointer; transition:all 0.15s; text-align:center;
     }
-    .opt-btn:hover:not(:disabled) { border-color:#38bdf8; background:#f0f9ff; }
-    .opt-btn.correct  { border-color:#86efac; background:#dcfce7; color:#15803d; }
-    .opt-btn.wrong    { border-color:#fca5a5; background:#fee2e2; color:#dc2626; }
-    .opt-btn.reveal   { border-color:#86efac; background:#dcfce7; color:#15803d; opacity:0.6; }
+    .opt-btn:hover:not(:disabled) { border-color:#FFC49A; transform: translateY(-2px); }
+    .opt-btn.correct  { border-color:#3FAE6E; background:#E8F7EE; color:#14532D; }
+    .opt-btn.wrong    { border-color:#E5484D; background:#FDECEA; color:#B42318; }
+    .opt-btn.reveal   { border-color:#7FCB9C; background:#E8F7EE; color:#14532D; opacity:0.7; }
 
     /* ── Pyramid ── */
     .pyramid { display:flex; flex-direction:column; align-items:center; gap:6px; }
     .pyr-row { display:flex; gap:6px; }
     .pyr-cell {
-        width:58px; height:58px; border-radius:14px; display:flex; align-items:center; justify-content:center;
-        font-family:'Fredoka One',cursive; font-size:1.1rem;
+        width:58px; height:58px; border-radius:16px; display:flex; align-items:center; justify-content:center;
+        font-family:inherit; font-weight:900; font-size:1.15rem;
     }
-    .pyr-cell.given { background:#4f46e5; color:white; box-shadow:0 4px 10px rgba(79,70,229,0.3); }
+    .pyr-cell.given { background:#6D4FE0; color:white; }
     .pyr-cell.hidden input {
-        width:100%; height:100%; border:2.5px solid #a5b4fc; border-radius:12px; background:#eef2ff;
-        color:#4f46e5; font-family:'Fredoka One',cursive; font-size:1.1rem;
+        width:100%; height:100%; border:2.5px solid #C9BBFF; border-radius:16px; background:#EEE8FF;
+        color:#4B33B8; font-family:inherit; font-weight:900; font-size:1.15rem;
         text-align:center; outline:none; padding:0;
     }
-    .pyr-cell.hidden input:focus { border-color:#4f46e5; background:#e0e7ff; }
-    .pyr-cell.hidden.correct-cell input { border-color:#86efac !important; background:#dcfce7 !important; color:#15803d !important; }
-    .pyr-cell.hidden.wrong-cell input   { border-color:#fca5a5 !important; background:#fee2e2 !important; color:#dc2626 !important; }
+    .pyr-cell.hidden input:focus { border-color:#6D4FE0; }
+    .pyr-cell.hidden.correct-cell input { border-color:#3FAE6E !important; background:#E8F7EE !important; color:#14532D !important; }
+    .pyr-cell.hidden.wrong-cell input   { border-color:#E5484D !important; background:#FDECEA !important; color:#B42318 !important; }
 
     /* ── Check button ── */
     .check-btn {
         display:block; width:calc(100% - 32px); margin:0 16px;
-        padding:15px; border:none; border-radius:18px;
-        font-family:'Fredoka One',cursive; font-size:1.05rem; color:white;
-        background:linear-gradient(135deg,#0ea5e9,#0284c7);
-        box-shadow:0 6px 20px rgba(2,132,199,0.3); cursor:pointer;
-        transition:all 0.15s;
+        height:58px; border:none; border-radius:29px;
+        font-family:inherit; font-weight:800; font-size:1.1rem; color:white;
+        background:#1D1A17; cursor:pointer; transition:background 0.15s;
     }
-    .check-btn:hover { transform:translateY(-1px); }
-    .check-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+    .check-btn:hover { background:#000; }
+    .check-btn:disabled { opacity:0.45; cursor:not-allowed; }
 
     /* ── Feedback bar ── */
-    .feedback { margin:12px 16px 0; padding:14px 18px; border-radius:16px; font-family:'Fredoka One',cursive; font-size:1rem; display:none; }
-    .feedback.correct { background:#dcfce7; color:#15803d; }
-    .feedback.wrong   { background:#fee2e2; color:#dc2626; }
+    .feedback { margin:12px 16px 0; padding:14px 18px; border-radius:18px; font-weight:800; font-size:1.05rem; display:none; }
+    .feedback.correct { background:#E8F7EE; color:#14532D; }
+    .feedback.wrong   { background:#FDECEA; color:#B42318; }
 
     /* ── Next button ── */
     .next-btn {
         display:none; width:calc(100% - 32px); margin:10px 16px 0;
-        padding:14px; border:none; border-radius:18px;
-        font-family:'Fredoka One',cursive; font-size:1rem; color:white;
-        background:linear-gradient(135deg,#22c55e,#16a34a);
-        box-shadow:0 6px 20px rgba(22,163,74,0.3); cursor:pointer; transition:all 0.15s;
+        height:58px; border:none; border-radius:29px;
+        font-family:inherit; font-weight:800; font-size:1.1rem; color:white;
+        background:#C24A0A; cursor:pointer; transition:background 0.15s;
     }
-    .next-btn:hover { transform:translateY(-1px); }
+    .next-btn:hover { background:#A53E08; }
 
     /* ── Code question ── */
-    .code-eq-box { background:#fff8e7;border-radius:12px;padding:12px 14px;margin-bottom:14px;border:1.5px dashed #ffe194; }
-    .code-eq { font-family:'Fredoka One',cursive; font-size:1rem; color:#374151; margin:3px 0; }
+    .code-eq-box { background:#FFF6DC;border-radius:16px;padding:12px 16px;margin-bottom:14px;border:2px dashed #F2CF6B; }
+    .code-eq { font-weight:700; font-size:1.05rem; color:#1D1A17; margin:3px 0; }
     .code-target-row { display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:10px; }
-    .code-sym-box { width:52px;height:52px;border-radius:12px;background:#4f46e5;color:white;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0; }
+    .code-sym-box { width:52px;height:52px;border-radius:14px;background:#6D4FE0;color:white;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0; }
     .code-inp-row { display:flex;gap:8px;justify-content:center;flex-wrap:wrap; }
-    .code-inp { width:52px;height:52px;border-radius:12px;border:2.5px solid #a5b4fc;background:#eef2ff;color:#4f46e5;font-family:'Fredoka One',cursive;font-size:1.1rem;text-align:center;outline:none;padding:0;transition:border-color 0.2s,background 0.2s; }
-    .code-inp:focus { border-color:#4f46e5;background:#e0e7ff; }
-    .code-inp.correct-inp { border-color:#86efac !important;background:#dcfce7 !important;color:#15803d !important; }
-    .code-inp.wrong-inp   { border-color:#fca5a5 !important;background:#fee2e2 !important;color:#dc2626 !important; }
+    .code-inp { width:52px;height:52px;border-radius:14px;border:2.5px solid #C9BBFF;background:#EEE8FF;color:#4B33B8;font-family:inherit;font-weight:900;font-size:1.15rem;text-align:center;outline:none;padding:0;transition:border-color .15s; }
+    .code-inp:focus { border-color:#6D4FE0; }
+    .code-inp.correct-inp { border-color:#3FAE6E !important;background:#E8F7EE !important;color:#14532D !important; }
+    .code-inp.wrong-inp   { border-color:#E5484D !important;background:#FDECEA !important;color:#B42318 !important; }
 
     /* ── Crossword ── */
     .cw-grid { display:grid;gap:4px;align-items:center;justify-items:center;margin:0 auto; }
-    .cw-inp { width:100%;height:100%;border:2.5px solid #a5b4fc;border-radius:12px;background:#eef2ff;color:#4f46e5;font-family:'Fredoka One',cursive;font-size:1rem;text-align:center;outline:none;padding:0;transition:border-color 0.2s,background 0.2s; }
-    .cw-inp:focus { border-color:#4f46e5;background:#e0e7ff; }
-    .cw-inp.correct-inp { border-color:#86efac !important;background:#dcfce7 !important;color:#15803d !important; }
-    .cw-inp.wrong-inp   { border-color:#fca5a5 !important;background:#fee2e2 !important;color:#dc2626 !important; }
-    .cw-given { width:52px;height:52px;border-radius:12px;background:#d1fae5;border:2.5px solid #6ee7b7;color:#065f46;font-family:'Fredoka One',cursive;font-size:1rem;display:flex;align-items:center;justify-content:center;font-weight:700; }
-    .cw-op  { font-family:'Fredoka One',cursive;font-size:1rem;color:#64748b;text-align:center; }
-    .cw-eq  { font-family:'Fredoka One',cursive;font-size:0.85rem;color:#94a3b8;text-align:center; }
-    .cw-res { width:100%;height:100%;border-radius:10px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:0.95rem;color:#374151;font-weight:700; }
+    .cw-inp { width:100%;height:100%;border:2.5px solid #C9BBFF;border-radius:14px;background:#EEE8FF;color:#4B33B8;font-family:inherit;font-weight:900;font-size:1.05rem;text-align:center;outline:none;padding:0;transition:border-color .15s; }
+    .cw-inp:focus { border-color:#6D4FE0; }
+    .cw-inp.correct-inp { border-color:#3FAE6E !important;background:#E8F7EE !important;color:#14532D !important; }
+    .cw-inp.wrong-inp   { border-color:#E5484D !important;background:#FDECEA !important;color:#B42318 !important; }
+    .cw-given { width:52px;height:52px;border-radius:14px;background:#DFF5E3;border:2.5px solid #9FD9B5;color:#14532D;font-family:inherit;font-weight:900;font-size:1.05rem;display:flex;align-items:center;justify-content:center; }
+    .cw-op  { font-family:inherit;font-weight:900;font-size:1.05rem;color:#6B625A;text-align:center; }
+    .cw-eq  { font-family:inherit;font-weight:900;font-size:0.9rem;color:#B5AAA0;text-align:center; }
+    .cw-res { width:100%;height:100%;border-radius:12px;background:#F5EFE8;display:flex;align-items:center;justify-content:center;font-family:inherit;font-size:1rem;color:#1D1A17;font-weight:900; }
 
     /* ── Spinner ── */
-    .spinner { display:none; text-align:center; padding:40px; font-family:'Fredoka One',cursive; color:#94a3b8; font-size:1rem; }
+    .spinner { display:none; text-align:center; padding:40px; font-weight:700; color:#6B625A; font-size:1rem; }
     .spinner.show { display:block; }
+    @media (max-width: 900px) { .title { font-size: 40px; } .q-card { margin: 14px 0; } .feedback, .check-btn, .next-btn { margin-left: 0; margin-right: 0; width: 100%; } .topbar { padding: 0; } .topic-tag { margin-left: 0; } }
 </style>
 
 <div class="wrap">
     <div class="topbar">
-        <div class="title">
-            @if($type === 'pyramid') 🔺 პირამიდა
-            @elseif($type === 'auto') 🎯 ვარჯიში
+        <h1 class="title">
+            @if($type === 'pyramid') პირამიდა
+            @elseif($type === 'auto') ვარჯიში
             @else 📘 {{ $topic->name }}
             @endif
-        </div>
+        </h1>
     </div>
 
     @if($type === 'auto')
@@ -139,7 +138,7 @@
         <div id="codeArea" style="display:none;">
             <div class="q-text" style="margin-bottom:14px;">🕵️ გაშიფრე კოდი</div>
             <div class="code-eq-box" id="codeEqs"></div>
-            <div style="font-size:0.6rem;color:#94a3b8;text-align:center;margin-bottom:6px;letter-spacing:0.08em;">სამიზნე კოდი</div>
+            <div style="font-size:0.78rem;font-weight:800;color:#6B625A;text-align:center;margin-bottom:6px;">სამიზნე კოდი</div>
             <div class="code-target-row" id="codeSyms"></div>
             <div class="code-inp-row" id="codeInps"></div>
         </div>

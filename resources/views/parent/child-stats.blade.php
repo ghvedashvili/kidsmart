@@ -1,190 +1,108 @@
 @extends('layouts.app')
 @section('content')
-<style>
-    body { background: transparent !important; }
-    .wrap {
-        max-width: 520px; margin: 0 auto;
-        padding: 28px 20px 80px;
-        font-family: 'Goldman', monospace;
-    }
-    @media (min-width: 760px)  { .wrap { max-width: 700px; } }
-    @media (min-width: 1040px) { .wrap { max-width: 960px; } }
-
-    .page-hero {
-        width: 100%; box-sizing: border-box; border-radius: 20px; padding: 26px 20px;
-        min-height: 120px; display: flex; flex-direction: column; justify-content: center;
-        position: relative; overflow: hidden; margin-bottom: 24px;
-        background-image:
-            linear-gradient(90deg, rgba(240,253,244,0.94) 0%, rgba(240,253,244,0.78) 45%, rgba(240,253,244,0.08) 68%),
-            url('/img/tests-hero.jpg');
-        background-size: cover; background-position: right center; background-repeat: no-repeat;
-        box-shadow: 0 8px 20px rgba(22,163,74,0.18);
-    }
-    .page-hero-title { font-family:'Goldman', monospace; font-size:1.05rem; color:#166534; margin-bottom:4px; letter-spacing: 0.04em; }
-    .page-hero-sub { font-family:'Goldman', monospace; font-size:0.65rem; color:#16a34a; letter-spacing: 0.08em; }
-
-    .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 32px; }
-    .stat-card {
-        background: #fff; border: 1px solid #e8e8e8; border-radius: 10px;
-        padding: 16px 12px; text-align: center;
-    }
-    .stat-val { font-size: clamp(1.4rem, 5vw, 1.9rem); color: #111; letter-spacing: 0.04em; line-height: 1; }
-    .stat-label { font-size: 0.58rem; color: #bbb; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 6px; }
-
-    .section-label { font-size: 0.62rem; color: #aaa; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 12px; }
-
-    .test-row {
-        background: #fff; border: 1px solid #e8e8e8; border-radius: 10px;
-        padding: 14px 16px; margin-bottom: 8px;
-        display: flex; align-items: center; gap: 12px;
-        text-decoration: none; transition: border-color 0.2s;
-    }
-    .test-row:hover { border-color: #bbb; }
-    .test-icon { font-size: 1.4rem; flex-shrink: 0; }
-    .test-info { flex: 1; min-width: 0; }
-    .test-date { font-size: 0.62rem; color: #bbb; letter-spacing: 0.06em; margin-bottom: 3px; }
-    .test-score { font-size: 0.88rem; color: #111; letter-spacing: 0.04em; }
-    .test-pct {
-        font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em;
-        padding: 3px 10px; border-radius: 99px; flex-shrink: 0;
-    }
-    .pct-hi { background: #dcfce7; color: #16a34a; }
-    .pct-mid { background: #fef9c3; color: #ca8a04; }
-    .pct-lo { background: #fee2e2; color: #dc2626; }
-
-    .empty { text-align: center; padding: 40px 20px; color: #ccc; font-size: 0.72rem; letter-spacing: 0.08em; }
-
-    .topic-stat-row {
-        background: #fff; border: 1px solid #e8e8e8; border-radius: 10px;
-        padding: 12px 16px; margin-bottom: 8px;
-    }
-    .topic-stat-name { font-size: 0.8rem; color: #111; letter-spacing: 0.03em; margin-bottom: 8px; }
-    .topic-levels { display: flex; gap: 6px; flex-wrap: wrap; }
-    .level-pct-pill {
-        display: inline-flex; align-items: center; gap: 5px;
-        font-size: 0.66rem; letter-spacing: 0.03em; border-radius: 99px;
-        padding: 4px 10px; font-weight: 700;
-    }
-    .level-pct-pill .lvl { opacity: 0.65; font-weight: 400; }
-
-    .collapse-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 10px; margin-bottom: 20px; overflow: hidden; }
-    .collapse-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; cursor: pointer; user-select: none; transition: background 0.15s; }
-    .collapse-header:hover { background: #fafafa; }
-    .collapse-title { font-size: 0.62rem; color: #aaa; letter-spacing: 0.14em; text-transform: uppercase; }
-    .collapse-arrow { font-size: 0.68rem; color: #ccc; transition: transform 0.2s; flex-shrink: 0; }
-    .collapse-card.open .collapse-arrow { transform: rotate(90deg); }
-    .collapse-body { display: none; padding: 0 12px 12px; }
-    .collapse-card.open .collapse-body { display: block; }
-    .collapse-body .test-row:last-child, .collapse-body .topic-stat-row:last-child { margin-bottom: 0; }
-
-    .old-grades-hr { border: none; border-top: 1px solid #e8e8e8; margin: 28px 0 20px; }
-    .history-meta { font-size: 0.66rem; color: #aaa; letter-spacing: 0.04em; margin-bottom: 10px; }
-</style>
-
-<div class="wrap">
-    <div class="page-hero">
-        <div class="page-hero-title">📊 {{ $child->name }}-ის სტატისტიკა</div>
-        <div class="page-hero-sub">ტესტების ისტორია და შედეგები</div>
+<div class="ks-cp">
+    <div class="ks-cp-hero dark">
+        <span class="ks-cp-hero-ic" aria-hidden="true">📊</span>
+        <span class="ks-cp-eyebrow" style="color:#FFC49A;">ტესტების ისტორია და შედეგები</span>
+        <h1 class="ks-cp-title">{{ $child->name }} · ანალიტიკა</h1>
     </div>
 
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-val">{{ $totalTests }}</div>
-            <div class="stat-label">ტესტი სულ</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-val">{{ $avgScore !== null ? $avgScore . '%' : '—' }}</div>
-            <div class="stat-label">საშ. შედეგი</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-val">{{ $todayCount }}@if($required > 0)<span style="font-size:0.9rem;color:#bbb;">/{{ $required }}</span>@endif</div>
-            <div class="stat-label">დღეს</div>
-        </div>
+    <div class="ks-cp-stats">
+        <div class="ks-cp-stat"><b>{{ $totalTests }}</b><span>ტესტი სულ</span></div>
+        <div class="ks-cp-stat"><b>{{ $avgScore !== null ? $avgScore . '%' : '—' }}</b><span>საშუალო შედეგი</span></div>
+        <div class="ks-cp-stat"><b>{{ $todayCount }}@if($required > 0)<span style="font-size:18px;color:#B5AAA0;">/{{ $required }}</span>@endif</b><span>დღეს</span></div>
     </div>
 
     @if($topicStats->count())
-    <div class="collapse-card" id="secTopics">
-        <div class="collapse-header" onclick="toggleSection('secTopics')">
-            <span class="collapse-title">თემების მიხედვით · {{ $topicStats->count() }}</span>
-            <span class="collapse-arrow">▶</span>
+    <div class="ks-cp-acc open" id="secTopics">
+        <div class="ks-cp-acc-h" onclick="toggleSection('secTopics')">
+            <span class="ks-cp-row-ic" style="background:#EEE8FF;">📚</span>
+            <span class="ks-cp-acc-t">თემების მიხედვით</span>
+            <span class="ks-cp-chip">{{ $topicStats->count() }}</span>
+            <i class="bi bi-chevron-right ks-cp-acc-arrow"></i>
         </div>
-        <div class="collapse-body">
+        <div class="ks-cp-acc-b">
+            <div class="ks-cp-list">
             @foreach($topicStats as $topicName => $levels)
-            <div class="topic-stat-row">
-                <div class="topic-stat-name">{{ $topicName }}</div>
-                <div class="topic-levels">
+            <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:12px 14px;background:#FFF8F1;border-radius:16px;">
+                <span style="flex:1 1 180px;font-weight:800;">{{ $topicName }}</span>
+                <span style="display:flex;flex-wrap:wrap;gap:6px;">
                     @foreach($levels as $lvl)
-                    <span class="level-pct-pill {{ $lvl->pct >= 80 ? 'pct-hi' : ($lvl->pct >= 50 ? 'pct-mid' : 'pct-lo') }}">
-                        <span class="lvl">დონე {{ $lvl->difficulty }}</span> {{ $lvl->pct }}%
-                    </span>
+                    <span class="ks-cp-pct {{ $lvl->pct >= 80 ? 'hi' : ($lvl->pct >= 50 ? 'mid' : 'lo') }}" style="font-size:12px;">დონე {{ $lvl->difficulty }} · {{ $lvl->pct }}%</span>
                     @endforeach
-                </div>
+                </span>
             </div>
             @endforeach
+            </div>
         </div>
     </div>
     @endif
 
-    <div class="collapse-card" id="secTests">
-        <div class="collapse-header" onclick="toggleSection('secTests')">
-            <span class="collapse-title">ტესტების ისტორია · {{ $totalTests }}</span>
-            <span class="collapse-arrow">▶</span>
+    <div class="ks-cp-acc open" id="secTests">
+        <div class="ks-cp-acc-h" onclick="toggleSection('secTests')">
+            <span class="ks-cp-row-ic" style="background:#FFE3CC;">📋</span>
+            <span class="ks-cp-acc-t">ტესტების ისტორია</span>
+            <span class="ks-cp-chip">{{ $totalTests }}</span>
+            <i class="bi bi-chevron-right ks-cp-acc-arrow"></i>
         </div>
-        <div class="collapse-body">
+        <div class="ks-cp-acc-b">
+            <div class="ks-cp-list">
             @forelse($tests as $test)
             @php $pct = round($test->correct_count / max($test->total_questions, 1) * 100); @endphp
-            <a href="{{ route('child.test.show', [$child, $test]) }}" class="test-row">
-                <div class="test-icon">{{ $test->theme?->icon ?? '📝' }}</div>
-                <div class="test-info">
-                    <div class="test-date">{{ $test->completed_at->format('d.m.Y · H:i') }}</div>
-                    <div class="test-score">{{ $test->correct_count }} / {{ $test->total_questions }} სწორი</div>
-                </div>
-                <div class="test-pct {{ $pct >= 80 ? 'pct-hi' : ($pct >= 50 ? 'pct-mid' : 'pct-lo') }}">
-                    {{ $pct }}%
-                </div>
+            <a href="{{ route('child.test.show', [$child, $test]) }}" class="ks-cp-row" style="background:#FFF8F1;box-shadow:none;">
+                <span class="ks-cp-row-ic" style="background:#fff;">{{ $test->theme?->icon ?? '📝' }}</span>
+                <span class="ks-cp-row-b">
+                    <span class="ks-cp-row-t">{{ $test->correct_count }} / {{ $test->total_questions }} სწორი</span>
+                    <span class="ks-cp-row-s">{{ $test->completed_at->format('d.m.Y · H:i') }}</span>
+                </span>
+                <span class="ks-cp-pct {{ $pct >= 80 ? 'hi' : ($pct >= 50 ? 'mid' : 'lo') }}">{{ $pct }}%</span>
+                <i class="bi bi-chevron-right ks-cp-row-end"></i>
             </a>
             @empty
-            <div class="empty">ტესტები ჯერ არ დაწერილა</div>
+            <div class="ks-cp-row-s">ტესტები ჯერ არ დაწერილა</div>
             @endforelse
+            </div>
         </div>
     </div>
 
     @if($oldGrades->isNotEmpty())
-    <hr class="old-grades-hr">
-    <div class="section-label">ძველი კლასები</div>
-
+    <h2 class="ks-cp-h2">ძველი კლასები</h2>
+    <div class="ks-cp-list">
     @foreach($oldGrades as $grade)
     @php
         $gTests   = $oldGradeTests->get($grade->id, collect());
         $gHist    = $gradeHistory->get($grade->id);
     @endphp
-    <div class="collapse-card" id="secOldGrade{{ $grade->id }}">
-        <div class="collapse-header" onclick="toggleSection('secOldGrade{{ $grade->id }}')">
-            <span class="collapse-title">{{ $grade->name }} · {{ $gTests->count() }}</span>
-            <span class="collapse-arrow">▶</span>
+    <div class="ks-cp-acc" id="secOldGrade{{ $grade->id }}">
+        <div class="ks-cp-acc-h" onclick="toggleSection('secOldGrade{{ $grade->id }}')">
+            <span class="ks-cp-acc-t">{{ $grade->name }}</span>
+            <span class="ks-cp-chip">{{ $gTests->count() }} ტესტი</span>
+            <i class="bi bi-chevron-right ks-cp-acc-arrow"></i>
         </div>
-        <div class="collapse-body">
+        <div class="ks-cp-acc-b">
             @if($gHist)
-            <div class="history-meta">საბოლოო დონე: {{ $gHist->difficulty }} · სულ {{ $gHist->tests_completed }} ტესტი</div>
+            <div class="ks-cp-row-s" style="margin-bottom:10px;">საბოლოო დონე: {{ $gHist->difficulty }} · სულ {{ $gHist->tests_completed }} ტესტი</div>
             @endif
+            <div class="ks-cp-list">
             @forelse($gTests as $test)
             @php $pct = round($test->correct_count / max($test->total_questions, 1) * 100); @endphp
-            <a href="{{ route('child.test.show', [$child, $test]) }}" class="test-row">
-                <div class="test-icon">{{ $test->theme?->icon ?? '📝' }}</div>
-                <div class="test-info">
-                    <div class="test-date">{{ $test->completed_at->format('d.m.Y · H:i') }}</div>
-                    <div class="test-score">{{ $test->correct_count }} / {{ $test->total_questions }} სწორი</div>
-                </div>
-                <div class="test-pct {{ $pct >= 80 ? 'pct-hi' : ($pct >= 50 ? 'pct-mid' : 'pct-lo') }}">
-                    {{ $pct }}%
-                </div>
+            <a href="{{ route('child.test.show', [$child, $test]) }}" class="ks-cp-row" style="background:#FFF8F1;box-shadow:none;">
+                <span class="ks-cp-row-ic" style="background:#fff;">{{ $test->theme?->icon ?? '📝' }}</span>
+                <span class="ks-cp-row-b">
+                    <span class="ks-cp-row-t">{{ $test->correct_count }} / {{ $test->total_questions }} სწორი</span>
+                    <span class="ks-cp-row-s">{{ $test->completed_at->format('d.m.Y · H:i') }}</span>
+                </span>
+                <span class="ks-cp-pct {{ $pct >= 80 ? 'hi' : ($pct >= 50 ? 'mid' : 'lo') }}">{{ $pct }}%</span>
+                <i class="bi bi-chevron-right ks-cp-row-end"></i>
             </a>
             @empty
-            <div class="empty">ამ კლასში ტესტები არ დაწერილა</div>
+            <div class="ks-cp-row-s">ამ კლასში ტესტები არ დაწერილა</div>
             @endforelse
+            </div>
         </div>
     </div>
     @endforeach
+    </div>
     @endif
 </div>
 

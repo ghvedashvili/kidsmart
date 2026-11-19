@@ -1,151 +1,185 @@
 @extends('layouts.app')
 
+{{-- redesign-kidsmart: ადმინ პანელი (დიზაინი A1) --}}
 @section('content')
-<style>
-    body { background: transparent !important; }
-    .admin-wrap { max-width: 720px; margin: 0 auto; padding: 32px 16px 64px; font-family: 'Goldman', monospace; }
-    .card-dark { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-    .card-label { font-size: 0.72rem; color: #94a3b8; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px; }
-    .form-ctrl { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 5px; color: #374151; font-family: 'Goldman', monospace; font-size: 0.82rem; padding: 10px 14px; width: 100%; outline: none; transition: border-color 0.2s; margin-bottom: 10px; }
-    .form-ctrl:focus { border-color: #94a3b8; }
-    .form-ctrl::placeholder { color: #cbd5e1; }
-    .btn-send { background: #f8fafc; border: 1px solid #e2e8f0; color: #64748b; font-family: 'Goldman', monospace; font-size: 0.8rem; letter-spacing: 0.08em; padding: 10px 28px; border-radius: 5px; cursor: pointer; transition: border-color 0.2s, color 0.2s; }
-    .btn-send:hover { border-color: #94a3b8; color: #1e293b; }
-    .result-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.75rem; color: #64748b; }
-    .result-row:last-child { border-bottom: none; }
-    .ok  { color: #059669; }
-    .err { color: #ef4444; }
-    .user-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.78rem; color: #374151; }
-    .user-row:last-child { border-bottom: none; }
-    .sub-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-    .sub-on  { background: #059669; }
-    .sub-off { background: #cbd5e1; }
-    select.form-ctrl { cursor: pointer; }
-
-    /* nav cards grid */
-    .nav-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 28px; }
-    .nav-card { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 14px 16px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; text-decoration: none; color: inherit; transition: border-color 0.15s, box-shadow 0.15s; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
-    .nav-card:hover { border-color: #94a3b8; box-shadow: 0 2px 6px rgba(0,0,0,0.07); }
-    .nav-card-icon { font-size: 1.1rem; line-height: 1; }
-    .nav-card-name { font-family: 'Goldman', monospace; font-size: 0.72rem; color: #374151; }
-    .section-lbl { font-family: 'Goldman', monospace; font-size: 0.62rem; color: #bbb; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 10px; }
-
-    @media (max-width: 640px) {
-        .admin-wrap { padding: 14px 10px 48px; }
-        .card-dark { padding: 16px; }
-        #pushForm > div { flex-wrap: wrap; }
-        #pushForm > div select { min-width: 0; }
-        #pushForm > div button { width: 100%; }
-        .user-row { font-size: 0.7rem; gap: 6px; }
-        .nav-cards { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
-    }
-</style>
-
 @php
 $_map = [
-    'admin.panel'     => ['route' => 'admin.panel',             'icon' => '⚡', 'name' => 'Push'],
-    'admin.grades'    => ['route' => 'admin.grades.index',      'icon' => '🎓', 'name' => 'კლასები'],
-    'admin.themes'    => ['route' => 'admin.themes.index',      'icon' => '🎨', 'name' => 'თემატიკა'],
-    'admin.topics'    => ['route' => 'admin.topics.index',      'icon' => '📚', 'name' => 'თემები'],
-    'admin.questions' => ['route' => 'admin.questions.index',   'icon' => '❓',  'name' => 'კითხვები'],
-    'admin.users'     => ['route' => 'admin.users.index',       'icon' => '👥', 'name' => 'მომხმარებლები'],
-    'admin.perms'     => ['route' => 'admin.permissions.index', 'icon' => '🔐', 'name' => 'ნებართვები'],
-    'admin.packages'  => ['route' => 'admin.packages.index',    'icon' => '📦', 'name' => 'პაკეტები'],
+    'admin.questions' => ['route' => 'admin.questions.index',   'name' => 'ახალი შაბლონი',     'sub' => 'კითხვის კონსტრუქტორი', 'bg' => '#FFE3CC', 'create' => true],
+    'admin.topics'    => ['route' => 'admin.topics.index',      'name' => 'თემები',            'sub' => 'კლასების თემები',      'bg' => '#EEE8FF'],
+    'admin.themes'    => ['route' => 'admin.themes.index',      'name' => 'ცვლადები',          'sub' => 'თემატიკის სიტყვები',   'bg' => '#DCEBFF'],
+    'admin.olympiadrules' => ['route' => 'admin.olympiad-rules.index', 'name' => 'ოლიმპიადა', 'sub' => 'თარიღი და წესები',     'bg' => '#FFF1C2'],
+    'admin.users'     => ['route' => 'admin.users.index',       'name' => 'პაკეტის მინიჭება',  'sub' => 'მომხმარებლებში',       'bg' => '#DFF5E3'],
+    'admin.grades'    => ['route' => 'admin.grades.index',      'name' => 'კლასები',           'sub' => 'მაქს. დონე, სტატუსი',  'bg' => '#FDE2EC'],
 ];
 $_visibleMap = $isAdmin
     ? $_map
     : array_filter($_map, fn($key) => in_array($key, \App\Models\RolePermission::allowedPages(auth()->user()->role) ?? []), ARRAY_FILTER_USE_KEY);
+
+if ($isAdmin) {
+    $_kUsers     = $users->count();
+    $_kNewWeek   = $users->where('created_at', '>=', now()->subDays(7))->count();
+    $_kChildren  = $users->where('role', 'child')->count();
+    $_kTestsDay  = \App\Models\Test::whereNotNull('completed_at')->whereDate('completed_at', today())->count();
+    $_kPaid      = \App\Models\UserSubscription::where(fn($q) => $q->whereNull('expires_at')->orWhereDate('expires_at', '>=', today()))
+                        ->whereHas('package', fn($q) => $q->where('is_free', false))->count();
+    $_kExpiring  = \App\Models\UserSubscription::whereBetween('expires_at', [today(), today()->addDays(7)])->count();
+
+    // კონტენტის დაფარვა: კლასი × სირთულე
+    $_grades = \App\Models\Grade::orderBy('number')->withCount('topics')->get();
+    $_cover  = \App\Models\QuestionTemplate::query()
+        ->join('topics', 'topics.id', '=', 'question_templates.topic_id')
+        ->selectRaw('topics.grade_id as grade_id, question_templates.difficulty as difficulty, count(*) as c')
+        ->groupBy('topics.grade_id', 'question_templates.difficulty')
+        ->get()
+        ->groupBy('grade_id');
+    $_emptyTopics = \App\Models\Topic::doesntHave('questionTemplates')->selectRaw('grade_id, count(*) as c')->groupBy('grade_id')->pluck('c', 'grade_id');
+}
 @endphp
 
-<div class="admin-wrap">
-    <a href="javascript:history.back()" style="font-family:'Goldman',monospace;font-size:0.72rem;color:#999;letter-spacing:0.06em;text-decoration:none;display:inline-block;margin-bottom:24px;">← back</a>
+<header class="ks-page-head">
+    <div class="ks-page-title">
+        <span class="ks-eyebrow">{{ now()->locale('ka')->translatedFormat('l, j F') }}</span>
+        <h1 class="ks-display ks-h1">ადმინ პანელი</h1>
+    </div>
+    @if($isAdmin || in_array('admin.questions', \App\Models\RolePermission::allowedPages(auth()->user()->role) ?? []))
+    <a href="{{ route('admin.questions.create') }}" class="ks-btn ks-btn-primary">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        ახალი შაბლონი
+    </a>
+    @endif
+</header>
 
-    {{-- Nav cards --}}
-    <div class="section-lbl">გვერდები</div>
-    <div class="nav-cards">
-        <a href="{{ route('test.preview') }}" class="nav-card">
-            <span class="nav-card-icon">🧪</span>
-            <span class="nav-card-name">ტესტის გადახედვა</span>
-        </a>
-        @foreach($_visibleMap as $info)
-        <a href="{{ route($info['route']) }}" class="nav-card">
-            <span class="nav-card-icon">{{ $info['icon'] }}</span>
-            <span class="nav-card-name">{{ $info['name'] }}</span>
-        </a>
-        @endforeach
+@if($isAdmin)
+<div class="ks-kpis">
+    <div class="ks-kpi"><span class="ks-kpi-label">მომხმარებელი</span><span class="ks-kpi-value">{{ number_format($_kUsers, 0, '.', ' ') }}</span><span class="ks-kpi-note up">+{{ $_kNewWeek }} ბოლო 7 დღეში</span></div>
+    <div class="ks-kpi"><span class="ks-kpi-label">ბავშვი</span><span class="ks-kpi-value">{{ number_format($_kChildren, 0, '.', ' ') }}</span><span class="ks-kpi-note">რეგისტრირებული</span></div>
+    <div class="ks-kpi"><span class="ks-kpi-label">ტესტი დღეს</span><span class="ks-kpi-value">{{ number_format($_kTestsDay, 0, '.', ' ') }}</span><span class="ks-kpi-note">დასრულებული</span></div>
+    <div class="ks-kpi"><span class="ks-kpi-label">ფასიანი გამოწერა</span><span class="ks-kpi-value">{{ number_format($_kPaid, 0, '.', ' ') }}</span><span class="ks-kpi-note">{{ $_kExpiring }} იწურება 7 დღეში</span></div>
+</div>
+
+<section style="display:flex;flex-wrap:wrap;gap:20px;">
+    <div class="ks-card" style="flex:2 1 460px;min-width:0;display:flex;flex-direction:column;gap:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+            <h2 class="ks-h2">კონტენტი კლასების მიხედვით</h2>
+            <a href="{{ route('admin.topics.index') }}" style="font-size:13px;font-weight:700;color:var(--ks-orange-dark);">თემების მართვა</a>
+        </div>
+        <div class="ks-table-wrap">
+            <table class="ks-table" style="min-width:520px;">
+                <thead><tr><th>კლასი</th><th>თემა</th><th>შაბლონი</th><th>დაფარვა D1–D5</th><th>ყურადღება</th></tr></thead>
+                <tbody>
+                @forelse($_grades as $_g)
+                    @php
+                        $_byDiff  = ($_cover[$_g->id] ?? collect())->pluck('c', 'difficulty');
+                        $_tplSum  = $_byDiff->sum();
+                        $_maxLvl  = $_g->max_level ?: 5;
+                        $_missing = collect(range(1, $_maxLvl))->filter(fn($d) => !($_byDiff[$d] ?? 0));
+                        $_empty   = $_emptyTopics[$_g->id] ?? 0;
+                    @endphp
+                    <tr>
+                        <td style="font-weight:800;">{{ $_g->name }} @unless($_g->is_active)<span class="ks-chip" style="margin-left:6px;">გათიშული</span>@endunless</td>
+                        <td>{{ $_g->topics_count }}</td>
+                        <td>{{ $_tplSum }}</td>
+                        <td>
+                            <span style="display:flex;gap:4px;">
+                            @for($d = 1; $d <= 5; $d++)
+                                @php $_has = ($_byDiff[$d] ?? 0) > 0; $_out = $d > $_maxLvl; @endphp
+                                <span title="დონე {{ $d }}: {{ $_out ? 'კლასის ზღვარს გარეთ' : ($_byDiff[$d] ?? 0).' შაბლონი' }}"
+                                      style="width:22px;height:22px;border-radius:6px;background:{{ $_out ? 'transparent' : ($_has ? '#7B5CF0' : '#EFE3D6') }};{{ $_out ? 'border:1px dashed #E3D9CF;' : '' }}"></span>
+                            @endfor
+                            </span>
+                        </td>
+                        <td>
+                            @if($_empty)
+                                <span class="ks-chip ks-chip-orange">{{ $_empty }} თემა შაბლონის გარეშე</span>
+                            @elseif($_missing->count())
+                                <span class="ks-chip ks-chip-orange">ცარიელი: D{{ $_missing->implode(', D') }}</span>
+                            @else
+                                <span class="ks-chip ks-chip-green">ყველაფერი რიგზეა</span>
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr><td colspan="5" class="ks-muted">კლასი ჯერ არ არის დამატებული</td></tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <form id="pushForm" class="ks-card" style="flex:1 1 300px;display:flex;flex-direction:column;gap:10px;">
+        @csrf
+        <h2 class="ks-h2">Push შეტყობინება</h2>
+        <div class="ks-field"><label class="ks-label" for="pTitle">სათაური</label><input type="text" class="ks-input" id="pTitle" required></div>
+        <div class="ks-field"><label class="ks-label" for="pBody">ტექსტი</label><textarea class="ks-textarea" id="pBody" rows="2" placeholder="მაგ: ახალი თემა დაემატა — სცადე!" required></textarea></div>
+        <div class="ks-field"><label class="ks-label" for="pUrl">ბმული <span class="ks-muted" style="font-weight:500;">(სურვილისამებრ)</span></label><input type="text" class="ks-input" id="pUrl" placeholder="/"></div>
+        <div class="ks-field">
+            <label class="ks-label" for="pUser">ვის</label>
+            <select class="ks-select" id="pUser">
+                <option value="">ყველა მომხმარებელი</option>
+                @foreach($users as $u)
+                <option value="{{ $u->id }}">{{ $u->name }} ({{ $u->email }})</option>
+                @endforeach
+            </select>
+        </div>
+        <button type="submit" class="ks-btn ks-btn-dark" style="margin-top:4px;">გაგზავნა</button>
+        <span class="ks-muted" style="font-size:12px;">Push-ის გამომწერი: {{ $subscriptions->count() }}</span>
+        <div id="pushResults"></div>
+    </form>
+</section>
+@endif
+
+<section style="display:flex;flex-wrap:wrap;gap:20px;">
+    <div class="ks-card" style="flex:1 1 360px;display:flex;flex-direction:column;gap:12px;">
+        <h2 class="ks-h2">სწრაფი მოქმედებები</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;">
+            @foreach($_visibleMap as $_info)
+            <a href="{{ !empty($_info['create']) && \Illuminate\Support\Facades\Route::has('admin.questions.create') ? route('admin.questions.create') : route($_info['route']) }}"
+               style="text-decoration:none;color:var(--ks-ink);border-radius:16px;padding:14px;min-height:70px;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;background:{{ $_info['bg'] }};">
+                <span style="font-size:14px;font-weight:800;">{{ $_info['name'] }}</span>
+                <span style="font-size:12px;color:var(--ks-ink-2);">{{ $_info['sub'] }}</span>
+            </a>
+            @endforeach
+            <a href="{{ route('test.preview') }}" style="text-decoration:none;color:var(--ks-ink);border-radius:16px;padding:14px;min-height:70px;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;background:#F1E8DE;">
+                <span style="font-size:14px;font-weight:800;">ტესტის გადახედვა</span>
+                <span style="font-size:12px;color:var(--ks-ink-2);">როგორ ხედავს ბავშვი</span>
+            </a>
+        </div>
     </div>
 
     @if($isAdmin)
-    {{-- Push Send Form --}}
-    <div class="card-dark">
-        <div class="card-label">Push Notification</div>
-        <form id="pushForm">
-            @csrf
-            <input type="text" class="form-ctrl" id="pTitle" placeholder="სათაური" required>
-            <textarea class="form-ctrl" id="pBody" rows="2" placeholder="ტექსტი" required></textarea>
-            <input type="text" class="form-ctrl" id="pUrl" placeholder="URL (არასავალდებულო)">
-            <div style="display:flex;align-items:center;gap:12px;margin-top:4px;">
-                <select class="form-ctrl" id="pUser" style="width:auto;flex:1;margin-bottom:0;">
-                    <option value="">ყველა მომხმარებელი</option>
-                    @foreach($users as $u)
-                    <option value="{{ $u->id }}">{{ $u->name }} ({{ $u->email }})</option>
-                    @endforeach
-                </select>
-                <button type="submit" class="btn-send">გაგზავნა →</button>
-            </div>
-        </form>
-        <div id="pushResults" style="margin-top:16px;"></div>
-    </div>
-
-    {{-- Subscriptions --}}
-    <div class="card-dark">
-        <div class="card-label">Subscriptions · {{ $subscriptions->count() }}</div>
-        @forelse($subscriptions as $sub)
-        <div class="result-row">
-            <span class="sub-dot sub-on"></span>
-            <span style="color:#888;">{{ $sub->user?->name ?? '—' }}</span>
-            <span style="color:#555;font-size:0.7rem;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ Str::limit($sub->endpoint, 60) }}</span>
+    <div class="ks-card" style="flex:1 1 360px;display:flex;flex-direction:column;gap:6px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <h2 class="ks-h2">ბოლო რეგისტრაციები</h2>
+            @if(\Illuminate\Support\Facades\Route::has('admin.users.index'))
+            <a href="{{ route('admin.users.index') }}" style="font-size:13px;font-weight:700;color:var(--ks-orange-dark);">ყველა</a>
+            @endif
         </div>
-        @empty
-        <div style="color:#444;font-size:0.78rem;">Subscription არ არის</div>
-        @endforelse
-    </div>
-
-    {{-- Users --}}
-    <div class="card-dark">
-        <div class="card-label">Users · {{ $users->count() }}</div>
-        @foreach($users as $u)
+        @php
+            $_roleChip = ['admin' => ['ადმინი', 'ks-chip-dark'], 'parent' => ['მშობელი', 'ks-chip-purple'], 'child' => ['ბავშვი', 'ks-chip-orange'], 'teacher' => ['მასწავლებელი', 'ks-chip-blue'], 'staff' => ['სტაფი', 'ks-chip-blue']];
+        @endphp
+        @foreach($users->take(6) as $u)
         @php $hasSub = $subscriptions->where('user_id', $u->id)->count() > 0; @endphp
-        <div class="user-row">
-            <div style="display:flex;align-items:center;gap:10px;">
-                <span class="sub-dot {{ $hasSub ? 'sub-on' : 'sub-off' }}" title="{{ $hasSub ? 'subscribed' : 'not subscribed' }}"></span>
-                <div>
-                    <div style="color:#aaa;">{{ $u->name }}</div>
-                    <div style="color:#555;font-size:0.7rem;">{{ $u->email }}</div>
-                </div>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px;">
-                <span style="color:#555;font-size:0.7rem;" id="role-{{ $u->id }}">{{ $u->role }}</span>
-                @if($u->id !== auth()->id())
-                <button onclick="toggleRole({{ $u->id }}, '{{ $u->role }}')"
-                    style="background:none;border:1px solid #2a2a2a;color:#666;font-family:'Goldman',monospace;font-size:0.65rem;padding:3px 8px;border-radius:3px;cursor:pointer;"
-                    id="role-btn-{{ $u->id }}">
-                    {{ $u->role === 'admin' ? '→ user' : '→ admin' }}
-                </button>
-                @endif
-            </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--ks-line-soft);">
+            <span style="width:34px;height:34px;border-radius:50%;background:#F1E8DE;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">{{ mb_substr($u->name, 0, 1) }}</span>
+            <span style="flex-grow:1;min-width:0;display:flex;flex-direction:column;">
+                <span style="font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $u->name }}</span>
+                <span class="ks-muted" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $u->email }}</span>
+            </span>
+            @if($hasSub)<span title="Push გამოწერილია" style="width:8px;height:8px;border-radius:50%;background:var(--ks-green);flex-shrink:0;"></span>@endif
+            <span class="ks-chip {{ $_roleChip[$u->role][1] ?? '' }}">{{ $_roleChip[$u->role][0] ?? $u->role }}</span>
+            <span class="ks-muted" style="font-size:12px;white-space:nowrap;">{{ $u->created_at?->format('d.m') }}</span>
         </div>
         @endforeach
     </div>
     @endif
-</div>
+</section>
 
 @if($isAdmin)
 <script>
 document.getElementById('pushForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const res = document.getElementById('pushResults');
-    res.innerHTML = '<div style="color:#555;font-size:0.78rem;">გაგზავნა…</div>';
+    res.innerHTML = '<div class="ks-muted" style="font-size:13px;">იგზავნება…</div>';
 
     const resp = await fetch('{{ route("push.send") }}', {
         method: 'POST',
@@ -159,44 +193,18 @@ document.getElementById('pushForm').addEventListener('submit', async function(e)
     });
 
     const data = await resp.json();
-    if (!data.success) { res.innerHTML = '<div style="color:#e74c3c;font-size:0.78rem;">შეცდომა</div>'; return; }
+    if (!data.success) { res.innerHTML = '<span class="ks-chip ks-chip-red">შეცდომა</span>'; return; }
 
     if (!data.results || data.results.length === 0) {
-        res.innerHTML = '<div style="color:#555;font-size:0.78rem;">Subscriber არ არის</div>';
+        res.innerHTML = '<span class="ks-chip">გამომწერი არ არის</span>';
         return;
     }
 
     const okCount  = data.results.filter(r => r.success).length;
     const errCount = data.results.filter(r => !r.success).length;
-    res.innerHTML = `
-        <div style="font-size:0.78rem;margin-bottom:8px;color:#777;">
-            <span class="ok">✓ ${okCount} წარმატება</span>
-            ${errCount > 0 ? `&nbsp;<span class="err">✗ ${errCount} შეცდომა</span>` : ''}
-        </div>
-        ${data.results.map(r => `
-        <div class="result-row">
-            <span class="${r.success ? 'ok' : 'err'}">${r.success ? '✓' : '✗'}</span>
-            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.endpoint}</span>
-        </div>`).join('')}
-    `;
+    res.innerHTML = '<span class="ks-chip ks-chip-green">✓ ' + okCount + ' გაიგზავნა</span>'
+        + (errCount > 0 ? ' <span class="ks-chip ks-chip-red">✗ ' + errCount + ' შეცდომა</span>' : '');
 });
-
-async function toggleRole(userId, currentRole) {
-    const newRole = currentRole === 'admin' ? 'child' : 'admin';
-    const btn = document.getElementById('role-btn-' + userId);
-    btn.disabled = true;
-    const resp = await fetch(`/admin/users/${userId}/role`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-        body: JSON.stringify({ role: newRole })
-    });
-    const data = await resp.json();
-    if (data.success) {
-        document.getElementById('role-' + userId).textContent = data.role;
-        btn.textContent = data.role === 'admin' ? '→ gamer' : '→ admin';
-    }
-    btn.disabled = false;
-}
 </script>
 @endif
 @endsection

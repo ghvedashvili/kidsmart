@@ -15,6 +15,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    {{-- redesign-kidsmart: ახალი შრიფტი და საერთო დიზაინ-სისტემა --}}
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wdth,wght@62.5..100,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/kidsmart-ui.css') }}?v={{ file_exists(public_path('css/kidsmart-ui.css')) ? filemtime(public_path('css/kidsmart-ui.css')) : 1 }}">
     <style>
         html {
             background-color: #fdf8f0;
@@ -74,7 +77,18 @@
     </style>
     @stack('head')
 </head>
-<body class="@yield('bodyClass')">
+@php
+    // redesign-kidsmart: ადმინის გვერდებს გვერდითი მენიუ აქვს ზედა ზოლის ნაცვლად
+    $__ksAdmin = auth()->check()
+        && (request()->routeIs('admin.*') || request()->routeIs('test.preview'))
+        && (auth()->user()->isAdmin() || \App\Models\RolePermission::hasAnyAdminPage(auth()->user()->role));
+    // redesign-kidsmart: ბავშვის გვერდებს აქვს საერთო გარსი (მენიუ ტესტის წერისასაც ჩანს)
+    $__ksChild = !$__ksAdmin && auth()->check() && auth()->user()->role === 'child'
+        && request()->routeIs('dashboard', 'test.show', 'practice.topics', 'practice.show', 'games.memory', 'games.rps', 'games.wolves-hare', 'games.quoridor', 'my.tests', 'my.test.show', 'achievements', 'games.index', 'market.child', 'olympiad.index', 'videos.library');
+    $__ksParent = !$__ksAdmin && auth()->check() && auth()->user()->role === 'parent'
+        && request()->routeIs('dashboard', 'child.hub', 'child.stats', 'child.practice-stats', 'child.olympiad-stats', 'child.achievements', 'child.test.show', 'market.index');
+@endphp
+<body class="@yield('bodyClass'){{ $__ksAdmin ? ' ks-admin' : '' }}{{ $__ksChild ? ' ks-child' : '' }}{{ $__ksParent ? ' ks-parent' : '' }}{{ !auth()->check() && request()->is('/') ? ' ks-landing' : '' }}{{ $__ksChild && request()->routeIs('games.memory', 'games.rps', 'games.wolves-hare', 'games.quoridor') ? ' ks-game' : '' }}">
 
 <div id="page-loader">
     <div class="ks-loader">
@@ -224,7 +238,20 @@
 @stack('toasts')
 
 <div class="container-fluid px-0" style="position:relative;z-index:1;">
+    @if($__ksAdmin)
+    <div class="ks-admin-shell">
+        @include('layouts.admin-sidebar')
+        <main class="ks-admin-main">
+            @yield('content')
+        </main>
+    </div>
+    @elseif($__ksChild)
+    @include('layouts.child-shell')
+    @elseif($__ksParent)
+    @include('layouts.parent-shell')
+    @else
     @yield('content')
+    @endif
 </div>
 
 {{-- Modals are pushed here, outside .container-fluid — that div's z-index:1

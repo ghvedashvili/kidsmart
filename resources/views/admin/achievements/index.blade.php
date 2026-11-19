@@ -1,79 +1,86 @@
 @extends('layouts.app')
+{{-- redesign-kidsmart: მიღწევები (დიზაინი A8) --}}
 @section('content')
-<style>
-    body { background: transparent !important; }
-    .aw { max-width: 900px; margin: 0 auto; padding: 32px 16px 64px; font-family: 'Goldman', monospace; }
-    .aw-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
-    .msg { font-size: 0.75rem; color: #059669; margin-bottom: 16px; }
-    .btn { background: #f8fafc; border: 1px solid #e2e8f0; color: #64748b; font-family: 'Goldman', monospace; font-size: 0.78rem; letter-spacing: 0.08em; padding: 9px 22px; border-radius: 4px; cursor: pointer; text-decoration:none; display:inline-block; transition: all 0.2s; }
-    .btn:hover { border-color: #94a3b8; color: #1e293b; }
-    .btn-add { background:#eef2ff; border-color:#c7d2fe; color:#4338ca; }
-    .btn-add:hover { border-color:#818cf8; }
-
-    .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:14px; }
-    .card { background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:16px; text-align:center; box-shadow:0 1px 3px rgba(0,0,0,0.04); position:relative; }
-    .card.inactive { opacity:0.5; }
-    .card-img { width:56px; height:56px; object-fit:contain; margin:0 auto 8px; display:block; }
-    .card-emoji { font-size:2.2rem; margin-bottom:8px; }
-    .card-name { font-size:0.82rem; color:#1e293b; margin-bottom:4px; }
-    .card-meta { font-size:0.62rem; color:#94a3b8; margin-bottom:10px; }
-    .card-actions { display:flex; gap:6px; justify-content:center; align-items:center; flex-wrap:wrap; }
-    .toggle-btn { font-family:'Goldman',monospace; font-size:0.6rem; letter-spacing:0.05em; border-radius:20px; padding:4px 10px; cursor:pointer; border:none; }
-    .toggle-btn.on { background:#dcfce7; color:#15803d; }
-    .toggle-btn.off { background:#f1f5f9; color:#94a3b8; }
-    .btn-edit-sm { color:#6366f1; font-size:0.7rem; text-decoration:none; padding:4px 8px; }
-    .btn-del-sm { color:#cbd5e1; font-size:0.7rem; background:none; border:none; cursor:pointer; padding:4px 8px; }
-    .btn-del-sm:hover { color:#ef4444; }
-</style>
-
-<div class="aw">
-    <a href="javascript:history.back()" style="font-family:'Goldman',monospace;font-size:0.72rem;color:#999;letter-spacing:0.06em;text-decoration:none;display:inline-block;margin-bottom:24px;">← back</a>
-
-    @if(session('success'))
-    <div class="msg">{{ session('success') }}</div>
-    @endif
-
-    <div class="aw-head">
-        <div style="font-size:0.68rem;color:#94a3b8;letter-spacing:0.12em;text-transform:uppercase;">მიღწევები · {{ $achievements->count() }}</div>
-        <a href="{{ route('admin.achievements.create') }}" class="btn btn-add">+ ახალი მიღწევა</a>
+<header class="ks-page-head">
+    <div class="ks-page-title">
+        <span class="ks-eyebrow">მედლები, რომლებსაც ბავშვი აქტივობით იღებს · {{ $achievements->count() }}</span>
+        <h1 class="ks-display ks-h1">მიღწევები</h1>
     </div>
+    <a href="{{ route('admin.achievements.create') }}" class="ks-btn ks-btn-primary">+ ახალი მიღწევა</a>
+</header>
 
-    <div class="grid">
-        @forelse($achievements as $ach)
-        @php $topTier = $ach->tiers->last(); @endphp
-        <div class="card {{ $ach->is_active ? '' : 'inactive' }}">
-            @if($topTier?->imageUrl())
-            <img src="{{ $topTier->imageUrl() }}" class="card-img" alt="">
-            @else
-            <div class="card-emoji">🏅</div>
-            @endif
-            <div class="card-name">{{ $ach->name }}</div>
-            @if($ach->theme)
-            <div style="font-size:0.6rem;color:#7c3aed;margin-bottom:2px;">{{ $ach->theme->icon ?? '' }} მხოლოდ {{ $ach->theme->name }}</div>
-            @endif
-            <div class="card-meta">
-                {{ \App\Models\Achievement::CONTEXTS[$ach->context] ?? $ach->context }}
-                @if($ach->game) · {{ $ach->game }} @endif
-                · {{ \App\Models\Achievement::CONDITION_TYPES[$ach->condition_type] ?? $ach->condition_type }}
-                @if($ach->tiers->count() > 1) · {{ $ach->tiers->count() }} დონე @endif
-            </div>
-            <div class="card-actions">
-                <form method="POST" action="{{ route('admin.achievements.toggle', $ach) }}">
-                    @csrf @method('PATCH')
-                    <button type="submit" class="toggle-btn {{ $ach->is_active ? 'on' : 'off' }}">
-                        {{ $ach->is_active ? '● აქტიური' : '○ გათიშული' }}
-                    </button>
-                </form>
-                <a href="{{ route('admin.achievements.edit', $ach) }}" class="btn-edit-sm">✎ რედ.</a>
-                <form method="POST" action="{{ route('admin.achievements.destroy', $ach) }}" style="display:inline;">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="btn-del-sm" onclick="return confirm('წაიშალოს „{{ $ach->name }}“?')">✕</button>
-                </form>
-            </div>
-        </div>
-        @empty
-        <div style="color:#444;font-size:0.78rem;">მიღწევა არ არის დამატებული</div>
-        @endforelse
-    </div>
+@if(session('success'))
+<div class="ks-note" style="background:var(--ks-green-soft);color:var(--ks-green-dark);font-weight:700;">{{ session('success') }}</div>
+@endif
+
+@php
+    $__ctxs = \App\Models\Achievement::CONTEXTS;
+    $__used = $achievements->pluck('context')->unique();
+    $__tierC = ['#D98B4A', '#9AA3B2', '#F5B301', '#7B5CF0', '#1E8A4C'];
+@endphp
+
+<div role="tablist" aria-label="კატეგორია" style="display:flex;flex-wrap:wrap;gap:6px;">
+    <button type="button" role="tab" class="ks-btn ks-btn-dark ks-btn-sm ach-filter" data-ctx="" onclick="achFilter(this)">ყველა</button>
+    @foreach($__ctxs as $key => $label)
+        @if($__used->contains($key))
+        <button type="button" role="tab" class="ks-btn ks-btn-ghost ks-btn-sm ach-filter" data-ctx="{{ $key }}" onclick="achFilter(this)">{{ $label }}</button>
+        @endif
+    @endforeach
 </div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;">
+    @forelse($achievements as $ach)
+    @php $topTier = $ach->tiers->last(); @endphp
+    <div class="ks-card ks-card-tight ach-card" data-ctx="{{ $ach->context }}" style="display:flex;flex-direction:column;gap:8px;{{ $ach->is_active ? '' : 'opacity:.6;' }}">
+        <div style="display:flex;align-items:center;gap:10px;">
+            @if($topTier?->imageUrl())
+            <img src="{{ $topTier->imageUrl() }}" alt="" style="width:48px;height:48px;border-radius:50%;object-fit:cover;">
+            @else
+            <span style="display:flex;gap:4px;">
+                @foreach($ach->tiers as $t)
+                <span title="{{ $t->label }}" style="width:24px;height:24px;border-radius:50%;background:{{ $ach->tiers->count() === 1 ? '#F5B301' : ($__tierC[$loop->index] ?? '#7B5CF0') }};"></span>
+                @endforeach
+            </span>
+            @endif
+            <span style="flex-grow:1;"></span>
+            <form method="POST" action="{{ route('admin.achievements.toggle', $ach) }}">
+                @csrf @method('PATCH')
+                <button type="submit" class="ks-switch" role="switch" aria-checked="{{ $ach->is_active ? 'true' : 'false' }}" aria-label="{{ $ach->name }} — აქტიური"></button>
+            </form>
+        </div>
+        <span style="font-size:15px;font-weight:800;">{{ $ach->name }}</span>
+        @if($ach->description)<span style="font-size:13px;color:var(--ks-ink-2);">{{ $ach->description }}</span>@endif
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span class="ks-chip ks-chip-orange">{{ $__ctxs[$ach->context] ?? $ach->context }}</span>
+            <span class="ks-chip">{{ \App\Models\Achievement::CONDITION_TYPES[$ach->condition_type] ?? $ach->condition_type }}</span>
+            @if($ach->tiers->count() > 1)<span class="ks-chip ks-chip-purple">{{ $ach->tiers->count() }} დონე</span>@endif
+            @if($ach->theme)<span class="ks-chip ks-chip-blue">{{ $ach->theme->icon ?? '' }} {{ $ach->theme->name }}</span>@endif
+            @if($ach->game)<span class="ks-chip ks-mono">{{ $ach->game }}</span>@endif
+        </div>
+        <div style="display:flex;gap:8px;margin-top:auto;">
+            <a href="{{ route('admin.achievements.edit', $ach) }}" class="ks-btn ks-btn-soft ks-btn-sm" style="flex-grow:1;">რედაქტირება</a>
+            <form method="POST" action="{{ route('admin.achievements.destroy', $ach) }}" style="display:inline;">
+                @csrf @method('DELETE')
+                <button type="submit" class="ks-btn ks-btn-danger ks-btn-sm" onclick="return confirm('წაიშალოს „{{ $ach->name }}“?')" aria-label="წაშლა">×</button>
+            </form>
+        </div>
+    </div>
+    @empty
+    <div class="ks-card ks-muted">მიღწევა ჯერ არ არის დამატებული</div>
+    @endforelse
+</div>
+
+<script>
+function achFilter(btn) {
+    const ctx = btn.dataset.ctx;
+    document.querySelectorAll('.ach-filter').forEach(b => {
+        const on = b === btn;
+        b.classList.toggle('ks-btn-dark', on);
+        b.classList.toggle('ks-btn-ghost', !on);
+    });
+    document.querySelectorAll('.ach-card').forEach(c => {
+        c.style.display = !ctx || c.dataset.ctx === ctx ? 'flex' : 'none';
+    });
+}
+</script>
 @endsection

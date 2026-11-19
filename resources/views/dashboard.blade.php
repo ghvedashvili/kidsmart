@@ -593,7 +593,10 @@
 @endpush
 @endif
 
-<div class="dash-hero{{ auth()->user()->role === 'child' ? ' child-dash-fit' : '' }}">
+@if(auth()->user()->role === 'child')
+@include('child.partials.home')
+@else
+<div class="dash-hero{{ in_array(auth()->user()->role, ['parent', 'admin']) ? ' ks-parent-dash' : '' }}">
     <div class="dash-inner">
 
         @if(auth()->user()->role !== 'child')
@@ -605,162 +608,122 @@
                 $atChildLimit = $currentPkg->max_children > 0 && $children->count() >= $currentPkg->max_children;
             }
         @endphp
-        <div class="parent-hero-banner">
-            <div class="parent-hero-top">
-                <div class="parent-hero-text">
-                    <h2>გამარჯობა! 👋</h2>
-                    <div class="parent-hero-name">{{ auth()->user()->name }}</div>
-                </div>
-                @if(in_array(auth()->user()->role, ['parent', 'admin']) && $children->count() > 0)
-                <button type="button" class="add-mini-btn"
+        @if(in_array(auth()->user()->role, ['parent', 'admin']))
+        {{-- redesign-kidsmart: მშობლის მთავარი — შვილების პროგრესი --}}
+        <div class="ks-pp-head">
+            <div>
+                <span class="ks-pp-hi">გამარჯობა, {{ auth()->user()->name }}!</span>
+                <h1 class="ks-pp-title">შვილების პროგრესი</h1>
+            </div>
+            <div class="ks-pp-act">
+                <button type="button" class="ks-pp-plan" onclick="document.getElementById('plansModal').classList.add('open')">
+                    <span style="width:10px;height:10px;border-radius:50%;background:{{ $currentPkg->is_free ? '#3FAE6E' : '#6D4FE0' }};display:inline-block;"></span>
+                    {{ $currentPkg->name }}
+                    @if($activeSub?->expires_at)
+                        <small>· {{ $activeSub->expires_at->format('d.m.Y') }}-მდე</small>
+                    @endif
+                </button>
+                @if($children->count() > 0)
+                <button type="button" class="ks-pp-add"
                     onclick="document.getElementById('{{ $atChildLimit ? 'plansModal' : 'addChildModal' }}').classList.add('open'); {{ $atChildLimit ? '' : 'wizReset();' }}"
                     title="{{ $atChildLimit ? $currentPkg->name . ' პლანი მხოლოდ ' . $currentPkg->max_children . ' ბავშვს იძლევა' : 'შვილის დამატება' }}">
-                    <i class="bi bi-plus-lg"></i> შვილი
+                    <i class="bi bi-plus-lg"></i> შვილის დამატება
                 </button>
                 @endif
             </div>
-            @if(in_array(auth()->user()->role, ['parent', 'admin']))
-            <button type="button" class="plan-pill" onclick="document.getElementById('plansModal').classList.add('open')">
-                <span style="width:8px;height:8px;border-radius:50%;background:{{ $currentPkg->is_free ? '#10b981' : '#93c5fd' }};display:inline-block;"></span>
-                {{ $currentPkg->name }}
-                @if($activeSub?->expires_at)
-                    <span style="opacity:0.7;font-size:0.6rem;">· {{ $activeSub->expires_at->format('d.m.Y') }}-მდე</span>
-                @endif
-                <span style="opacity:0.8;font-size:0.62rem;margin-left:auto;">↑ გეგმა</span>
-            </button>
-            @endif
         </div>
+        @else
+        <div class="ks-pp-head">
+            <div>
+                <span class="ks-pp-hi">გამარჯობა!</span>
+                <h1 class="ks-pp-title">{{ auth()->user()->name }}</h1>
+            </div>
+        </div>
+        @endif
         @endif
 
         {{-- მშობლის ხედი --}}
         @if(in_array(auth()->user()->role, ['parent', 'admin']))
-        <div class="children-section">
-            <div class="section-label">შვილები · {{ $children->count() }}</div>
-
-            <div class="children-grid">
-            @forelse($children as $child)
+        @php
+            $__wkDays = collect(range(6, 0))->map(fn($d) => today()->copy()->subDays($d));
+            $__wkLbl  = ['ორ', 'სამ', 'ოთხ', 'ხუთ', 'პარ', 'შაბ', 'კვი'];
+        @endphp
+        @if($children->count() === 0)
+        <div class="ks-pp-empty">
+            <div style="font-size:56px;line-height:1;">👨‍👩‍👧</div>
+            <b>დაამატე პირველი შვილი</b>
+            <span>შექმენი ბავშვის პროფილი ან დააკავშირე არსებული კოდით.</span>
+            <button type="button" class="ks-pp-add"
+                onclick="document.getElementById('{{ $atChildLimit ? 'plansModal' : 'addChildModal' }}').classList.add('open'); {{ $atChildLimit ? '' : 'wizReset();' }}"
+                @if($atChildLimit) title="{{ $currentPkg->name }} პლანი მხოლოდ {{ $currentPkg->max_children }} ბავშვს იძლევა" @endif>
+                <i class="bi bi-plus-lg"></i>
+                @if($atChildLimit) გეგმის განახლება @else შვილის დამატება @endif
+            </button>
+        </div>
+        @else
+        <div class="ks-pp-kids">
+            @foreach($children as $child)
             @php
                 $s = $child->childSetting;
                 $todayDone = $child->tests()->whereNotNull('completed_at')->whereDate('completed_at', today())->count();
                 $pendingMarket = \App\Models\MarketPurchase::where('child_id', $child->id)->where('status','pending')->count();
+                $__wkTests = $child->tests()->whereNotNull('completed_at')
+                    ->where('completed_at', '>=', today()->copy()->subDays(6))
+                    ->get(['completed_at', 'correct_count', 'total_questions']);
+                $__wkCounts = $__wkDays->map(fn($d) => $__wkTests->filter(fn($t) => $t->completed_at->isSameDay($d))->count());
+                $__wkMax = max(1, $__wkCounts->max());
+                $__wkC = $__wkTests->sum('correct_count'); $__wkT = $__wkTests->sum('total_questions');
+                $__wkAvg = $__wkT > 0 ? (int) round($__wkC / $__wkT * 100) : null;
+                $__av = $child->avatar === 'boy' ? '👦' : ($child->avatar === 'girl' ? '👧' : '🙂');
             @endphp
-            <div class="child-card" style="{{ !$child->is_active ? 'opacity:0.55;' : '' }}">
+            <div class="ks-pp-card {{ !$child->is_active ? 'off' : '' }}">
                 @if(!$child->is_active)
-                <div style="display:flex;align-items:center;gap:6px;background:#fef2f2;border:1px solid #fecaca;border-radius:5px;padding:5px 8px;font-size:0.6rem;color:#dc2626;">
-                    <span>⊘</span>
-                    <span>გათიშული</span>
-                    <button type="button" onclick="document.getElementById('plansModal').classList.add('open')"
-                        style="margin-left:auto;background:none;border:1px solid #fca5a5;color:#dc2626;font-family:'Goldman',monospace;font-size:0.56rem;padding:2px 7px;border-radius:3px;cursor:pointer;white-space:nowrap;">↑ გეგმა</button>
+                <div class="ks-pp-off">
+                    <span>⊘ პროფილი გათიშულია</span>
+                    <button type="button" onclick="document.getElementById('plansModal').classList.add('open')">გეგმა ↑</button>
                 </div>
                 @endif
 
-                <div class="cc-mcard" onclick="window.location.href='{{ route('child.hub', $child) }}'">
-                    <div class="cc-mheader {{ $child->avatar === 'boy' ? 'boy' : ($child->avatar === 'girl' ? 'girl' : '') }}">
-                        <button type="button" class="cc-mavatar" title="პროფილის არჩევა"
-                            onclick="event.stopPropagation(); document.getElementById('avatarModal{{ $child->id }}').classList.add('open')">
-                            <span class="cc-mavatar-inner">{{ $child->avatar === 'boy' ? '👦' : ($child->avatar === 'girl' ? '👧' : '👤') }}</span>
-                        </button>
-                        <div class="cc-mheader-info">
-                            <div class="cc-mheader-name">{{ $child->name }}</div>
-                            @if($child->child_code)
-                            <span class="cc-mheader-code" onclick="event.stopPropagation(); copyChildCode(this, '{{ $child->child_code }}')"
-                                title="კოდის კოპირება">ID: {{ $child->child_code }}</span>
-                            @endif
-                        </div>
-                        <button type="button" class="cc-mheader-edit" title="რედაქტირება"
-                            onclick="event.stopPropagation(); document.getElementById('editChildModal{{ $child->id }}').classList.add('open')"><i class="bi bi-gear-fill"></i></button>
-                    </div>
-
-                    <div class="cc-mstat-row">
-                        <div class="cc-mstat purple">
-                            <span class="cc-mstat-icon">🎓</span>
-                            <span class="cc-mstat-val">{{ $s?->grade?->name ?? '—' }}</span>
-                        </div>
-                        <div class="cc-mstat blue">
-                            <span class="cc-mstat-icon">🏆</span>
-                            <span class="cc-mstat-val">{{ $s ? 'დონე ' . $s->difficulty : '—' }}</span>
-                        </div>
-                        <div class="cc-mstat amber">
-                            <span class="cc-mstat-icon">📅</span>
-                            <span class="cc-mstat-val">{{ $s ? $todayDone . '/' . $s->tests_per_week . ' დღეს' : '—' }}</span>
-                        </div>
-                        <div class="cc-mstat emerald">
-                            <span class="cc-mstat-icon">💰</span>
-                            <span class="cc-mstat-val">{{ $s->coins ?? 0 }} მონეტა</span>
-                        </div>
-                    </div>
-
-                    @if($child->child_code)
-                    <button type="button" class="cc-full-btn-secondary" onclick="event.stopPropagation(); toggleShare({{ $child->id }})">
-                        <i class="bi bi-link-45deg"></i> გაზიარება
-                    </button>
-                    @endif
-                </div>
-
-                <div class="cc-layout">
-                    <button type="button" class="cc-photo {{ $child->avatar === 'boy' ? 'boy' : ($child->avatar === 'girl' ? 'girl' : '') }}" title="პროფილის არჩევა"
-                        onclick="document.getElementById('avatarModal{{ $child->id }}').classList.add('open')">
-                        <span class="cc-avatar-ring">
-                            <span class="cc-avatar-inner">{{ $child->avatar === 'boy' ? '👦' : ($child->avatar === 'girl' ? '👧' : '👤') }}</span>
-                        </span>
-                        <span class="cc-avatar-picker-edit">✎</span>
-                    </button>
-
-                    <div class="cc-body">
-                        <div class="cc-header-row">
-                            <div class="cc-name">{{ $child->name }}</div>
-                            @if($child->child_code)
-                            <span class="cc-code" onclick="copyChildCode(this, '{{ $child->child_code }}')"
-                                title="კოდის კოპირება">ID: {{ $child->child_code }}</span>
-                            @endif
-                        </div>
-
-                        <div class="cc-mini-grid">
-                            <div class="cc-mini purple">
-                                <div class="cc-mini-icon">🎓</div>
-                                <div class="cc-mini-text">
-                                    <p class="cc-mini-label">კლასი</p>
-                                    <p class="cc-mini-value">{{ $s?->grade?->name ?? '—' }}</p>
-                                </div>
-                            </div>
-                            <div class="cc-mini blue">
-                                <div class="cc-mini-icon">🏆</div>
-                                <div class="cc-mini-text">
-                                    <p class="cc-mini-label">პროგრესი</p>
-                                    <p class="cc-mini-value">{{ $s ? 'დონე ' . $s->difficulty : '—' }}</p>
-                                </div>
-                            </div>
-                            <div class="cc-mini amber">
-                                <div class="cc-mini-icon">📅</div>
-                                <div class="cc-mini-text">
-                                    <p class="cc-mini-label">დღიური</p>
-                                    <p class="cc-mini-value">{{ $s ? $todayDone . '/' . $s->tests_per_week . ' დღეს' : '—' }}</p>
-                                </div>
-                            </div>
-                            <div class="cc-mini emerald">
-                                <div class="cc-mini-icon">💰</div>
-                                <div class="cc-mini-text">
-                                    <p class="cc-mini-label">ბალანსი</p>
-                                    <p class="cc-mini-value">{{ $s->coins ?? 0 }} მონეტა</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="cc-btn-row">
-                            <a href="{{ route('child.hub', $child) }}" class="cc-full-btn">
-                                გახსენი სრულად
-                                <i class="bi bi-arrow-right"></i>
-                                @if($pendingMarket)<span class="cc-full-btn-badge">{{ $pendingMarket }}</span>@endif
-                            </a>
-                            <button type="button" class="cc-mini-btn edit" title="რედაქტირება"
-                                onclick="document.getElementById('editChildModal{{ $child->id }}').classList.add('open')"><i class="bi bi-gear-fill"></i></button>
-                        </div>
+                <div class="ks-pp-card-h">
+                    <button type="button" class="ks-pp-av {{ $child->avatar }}" title="პროფილის არჩევა"
+                        onclick="document.getElementById('avatarModal{{ $child->id }}').classList.add('open')">{{ $__av }}</button>
+                    <div class="ks-pp-name">
+                        <b>{{ $child->name }}</b>
                         @if($child->child_code)
-                        <button type="button" class="cc-full-btn-secondary" onclick="toggleShare({{ $child->id }})">
-                            <i class="bi bi-link-45deg"></i> გაზიარება
-                        </button>
+                        <span class="ks-pp-code" onclick="copyChildCode(this, '{{ $child->child_code }}')" title="კოდის კოპირება">ID: {{ $child->child_code }}</span>
                         @endif
                     </div>
+                    <button type="button" class="ks-pp-gear" title="პარამეტრები"
+                        onclick="document.getElementById('editChildModal{{ $child->id }}').classList.add('open')"><i class="bi bi-gear"></i></button>
+                </div>
+
+                <div class="ks-pp-stats">
+                    <div class="ks-pp-stat purple"><span>კლასი</span><b>{{ $s?->grade?->name ?? '—' }}</b></div>
+                    <div class="ks-pp-stat blue"><span>დონე</span><b>{{ $s ? $s->difficulty . '/' . ($s->grade?->max_level ?? \App\Models\Grade::DEFAULT_MAX_LEVEL) : '—' }}</b></div>
+                    <div class="ks-pp-stat orange"><span>დღეს</span><b>{{ $s ? $todayDone . '/' . $s->tests_per_week : '—' }}</b></div>
+                    <div class="ks-pp-stat green"><span>მონეტა</span><b>{{ (int) floor($s->coins ?? 0) }}</b></div>
+                </div>
+
+                <div class="ks-pp-week">
+                    <div class="ks-pp-week-h">ბოლო 7 დღე <span>{{ $__wkTests->count() }} ტესტი{{ $__wkAvg !== null ? ' · საშ. ' . $__wkAvg . '%' : '' }}</span></div>
+                    <div class="ks-pp-bars" role="img" aria-label="ტესტები ბოლო 7 დღეში: {{ $__wkCounts->implode(', ') }}">
+                        @foreach($__wkDays as $__di => $__d)
+                        @php $__n = $__wkCounts[$__di]; @endphp
+                        <div class="ks-pp-bar" title="{{ $__d->format('d.m') }} — {{ $__n }} ტესტი">
+                            <i class="{{ $__n === 0 ? 'zero' : ($__d->isToday() ? 'today' : '') }}" style="height: {{ $__n === 0 ? 4 : max(12, round($__n / $__wkMax * 64)) }}px"></i>
+                            <span>{{ $__wkLbl[$__d->dayOfWeekIso - 1] }}</span>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="ks-pp-btns">
+                    <a href="{{ route('child.hub', $child) }}" class="ks-pp-btn dark">სრულად <i class="bi bi-arrow-right"></i></a>
+                    <a href="{{ route('child.stats', $child) }}" class="ks-pp-btn" title="ანალიტიკა"><i class="bi bi-bar-chart-line"></i></a>
+                    <a href="{{ route('market.index', $child) }}" class="ks-pp-btn" title="მარკეტი"><i class="bi bi-bag"></i>@if($pendingMarket)<span class="ks-pnav-badge">{{ $pendingMarket }}</span>@endif</a>
+                    @if($child->child_code)
+                    <button type="button" class="ks-pp-btn" title="შესვლის ბმულის გაზიარება" onclick="toggleShare({{ $child->id }})"><i class="bi bi-link-45deg"></i></button>
+                    @endif
                 </div>
 
                 @if($child->child_code)
@@ -777,38 +740,13 @@
                 </div>
                 @endif
 
-                <div class="cc-mfull-row">
-                    <a href="{{ route('child.hub', $child) }}" class="cc-mfull-link">
-                        სრულად <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
-
                 @if(session('reminder_sent_' . $child->id))
-                <div style="font-family:'Goldman',monospace;font-size:0.6rem;color:#059669;margin-top:-6px;">&#10003; შეხსენება გაიგზავნა</div>
+                <div style="font-size:13px;font-weight:700;color:#1E7A45;">✓ შეხსენება გაიგზავნა</div>
                 @endif
             </div>
-            @empty
-            <div class="no-children">
-                ბავშვი ჯერ არ დარეგისტრირებულა<br>
-                <span style="font-size:0.62rem;color:#ccc;margin-top:4px;display:block;">კოდი გაუზიარე შვილს</span>
-            </div>
-            @endforelse
-            @if($children->count() === 0)
-            <button type="button" class="add-card"
-                onclick="document.getElementById('{{ $atChildLimit ? 'plansModal' : 'addChildModal' }}').classList.add('open'); {{ $atChildLimit ? '' : 'wizReset();' }}"
-                @if($atChildLimit) title="{{ $currentPkg->name }} პლანი მხოლოდ {{ $currentPkg->max_children }} ბავშვს იძლევა" @endif>
-                <span class="add-card-plus">+</span>
-                <span class="add-card-label">
-                    @if($atChildLimit)
-                        ↑ გეგმის განახლება
-                    @else
-                        შვილის დამატება
-                    @endif
-                </span>
-            </button>
-            @endif
-            </div>
+            @endforeach
         </div>
+        @endif
         @endif
 
 
@@ -870,126 +808,6 @@
         </div>
         @endif
 
-        {{-- ბავშვის ხედი --}}
-        @if(auth()->user()->role === 'child')
-        @php
-            $activeTest    = auth()->user()->tests()->where('is_olympiad', false)->whereNull('completed_at')->latest()->first();
-            $setting       = auth()->user()->childSetting;
-            $required      = $setting?->tests_per_week ?? 0;
-            $todayCount    = auth()->user()->tests()->where('is_olympiad', false)->whereNotNull('completed_at')->whereDate('completed_at', today())->count();
-            $olympiadStatus = (new \App\Services\OlympiadService())->statusFor(auth()->user());
-            $doneToday     = $required > 0 && $todayCount >= $required && !$activeTest && !$setting?->unlimited_tests;
-            $coins         = $setting?->coins ?? 0;
-            $achCount      = auth()->user()->achievements()->count();
-            $totalTestsCount = auth()->user()->tests()->whereNotNull('completed_at')->count();
-            $practiceTopicsCount = \App\Models\Topic::where('grade_id', $setting?->grade_id)
-                ->whereHas('questionTemplates')->count();
-
-            $doneDates = auth()->user()->tests()->whereNotNull('completed_at')
-                ->pluck('completed_at')->map(fn($d) => $d->format('Y-m-d'))->unique();
-
-            $streak = 0;
-            $cursor = \Carbon\Carbon::today();
-            if (!$doneDates->contains($cursor->format('Y-m-d'))) { $cursor = $cursor->copy()->subDay(); }
-            while ($doneDates->contains($cursor->format('Y-m-d'))) { $streak++; $cursor = $cursor->copy()->subDay(); }
-        @endphp
-
-        {{-- დღევანდელი მისია --}}
-        @if($activeTest)
-            <div class="mission-card resume">
-                <div class="mission-badge">🎯 დღევანდელი მისია</div>
-                <div class="mission-title">👋 {{ auth()->user()->name }}, მზად ხარ დღეს ჩემპიონო?</div>
-                <div class="mission-sub">ტესტი დაწყებული გაქვს — დაასრულე და აიღე მონეტები.</div>
-                <a href="{{ route('test.show', $activeTest) }}" class="mission-cta">📝 გააგრძელე მისია →</a>
-            </div>
-        @elseif(!$setting || !$setting->grade_id)
-            <div class="mission-card">
-                <div class="mission-badge">⏳ მოლოდინში</div>
-                <div class="mission-title">👋 {{ auth()->user()->name }}, მზად ხარ დღეს ჩემპიონო?</div>
-                <div class="mission-sub">მშობელს ჯერ დავალება არ დაუყენებია — მალე მიიღებ შენს პირველ მისიას!</div>
-            </div>
-        @elseif($doneToday)
-            <div class="mission-card">
-                <div class="mission-badge">🎉 შესრულებულია</div>
-                <div class="mission-title">👋 {{ auth()->user()->name }}, მზად ხარ დღეს ჩემპიონო?</div>
-                <div class="mission-sub">დღევანდელი მისია დასრულდა! {{ $todayCount }} ტესტი გააკეთე დღეს — ყოჩაღ!</div>
-            </div>
-        @else
-            <div class="mission-card">
-                <div class="mission-badge">🎯 დღევანდელი მისია</div>
-                <div class="mission-title">👋 {{ auth()->user()->name }}, მზად ხარ დღეს ჩემპიონო?</div>
-                <div class="mission-sub">გახსენი ტესტი და მოიგე მონეტები სწორი პასუხებისთვის.</div>
-                <a href="{{ route('test.start') }}" class="mission-cta">🚀 მისიის დაწყება</a>
-            </div>
-        @endif
-
-        {{-- სტატისტიკის ბარათები --}}
-        <div class="stat-grid-4">
-            <a href="{{ route('practice.topics') }}" class="stat-card-4">
-                <img src="/img/Mission.jpg" class="stat-card-4-icon-img" alt="">
-                <div class="stat-card-4-content">
-                    <div class="stat-card-4-head">სავარჯიშოები</div>
-                    <div class="stat-card-4-val">{{ $practiceTopicsCount }}</div>
-                    <div class="stat-card-4-link">თემა · დაწყება →</div>
-                </div>
-            </a>
-            <a href="{{ route('achievements') }}" class="stat-card-4">
-                <img src="/img/Achievements.jpg" class="stat-card-4-icon-img" alt="">
-                <div class="stat-card-4-content">
-                    <div class="stat-card-4-head">ჩემი მედლები</div>
-                    <div class="stat-card-4-val">{{ $achCount }}</div>
-                    <div class="stat-card-4-link">ყველას ნახვა →</div>
-                </div>
-            </a>
-            <a href="{{ route('my.tests') }}" class="stat-card-4">
-                <img src="/img/tests.jpg" class="stat-card-4-icon-img" alt="">
-                <div class="stat-card-4-content">
-                    <div class="stat-card-4-head">ჩემი ტესტები</div>
-                    <div class="stat-card-4-val">{{ $totalTestsCount }}</div>
-                    <div class="stat-card-4-link">ისტორია →</div>
-                </div>
-            </a>
-            <a href="{{ route('market.child') }}" class="stat-card-4">
-                <img src="/img/Market.jpg" class="stat-card-4-icon-img" alt="">
-                <div class="stat-card-4-content">
-                    <div class="stat-card-4-head">მარკეტი</div>
-                    <div class="stat-card-4-val">💰 {{ $coins }}</div>
-                    <div class="stat-card-4-link">ნახვა →</div>
-                </div>
-            </a>
-        </div>
-
-        <div class="mini-cards-row">
-            {{-- თამაშები --}}
-            <a href="{{ route('games.index') }}" class="games-card">
-                <span class="games-card-icon">🎮</span>
-                <div class="games-card-text">
-                    <div class="games-card-title">თამაშები</div>
-                    <div class="games-card-sub">ითამაშე Kidsmart-თან და აჯობე!</div>
-                </div>
-                <span class="games-card-arrow">→</span>
-            </a>
-
-            {{-- ოლიმპიადა --}}
-            <a href="{{ route('olympiad.index') }}" class="oly-card {{ $olympiadStatus['eligible_today'] || $olympiadStatus['already_attempted_today'] ? '' : 'locked' }}">
-                <span class="oly-card-icon">🏆</span>
-                <div class="oly-card-text">
-                    <div class="oly-card-title">ოლიმპიადა</div>
-                    <div class="oly-card-sub">
-                        @if($olympiadStatus['already_attempted_today'])
-                            {{ $olympiadStatus['todays_test']->completed_at ? 'დღევანდელი ოლიმპიადა დასრულებულია!' : 'ოლიმპიადა დაწყებულია — გააგრძელე!' }}
-                        @elseif($olympiadStatus['eligible_today'])
-                            დღეს შეგიძლია დაწერო — დააჭირე და დაიწყე!
-                        @else
-                            {{ $olympiadStatus['reason'] }}
-                        @endif
-                    </div>
-                </div>
-                <span class="oly-card-arrow">→</span>
-            </a>
-        </div>
-
-        @endif
 
 
         @if(auth()->user()->isAdmin())
@@ -1001,6 +819,7 @@
 
     </div>
 </div>
+@endif
 
 {{-- Edit / avatar modals (one per child) — pushed to the 'modals' stack, rendered outside both
      .dash-hero (overflow:hidden would clip their fixed backdrop) and .container-fluid (whose
@@ -1316,7 +1135,8 @@
 @endpush
 
 <script>
-
+// redesign-kidsmart: გვერდითი მენიუდან „გეგმის შეცვლა“ → dashboard#plans
+if (location.hash === '#plans') { document.addEventListener('DOMContentLoaded', function () { var m = document.getElementById('plansModal'); if (m) m.classList.add('open'); }); }
 
 function switchChildTab(tab) {
     const isNew = tab === 'new';

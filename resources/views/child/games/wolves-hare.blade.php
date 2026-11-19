@@ -107,6 +107,11 @@ h1 { margin: 0; font-size: 20px; color: #1b5e20; flex: 1; text-align: left; }
 .stats-box p { margin: 2px 0; color: #388e3c; }
 .stats-box span { font-weight: 800; color: #1b5e20; }
 </style>
+<style>
+/* redesign-kidsmart: ახალი დიზაინის ფერები (ორიგინალ სტილზე ზემოდან) */
+.restart-btn { background: #1D1A17 !important; color: #fff !important; border: none !important; border-radius: 24px !important; font-family: inherit !important; font-weight: 800 !important; box-shadow: none !important; }
+.restart-btn:hover { background: #000 !important; }
+</style>
 
 <div class="wrap">
     <div class="game">

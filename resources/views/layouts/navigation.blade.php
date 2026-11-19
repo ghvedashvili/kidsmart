@@ -152,7 +152,7 @@
     // each page's own "back" link and the dashboard's cards instead.
     $__hideChildChrome = auth()->check() && in_array(auth()->user()->role, ['child', 'parent']);
 @endphp
-@if($__hideChildChrome)
+@if($__hideChildChrome && empty($__ksChild) && empty($__ksParent))
 <style>
     .child-top-bar {
         display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;

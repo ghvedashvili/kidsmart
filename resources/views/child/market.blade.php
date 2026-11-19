@@ -1,150 +1,67 @@
 @extends('layouts.app')
-@push('head')
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
-@endpush
 @section('content')
-<style>
-body { font-family: 'Nunito', sans-serif; background: transparent !important; }
-.wrap { max-width: 520px; margin: 0 auto; padding: 28px 16px 80px; }
-@media (min-width: 760px)  { .wrap { max-width: 700px; } .item-grid, .reward-grid { grid-template-columns: repeat(5, 1fr); } }
-@media (min-width: 1040px) { .wrap { max-width: 960px; } .item-grid, .reward-grid { grid-template-columns: repeat(6, 1fr); } }
-
-.back-btn { display:inline-flex; align-items:center; gap:6px; margin:0 0 16px; font-family:'Nunito',sans-serif; font-size:0.82rem; font-weight:800; color:#d97706; text-decoration:none; background:white; border-radius:99px; padding:8px 16px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
-
-.page-hero {
-    width: 100%; box-sizing: border-box; border-radius: 20px; padding: 26px 20px;
-    min-height: 140px; display: flex; flex-direction: column; justify-content: center;
-    position: relative; overflow: hidden; margin-bottom: 20px;
-    background-image:
-        linear-gradient(90deg, rgba(255,251,235,0.94) 0%, rgba(255,251,235,0.78) 45%, rgba(255,251,235,0.08) 68%),
-        url('/img/market-hero.jpg');
-    background-size: cover; background-position: right center; background-repeat: no-repeat;
-    box-shadow: 0 8px 20px rgba(217,119,6,0.18);
-}
-.page-hero-title { font-family:'Fredoka One',cursive; font-size:1.15rem; color:#92400e; margin-bottom:4px; }
-.page-hero-sub { font-family:'Nunito',sans-serif; font-weight:800; font-size:0.75rem; color:#b45309; }
-
-.section { padding:16px 0 0; }
-.sec-title { font-size:0.68rem; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; color:#64748b; margin-bottom:10px; padding-left:2px; }
-
-/* Flash */
-.flash-ok  { background:#ecfdf5; border:1px solid #6ee7b7; border-radius:10px; padding:10px 14px; font-size:0.8rem; font-weight:700; color:#065f46; margin-bottom:12px; }
-.flash-err { background:#fef2f2; border:1px solid #fca5a5; border-radius:10px; padding:10px 14px; font-size:0.8rem; font-weight:700; color:#dc2626; margin-bottom:12px; }
-
-/* Item cubes — same grid language as the achievements page */
-.item-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:28px; }
-.item-cube {
-    background: white; border-radius: 16px; padding: 16px 12px 14px;
-    text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.07);
-    border: 2px solid transparent; transition: transform 0.15s;
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
-}
-.item-cube.can-afford { border-color: #fde68a; box-shadow: 0 2px 12px rgba(245,158,11,0.15); }
-.item-cube:hover { transform: translateY(-2px); }
-.item-cube .item-icon { font-size: 2.2rem; line-height:1; margin-bottom: 2px; }
-.item-title { font-family:'Fredoka One',cursive; font-size: 0.82rem; color: #1e293b; line-height:1.25; }
-.item-cost  { display:inline-flex; align-items:center; gap:4px; background:#fef9c3; border:1px solid #fde68a; border-radius:20px; padding:3px 10px; font-size:0.7rem; font-weight:900; color:#92400e; margin-top:2px; }
-.buy-btn {
-    width: 100%; margin-top: 6px; box-sizing: border-box;
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-    color: white; border: none; border-radius: 10px;
-    font-family: 'Fredoka One', cursive; font-size: 0.8rem;
-    padding: 8px 10px; cursor: pointer; transition: opacity 0.15s;
-}
-.buy-btn:hover { opacity: 0.9; }
-.buy-btn:disabled, .buy-btn.disabled {
-    background: #e2e8f0; color: #94a3b8; cursor: not-allowed; opacity: 1;
-}
-.pend-badge {
-    display:inline-block; margin-top:6px; background:#fef3c7; border:1px solid #fde68a;
-    border-radius:20px; padding:4px 12px; font-size:0.68rem; font-weight:800;
-    color:#92400e; white-space:nowrap;
-}
-
-/* Approved purchases — cube style matching the achievements page's earned cards */
-.reward-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; }
-.reward-cube {
-    background: white; border-radius: 16px; padding: 16px 10px 14px;
-    text-align: center; box-shadow: 0 2px 12px rgba(245,158,11,0.15);
-    border: 2px solid #fde68a; position: relative;
-}
-.reward-cube .earned-badge {
-    position: absolute; top: 8px; right: 8px; width: 16px; height: 16px;
-    background: #f59e0b; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.55rem; color: white; font-weight: 900;
-}
-.reward-cube .r-icon  { font-size: 2rem; margin-bottom: 6px; }
-.reward-cube .r-title { font-family:'Fredoka One',cursive; font-size: 0.8rem; color: #1e293b; }
-.reward-cube .r-coins { font-size: 0.6rem; font-weight: 800; color: #f59e0b; margin-top: 4px; }
-.reward-cube .r-date  { font-size: 0.56rem; color: #94a3b8; font-weight: 700; margin-top: 2px; }
-</style>
-
-<div class="wrap">
-<div class="page-hero">
-    <div class="page-hero-title">🛒 მარკეტი</div>
-    <div class="page-hero-sub">💰 {{ $coins }} მონეტა — აირჩიე შენი ჯილდო!</div>
-</div>
-
-<div class="section" style="padding-top:20px;">
+<div class="ks-cp">
+    <div class="ks-cp-hero dark">
+        <span class="ks-cp-hero-ic" aria-hidden="true">🛍️</span>
+        <span class="ks-cp-eyebrow" style="color:#FFC49A;">{{ (int) floor($coins) }} მონეტა — აირჩიე შენი ჯილდო!</span>
+        <h1 class="ks-cp-title">მარკეტი</h1>
+        <span class="ks-cp-sub" style="color:#E8DCCF;">ჯილდოებს მშობელი ამატებს და ადასტურებს</span>
+    </div>
 
     @if(session('market_ok'))
-    <div class="flash-ok">{{ session('market_ok') }}</div>
+    <div class="ks-cp-flash ok">{{ session('market_ok') }}</div>
     @endif
     @if(session('market_error'))
-    <div class="flash-err">{{ session('market_error') }}</div>
+    <div class="ks-cp-flash err">{{ session('market_error') }}</div>
     @endif
 
     @if($items->isEmpty())
-    <div style="text-align:center;padding:40px 20px;color:#94a3b8;">
-        <div style="font-size:2.5rem;margin-bottom:10px;">🛒</div>
-        <div style="font-family:'Fredoka One',cursive;font-size:1rem;">მარკეტი ჯერ ცარიელია</div>
-        <div style="font-size:0.78rem;margin-top:4px;">მშობელი მალე დაამატებს პროდუქტებს</div>
+    <div class="ks-cp-empty">
+        <div class="ks-cp-empty-ic">🛒</div>
+        <div class="ks-cp-empty-t">მარკეტი ჯერ ცარიელია</div>
+        <div class="ks-cp-empty-s">მშობელი მალე დაამატებს ჯილდოებს</div>
     </div>
     @else
-
-    <div class="item-grid">
+    <div class="ks-cp-grid">
     @foreach($items as $item)
     @php
         $pending   = $item->pendingPurchase(auth()->id());
         $canAfford = $coins >= $item->coin_cost;
     @endphp
-    <div class="item-cube {{ $canAfford && !$pending ? 'can-afford' : '' }}">
-        <div class="item-icon">{{ $item->icon }}</div>
-        <div class="item-title">{{ $item->title }}</div>
-        <div class="item-cost">💰 {{ $item->coin_cost }} მონეტა</div>
+    <div class="ks-cp-item {{ $canAfford && !$pending ? 'hl' : '' }}">
+        <div class="ks-cp-item-ic">{{ $item->icon }}</div>
+        <div class="ks-cp-item-t">{{ $item->title }}</div>
+        <span class="ks-pill" style="font-size:14px;padding:3px 12px 3px 3px;box-shadow:none;background:#FFF8F1;">
+            <svg viewBox="0 0 24 24" style="width:22px;height:22px;" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#F5B301"/><circle cx="12" cy="12" r="6.5" fill="none" stroke="#FFE08A" stroke-width="2"/></svg>
+            {{ $item->coin_cost }}
+        </span>
         @if($pending)
-            <span class="pend-badge">⏳ ელოდება</span>
+            <span class="ks-cp-chip" style="margin-top:6px;background:#FFF1C9;color:#8A5A00;">⏳ მშობელს ელოდება</span>
         @elseif($canAfford)
             <form method="POST" action="{{ route('market.buy', $item) }}" style="width:100%;">
                 @csrf
-                <button type="submit" class="buy-btn">🛍 ყიდვა</button>
+                <button type="submit" class="ks-cp-btn orange">ყიდვა</button>
             </form>
         @else
-            <button class="buy-btn disabled" disabled>💰 {{ $item->coin_cost - $coins }} კიდევ</button>
+            <button class="ks-cp-btn disabled" disabled>კიდევ {{ $item->coin_cost - $coins }}</button>
         @endif
     </div>
     @endforeach
     </div>
-
     @endif
-</div>
 
-@if($approved->count())
-<div class="section" style="margin-top:24px;">
-    <div class="sec-title">✓ ჩემი ჯილდოები</div>
-    <div class="reward-grid">
+    @if($approved->count())
+    <h2 class="ks-cp-h2">ჩემი ჯილდოები</h2>
+    <div class="ks-cp-grid">
     @foreach($approved as $ap)
-    <div class="reward-cube">
-        <div class="earned-badge">✓</div>
-        <div class="r-icon">{{ $ap->item->icon }}</div>
-        <div class="r-title">{{ $ap->item->title }}</div>
-        <div class="r-coins">💰 {{ $ap->coins_spent }} მონეტა</div>
-        <div class="r-date">{{ $ap->updated_at->format('d.m.Y') }}</div>
+    <div class="ks-cp-item">
+        <span class="ks-cp-item-badge">✓</span>
+        <div class="ks-cp-item-ic">{{ $ap->item->icon }}</div>
+        <div class="ks-cp-item-t">{{ $ap->item->title }}</div>
+        <div class="ks-cp-item-s">{{ $ap->coins_spent }} მონეტა · {{ $ap->updated_at->format('d.m.Y') }}</div>
     </div>
     @endforeach
     </div>
-</div>
-@endif
+    @endif
 </div>
 @endsection

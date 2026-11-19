@@ -119,6 +119,19 @@ button.action-btn:hover { opacity: 0.9; }
     border-radius: 10px; border: none; font-family:'Fredoka One',cursive; font-size: 14px; cursor: pointer;
 }
 </style>
+<style>
+/* redesign-kidsmart: ახალი დიზაინის ფერები (ორიგინალ სტილზე ზემოდან) */
+#info-btn { background: #fff !important; color: #1D1A17 !important; border: 1px solid #F1E3D3 !important; width: 40px !important; height: 40px !important; border-radius: 14px !important; }
+.player-box { background: #fff !important; border-color: #F1E3D3 !important; }
+.player-box.active { border-color: #E2590F !important; background: #FFF4EA !important; box-shadow: 0 0 0 3px rgba(226,89,15,.15) !important; }
+.player-title, .wall-count, .instructions { font-family: inherit !important; }
+#wall-btn { background: #1D1A17 !important; font-family: inherit !important; font-weight: 800 !important; border-radius: 22px !important; padding: 12px !important; font-size: 15px !important; }
+#wall-btn.active { background: #C24A0A !important; }
+.cell.possible { background: #FFE3CC !important; border-color: #E2590F !important; }
+.modal-box { font-family: 'Noto Sans Georgian', system-ui, sans-serif !important; border-radius: 24px !important; }
+.modal-box h2 { color: #1D1A17 !important; font-family: inherit !important; font-weight: 900 !important; }
+#win-restart-btn { background: #1D1A17 !important; border-radius: 24px !important; font-family: inherit !important; font-weight: 800 !important; }
+</style>
 
 <div class="wrap">
     <div class="header-row">

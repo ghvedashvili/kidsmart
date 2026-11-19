@@ -1,97 +1,75 @@
 @extends('layouts.app')
 @section('content')
 <style>
-    body { background: #e8f7ff !important; padding: 0 !important;
-        background-image: radial-gradient(circle at 20% 50%, rgba(37,163,82,0.08) 0%, transparent 50%),
-                          radial-gradient(circle at 80% 20%, rgba(249,201,19,0.10) 0%, transparent 40%);
-    }
+    :root { --t-ink:#1D1A17; }
+    .wrap { max-width: 760px; margin: 0; padding: 0 0 60px; font-family: 'Noto Sans Georgian', system-ui, sans-serif; color: #1D1A17; }
 
-    :root { --green:#1a7a3c; --lg:#25a352; --yellow:#f9c913; --orange:#ff6b2b; --dark:#0d2818; }
-
-    .wrap { max-width: 600px; margin: 0 auto; padding: 28px 16px 80px; font-family: 'Nunito', sans-serif; }
-
-    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-    .back { font-family: 'Nunito', sans-serif; font-size: 0.8rem; font-weight: 800; color: var(--green); text-decoration: none; padding: 6px 14px; background: white; border-radius: 99px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-    .back:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
-    .test-date { font-size: 0.72rem; font-weight: 700; color: #888; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 10px; }
+    .back { font-size: 0.86rem; font-weight: 800; color: #1D1A17; text-decoration: none; padding: 8px 14px; background: white; border-radius: 14px; border: 1px solid #F1E3D3; }
+    .back:hover { background: #FFF4EA; color: #1D1A17; }
+    .test-date { font-size: 0.86rem; font-weight: 700; color: #6B625A; margin-left: auto; }
 
     /* Summary card */
     .summary-card {
-        background: linear-gradient(135deg, var(--green), #0f5c2a);
-        border-radius: 20px; padding: 24px 22px;
+        position: relative; overflow: hidden;
+        background: #F7883E; border-radius: 28px; padding: 24px 26px;
         color: white; margin-bottom: 28px;
-        box-shadow: 0 8px 28px rgba(26,122,60,0.35);
         display: flex; align-items: center; gap: 20px;
     }
-    .sum-icon { font-size: 3rem; }
-    .sum-name { font-family: 'Fredoka One', cursive; font-size: 1.1rem; opacity: 0.85; margin-bottom: 4px; }
-    .sum-score { font-family: 'Fredoka One', cursive; font-size: 2rem; line-height: 1; }
-    .sum-pct {
-        display: inline-block; margin-top: 6px; font-family: 'Fredoka One', cursive;
-        font-size: 0.9rem; padding: 3px 14px; border-radius: 99px;
-    }
-    .pct-hi { background: #dcfce7; color: #15803d; }
-    .pct-mid { background: #fef9c3; color: #ca8a04; }
-    .pct-lo { background: #fee2e2; color: #dc2626; }
-    .pitch-strip {
-        height: 6px; border-radius: 3px; margin-bottom: 24px;
-        background: repeating-linear-gradient(90deg, var(--lg) 0px, var(--lg) 24px, var(--green) 24px, var(--green) 48px);
-    }
+    .summary-card::before { content: ''; position: absolute; right: -60px; top: -80px; width: 260px; height: 260px; border-radius: 50%; background: rgba(255,255,255,.2); }
+    .summary-card > * { position: relative; }
+    .sum-icon { font-size: 3rem; width: 76px; height: 76px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .sum-name { font-size: 0.95rem; font-weight: 700; color: #3D1A04; margin-bottom: 4px; }
+    .sum-score { font-size: 3rem; line-height: .95; font-weight: 900; font-stretch: 70%; }
+    .sum-pct { display: inline-block; margin-top: 8px; font-size: 0.9rem; font-weight: 800; padding: 3px 14px; border-radius: 99px; }
+    .pct-hi { background: #E8F7EE; color: #1E7A45; }
+    .pct-mid { background: #FFF1C9; color: #8A5A00; }
+    .pct-lo { background: #FDECEA; color: #B42318; }
+    .pitch-strip { display: none; }
 
     /* Question cards */
     .q-card {
-        background: white; border-radius: 20px;
-        padding: 28px 20px 20px; margin-bottom: 18px;
-        box-shadow: 0 6px 24px rgba(26,122,60,0.10);
-        border-top: 6px solid var(--green);
-        position: relative;
+        background: white; border-radius: 26px;
+        padding: 30px 22px 22px; margin-bottom: 24px;
+        box-shadow: 0 2px 0 #F1E3D3; position: relative;
     }
-    .q-card:nth-child(3n+2) { border-top-color: var(--yellow); }
-    .q-card:nth-child(3n+3) { border-top-color: var(--orange); }
-
     .q-badge {
-        position: absolute; top: -14px; left: 18px;
-        background: var(--green); color: white;
-        font-family: 'Fredoka One', cursive; font-size: 0.9rem;
-        padding: 3px 14px; border-radius: 99px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        position: absolute; top: -14px; left: 20px;
+        background: #C24A0A; color: white; font-weight: 900; font-size: 0.95rem;
+        padding: 3px 16px; border-radius: 99px;
     }
-    .q-card:nth-child(3n+2) .q-badge { background: #c89800; }
-    .q-card:nth-child(3n+3) .q-badge { background: var(--orange); }
+    .q-card:nth-child(3n+2) .q-badge { background: #6D4FE0; }
+    .q-card:nth-child(3n+3) .q-badge { background: #2F6FD6; }
 
-    .q-text { font-size: clamp(0.95rem, 3vw, 1.05rem); font-weight: 800; color: var(--dark); line-height: 1.7; margin-bottom: 6px; }
-    .q-hint { font-size: 0.78rem; color: #64748b; font-style: italic; margin-bottom: 14px; line-height: 1.5; }
+    .q-text { font-size: clamp(1rem, 3vw, 1.15rem); font-weight: 700; color: #1D1A17; line-height: 1.65; margin-bottom: 6px; }
+    .q-hint { font-size: 0.86rem; color: #6B625A; margin-bottom: 14px; line-height: 1.5; border-left: 3px solid #FFE3CC; padding-left: 10px; }
 
-    .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 20px; }
+    .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
     .opt-row {
         display: flex; align-items: center; justify-content: center; gap: 6px;
-        padding: 12px 10px; border-radius: 14px; border: 2.5px solid #e2e8f0;
-        font-family: 'Fredoka One', cursive; font-size: clamp(0.95rem, 3.5vw, 1.1rem);
-        color: #888; text-align: center; min-height: 52px; position: relative;
+        padding: 12px 10px; border-radius: 18px; border: 2.5px solid #F1E3D3; background: #FFF8F1;
+        font-weight: 900; font-size: clamp(1.05rem, 3.5vw, 1.25rem);
+        color: #6B625A; text-align: center; min-height: 56px; position: relative;
     }
-    .opt-row.correct   { background: #dcfce7; border-color: #86efac; color: #15803d; }
-    .opt-row.wrong     { background: #fee2e2; border-color: #fca5a5; color: #dc2626; }
-    .opt-row.missed    { background: #dcfce7; border-color: #86efac; color: #15803d; opacity: 0.55; }
+    .opt-row.correct   { background: #E8F7EE; border-color: #3FAE6E; color: #14532D; }
+    .opt-row.wrong     { background: #FDECEA; border-color: #E5484D; color: #B42318; }
+    .opt-row.missed    { background: #E8F7EE; border-color: #7FCB9C; color: #14532D; opacity: 0.6; }
 
     .opt-icon { font-size: 1rem; }
-    .opt-tag {
-        position: absolute; top: -9px; right: 8px;
-        font-family: 'Nunito', sans-serif; font-size: 0.6rem; font-weight: 900;
-        padding: 1px 8px; border-radius: 99px;
-    }
-    .tag-correct { background: #15803d; color: white; }
-    .tag-wrong   { background: #dc2626; color: white; }
-    .tag-answer  { background: #4f46e5; color: white; }
+    .opt-tag { position: absolute; top: -10px; right: 8px; font-size: 0.66rem; font-weight: 800; padding: 1px 9px; border-radius: 99px; }
+    .tag-correct { background: #1E8A4C; color: white; }
+    .tag-wrong   { background: #C62828; color: white; }
+    .tag-answer  { background: #6D4FE0; color: white; }
 
-    .no-ans { font-family: 'Nunito', sans-serif; font-size: 0.75rem; font-weight: 800; color: #f59e0b; margin-top: 10px; }
+    .no-ans { font-size: 0.86rem; font-weight: 800; color: #8A5A00; margin-top: 10px; }
 
-    .vid-btn { display:inline-flex; align-items:center; gap:6px; margin-top:12px; padding:7px 16px; background:#ede9fe; border-radius:99px; font-family:'Nunito',sans-serif; font-weight:800; font-size:0.75rem; color:#6d28d9; text-decoration:none; border:none; cursor:pointer; }
-    .vid-btn:hover { background:#ddd6fe; }
+    .vid-btn { display:inline-flex; align-items:center; gap:6px; margin-top:12px; padding:8px 16px; background:#EEE8FF; border-radius:99px; font-weight:800; font-size:0.84rem; color:#4B33B8; border:none; cursor:pointer; text-decoration:none; font-family:inherit; }
+    .vid-btn:hover { background:#DDD3FF; }
     .vid-panel-q { margin-top:10px; display:none; }
-    .vid-panel-q iframe { width:100%; aspect-ratio:16/9; border:none; border-radius:12px; }
-    .vid-title-q { font-family:'Nunito',sans-serif; font-weight:800; font-size:0.75rem; color:#64748b; margin-top:6px; }
+    .vid-panel-q iframe { width:100%; aspect-ratio:16/9; border:none; border-radius:16px; }
+    .vid-title-q { font-weight:700; font-size:0.84rem; color:#6B625A; margin-top:6px; }
+    @media (max-width: 600px) { .summary-card { padding: 20px; border-radius: 24px; } .sum-score { font-size: 2.4rem; } .q-card { padding: 26px 16px 18px; } }
 </style>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
 
 <div class="wrap">
     <div class="topbar">
@@ -153,7 +131,7 @@
                     $cellOk = $sol !== null && (int)($uv ?? PHP_INT_MIN) === $sol;
                 @endphp
                 @if($val !== null)
-                <div style="width:44px;height:44px;border-radius:10px;background:#4f46e5;color:white;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;">{{ $val }}</div>
+                <div style="width:44px;height:44px;border-radius:10px;background:#6D4FE0;color:white;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;">{{ $val }}</div>
                 @elseif($cellOk)
                 <div style="width:44px;height:44px;border-radius:10px;background:#16a34a;color:white;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;">{{ $sol }}</div>
                 @elseif($uv !== null)
@@ -224,7 +202,7 @@
                 if($_gv){$_bg='#d1fae5';$_fg='#065f46';$_bd='2.5px solid #6ee7b7';}
                 elseif($selected!==null&&$_ok){$_bg='#dcfce7';$_fg='#15803d';$_bd='2px solid #86efac';}
                 elseif($selected!==null&&$_uv!==null){$_bg='#fee2e2';$_fg='#991b1b';$_bd='2px solid #fca5a5';}
-                else{$_bg='#4f46e5';$_fg='white';$_bd='none';}
+                else{$_bg='#6D4FE0';$_fg='white';$_bd='none';}
             }
         @endphp
         @if($_isDR&&$_isDC)
@@ -281,7 +259,7 @@
                 $ok   = $cv !== null && (int)($uv ?? PHP_INT_MIN) === (int)$cv;
             @endphp
             <div style="text-align:center;">
-                <div style="width:44px;height:44px;border-radius:8px;background:#4f46e5;color:white;display:flex;align-items:center;justify-content:center;font-size:1.25rem;margin-bottom:3px;">{{ $sym }}</div>
+                <div style="width:44px;height:44px;border-radius:8px;background:#6D4FE0;color:white;display:flex;align-items:center;justify-content:center;font-size:1.25rem;margin-bottom:3px;">{{ $sym }}</div>
                 @if($selected !== null)
                     @if($ok)
                     <div style="font-size:0.78rem;font-weight:900;color:#16a34a;">{{ $cv }}</div>

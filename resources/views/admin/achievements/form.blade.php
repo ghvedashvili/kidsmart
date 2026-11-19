@@ -1,134 +1,130 @@
 @extends('layouts.app')
+{{-- redesign-kidsmart: მიღწევის ფორმა (დიზაინი A8) --}}
 @section('content')
 <style>
-    body { background: transparent !important; }
-    .aw { max-width: 680px; margin: 0 auto; padding: 32px 16px 64px; font-family: 'Goldman', monospace; }
-    .card-dark { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-    .card-label { font-size: 0.68rem; color: #94a3b8; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px; }
-    .lbl { font-size: 0.62rem; color: #94a3b8; letter-spacing: 0.08em; margin: 10px 0 6px; text-transform: uppercase; }
-    .fc { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; color: #374151; font-family: 'Goldman', monospace; font-size: 0.82rem; padding: 9px 13px; width: 100%; outline: none; margin-bottom: 4px; box-sizing: border-box; }
-    .fc:focus { border-color: #94a3b8; }
-    .err { font-size: 0.72rem; color: #e74c3c; margin: 4px 0 8px; }
-    .btn { background: #f8fafc; border: 1px solid #e2e8f0; color: #64748b; font-family: 'Goldman', monospace; font-size: 0.78rem; letter-spacing: 0.08em; padding: 9px 22px; border-radius: 4px; cursor: pointer; transition: all 0.2s; }
-    .btn:hover { border-color: #94a3b8; color: #1e293b; }
-    .btn-save { background:#eef2ff; border-color:#c7d2fe; color:#4338ca; }
-    .check-row { display:flex; align-items:center; gap:8px; font-size:0.78rem; color:#374151; margin:12px 0; }
-
-    .tier-row { border:1px solid #e2e8f0; border-radius:8px; padding:14px; margin-bottom:10px; position:relative; }
-    .tier-num { font-size:0.6rem; color:#94a3b8; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:8px; }
-    .tier-grid { display:grid; grid-template-columns:1fr 110px; gap:8px; }
-    .tier-remove { position:absolute; top:10px; right:10px; background:none; border:none; color:#cbd5e1; cursor:pointer; font-size:0.8rem; }
-    .tier-remove:hover { color:#ef4444; }
-    .tier-img-row { display:flex; align-items:center; gap:10px; margin-top:8px; }
-    .tier-img-preview { width:44px; height:44px; object-fit:contain; border:1px solid #e2e8f0; border-radius:6px; background:#f8fafc; }
-    .tier-add { background:none; border:1px dashed #cbd5e1; color:#94a3b8; font-family:'Goldman',monospace; font-size:0.68rem; letter-spacing:0.06em; padding:8px 16px; border-radius:6px; cursor:pointer; width:100%; }
-    .tier-add:hover { border-color:#818cf8; color:#4338ca; }
-    .hint { font-size: 0.66rem; color: #94a3b8; margin: -2px 0 10px; line-height: 1.5; }
+    .tier-row { display: flex; flex-direction: column; gap: 8px; background: var(--ks-bg-admin); border-radius: 14px; padding: 12px; position: relative; }
+    .tier-num { font-size: 13px; font-weight: 800; }
+    .tier-grid { display: grid; grid-template-columns: 1fr 140px; gap: 8px; }
+    .tier-img-row { display: flex; align-items: center; gap: 10px; }
+    .tier-img-preview { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+    .tier-remove { position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; border-radius: 8px; border: none; background: var(--ks-red-soft); color: var(--ks-red-dark); font-weight: 800; cursor: pointer; }
+    @media (max-width: 520px) { .tier-grid { grid-template-columns: 1fr; } }
 </style>
 
-<div class="aw">
-    <a href="javascript:history.back()" style="font-family:'Goldman',monospace;font-size:0.72rem;color:#999;letter-spacing:0.06em;text-decoration:none;display:inline-block;margin-bottom:24px;">← back</a>
+<header class="ks-page-head">
+    <div class="ks-page-title">
+        <nav aria-label="ნავიგაცია" class="ks-eyebrow"><a href="{{ route('admin.achievements.index') }}" style="color:var(--ks-orange-dark);font-weight:700;">მიღწევები</a> / {{ $achievement ? 'რედაქტირება' : 'ახალი' }}</nav>
+        <h1 class="ks-display ks-h1">{{ $achievement ? $achievement->name : 'ახალი მიღწევა' }}</h1>
+    </div>
+</header>
 
-    <form method="POST"
-        action="{{ $achievement ? route('admin.achievements.update', $achievement) : route('admin.achievements.store') }}"
-        enctype="multipart/form-data">
-        @csrf
-        @if($achievement) @method('PUT') @endif
+<form method="POST"
+      action="{{ $achievement ? route('admin.achievements.update', $achievement) : route('admin.achievements.store') }}"
+      enctype="multipart/form-data"
+      style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;">
+    @csrf
+    @if($achievement) @method('PUT') @endif
 
-        <div class="card-dark">
-            <div class="card-label">{{ $achievement ? 'მიღწევის რედაქტირება' : 'ახალი მიღწევა' }}</div>
-
-            <div class="lbl">სახელი</div>
-            <input type="text" name="name" id="achName" class="fc" value="{{ old('name', $achievement?->name) }}" required>
-            @error('name')<div class="err">{{ $message }}</div>@enderror
-
-            <div class="lbl">Slug (უნიკალური იდენტიფიკატორი)</div>
-            <input type="text" name="slug" id="achSlug" class="fc" value="{{ old('slug', $achievement?->slug) }}" required>
-            @error('slug')<div class="err">{{ $message }}</div>@enderror
-
-            <div class="lbl">თემატიკა <span style="color:#cbd5e1;">(თუ მონიშნავ, მედალი ჩანს/მოქმედებს მხოლოდ ამ თემატიკის ბავშვებისთვის)</span></div>
-            <select name="theme_id" class="fc">
-                <option value="">ნებისმიერი თემატიკა</option>
-                @foreach($themes as $theme)
-                <option value="{{ $theme->id }}" {{ old('theme_id', $achievement?->theme_id) == $theme->id ? 'selected' : '' }}>{{ $theme->icon ?? '' }} {{ $theme->name }}</option>
-                @endforeach
-            </select>
-            @error('theme_id')<div class="err">{{ $message }}</div>@enderror
-
-            <div class="lbl">კატეგორია <span style="color:#cbd5e1;">(რომელი აქტივობა ამოწმებს ამ მიღწევას)</span></div>
-            <select name="context" id="achContext" class="fc" onchange="achOnContextChange()">
-                @foreach($contexts as $key => $label)
-                <option value="{{ $key }}" {{ old('context', $achievement?->context ?? 'test') === $key ? 'selected' : '' }}>{{ $label }}</option>
-                @endforeach
-            </select>
-            @error('context')<div class="err">{{ $message }}</div>@enderror
-
-            <div id="achGameField" style="display:none;">
-                <div class="lbl">თამაში <span style="color:#cbd5e1;">(ცარიელი = ყველა თამაშზე მოქმედებს)</span></div>
-                <input type="text" name="game" class="fc" value="{{ old('game', $achievement?->game) }}" placeholder="მაგ: memory, quoridor, rock_paper_scissors, wolves_and_hare">
-                @error('game')<div class="err">{{ $message }}</div>@enderror
+    <div class="ks-card" style="flex:3 1 440px;display:flex;flex-direction:column;gap:12px;">
+        <h2 class="ks-h2">ძირითადი</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">
+            <div class="ks-field">
+                <label class="ks-label" for="achName">სახელი</label>
+                <input type="text" name="name" id="achName" class="ks-input" value="{{ old('name', $achievement?->name) }}" required>
+                @error('name')<span class="ks-chip ks-chip-red">{{ $message }}</span>@enderror
             </div>
-
-            <div class="lbl">აღწერა <span style="color:#cbd5e1;">({n} შეიცვლება დონის ზღვრით)</span></div>
-            <input type="text" name="description" class="fc" value="{{ old('description', $achievement?->description) }}" placeholder="მაგ: დაწერე {n} ტესტი">
-
-            <div class="lbl">პირობის ტიპი</div>
-            <select name="condition_type" id="achConditionType" class="fc" onchange="achOnConditionChange()">
-                @foreach($conditionTypes as $key => $label)
-                <option value="{{ $key }}" {{ old('condition_type', $achievement?->condition_type) === $key ? 'selected' : '' }}>{{ $label }}</option>
-                @endforeach
-            </select>
-            @error('condition_type')<div class="err">{{ $message }}</div>@enderror
-
-            <div id="timeOfDayFields" style="display:none;">
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                    <div>
-                        <div class="lbl">საათამდე (მაგ: 09:00)</div>
-                        <input type="time" name="condition_before" class="fc" value="{{ old('condition_before', $achievement?->condition_config['before'] ?? '') }}">
-                    </div>
-                    <div>
-                        <div class="lbl">საათის შემდეგ (მაგ: 22:30)</div>
-                        <input type="time" name="condition_after" class="fc" value="{{ old('condition_after', $achievement?->condition_config['after'] ?? '') }}">
-                    </div>
-                </div>
-                <div class="hint">შეავსე მხოლოდ ერთ-ერთი — ან „საათამდე“ ან „საათის შემდეგ“.</div>
+            <div class="ks-field">
+                <label class="ks-label" for="achSlug">Slug <span class="ks-muted" style="font-weight:500;">(უნიკალური)</span></label>
+                <input type="text" name="slug" id="achSlug" class="ks-input ks-mono" value="{{ old('slug', $achievement?->slug) }}" required>
+                @error('slug')<span class="ks-chip ks-chip-red">{{ $message }}</span>@enderror
             </div>
-
-            <label class="check-row">
-                <input type="checkbox" name="is_active" value="1" {{ old('is_active', $achievement?->is_active ?? true) ? 'checked' : '' }}>
-                აქტიური
-            </label>
+            <div class="ks-field">
+                <label class="ks-label" for="achContext">კატეგორია <span class="ks-muted" style="font-weight:500;">— რა აქტივობა ამოწმებს</span></label>
+                <select name="context" id="achContext" class="ks-select" onchange="achOnContextChange()">
+                    @foreach($contexts as $key => $label)
+                    <option value="{{ $key }}" {{ old('context', $achievement?->context ?? 'test') === $key ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+                @error('context')<span class="ks-chip ks-chip-red">{{ $message }}</span>@enderror
+            </div>
+            <div class="ks-field">
+                <label class="ks-label" for="achTheme">თემატიკა <span class="ks-muted" style="font-weight:500;">— მხოლოდ ამ თემატიკის ბავშვებს</span></label>
+                <select name="theme_id" id="achTheme" class="ks-select">
+                    <option value="">ნებისმიერი თემატიკა</option>
+                    @foreach($themes as $theme)
+                    <option value="{{ $theme->id }}" {{ old('theme_id', $achievement?->theme_id) == $theme->id ? 'selected' : '' }}>{{ $theme->icon ?? '' }} {{ $theme->name }}</option>
+                    @endforeach
+                </select>
+                @error('theme_id')<span class="ks-chip ks-chip-red">{{ $message }}</span>@enderror
+            </div>
+            <div class="ks-field">
+                <label class="ks-label" for="achConditionType">პირობის ტიპი</label>
+                <select name="condition_type" id="achConditionType" class="ks-select" onchange="achOnConditionChange()">
+                    @foreach($conditionTypes as $key => $label)
+                    <option value="{{ $key }}" {{ old('condition_type', $achievement?->condition_type) === $key ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+                @error('condition_type')<span class="ks-chip ks-chip-red">{{ $message }}</span>@enderror
+            </div>
+            <div class="ks-field" id="achGameField" style="display:none;">
+                <label class="ks-label" for="achGame">თამაში <span class="ks-muted" style="font-weight:500;">(ცარიელი = ყველა)</span></label>
+                <input type="text" name="game" id="achGame" class="ks-input ks-mono" value="{{ old('game', $achievement?->game) }}" placeholder="memory, quoridor, rock_paper_scissors, wolves_and_hare">
+                @error('game')<span class="ks-chip ks-chip-red">{{ $message }}</span>@enderror
+            </div>
         </div>
 
-        <div class="card-dark">
-            <div class="card-label">დონეები</div>
-            <div class="hint">ერთი დონე = უბრალო მიღწევა. რამდენიმე დონე = პროგრესირებადი (მაგ. ბრინჯაო/ვერცხლი/ოქრო) — ბავშვი თანმიმდევრობით გადადის დონეებზე.</div>
-
-            <div id="tiersWrap">
-                @php $existingTiers = old('tiers', $achievement?->tiers->map(fn($t) => ['label' => $t->label, 'threshold' => $t->threshold])->toArray() ?? [['label' => '', 'threshold' => '']]); @endphp
-                @foreach($existingTiers as $i => $tier)
-                <div class="tier-row" data-tier-index="{{ $i }}">
-                    @if($i > 0)<button type="button" class="tier-remove" onclick="achRemoveTier(this)">✕</button>@endif
-                    <div class="tier-num">დონე {{ $i + 1 }}</div>
-                    <div class="tier-grid">
-                        <input type="text" name="tiers[{{ $i }}][label]" class="fc" placeholder="სახელი, მაგ: ბრინჯაო" value="{{ $tier['label'] ?? '' }}" required>
-                        <input type="number" name="tiers[{{ $i }}][threshold]" class="fc tier-threshold" placeholder="ზღვარი" min="1" value="{{ $tier['threshold'] ?? '' }}">
-                    </div>
-                    <div class="tier-img-row">
-                        @if($achievement && ($achievement->tiers[$i]->image_path ?? null))
-                        <img src="{{ $achievement->tiers[$i]->imageUrl() }}" class="tier-img-preview">
-                        @endif
-                        <input type="file" name="tiers[{{ $i }}][image]" accept="image/*" class="fc" style="margin-bottom:0;">
-                    </div>
-                </div>
-                @endforeach
-            </div>
-            <button type="button" class="tier-add" onclick="achAddTier()">+ დონის დამატება</button>
+        <div class="ks-field">
+            <label class="ks-label" for="achDesc">აღწერა <span class="ks-muted" style="font-weight:500;">— {n} შეიცვლება დონის ზღვრით</span></label>
+            <input type="text" name="description" id="achDesc" class="ks-input" value="{{ old('description', $achievement?->description) }}" placeholder="მაგ: დაწერე {n} ტესტი">
         </div>
 
-        <button type="submit" class="btn btn-save">შენახვა</button>
-    </form>
-</div>
+        <div id="timeOfDayFields" style="display:none;flex-direction:column;gap:8px;">
+            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;">
+                <div class="ks-field"><label class="ks-label" for="achBefore">საათამდე (მაგ: 09:00)</label><input type="time" id="achBefore" name="condition_before" class="ks-input" value="{{ old('condition_before', $achievement?->condition_config['before'] ?? '') }}"></div>
+                <div class="ks-field"><label class="ks-label" for="achAfter">საათის შემდეგ (მაგ: 22:30)</label><input type="time" id="achAfter" name="condition_after" class="ks-input" value="{{ old('condition_after', $achievement?->condition_config['after'] ?? '') }}"></div>
+            </div>
+            <span class="ks-muted" style="font-size:12px;">შეავსე მხოლოდ ერთ-ერთი.</span>
+        </div>
+
+        <div class="ks-note" style="background:var(--ks-orange-soft);color:#4A2A12;">ბავშვი დაინახავს: <b id="achPreview">—</b></div>
+
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;">
+            <input type="checkbox" name="is_active" value="1" {{ old('is_active', $achievement?->is_active ?? true) ? 'checked' : '' }} style="width:18px;height:18px;accent-color:#C24A0A;">
+            აქტიური
+        </label>
+    </div>
+
+    <div class="ks-card" style="flex:2 1 320px;display:flex;flex-direction:column;gap:10px;position:sticky;top:24px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+            <h2 class="ks-h2">დონეები</h2>
+            <span class="ks-muted" style="font-size:12px;">1 დონე = უბრალო მედალი</span>
+        </div>
+        <span class="ks-muted" style="font-size:12px;line-height:1.5;">რამდენიმე დონე = პროგრესირებადი (ბრინჯაო → ვერცხლი → ოქრო). ბავშვი თანმიმდევრობით გადადის.</span>
+
+        <div id="tiersWrap" style="display:flex;flex-direction:column;gap:8px;">
+            @php $existingTiers = old('tiers', $achievement?->tiers->map(fn($t) => ['label' => $t->label, 'threshold' => $t->threshold])->toArray() ?? [['label' => '', 'threshold' => '']]); @endphp
+            @foreach($existingTiers as $i => $tier)
+            <div class="tier-row" data-tier-index="{{ $i }}">
+                @if($i > 0)<button type="button" class="tier-remove" onclick="achRemoveTier(this)" aria-label="დონის წაშლა">×</button>@endif
+                <div class="tier-num">დონე {{ $i + 1 }}</div>
+                <div class="tier-grid">
+                    <input type="text" name="tiers[{{ $i }}][label]" class="ks-input" aria-label="დონის სახელი" placeholder="სახელი, მაგ: ბრინჯაო" value="{{ $tier['label'] ?? '' }}" required>
+                    <input type="number" name="tiers[{{ $i }}][threshold]" class="ks-input tier-threshold" aria-label="ზღვარი (n)" placeholder="ზღვარი n" min="1" value="{{ $tier['threshold'] ?? '' }}">
+                </div>
+                <div class="tier-img-row">
+                    @if($achievement && ($achievement->tiers[$i]->image_path ?? null))
+                    <img src="{{ $achievement->tiers[$i]->imageUrl() }}" class="tier-img-preview" alt="">
+                    @endif
+                    <input type="file" name="tiers[{{ $i }}][image]" accept="image/*" aria-label="მედლის სურათი" style="font-family:var(--ks-font);font-size:13px;">
+                </div>
+            </div>
+            @endforeach
+        </div>
+        <button type="button" class="ks-btn ks-btn-ghost ks-btn-sm" style="align-self:flex-start;border-style:dashed;" onclick="achAddTier()">+ დონის დამატება</button>
+        <button type="submit" class="ks-btn ks-btn-primary" style="margin-top:6px;">შენახვა</button>
+    </div>
+</form>
+
 <script>
 const BINARY_TYPES = @json(\App\Models\Achievement::BINARY_TYPES);
 let tierIndex = document.querySelectorAll('.tier-row').length;
@@ -144,9 +140,18 @@ document.getElementById('achName').addEventListener('input', function() {
 });
 document.getElementById('achSlug').addEventListener('input', function() { slugTouched = true; });
 
+function achUpdatePreview() {
+    const desc = document.getElementById('achDesc').value || document.getElementById('achName').value || '—';
+    const first = document.querySelector('.tier-threshold');
+    const n = first && first.value ? first.value : 'n';
+    document.getElementById('achPreview').textContent = desc.split('{n}').join(n);
+}
+document.getElementById('achDesc').addEventListener('input', achUpdatePreview);
+document.getElementById('tiersWrap').addEventListener('input', achUpdatePreview);
+
 function achOnConditionChange() {
     const type = document.getElementById('achConditionType').value;
-    document.getElementById('timeOfDayFields').style.display = type === 'time_of_day' ? 'block' : 'none';
+    document.getElementById('timeOfDayFields').style.display = type === 'time_of_day' ? 'flex' : 'none';
     const isBinary = BINARY_TYPES.includes(type);
     document.querySelectorAll('.tier-threshold').forEach(inp => {
         inp.style.display = isBinary ? 'none' : '';
@@ -156,7 +161,7 @@ function achOnConditionChange() {
 
 function achOnContextChange() {
     const context = document.getElementById('achContext').value;
-    document.getElementById('achGameField').style.display = context === 'games' ? 'block' : 'none';
+    document.getElementById('achGameField').style.display = context === 'games' ? 'flex' : 'none';
 }
 
 function achAddTier() {
@@ -165,22 +170,28 @@ function achAddTier() {
     const div = document.createElement('div');
     div.className = 'tier-row';
     div.innerHTML = `
-        <button type="button" class="tier-remove" onclick="achRemoveTier(this)">✕</button>
+        <button type="button" class="tier-remove" onclick="achRemoveTier(this)" aria-label="დონის წაშლა">×</button>
         <div class="tier-num">დონე ${i + 1}</div>
         <div class="tier-grid">
-            <input type="text" name="tiers[${i}][label]" class="fc" placeholder="სახელი, მაგ: ვერცხლი" required>
-            <input type="number" name="tiers[${i}][threshold]" class="fc tier-threshold" placeholder="ზღვარი" min="1">
+            <input type="text" name="tiers[${i}][label]" class="ks-input" aria-label="დონის სახელი" placeholder="სახელი, მაგ: ვერცხლი" required>
+            <input type="number" name="tiers[${i}][threshold]" class="ks-input tier-threshold" aria-label="ზღვარი (n)" placeholder="ზღვარი n" min="1">
         </div>
         <div class="tier-img-row">
-            <input type="file" name="tiers[${i}][image]" accept="image/*" class="fc" style="margin-bottom:0;">
+            <input type="file" name="tiers[${i}][image]" accept="image/*" aria-label="მედლის სურათი" style="font-family:var(--ks-font);font-size:13px;">
         </div>
     `;
     wrap.appendChild(div);
+    achRenumber();
     achOnConditionChange();
 }
 
 function achRemoveTier(btn) {
     btn.closest('.tier-row').remove();
+    achRenumber();
+    achUpdatePreview();
+}
+
+function achRenumber() {
     document.querySelectorAll('#tiersWrap .tier-row').forEach((row, idx) => {
         row.querySelector('.tier-num').textContent = 'დონე ' + (idx + 1);
     });
@@ -188,5 +199,6 @@ function achRemoveTier(btn) {
 
 achOnConditionChange();
 achOnContextChange();
+achUpdatePreview();
 </script>
 @endsection

@@ -1,107 +1,69 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
+{{-- redesign-kidsmart: კლასები (დიზაინი A9) --}}
 @section('content')
-<style>
-    body { background: transparent !important; }
-    .aw { max-width: 680px; margin: 0 auto; padding: 32px 16px 64px; font-family: 'Goldman', monospace; }
-    .card-dark { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-    .card-label { font-size: 0.68rem; color: #94a3b8; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px; }
-    .fc { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; color: #374151; font-family: 'Goldman', monospace; font-size: 0.82rem; padding: 9px 13px; width: 100%; outline: none; margin-bottom: 10px; box-sizing: border-box; }
-    .fc:focus { border-color: #94a3b8; }
-    .fc::placeholder { color: #cbd5e1; }
-    .btn { background: #f8fafc; border: 1px solid #e2e8f0; color: #64748b; font-family: 'Goldman', monospace; font-size: 0.78rem; letter-spacing: 0.08em; padding: 9px 22px; border-radius: 4px; cursor: pointer; transition: all 0.2s; }
-    .btn:hover { border-color: #94a3b8; color: #1e293b; }
-    .btn-del { background: none; border: none; color: #cbd5e1; font-size: 0.72rem; cursor: pointer; padding: 0 4px; transition: color 0.2s; }
-    .btn-del:hover { color: #ef4444; }
-    .btn-edit { background: none; border: none; color: #cbd5e1; font-size: 0.82rem; cursor: pointer; padding: 0 4px; transition: color 0.2s; line-height:1; }
-    .btn-edit:hover { color: #6366f1; }
-    .row { display: flex; flex-direction: column; padding: 9px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.8rem; color: #374151; }
-    .row:last-child { border-bottom: none; }
-    .row-display { display: flex; align-items: center; justify-content: space-between; width: 100%; }
-    .row-edit { display: none; gap: 8px; align-items: center; padding: 4px 0 2px; }
-    .msg { font-size: 0.75rem; color: #059669; margin-bottom: 16px; }
-    .toggle-btn { display:inline-flex;align-items:center;gap:5px;font-family:'Goldman',monospace;font-size:0.64rem;letter-spacing:0.06em;border-radius:20px;padding:4px 12px;cursor:pointer;border:none;transition:all 0.2s;white-space:nowrap; }
-    .toggle-btn.on  { background:#dcfce7;color:#15803d; }
-    .toggle-btn.off { background:#f1f5f9;color:#94a3b8; }
-    @media (max-width: 640px) {
-        .aw { padding: 14px 10px 48px; }
-        .card-dark { padding: 14px; }
-        .card-dark > form > div[style] { flex-wrap: wrap !important; }
-        .card-dark > form > div[style] input[style*="width:100px"] { width: 100% !important; }
-        .card-dark > form > div[style] button { width: 100%; margin-top: 4px; }
-    }
-</style>
+@include('admin.partials.settings-tabs', ['active' => 'grades'])
 
-<div class="aw">
-    <a href="javascript:history.back()" style="font-family:'Goldman',monospace;font-size:0.72rem;color:#999;letter-spacing:0.06em;text-decoration:none;display:inline-block;margin-bottom:24px;">← back</a>
+@php $__gBg = ['#FFE3CC', '#EEE8FF', '#DCEBFF', '#DFF5E3', '#FFF1C2', '#FDE2EC']; @endphp
 
-    @if(session('success'))
-    <div class="msg">{{ session('success') }}</div>
-    @endif
-
-    <div class="card-dark">
-        <div class="card-label">კლასის დამატება</div>
-        <div style="font-size:0.68rem;color:#94a3b8;margin:-10px 0 14px;line-height:1.6;">
-            „მაქს. ლეველი" განსაზღვრავს რამდენ სირთულის დონემდე შეიძლება ავიდეს ბავშვი ამ კლასში (ლეველის ავტომატური მატება ამაზე მაღლა არასდროს ავალს) და რამდენი დონე გამოჩნდება კითხვების შექმნის ფორმაში ამ კლასის არჩევისას.
-        </div>
-        <form method="POST" action="{{ route('admin.grades.store') }}">
-            @csrf
-            <div style="display:flex;gap:10px;">
-                <input type="number" name="number" class="fc" placeholder="№ (1–12)" min="1" max="12" style="width:100px;margin-bottom:0;" required>
-                <input type="text" name="name" class="fc" placeholder="სახელი, მაგ: მე-2 კლასი" style="flex:1;margin-bottom:0;" required>
-                <input type="number" name="max_level" class="fc" placeholder="მაქს. ლეველი" min="1" max="5" value="{{ old('max_level', \App\Models\Grade::DEFAULT_MAX_LEVEL) }}" style="width:120px;margin-bottom:0;" required>
-                <button type="submit" class="btn">+ დამატება</button>
-            </div>
-            @error('number')<div style="color:#e74c3c;font-size:0.72rem;margin-top:6px;">{{ $message }}</div>@enderror
-            @error('max_level')<div style="color:#e74c3c;font-size:0.72rem;margin-top:6px;">{{ $message }}</div>@enderror
-        </form>
-    </div>
-
-    <div class="card-dark">
-        <div class="card-label">კლასები · {{ $grades->count() }}</div>
+<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;">
+    <div style="flex:3 1 420px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">
         @forelse($grades as $grade)
-        <div class="row">
-            {{-- Display mode --}}
-            <div class="row-display" id="gd{{ $grade->id }}">
-                <span style="{{ !$grade->is_active ? 'color:#bbb;' : '' }}">
-                    <span style="margin-right:10px;color:#94a3b8;">{{ $grade->number }}</span>{{ $grade->name }}
-                    <span style="margin-left:10px;background:#f1f5f9;color:#64748b;border-radius:20px;padding:2px 10px;font-size:0.64rem;">მაქს. {{ $grade->max_level }} ლ.</span>
-                </span>
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <form method="POST" action="{{ route('admin.grades.toggle', $grade) }}">
+        <div style="border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px;background:{{ $__gBg[$loop->index % count($__gBg)] }};{{ $grade->is_active ? '' : 'opacity:.6;' }}">
+            {{-- ნახვის რეჟიმი --}}
+            <div id="gd{{ $grade->id }}" style="display:flex;flex-direction:column;gap:6px;">
+                <span style="font-size:40px;line-height:1;font-weight:900;font-stretch:68%;">{{ $grade->number }}</span>
+                <span style="font-size:15px;font-weight:800;">{{ $grade->name }}</span>
+                <span style="font-size:13px;color:var(--ks-ink-2);">მაქს. დონე: <b>{{ $grade->max_level }}</b></span>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <form method="POST" action="{{ route('admin.grades.toggle', $grade) }}" style="display:flex;align-items:center;gap:8px;">
                         @csrf @method('PATCH')
-                        <button type="submit" class="toggle-btn {{ $grade->is_active ? 'on' : 'off' }}">
-                            {{ $grade->is_active ? '● აქტიური' : '○ გათიშული' }}
-                        </button>
+                        <button type="submit" class="ks-switch" role="switch" aria-checked="{{ $grade->is_active ? 'true' : 'false' }}" aria-label="{{ $grade->name }} — აქტიური"></button>
+                        <span style="font-size:12px;font-weight:700;">{{ $grade->is_active ? 'აქტიური' : 'გათიშული' }}</span>
                     </form>
-                    <button type="button" class="btn-edit" onclick="gradeEdit({{ $grade->id }})" title="ედიტი">✎</button>
-                    <form method="POST" action="{{ route('admin.grades.destroy', $grade) }}">
+                    <span style="flex-grow:1;"></span>
+                    <button type="button" class="ks-btn ks-btn-ghost ks-btn-sm" onclick="gradeEdit({{ $grade->id }})">რედ.</button>
+                    <form method="POST" action="{{ route('admin.grades.destroy', $grade) }}" style="display:inline;">
                         @csrf @method('DELETE')
-                        <button type="submit" class="btn-del" onclick="return confirm('წაიშალოს?')">✕</button>
+                        <button type="submit" class="ks-btn ks-btn-danger ks-btn-sm" onclick="return confirm('წაიშალოს?')" aria-label="წაშლა">×</button>
                     </form>
                 </div>
             </div>
-            {{-- Edit mode --}}
-            <div class="row-edit" id="ge{{ $grade->id }}">
-                <form method="POST" action="{{ route('admin.grades.update', $grade) }}" style="display:flex;gap:8px;align-items:center;width:100%;flex-wrap:wrap;">
-                    @csrf @method('PUT')
-                    <input type="number" name="number" class="fc" value="{{ $grade->number }}" min="1" max="12" style="width:74px;margin-bottom:0;" required>
-                    <input type="text" name="name" class="fc" value="{{ $grade->name }}" style="flex:1;min-width:120px;margin-bottom:0;" required>
-                    <input type="number" name="max_level" class="fc" value="{{ $grade->max_level }}" min="1" max="5" style="width:110px;margin-bottom:0;" required>
-                    <button type="submit" class="btn">შენახვა</button>
-                    <button type="button" class="btn-del" onclick="gradeCancel({{ $grade->id }})">✕</button>
-                </form>
-            </div>
+            {{-- რედაქტირების რეჟიმი --}}
+            <form id="ge{{ $grade->id }}" method="POST" action="{{ route('admin.grades.update', $grade) }}" style="display:none;flex-direction:column;gap:8px;">
+                @csrf @method('PUT')
+                <div class="ks-field"><label class="ks-label" for="gn{{ $grade->id }}">№</label><input type="number" id="gn{{ $grade->id }}" name="number" class="ks-input" value="{{ $grade->number }}" min="1" max="12" required></div>
+                <div class="ks-field"><label class="ks-label" for="gm{{ $grade->id }}">სახელი</label><input type="text" id="gm{{ $grade->id }}" name="name" class="ks-input" value="{{ $grade->name }}" required></div>
+                <div class="ks-field"><label class="ks-label" for="gl{{ $grade->id }}">მაქს. დონე</label><input type="number" id="gl{{ $grade->id }}" name="max_level" class="ks-input" value="{{ $grade->max_level }}" min="1" max="5" required></div>
+                <div style="display:flex;gap:8px;">
+                    <button type="submit" class="ks-btn ks-btn-primary ks-btn-sm">შენახვა</button>
+                    <button type="button" class="ks-btn ks-btn-ghost ks-btn-sm" onclick="gradeCancel({{ $grade->id }})">გაუქმება</button>
+                </div>
+            </form>
         </div>
         @empty
-        <div style="color:#444;font-size:0.78rem;">კლასი არ არის</div>
+        <div class="ks-card ks-muted">კლასი ჯერ არ არის დამატებული</div>
         @endforelse
     </div>
+
+    <form method="POST" action="{{ route('admin.grades.store') }}" class="ks-card" style="flex:1 1 260px;display:flex;flex-direction:column;gap:10px;">
+        @csrf
+        <h2 class="ks-h2">კლასის დამატება</h2>
+        <div class="ks-field"><label class="ks-label" for="gNum">ნომერი (1–12)</label><input type="number" id="gNum" name="number" class="ks-input" min="1" max="12" value="{{ old('number') }}" required></div>
+        <div class="ks-field"><label class="ks-label" for="gName">სახელი</label><input type="text" id="gName" name="name" class="ks-input" placeholder="მაგ: VI კლასი" value="{{ old('name') }}" required></div>
+        <div class="ks-field"><label class="ks-label" for="gMax">მაქსიმალური დონე (1–5)</label><input type="number" id="gMax" name="max_level" class="ks-input" min="1" max="5" value="{{ old('max_level', \App\Models\Grade::DEFAULT_MAX_LEVEL) }}" required></div>
+        <button type="submit" class="ks-btn ks-btn-primary">+ დამატება</button>
+        @error('number')<span class="ks-chip ks-chip-red">{{ $message }}</span>@enderror
+        @error('max_level')<span class="ks-chip ks-chip-red">{{ $message }}</span>@enderror
+        <span class="ks-muted" style="font-size:12px;line-height:1.5;">მაქს. დონე განსაზღვრავს, რამდენ სირთულემდე ავა ბავშვი ამ კლასში და რამდენი დონე გამოჩნდება კითხვის კონსტრუქტორში.</span>
+    </form>
 </div>
+
 <script>
 function gradeEdit(id) {
     document.getElementById('gd' + id).style.display = 'none';
-    document.getElementById('ge' + id).style.display = 'flex';
-    document.getElementById('ge' + id).querySelector('input[name="name"]').focus();
+    const f = document.getElementById('ge' + id);
+    f.style.display = 'flex';
+    f.querySelector('input[name="name"]').focus();
 }
 function gradeCancel(id) {
     document.getElementById('gd' + id).style.display = 'flex';
