@@ -28,6 +28,7 @@ class User extends Authenticatable
         'child_code',
         'is_active',
         'avatar',
+        'photo_url',
         'first_login_at',
     ];
 

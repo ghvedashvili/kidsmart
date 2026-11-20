@@ -7,6 +7,7 @@
         <span class="ks-cp-eyebrow">{{ $earned->count() }}/{{ $achievements->count() }} მედალი მოგებული</span>
         <h1 class="ks-cp-title">{{ $child->name }} · მედლები</h1>
     </div>
+    @include('parent.partials.kid-switcher')
 
     <div class="ks-cp-stats">
         <div class="ks-cp-stat"><b>{{ (int) floor($setting?->coins ?? 0) }}</b><span>მონეტა</span></div>

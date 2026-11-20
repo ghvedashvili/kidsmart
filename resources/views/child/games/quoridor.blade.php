@@ -134,6 +134,7 @@ button.action-btn:hover { opacity: 0.9; }
 </style>
 
 <div class="wrap">
+    <a href="{{ route('games.index') }}" class="back-btn ks-game-back"><i class="bi bi-arrow-left"></i> თამაშები</a>
     <div class="header-row">
         <h1>🧱 ქუორიდორი 5×5</h1>
         <button id="info-btn" aria-label="წესები">ⓘ</button>

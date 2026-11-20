@@ -596,3 +596,249 @@ body .auth-google-btn:hover { background: #A53E08 !important; transform: none !i
 body .auth-code-input { font-family: inherit !important; border-radius: 16px !important; border: 2px solid #F1E3D3 !important; background: #FFF8F1 !important; color: #1D1A17 !important; }
 body .auth-code-input:focus { border-color: #E2590F !important; }
 body .auth-code-btn { font-family: inherit !important; font-weight: 800 !important; background: #1D1A17 !important; border-radius: 26px !important; box-shadow: none !important; color: #fff !important; }
+
+
+/* ═════ ბავშვის მთავარი v2 (მობილური დიზაინის მიხედვით) ═════ */
+.ks-ctop-home { justify-content: flex-start; flex-wrap: nowrap; gap: 12px; }
+.kh-av { width: 52px; height: 52px; border-radius: 50%; background: #FFD9BF; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(150,80,20,.15); display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; box-sizing: border-box; }
+.kh-av.boy { background: #DCEBFF; } .kh-av.girl { background: #FCE4EC; }
+.kh-hello { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.kh-hello b { font-size: 20px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kh-hello span { font-size: 13px; color: #6B625A; }
+.ks-home { gap: 16px; max-width: 760px; }
+.kh-stats { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
+.kh-stat { background: #fff; border-radius: 18px; padding: 12px 4px; display: flex; flex-direction: column; align-items: center; gap: 2px; box-shadow: 0 2px 0 #F1E3D3; text-decoration: none; color: #1D1A17; }
+a.kh-stat:hover { color: #1D1A17; background: #FFFAF5; }
+.kh-stat b { font-size: 20px; font-weight: 800; line-height: 1.3; }
+.kh-stat span { font-size: 11px; color: #6B625A; }
+.kh-mission { position: relative; overflow: hidden; background: #FFE3CC; border-radius: 26px; padding: 18px; min-height: 196px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; gap: 16px; }
+.kh-mission.done { background: #DFF5E3; }
+.kh-mission-blob { position: absolute; right: -50px; top: -40px; width: 200px; height: 200px; border-radius: 50%; background: #FFC49A; }
+.kh-mission.done .kh-mission-blob { background: #B8E6C6; }
+.kh-mission-fox { position: absolute; right: 2px; top: 22px; }
+.kh-mission-txt { position: relative; display: flex; flex-direction: column; gap: 4px; max-width: 62%; }
+.kh-mission-eyebrow { font-size: 12px; font-weight: 700; color: #8A3407; }
+.kh-mission-title { font-size: 44px; line-height: .92; font-weight: 900; font-stretch: 68%; text-transform: uppercase; }
+.kh-mission-sub { font-size: 13px; color: #5A3A22; }
+.kh-mission.done .kh-mission-eyebrow, .kh-mission.done .kh-mission-sub { color: #14612F; }
+.kh-mission-act { position: relative; display: flex; align-items: center; gap: 12px; }
+.kh-go { width: 48px; height: 48px; border-radius: 50%; background: #1D1A17; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; text-decoration: none; }
+.kh-go:hover { background: #000; color: #fff; }
+.kh-mission.done .kh-go { background: #1E8A4C; }
+.kh-bar { flex: 1; height: 10px; border-radius: 5px; background: #fff; overflow: hidden; }
+.kh-bar span { display: block; height: 10px; border-radius: 5px; background: #E2590F; }
+.kh-mission.done .kh-bar span { background: #1E8A4C; }
+.kh-bar-lbl { font-size: 12px; font-weight: 700; color: #5A3A22; white-space: nowrap; }
+.kh-quick { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; }
+.kh-quick a { text-decoration: none; color: #1D1A17; border-radius: 18px; padding: 12px 4px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.kh-quick a:hover { color: #1D1A17; filter: brightness(.98); }
+.kh-quick-ic { width: 40px; height: 40px; border-radius: 12px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 19px; }
+.kh-quick b { font-size: 13px; font-weight: 700; }
+.kh-quick small { font-size: 10px; color: #6B625A; }
+.kh-today { display: flex; flex-direction: column; gap: 10px; }
+.kh-h { font-size: 18px; font-weight: 800; }
+.kh-today-row { background: #fff; border-radius: 20px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 0 #F1E3D3; }
+.kh-today-ic { width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; }
+.kh-today-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.kh-today-t b { font-size: 14px; font-weight: 700; }
+.kh-today-t small { font-size: 12px; color: #6B625A; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kh-today-v { font-size: 15px; font-weight: 800; background: #FFF8F1; border-radius: 12px; padding: 8px 12px; white-space: nowrap; }
+.kh-oly { text-decoration: none; color: #1D1A17; background: #EEE8FF; border-radius: 24px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+.kh-oly:hover { color: #1D1A17; filter: brightness(.98); }
+.kh-oly.open { background: #6D4FE0; color: #fff; }
+.kh-oly.open:hover { color: #fff; }
+.kh-oly-top { display: flex; align-items: center; gap: 12px; }
+.kh-oly-ic { width: 48px; height: 48px; border-radius: 14px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; }
+.kh-oly-t { flex: 1; display: flex; flex-direction: column; }
+.kh-oly-t small { font-size: 12px; font-weight: 700; opacity: .8; }
+.kh-oly-t b { font-size: 22px; font-weight: 900; font-stretch: 70%; text-transform: uppercase; line-height: 1.05; }
+.kh-oly-s { font-size: 14px; font-weight: 600; }
+.kh-oly-req { display: flex; flex-wrap: wrap; gap: 6px; }
+.kh-oly-req span { font-size: 12px; font-weight: 700; background: #fff; color: #6B625A; border-radius: 999px; padding: 4px 10px; }
+.kh-oly-req span.ok { color: #1E7A45; }
+@media (max-width: 420px) { .kh-mission-fox svg { width: 110px; height: 110px; } .kh-mission-title { font-size: 40px; } }
+
+
+/* ═════ ბავშვის ზედა ზოლი v3: ლოგო + გასვლა, მიმაგრებული (landing-ის მსგავსად) ═════ */
+.ks-ctop.ks-ctop-bar {
+    position: sticky; top: 0; z-index: 60;
+    justify-content: space-between; flex-wrap: nowrap;
+    margin: -24px -24px 0; padding: 12px 24px;
+    background: rgba(255,248,241,.94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid #F1E3D3;
+}
+.ks-ctop-bar .ks-cbrand { display: flex; }
+.ks-ctop-bar form { margin: 0; }
+.ks-clogout-top { height: 44px; padding: 0 16px; border-radius: 22px; border: 2px solid #F1E3D3; background: #fff; color: #1D1A17; font-family: 'Noto Sans Georgian', system-ui, sans-serif; font-size: 14px; font-weight: 800; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.ks-clogout-top:hover { border-color: #1D1A17; }
+.ks-child-shell .ks-clogout-top { background: #fff !important; color: #1D1A17 !important; border: 2px solid #F1E3D3 !important; border-radius: 22px !important; padding: 0 16px !important; font-family: 'Noto Sans Georgian', system-ui, sans-serif !important; font-size: 14px !important; }
+.kh-greet { display: flex; align-items: center; gap: 12px; }
+@media (min-width: 901px) {
+    /* დესკტოპზე ლოგო და გასვლა უკვე გვერდით მენიუშია */
+    .ks-ctop.ks-ctop-bar { display: none; }
+}
+@media (max-width: 900px) {
+    .ks-ctop.ks-ctop-bar { margin: -14px -14px 0; padding: 10px 14px; }
+    .ks-clogout-top span { display: none; }
+    .ks-clogout-top, .ks-child-shell .ks-clogout-top { width: 44px; padding: 0 !important; justify-content: center; }
+    /* ტესტის პროგრესის ზოლი ზედა ზოლის ქვემოთ მიემაგროს */
+    body.ks-child .hdr { top: 72px !important; }
+}
+
+.kh-mission-hi { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 800; margin-bottom: 6px; }
+.kh-av.kh-av-sm { width: 34px; height: 34px; font-size: 18px; border-width: 2px; }
+
+
+/* ═════ თამაშები: უკან ღილაკი + მობილურზე სიგანე არ გადავიდეს ═════ */
+body.ks-game .ks-game-back { display: inline-flex !important; align-items: center; gap: 6px; margin: 0 0 14px !important; height: 40px; padding: 0 16px !important; border-radius: 20px !important; background: #fff !important; border: 2px solid #F1E3D3 !important; box-shadow: none !important; color: #1D1A17 !important; font-family: 'Noto Sans Georgian', system-ui, sans-serif !important; font-size: 14px !important; font-weight: 800 !important; text-decoration: none; }
+body.ks-game .ks-game-back:hover { border-color: #1D1A17 !important; }
+@media (max-width: 900px) {
+    body.ks-game .wrap { padding-left: 0 !important; padding-right: 0 !important; max-width: 100% !important; overflow-x: clip; }
+    body.ks-game #container { width: min(420px, 100%) !important; }
+    body.ks-game .status-box, body.ks-game .players-info, body.ks-game #board-container,
+    body.ks-game .controls, body.ks-game .stats-box { width: min(380px, 100%, 55vh) !important; }
+    body.ks-game .board-wrap { width: min(380px, 100%, 38vh) !important; }
+}
+
+/* ═════ მშობლის მთავარი v2 („ჩემი შვილები“) ═════ */
+.ks-pp-hello { flex: 1 1 260px; display: flex; align-items: center; gap: 12px; }
+.ks-pp-ini { width: 48px; height: 48px; border-radius: 50%; background: #EEE8FF; color: #5B3FD0; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; flex-shrink: 0; }
+.ks-pp-hello-t { display: flex; flex-direction: column; gap: 2px; }
+.ks-pp-hello-t b { font-size: 19px; font-weight: 800; }
+.ks-pp-hello-t small { font-size: 13px; color: #6B625A; }
+.ks-pp-head { align-items: center; }
+.dash-hero.ks-parent-dash .ks-pp-title { margin: -6px 0 0; font-size: 46px; }
+.ks-pp-name span { font-size: 12px; color: #6B625A; }
+.ks-pp-name b { font-size: 17px; }
+.ks-pp-status { font-size: 11px; font-weight: 700; color: #8A3407; background: #FFE3CC; border-radius: 999px; padding: 6px 10px; white-space: nowrap; flex-shrink: 0; }
+.ks-pp-status.ok { color: #14612F; background: #DFF5E3; }
+.ks-pp-card-h { gap: 10px; }
+.ks-pp-av { width: 50px; height: 50px; }
+.ks-pp-gear { width: 38px; height: 38px; border-radius: 12px; font-size: 16px; }
+.ks-pp-mini { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
+.ks-pp-mini div { background: #FFF8F1; border-radius: 14px; padding: 8px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.ks-pp-mini b { font-size: 17px; font-weight: 800; }
+.ks-pp-mini span { font-size: 11px; color: #6B625A; }
+.ks-pp-remind { height: 46px; border-radius: 23px; border: none; background: #1D1A17; color: #fff; font-family: inherit; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
+.ks-pp-remind:hover { background: #000; }
+.ks-pp-remind.sent { background: #DFF5E3; color: #14612F; cursor: default; }
+.ks-pp-addkid { height: 56px; border-radius: 20px; border: 2px dashed #D8CEC3; background: transparent; color: #4F473F; font-family: inherit; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; width: 100%; }
+.ks-pp-addkid:hover { border-color: #1D1A17; color: #1D1A17; }
+.ks-pp-req { text-decoration: none; color: #1D1A17; background: #FFF1C2; border-radius: 20px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; }
+.ks-pp-req:hover { color: #1D1A17; filter: brightness(.98); }
+.ks-pp-req-ic { width: 40px; height: 40px; border-radius: 12px; background: #fff; color: #8A6200; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 19px; }
+.ks-pp-req-t { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.ks-pp-req-t b { font-size: 14px; font-weight: 800; }
+.ks-pp-req-t small { font-size: 12px; color: #6B4A00; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* გაზიარება */
+.ks-pp-card .ks-share { padding: 14px !important; flex-direction: column; gap: 12px; }
+.ks-pp-card .ks-share.open { display: flex !important; }
+.ks-share-tabs { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 4px; background: #F4ECE3; border-radius: 999px; padding: 4px; }
+.ks-share-tabs button { height: 36px; border: none; border-radius: 999px; background: transparent; color: #6B625A; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.ks-share-tabs button[aria-selected="true"] { background: #fff; color: #1D1A17; box-shadow: 0 2px 6px rgba(150,80,20,.15); }
+.ks-share-box { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.ks-share-box[hidden] { display: none; }
+.ks-share-box small { font-size: 12px; color: #6B625A; }
+.ks-share-code { font-size: 30px; font-weight: 900; letter-spacing: 3px; background: #fff; border-radius: 14px; padding: 8px 18px; }
+.ks-share-box .cc-share-link-text { font-size: 13px; word-break: break-all; background: #fff; border-radius: 12px; padding: 10px 12px; width: 100%; box-sizing: border-box; }
+.ks-share-qr { background: #fff; border-radius: 14px; padding: 12px; min-width: 180px; min-height: 180px; display: flex; align-items: center; justify-content: center; }
+.ks-share-qr img, .ks-share-qr canvas { width: 180px; height: 180px; }
+.ks-share .cc-share-actions { display: flex; gap: 8px; }
+.ks-share .cc-share-btn { flex: 1; height: 44px; border: 2px solid #F1E3D3 !important; background: #fff !important; color: #1D1A17 !important; font-size: 14px !important; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; }
+.ks-share .cc-share-btn.dark { background: #1D1A17 !important; color: #fff !important; border-color: #1D1A17 !important; }
+
+/* ═════ მშობლის სათაური: სურათი + მისალმება + პაკეტი ═════ */
+.ks-pp-photo { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(150,80,20,.15); }
+.ks-pp-hello .ks-pp-ini { width: 56px; height: 56px; font-size: 22px; }
+.ks-pp-hello-t { align-items: flex-start; }
+.ks-pp-pkg { display: inline-flex; align-items: center; gap: 6px; border: none; background: #fff; border-radius: 999px; padding: 3px 10px; font-family: inherit; font-size: 12px; font-weight: 700; color: #1D1A17; cursor: pointer; box-shadow: 0 1px 0 #F1E3D3; margin: 2px 0; }
+.ks-pp-pkg:hover { background: #FFF4EA; }
+
+/* ═════ შვილის პარამეტრების მოდალი (12. შვილის პარამეტრები) ═════ */
+.mbox.ks-set { background: #FFF8F1 !important; border-radius: 28px !important; padding: 20px !important; max-width: 440px !important; width: 100%; font-family: 'Noto Sans Georgian', system-ui, sans-serif !important; color: #1D1A17; max-height: 92dvh; overflow-y: auto; box-sizing: border-box; }
+.ks-set form { display: flex; flex-direction: column; gap: 12px; margin: 0; }
+.ks-set-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+.ks-set-head h2 { margin: 0; font-size: 28px; line-height: 1; font-weight: 900; font-stretch: 68%; text-transform: uppercase; }
+.ks-set-x { width: 40px; height: 40px; border-radius: 14px; background: #fff; border: 1px solid #F1E3D3; color: #1D1A17; cursor: pointer; flex-shrink: 0; }
+.ks-set-avs { display: flex; gap: 12px; justify-content: center; }
+.ks-set-av { cursor: pointer; margin: 0; }
+.ks-set-av input { position: absolute; opacity: 0; width: 0; height: 0; }
+.ks-set-av span { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 38px; background: #DCEBFF; border: 4px solid transparent; transition: border-color .15s, transform .15s; }
+.ks-set-av.girl span { background: #FCE4EC; }
+.ks-set-av input:checked + span { border-color: #6D4FE0; transform: scale(1.05); }
+.ks-set-av input:focus-visible + span { outline: 3px solid #C9BBFF; outline-offset: 2px; }
+.ks-set-card { background: #fff; border-radius: 22px; padding: 4px 16px; box-shadow: 0 2px 0 #F1E3D3; display: flex; flex-direction: column; }
+.ks-set-row { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid #F4ECE3; margin: 0; }
+.ks-set-row:last-child { border-bottom: none; }
+.ks-set-row > label { flex-grow: 1; font-size: 14px; font-weight: 700; margin: 0; }
+.ks-set-row input[type=text], .ks-set-row select { height: 40px; border-radius: 12px; border: 2px solid #F1E3D3; background: #FFF8F1; font-family: inherit; font-size: 14px; font-weight: 700; padding: 0 10px; color: #1D1A17; max-width: 60%; min-width: 0; outline: none; }
+.ks-set-row input[type=text]:focus, .ks-set-row select:focus { border-color: #E2590F; }
+.ks-set-sub { font-size: 13px; font-weight: 800; color: #6B625A; text-transform: uppercase; letter-spacing: .04em; margin: 4px 0 -4px 4px; }
+.ks-set-sw { cursor: pointer; }
+.ks-set-sw-t { flex-grow: 1; display: flex; flex-direction: column; }
+.ks-set-sw-t b { font-size: 14px; font-weight: 700; }
+.ks-set-sw-t small { font-size: 12px; color: #6B625A; }
+.ks-set-sw input { position: absolute; opacity: 0; width: 0; height: 0; }
+.ks-set-track { width: 52px; height: 32px; border-radius: 16px; padding: 3px; box-sizing: border-box; background: #D8CEC3; display: flex; justify-content: flex-start; flex-shrink: 0; transition: background .15s; }
+.ks-set-track span { width: 26px; height: 26px; border-radius: 50%; background: #fff; display: block; }
+.ks-set-sw input:checked + .ks-set-track { background: #1E8A4C; justify-content: flex-end; }
+.ks-set-sw input:focus-visible + .ks-set-track { outline: 3px solid #9FD9B5; outline-offset: 2px; }
+.ks-set-hint { font-size: 12px; color: #6B625A; margin: -4px 4px 0; }
+.ks-set-actions { display: flex; gap: 8px; margin-top: 4px; }
+.ks-set-save { flex: 1; height: 52px; border-radius: 26px; border: none; background: #1D1A17; color: #fff; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer; }
+.ks-set-save:hover { background: #000; }
+.ks-set-del { height: 52px; padding: 0 20px; border-radius: 26px; border: 2px solid #F6C9C4; background: #fff; color: #B42318; font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer; }
+.ks-set-del:hover { background: #FDECEA; }
+
+/* მშობლის სათაური: სურათი მარცხნივ, ტექსტი გასწვრივ სამ ხაზად */
+.ks-pp-head > .ks-pp-hello { flex-direction: row !important; align-items: center !important; gap: 14px !important; text-align: left; }
+.ks-pp-hello .ks-pp-hello-t { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
+.ks-pp-hello .ks-pp-hello-t b { line-height: 1.2; }
+
+/* ═════ მშობლის მთავარი: ზედა ბარათი + მიმაგრებული ზედა ზოლი ═════ */
+.ks-pp-hero { position: relative; overflow: hidden; background: #8C7BE8; color: #fff; border-radius: 28px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.ks-pp-hero-blob { position: absolute; right: -60px; top: -70px; width: 220px; height: 220px; border-radius: 50%; background: #A595F0; pointer-events: none; }
+.ks-pp-hero > * { position: relative; }
+.ks-pp-hero .ks-pp-hello { flex-direction: row !important; align-items: center !important; gap: 12px !important; }
+.ks-pp-hero .ks-pp-hello-t { flex: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
+.ks-pp-hero .ks-pp-hello-t b { font-size: 18px; color: #fff; }
+.ks-pp-hero .ks-pp-hello-t small { color: #F1ECFF; font-size: 12px; }
+.ks-pp-hero .ks-pp-ini { background: #fff; }
+.ks-pp-hero .ks-pp-photo { border-color: rgba(255,255,255,.9); }
+.ks-pp-hero .ks-pp-pkg { box-shadow: none; }
+.ks-pp-bell { width: 42px; height: 42px; border-radius: 14px; border: none; background: rgba(255,255,255,.22); color: #fff; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+.ks-pp-bell:hover { background: rgba(255,255,255,.32); }
+.ks-pp-bell.on { background: #fff; color: #1E8A4C; }
+.ks-pp-hero-title { margin: 0; font-size: 52px; line-height: .92; font-weight: 900; font-stretch: 66%; text-transform: uppercase; color: #fff; }
+.ks-pp-hero-sub { font-size: 13px; color: #F1ECFF; }
+.ks-pkids-top { margin-top: -6px; }
+@media (min-width: 901px) { .ks-pp-hero { padding: 24px 28px; } .ks-pp-hero-title { font-size: 64px; } }
+
+/* ═════ მშობლის ზედა ბარათი v2 — კომპაქტური ═════ */
+.ks-pp-hero { padding: 16px 18px !important; gap: 0 !important; border-radius: 24px; background: linear-gradient(135deg, #7B5CF0 0%, #9A85F2 100%); box-shadow: 0 8px 22px rgba(109,79,224,.22); }
+.ks-pp-hero > .ks-pp-hero-blob { position: absolute !important; right: -40px; top: -60px; width: 160px; height: 160px; background: rgba(255,255,255,.14); }
+.ks-pp-hero .ks-pp-photo, .ks-pp-hero .ks-pp-ini { width: 54px; height: 54px; }
+.ks-pp-hero .ks-pp-ini { color: #5B3FD0; font-size: 22px; box-shadow: 0 0 0 3px rgba(255,255,255,.35); }
+.ks-pp-hero .ks-pp-hello-t { gap: 4px; }
+.ks-pp-hero .ks-pp-hello-t b { font-size: 17px; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.ks-pp-hero .ks-pp-hello-t > small { font-size: 12px; color: rgba(255,255,255,.85); }
+.ks-pp-hero .ks-pp-pkg { background: rgba(255,255,255,.2); color: #fff; padding: 4px 10px; font-size: 12px; font-weight: 800; gap: 5px; margin: 0; border-radius: 999px; }
+.ks-pp-hero .ks-pp-pkg:hover { background: rgba(255,255,255,.3); }
+.ks-pp-hero .ks-pp-pkg i { font-size: 11px; }
+.ks-pp-hero .ks-pp-pkg small { font-weight: 600; opacity: .85; font-size: 11px; }
+.ks-pp-sec { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 4px 2px -4px; }
+.ks-pp-sec h1 { margin: 0; font-size: 30px; line-height: 1; font-weight: 900; font-stretch: 68%; text-transform: uppercase; color: #1D1A17; }
+.ks-pp-sec span { font-size: 13px; font-weight: 700; color: #6B625A; }
+@media (min-width: 901px) { .ks-pp-hero { padding: 20px 24px !important; } .ks-pp-sec h1 { font-size: 40px; } }
+/* ზომა მარკეტის ზედა ბარათის მსგავსი (ძველი flex-basis:260px ბარათს ზედმეტად აგრძელებდა) */
+.ks-pp-hero .ks-pp-hello { flex: 0 0 auto !important; }
+.ks-pp-hero { min-height: 150px; justify-content: center; box-sizing: border-box; }
+@media (min-width: 901px) { .ks-pp-hero { min-height: 180px; } }
+/* შვილების გადამრთველი გვერდზე (ზედა ბარათის ქვეშ) — ყველა ზომაზე */
+.ks-pkids-top.ks-pkids-page { display: flex !important; gap: 8px; overflow-x: auto; margin: 0; padding-bottom: 2px; scrollbar-width: none; }
+.ks-pkids-page::-webkit-scrollbar { display: none; }
+.ks-pkids-page .ks-pkid { height: 40px; background: #fff; color: #1D1A17; box-shadow: 0 2px 0 #F1E3D3; flex-shrink: 0; font-size: 14px; }
+.ks-pkids-page .ks-pkid:hover { color: #1D1A17; background: #FFF4EA; }
+.ks-pkids-page .ks-pkid.on { background: #6D4FE0; color: #fff; box-shadow: none; }
+.ks-pkids-page .ks-pkid-av { width: 30px; height: 30px; }
+.ks-pkids-top.ks-pkids-page { order: 0 !important; width: auto; }

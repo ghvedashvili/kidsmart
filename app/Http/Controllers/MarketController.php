@@ -172,6 +172,18 @@ class MarketController extends Controller
             'coins_spent'    => $item->coin_cost,
         ]);
 
+        // Push მშობლებს (თუ ჩართული აქვთ „მარკეტის მოთხოვნა“)
+        if ($setting->wantsParentNotify('market_request')) {
+            foreach ($child->parents as $parent) {
+                \App\Http\Controllers\PushController::sendToUser(
+                    $parent->id,
+                    '🛍️ ' . $child->name . '-ს სურს: ' . $item->title,
+                    $item->coin_cost . ' მონეტა · დაადასტურე მარკეტში',
+                    route('market.index', $child)
+                );
+            }
+        }
+
         return back()->with('market_ok', $item->icon . ' ' . $item->title . ' — მოთხოვნა გაიგზავნა!');
     }
 

@@ -103,6 +103,7 @@
 </style>
 
 <div class="wrap">
+    <a href="{{ route('practice.topics') }}" class="back" style="display:inline-flex;align-items:center;gap:6px;margin:0 0 12px;"><i class="bi bi-arrow-left"></i> ვარჯიში</a>
     <div class="topbar">
         <h1 class="title">
             @if($type === 'pyramid') პირამიდა

@@ -1,6 +1,44 @@
 @extends('layouts.app')
 @section('content')
 <style>
+    .pm-head { display: flex; flex-direction: column; gap: 4px; }
+    .pm-head span { font-size: 13px; color: #6B625A; }
+    .pm-head h1 { margin: 0; font-size: 44px; line-height: .95; font-weight: 900; font-stretch: 68%; text-transform: uppercase; }
+    .pm-sec { display: flex; flex-direction: column; gap: 8px; }
+    .pm-sec-h { display: flex; justify-content: space-between; align-items: center; }
+    .pm-sec-h span { font-size: 15px; font-weight: 800; }
+    .pm-sec-h small { font-size: 12px; color: #6B625A; }
+    .pm-req { background: #fff; border-radius: 20px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 0 #F1E3D3; }
+    .pm-req form { margin: 0; }
+    .pm-av { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+    .pm-req-t { flex-grow: 1; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+    .pm-req-t b { font-size: 14px; font-weight: 800; }
+    .pm-req-t small { font-size: 12px; color: #6B625A; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pm-round { width: 44px; height: 44px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; }
+    .pm-round.no { background: #F4ECE3; color: #4F473F; }
+    .pm-round.no:hover { background: #EADFD3; }
+    .pm-round.ok { background: #1E8A4C; color: #fff; }
+    .pm-round.ok:hover { background: #166B3A; }
+    .pm-badge { font-size: 12px; font-weight: 700; border-radius: 999px; padding: 6px 10px; background: #DFF5E3; color: #14612F; flex-shrink: 0; }
+    .pm-empty { font-size: 13px; color: #6B625A; padding: 4px 2px; }
+    .pm-list { background: #fff; border-radius: 22px; padding: 4px 14px; box-shadow: 0 2px 0 #F1E3D3; display: flex; flex-direction: column; }
+    .pm-item { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid #F4ECE3; }
+    .pm-item:last-child { border-bottom: none; }
+    .pm-item form { margin: 0; }
+    .pm-item.off .pm-item-ic, .pm-item.off .pm-item-t { opacity: .5; }
+    .pm-item-ic { font-size: 24px; width: 32px; text-align: center; flex-shrink: 0; }
+    .pm-item-t { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
+    .pm-item-t b { font-size: 14px; font-weight: 700; }
+    .pm-item-t small { font-size: 12px; color: #6B625A; }
+    .pm-del { width: 36px; height: 36px; border-radius: 12px; border: none; background: transparent; color: #B5AAA0; cursor: pointer; font-size: 15px; }
+    .pm-del:hover { color: #C62828; background: #FDECEA; }
+    .pm-switch { width: 52px; height: 32px; border-radius: 16px; border: none; padding: 3px; cursor: pointer; display: flex; background: #D8CEC3; justify-content: flex-start; }
+    .pm-switch.on { background: #1E8A4C; justify-content: flex-end; }
+    .pm-switch span { width: 26px; height: 26px; border-radius: 50%; background: #fff; display: block; }
+    .pm-add-wrap { position: sticky; bottom: 16px; z-index: 40; padding-top: 6px; }
+    .pm-add { width: 100%; height: 56px; border-radius: 28px; border: none; background: #6D4FE0; color: #fff; font-family: inherit; font-size: 16px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; box-shadow: 0 8px 20px rgba(109,79,224,.3); }
+    .pm-add:hover { background: #5A3DD0; }
+    @media (max-width: 900px) { .pm-add-wrap { bottom: calc(80px + env(safe-area-inset-bottom)); } }
     body { background: transparent !important; }
     .aw { max-width: 1000px; margin: 0; padding: 0 0 60px; font-family: 'Noto Sans Georgian', system-ui, sans-serif; color: #1D1A17; display: flex; flex-direction: column; gap: 18px; }
     .card  { background:#fff; border:none; border-radius:24px; padding:22px; margin-bottom:0; box-shadow:0 2px 0 #F1E3D3; }
@@ -102,10 +140,10 @@
 <div class="aw">
     <div class="ks-cp-hero dark">
         <span class="ks-cp-hero-ic" aria-hidden="true">🛍️</span>
-        <span class="ks-cp-eyebrow" style="color:#FFC49A;">{{ $child->name }}-ს აქვს {{ (int) floor($child->childSetting?->coins ?? 0) }} მონეტა</span>
+        <span class="ks-cp-eyebrow" style="color:#FFC49A;">თავად დააწესე ჯილდოები · {{ $child->name }}-ს აქვს {{ (int) floor($child->childSetting?->coins ?? 0) }} მონეტა</span>
         <h1 class="ks-cp-title">ოჯახის მარკეტი</h1>
-        <span class="ks-cp-sub" style="color:#E8DCCF;">დაამატე ჯილდოები, რომლებსაც შვილი მონეტებით იყიდის</span>
     </div>
+    @include('parent.partials.kid-switcher')
 
     @if(session('success'))
     @push('toasts')
@@ -126,77 +164,69 @@
     @endpush
     @endif
 
-    {{-- Pending requests --}}
-    @if($pending->count())
-    <div class="card" style="box-shadow:0 0 0 2px #FFC49A;">
-        <div class="sec" style="color:#8A3407;">⏳ ელოდება პასუხს · {{ $pending->count() }}</div>
-        @foreach($pending as $p)
-        <div class="pend-card">
-            <div class="pend-icon">{{ $p->item->icon }}</div>
-            <div class="pend-info">
-                <div class="pend-title">{{ $p->item->title }}</div>
-                <div class="pend-meta">💰 {{ $p->coins_spent }} მონეტა · {{ $p->created_at->diffForHumans() }}</div>
-            </div>
-            <div class="pend-actions">
-                <form method="POST" action="{{ route('market.approve', $p) }}">
-                    @csrf @method('PATCH')
-                    <button type="submit" class="btn btn-sm btn-ok">✓ დადასტურება</button>
-                </form>
-                <form method="POST" action="{{ route('market.cancel', $p) }}">
-                    @csrf @method('PATCH')
-                    <button type="submit" class="btn btn-sm" onclick="return confirm('გაუქმდეს? მონეტები დაბრუნდება.')">✕ გაუქმება</button>
-                </form>
-            </div>
+    {{-- მოთხოვნები --}}
+    <section class="pm-sec">
+        <div class="pm-sec-h"><span>მოთხოვნები</span>@if($pending->count())<small>{{ $pending->count() }} ელოდება</small>@endif</div>
+        @forelse($pending as $p)
+        <div class="pm-req">
+            <span class="pm-av" style="background: {{ $child->avatar === 'girl' ? '#FCE4EC' : ($child->avatar === 'boy' ? '#DCEBFF' : '#FFD9BF') }}">{{ $p->item->icon }}</span>
+            <span class="pm-req-t">
+                <b>{{ $p->item->title }}</b>
+                <small>{{ $child->name }} · {{ $p->coins_spent }} მონეტა · {{ $p->created_at->diffForHumans() }}</small>
+            </span>
+            <form method="POST" action="{{ route('market.cancel', $p) }}">
+                @csrf @method('PATCH')
+                <button type="submit" class="pm-round no" aria-label="უარყოფა — მონეტები დაბრუნდება" title="უარყოფა (მონეტები დაბრუნდება)" onclick="return confirm('გაუქმდეს? მონეტები დაბრუნდება.')"><i class="bi bi-x-lg"></i></button>
+            </form>
+            <form method="POST" action="{{ route('market.approve', $p) }}">
+                @csrf @method('PATCH')
+                <button type="submit" class="pm-round ok" aria-label="დადასტურება" title="დადასტურება"><i class="bi bi-check-lg"></i></button>
+            </form>
+        </div>
+        @empty
+        <div class="pm-empty">ახალი მოთხოვნა არ არის</div>
+        @endforelse
+        @foreach($approved->take(3) as $ap)
+        <div class="pm-req">
+            <span class="pm-av" style="background: {{ $child->avatar === 'girl' ? '#FCE4EC' : ($child->avatar === 'boy' ? '#DCEBFF' : '#FFD9BF') }}">{{ $ap->item->icon }}</span>
+            <span class="pm-req-t">
+                <b>{{ $ap->item->title }}</b>
+                <small>{{ $child->name }} · {{ $ap->coins_spent }} მონეტა · {{ $ap->updated_at->format('d.m.Y') }}</small>
+            </span>
+            <span class="pm-badge">დადასტურდა</span>
         </div>
         @endforeach
-    </div>
-    @endif
+    </section>
 
-    {{-- Current market items --}}
-    <div class="card">
-        <div class="sec">მარკეტის პროდუქტები · {{ $items->count() }}</div>
-        @forelse($items as $item)
-        @if($loop->first)<div class="item-grid">@endif
-        <div class="item-card" style="{{ !$item->is_active ? 'opacity:0.55;' : '' }}">
-            <form method="POST" action="{{ route('market.item.destroy', $item) }}" class="item-card-del">
-                @csrf @method('DELETE')
-                <button type="submit" class="btn-del" onclick="return confirm('წაიშალოს?')">✕</button>
-            </form>
-            <div class="item-card-icon">{{ $item->icon }}</div>
-            <div class="item-card-title">{{ $item->title }}</div>
-            @if($item->category)<div class="item-cat">{{ $item->category }}</div>@endif
-            <div class="item-card-footer">
-                <span class="cost-badge">💰 {{ $item->coin_cost }}</span>
+    {{-- ჯილდოები --}}
+    <section class="pm-sec">
+        <div class="pm-sec-h"><span>ჯილდოები</span><small>{{ $items->where('is_active', true)->count() }} აქტიური</small></div>
+        <div class="pm-list">
+            @forelse($items as $item)
+            <div class="pm-item {{ $item->is_active ? '' : 'off' }}">
+                <span class="pm-item-ic">{{ $item->icon }}</span>
+                <span class="pm-item-t">
+                    <b>{{ $item->title }}</b>
+                    <small>{{ $item->coin_cost }} მონეტა{{ $item->category ? ' · ' . $item->category : '' }}</small>
+                </span>
+                <form method="POST" action="{{ route('market.item.destroy', $item) }}">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="pm-del" aria-label="{{ $item->title }} — წაშლა" title="წაშლა" onclick="return confirm('წაიშალოს?')"><i class="bi bi-trash3"></i></button>
+                </form>
                 <form method="POST" action="{{ route('market.item.toggle', $item) }}">
                     @csrf @method('PATCH')
-                    <button type="submit" class="toggle-pill {{ $item->is_active ? 'on' : 'off' }}">
-                        {{ $item->is_active ? '● ჩართ.' : '○ გამრ.' }}
-                    </button>
+                    <button type="submit" role="switch" aria-checked="{{ $item->is_active ? 'true' : 'false' }}" aria-label="{{ $item->title }} — ჩართვა" class="pm-switch {{ $item->is_active ? 'on' : '' }}"><span></span></button>
                 </form>
             </div>
+            @empty
+            <div class="pm-empty" style="padding:18px 0;">ჯილდოები ჯერ არ არის — დაამატე ხელით ან შაბლონიდან</div>
+            @endforelse
         </div>
-        @if($loop->last)</div>@endif
-        @empty
-        <div style="color:#6B625A;font-size:0.92rem;text-align:center;padding:14px 0;">მარკეტი ცარიელია — დაამატე შაბლონიდან ან ხელით</div>
-        @endforelse
-    </div>
+    </section>
 
-    <button type="button" class="ks-mk-add" onclick="openAddItemModal()">+ ჯილდოს დამატება</button>
-
-    {{-- Approved history --}}
-    @if($approved->count())
-    <div class="card">
-        <div class="sec">✓ დადასტურებული · ბოლო {{ $approved->count() }}</div>
-        @foreach($approved as $ap)
-        <div class="appr-row">
-            <span>{{ $ap->item->icon }}</span>
-            <span>{{ $ap->item->title }}</span>
-            <span class="cost-badge">💰 {{ $ap->coins_spent }}</span>
-            <span class="appr-date">{{ $ap->updated_at->format('d.m.Y') }}</span>
-        </div>
-        @endforeach
+    <div class="pm-add-wrap">
+        <button type="button" class="pm-add" onclick="openAddItemModal()"><i class="bi bi-plus-lg"></i> ახალი ჯილდოს დამატება</button>
     </div>
-    @endif
 </div>
 
 @push('modals')

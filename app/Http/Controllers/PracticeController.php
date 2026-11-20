@@ -189,7 +189,7 @@ class PracticeController extends Controller
         if ($qtype === 'code') {
             $q          = json_decode($generated['question_text'], true) ?? [];
             $correctArr = json_decode($generated['correct_answer'], true) ?? [];
-            cache()->put($key, ['topic_id' => $item['topic_id'], 'qtype' => 'code', 'data' => $correctArr, 'prompt' => '🔢 კოდური ამოცანა — მიზანი: ' . ($q['target'] ?? ''), 'advance_queue' => $advanceQueueKey], now()->addMinutes(self::ANSWER_TTL_MINUTES));
+            cache()->put($key, ['topic_id' => $item['topic_id'], 'qtype' => 'code', 'data' => $correctArr, 'prompt' => '🔢 კოდური ამოცანა — მიზანი: ' . (is_array($q['target'] ?? null) ? implode(' ', $q['target']) : ($q['target'] ?? '')), 'advance_queue' => $advanceQueueKey], now()->addMinutes(self::ANSWER_TTL_MINUTES));
             return array_merge([
                 'type'      => 'code',
                 'key'       => $key,

@@ -6,6 +6,7 @@
         <span class="ks-cp-eyebrow">{{ $child->childSetting?->grade?->name ?? 'კლასი —' }} · სულ და დღევანდელი შედეგები</span>
         <h1 class="ks-cp-title">{{ $child->name }} · ვარჯიში</h1>
     </div>
+    @include('parent.partials.kid-switcher')
 
     <div class="ks-cp-stats">
         <div class="ks-cp-stat"><b>{{ $totalAnswered }}</b><span>სულ კითხვა</span></div>

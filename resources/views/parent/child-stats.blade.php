@@ -6,6 +6,7 @@
         <span class="ks-cp-eyebrow" style="color:#FFC49A;">ტესტების ისტორია და შედეგები</span>
         <h1 class="ks-cp-title">{{ $child->name }} · ანალიტიკა</h1>
     </div>
+    @include('parent.partials.kid-switcher')
 
     <div class="ks-cp-stats">
         <div class="ks-cp-stat"><b>{{ $totalTests }}</b><span>ტესტი სულ</span></div>

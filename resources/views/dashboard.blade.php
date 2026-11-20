@@ -609,28 +609,31 @@
             }
         @endphp
         @if(in_array(auth()->user()->role, ['parent', 'admin']))
-        {{-- redesign-kidsmart: მშობლის მთავარი — შვილების პროგრესი --}}
-        <div class="ks-pp-head">
-            <div>
-                <span class="ks-pp-hi">გამარჯობა, {{ auth()->user()->name }}!</span>
-                <h1 class="ks-pp-title">შვილების პროგრესი</h1>
-            </div>
-            <div class="ks-pp-act">
-                <button type="button" class="ks-pp-plan" onclick="document.getElementById('plansModal').classList.add('open')">
-                    <span style="width:10px;height:10px;border-radius:50%;background:{{ $currentPkg->is_free ? '#3FAE6E' : '#6D4FE0' }};display:inline-block;"></span>
-                    {{ $currentPkg->name }}
-                    @if($activeSub?->expires_at)
-                        <small>· {{ $activeSub->expires_at->format('d.m.Y') }}-მდე</small>
-                    @endif
-                </button>
-                @if($children->count() > 0)
-                <button type="button" class="ks-pp-add"
-                    onclick="document.getElementById('{{ $atChildLimit ? 'plansModal' : 'addChildModal' }}').classList.add('open'); {{ $atChildLimit ? '' : 'wizReset();' }}"
-                    title="{{ $atChildLimit ? $currentPkg->name . ' პლანი მხოლოდ ' . $currentPkg->max_children . ' ბავშვს იძლევა' : 'შვილის დამატება' }}">
-                    <i class="bi bi-plus-lg"></i> შვილის დამატება
-                </button>
+        {{-- redesign-kidsmart v2: მშობლის მთავარი („ჩემი შვილები“) --}}
+        {{-- ზედა ბარათი (ბავშვის მისიის ბარათის მსგავსად) --}}
+        <div class="ks-pp-hero">
+            <div class="ks-pp-hero-blob" aria-hidden="true"></div>
+            <div class="ks-pp-hello">
+                @if(auth()->user()->photo_url)
+                <img src="{{ auth()->user()->photo_url }}" alt="" class="ks-pp-photo" referrerpolicy="no-referrer">
+                @else
+                <span class="ks-pp-ini" aria-hidden="true">{{ mb_substr(auth()->user()->name, 0, 1) }}</span>
                 @endif
+                <span class="ks-pp-hello-t">
+                    <b>გამარჯობა, {{ \Illuminate\Support\Str::before(trim(auth()->user()->name), ' ') ?: auth()->user()->name }}!</b>
+                    <button type="button" class="ks-pp-pkg" onclick="document.getElementById('plansModal').classList.add('open')" title="გეგმის შეცვლა">
+                        <i class="bi bi-gem"></i>{{ $currentPkg->name }}@if($activeSub?->expires_at)<small>· {{ $activeSub->expires_at->format('d.m') }}-მდე</small>@endif
+                    </button>
+                    <small>მშობლის პანელი</small>
+                </span>
+                <button type="button" id="notifBtn" class="ks-pp-bell" aria-label="შეტყობინებები" title="შეტყობინებების ჩართვა/გამორთვა" onclick="window._notifToast=true;toggleNotifications()">
+                    <i id="notifIcon" class="bi bi-bell"></i>
+                </button>
             </div>
+        </div>
+        <div class="ks-pp-sec">
+            <h1>ჩემი შვილები</h1>
+            <span>{{ $children->count() }} შვილი</span>
         </div>
         @else
         <div class="ks-pp-head">
@@ -647,26 +650,15 @@
         @php
             $__wkDays = collect(range(6, 0))->map(fn($d) => today()->copy()->subDays($d));
             $__wkLbl  = ['ორ', 'სამ', 'ოთხ', 'ხუთ', 'პარ', 'შაბ', 'კვი'];
+            $__allPending = $children->isEmpty() ? collect() : \App\Models\MarketPurchase::with(['item', 'child'])
+                ->whereIn('child_id', $children->pluck('id'))->where('status', 'pending')->latest()->get();
         @endphp
-        @if($children->count() === 0)
-        <div class="ks-pp-empty">
-            <div style="font-size:56px;line-height:1;">👨‍👩‍👧</div>
-            <b>დაამატე პირველი შვილი</b>
-            <span>შექმენი ბავშვის პროფილი ან დააკავშირე არსებული კოდით.</span>
-            <button type="button" class="ks-pp-add"
-                onclick="document.getElementById('{{ $atChildLimit ? 'plansModal' : 'addChildModal' }}').classList.add('open'); {{ $atChildLimit ? '' : 'wizReset();' }}"
-                @if($atChildLimit) title="{{ $currentPkg->name }} პლანი მხოლოდ {{ $currentPkg->max_children }} ბავშვს იძლევა" @endif>
-                <i class="bi bi-plus-lg"></i>
-                @if($atChildLimit) გეგმის განახლება @else შვილის დამატება @endif
-            </button>
-        </div>
-        @else
         <div class="ks-pp-kids">
             @foreach($children as $child)
             @php
                 $s = $child->childSetting;
-                $todayDone = $child->tests()->whereNotNull('completed_at')->whereDate('completed_at', today())->count();
-                $pendingMarket = \App\Models\MarketPurchase::where('child_id', $child->id)->where('status','pending')->count();
+                $todayDone = $child->tests()->where('is_olympiad', false)->whereNotNull('completed_at')->whereDate('completed_at', today())->count();
+                $pendingMarket = $__allPending->where('child_id', $child->id)->count();
                 $__wkTests = $child->tests()->whereNotNull('completed_at')
                     ->where('completed_at', '>=', today()->copy()->subDays(6))
                     ->get(['completed_at', 'correct_count', 'total_questions']);
@@ -675,6 +667,13 @@
                 $__wkC = $__wkTests->sum('correct_count'); $__wkT = $__wkTests->sum('total_questions');
                 $__wkAvg = $__wkT > 0 ? (int) round($__wkC / $__wkT * 100) : null;
                 $__av = $child->avatar === 'boy' ? '👦' : ($child->avatar === 'girl' ? '👧' : '🙂');
+                $__last = $child->tests()->whereNotNull('completed_at')->latest('completed_at')->first(['correct_count', 'total_questions']);
+                $__lastPct = $__last ? (int) round($__last->correct_count / max(1, $__last->total_questions) * 100) : null;
+                $__dates = $child->tests()->whereNotNull('completed_at')->pluck('completed_at')->map(fn($d) => $d->format('Y-m-d'))->unique();
+                $__streak = 0; $__cur = today();
+                if (!$__dates->contains($__cur->format('Y-m-d'))) { $__cur = $__cur->copy()->subDay(); }
+                while ($__dates->contains($__cur->format('Y-m-d'))) { $__streak++; $__cur = $__cur->copy()->subDay(); }
+                $__link = $child->child_code ? route('child.magic-login', $child->child_code) : null;
             @endphp
             <div class="ks-pp-card {{ !$child->is_active ? 'off' : '' }}">
                 @if(!$child->is_active)
@@ -689,19 +688,21 @@
                         onclick="document.getElementById('avatarModal{{ $child->id }}').classList.add('open')">{{ $__av }}</button>
                     <div class="ks-pp-name">
                         <b>{{ $child->name }}</b>
-                        @if($child->child_code)
-                        <span class="ks-pp-code" onclick="copyChildCode(this, '{{ $child->child_code }}')" title="კოდის კოპირება">ID: {{ $child->child_code }}</span>
-                        @endif
+                        <span>{{ $s?->grade?->name ?? 'კლასი —' }}{{ $s ? ' · დონე ' . $s->difficulty . '/' . ($s->grade?->max_level ?? \App\Models\Grade::DEFAULT_MAX_LEVEL) : '' }}</span>
                     </div>
+                    @if($todayDone > 0)
+                    <span class="ks-pp-status ok">დღეს აქტიურია</span>
+                    @else
+                    <span class="ks-pp-status">0/1 ტესტი</span>
+                    @endif
                     <button type="button" class="ks-pp-gear" title="პარამეტრები"
                         onclick="document.getElementById('editChildModal{{ $child->id }}').classList.add('open')"><i class="bi bi-gear"></i></button>
                 </div>
 
-                <div class="ks-pp-stats">
-                    <div class="ks-pp-stat purple"><span>კლასი</span><b>{{ $s?->grade?->name ?? '—' }}</b></div>
-                    <div class="ks-pp-stat blue"><span>დონე</span><b>{{ $s ? $s->difficulty . '/' . ($s->grade?->max_level ?? \App\Models\Grade::DEFAULT_MAX_LEVEL) : '—' }}</b></div>
-                    <div class="ks-pp-stat orange"><span>დღეს</span><b>{{ $s ? $todayDone . '/' . $s->tests_per_week : '—' }}</b></div>
-                    <div class="ks-pp-stat green"><span>მონეტა</span><b>{{ (int) floor($s->coins ?? 0) }}</b></div>
+                <div class="ks-pp-mini">
+                    <div><b>{{ min($todayDone, 1) }}/1</b><span>ტესტი დღეს</span></div>
+                    <div><b>{{ $__lastPct !== null ? $__lastPct . '%' : '—' }}</b><span>ბოლო შედეგი</span></div>
+                    <div><b>{{ $__streak }} დღე</b><span>ზედიზედ</span></div>
                 </div>
 
                 <div class="ks-pp-week">
@@ -717,35 +718,61 @@
                     </div>
                 </div>
 
+                @if($todayDone === 0 && $child->is_active)
+                <button type="button" class="ks-pp-remind" onclick="openRemind({{ $child->id }}, '{{ addslashes($child->name) }}')">
+                    <i class="bi bi-bell"></i> შეხსენების გაგზავნა
+                </button>
+                @endif
+                @if(session('reminder_sent_' . $child->id))
+                <div class="ks-pp-remind sent"><i class="bi bi-check-lg"></i> შეხსენება გაიგზავნა</div>
+                @endif
+
                 <div class="ks-pp-btns">
                     <a href="{{ route('child.hub', $child) }}" class="ks-pp-btn dark">სრულად <i class="bi bi-arrow-right"></i></a>
                     <a href="{{ route('child.stats', $child) }}" class="ks-pp-btn" title="ანალიტიკა"><i class="bi bi-bar-chart-line"></i></a>
                     <a href="{{ route('market.index', $child) }}" class="ks-pp-btn" title="მარკეტი"><i class="bi bi-bag"></i>@if($pendingMarket)<span class="ks-pnav-badge">{{ $pendingMarket }}</span>@endif</a>
                     @if($child->child_code)
-                    <button type="button" class="ks-pp-btn" title="შესვლის ბმულის გაზიარება" onclick="toggleShare({{ $child->id }})"><i class="bi bi-link-45deg"></i></button>
+                    <button type="button" class="ks-pp-btn" title="შესვლის გაზიარება" onclick="toggleShare({{ $child->id }})"><i class="bi bi-link-45deg"></i></button>
                     @endif
                 </div>
 
                 @if($child->child_code)
-                <div class="cc-share-panel" id="sharePanel{{ $child->id }}">
-                    <div class="cc-share-link-box">
-                        <span class="cc-share-link-text" id="shareLinkText{{ $child->id }}">{{ route('child.magic-login', $child->child_code) }}</span>
+                {{-- გაზიარება: კოდი / ბმული / QR — რომელსაც აირჩევს, ის გაზიარდება --}}
+                <div class="cc-share-panel ks-share" id="sharePanel{{ $child->id }}" data-name="{{ $child->name }}" data-code="{{ $child->child_code }}" data-link="{{ $__link }}">
+                    <div class="ks-share-tabs" role="tablist" aria-label="გაზიარების ტიპი">
+                        <button type="button" role="tab" aria-selected="true" data-k="code" onclick="ksShareTab({{ $child->id }}, 'code')">კოდი</button>
+                        <button type="button" role="tab" aria-selected="false" data-k="link" onclick="ksShareTab({{ $child->id }}, 'link')">ბმული</button>
+                        <button type="button" role="tab" aria-selected="false" data-k="qr" onclick="ksShareTab({{ $child->id }}, 'qr')">QR</button>
                     </div>
+                    <div class="ks-share-box" data-p="code"><span class="ks-share-code">{{ $child->child_code }}</span><small>შესვლის ფანჯარაში „ბავშვის“ ტაბზე ჩაწერეთ ეს კოდი</small></div>
+                    <div class="ks-share-box" data-p="link" hidden><span class="cc-share-link-text" id="shareLinkText{{ $child->id }}">{{ $__link }}</span><small>ბმულზე გადასვლით ბავშვი პირდაპირ შევა</small></div>
+                    <div class="ks-share-box" data-p="qr" hidden><div class="ks-share-qr" id="shareQr{{ $child->id }}"></div><small>დაასკანერეთ ტელეფონით შესასვლელად</small></div>
                     <div class="cc-share-actions">
-                        <button type="button" class="cc-share-btn" id="shareCopyBtn{{ $child->id }}"
-                            onclick="copyShareLink({{ $child->id }})">📋 კოპირება</button>
-                        <button type="button" class="cc-share-btn"
-                            onclick="shareLink({{ $child->id }}, '{{ addslashes($child->name) }}')">📤 გაზიარება</button>
+                        <button type="button" class="cc-share-btn" id="shareCopyBtn{{ $child->id }}" onclick="ksShareCopy({{ $child->id }})"><i class="bi bi-clipboard"></i> კოპირება</button>
+                        <button type="button" class="cc-share-btn dark" onclick="ksShareSend({{ $child->id }})"><i class="bi bi-share"></i> გაზიარება</button>
                     </div>
                 </div>
-                @endif
-
-                @if(session('reminder_sent_' . $child->id))
-                <div style="font-size:13px;font-weight:700;color:#1E7A45;">✓ შეხსენება გაიგზავნა</div>
                 @endif
             </div>
             @endforeach
         </div>
+
+        <button type="button" class="ks-pp-addkid"
+            onclick="document.getElementById('{{ $atChildLimit ? 'plansModal' : 'addChildModal' }}').classList.add('open'); {{ $atChildLimit ? '' : 'wizReset();' }}"
+            @if($atChildLimit) title="{{ $currentPkg->name }} პლანი მხოლოდ {{ $currentPkg->max_children }} ბავშვს იძლევა" @endif>
+            <i class="bi bi-plus-lg"></i> {{ $atChildLimit ? 'გეგმის განახლება — შვილის დასამატებლად' : 'შვილის დამატება' }}
+        </button>
+
+        @if($__allPending->isNotEmpty())
+        @php $__fp = $__allPending->first(); @endphp
+        <a href="{{ route('market.index', $__fp->child_id) }}" class="ks-pp-req">
+            <span class="ks-pp-req-ic"><i class="bi bi-bag"></i></span>
+            <span class="ks-pp-req-t">
+                <b>{{ $__allPending->count() }} ახალი მოთხოვნა მარკეტში</b>
+                <small>{{ $__fp->child?->name }}-ს სურს: {{ $__fp->item?->title }} · {{ $__fp->coins_spent }} მონეტა</small>
+            </span>
+            <i class="bi bi-chevron-right"></i>
+        </a>
         @endif
         @endif
 
@@ -832,14 +859,10 @@
     $eThemeIds = $child->themes->pluck('id')->toArray();
 @endphp
 <div id="editChildModal{{ $child->id }}" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
-    <div class="mbox">
-        {{-- Header bar — same style as add modal tab bar --}}
-        <div style="display:flex;align-items:center;gap:0;margin-bottom:16px;border-bottom:2px solid #f0f0f0;">
-            <span style="flex:1;font-family:'Goldman',monospace;font-size:0.72rem;letter-spacing:0.06em;
-                color:#111;padding:8px 0;border-bottom:2px solid #111;margin-bottom:-2px;text-align:left;">
-                ✏️ {{ $child->name }}
-            </span>
-            <button type="button" class="modal-close" style="margin-bottom:-2px;"
+    <div class="mbox ks-set">
+        <div class="ks-set-head">
+            <h2>{{ $child->name }} · პარამეტრები</h2>
+            <button type="button" class="ks-set-x" aria-label="დახურვა"
                 onclick="document.getElementById('editChildModal{{ $child->id }}').classList.remove('open')">✕</button>
         </div>
 
@@ -847,58 +870,62 @@
             id="editChildForm{{ $child->id }}" data-orig-grade="{{ $es?->grade_id }}"
             onsubmit="return handleEditChildSubmit(event, {{ $child->id }}, '{{ addslashes($child->name) }}')">
             @csrf @method('PUT')
-
-            <div class="mlbl">სახელი</div>
-            <input type="text" name="name" class="minput" value="{{ $child->name }}" maxlength="50" autocomplete="off">
-
-            <div class="mlbl">კლასი <span>*</span></div>
-            <div class="mrow">
-                @foreach($grades as $grade)
-                <label class="mchip {{ $es?->grade_id == $grade->id ? 'sel' : '' }}"
-                    onclick="chipSingle(this,'egid{{ $child->id }}','{{ $grade->id }}')">{{ $grade->name }}</label>
-                @endforeach
-            </div>
-            <input type="hidden" name="grade_id" id="egid{{ $child->id }}" value="{{ $es?->grade_id }}">
-
-            <div class="mlbl">ტესტი დღეში</div>
-            <div class="mrow">
-                @for($i=1; $i<=3; $i++)
-                <label class="mchip {{ ($es?->tests_per_week ?? 3) == $i ? 'sel' : '' }}"
-                    onclick="chipSingle(this,'etpw{{ $child->id }}','{{ $i }}')">{{ $i }}</label>
-                @endfor
-            </div>
-            <input type="hidden" name="tests_per_week" id="etpw{{ $child->id }}" value="{{ $es?->tests_per_week ?? 3 }}">
-
+            <input type="hidden" name="tests_per_week" value="{{ $es?->tests_per_week ?? 1 }}">
             <input type="hidden" name="difficulty" value="{{ $es?->difficulty ?? 1 }}">
+            <input type="hidden" name="notify_form" value="1">
 
-            @if($themes->count())
-            <div class="mlbl">თემატიკა <span style="color:#aaa;font-size:0.9em;">(სურვილისამებრ)</span></div>
-            <div class="mrow">
-                @foreach($themes as $theme)
-                @if($theme->is_active)
-                @php
-                    // Mirrors the add-wizard's fallback: a child with NO theme attached yet
-                    // (an older child, or one linked by code from another parent) still shows
-                    // the default theme as visually selected, matching what store() would
-                    // actually attach if the form is saved untouched.
-                    $eIsSelected = count($eThemeIds)
-                        ? in_array($theme->id, $eThemeIds)
-                        : ($theme->id == ($defaultThemeId ?? null) && $theme->is_active);
-                @endphp
-                <label class="mchip {{ $eIsSelected ? 'sel' : '' }}"
-                    onclick="chipSingle(this,'etheme{{ $child->id }}','{{ $theme->id }}')">{{ $theme->icon }} {{ $theme->name }}</label>
-                @else
-                <span class="mchip" style="opacity:0.4;cursor:default;pointer-events:none;">{{ $theme->icon }} {{ $theme->name }}<span style="font-size:0.75em;margin-left:4px;color:#aaa;">მალე</span></span>
-                @endif
+            {{-- ავატარი --}}
+            <div class="ks-set-avs" role="radiogroup" aria-label="ავატარი">
+                @foreach(['boy' => '👦', 'girl' => '👧'] as $__ak => $__ae)
+                <label class="ks-set-av {{ $__ak }}">
+                    <input type="radio" name="avatar" value="{{ $__ak }}" @checked($child->avatar === $__ak)>
+                    <span>{{ $__ae }}</span>
+                </label>
                 @endforeach
             </div>
-            <input type="hidden" name="theme_ids[]" id="etheme{{ $child->id }}"
-                value="{{ count($eThemeIds) ? $eThemeIds[0] : ($defaultThemeId ?? '') }}">
-            @endif
 
-            <div style="display:flex;gap:8px;margin-top:4px;">
-                <button type="submit" class="msave" style="margin-top:0;">შენახვა</button>
-                <button type="button" class="msave msave-danger" style="margin-top:0;flex:0 0 auto;width:auto;padding-left:18px;padding-right:18px;"
+            <div class="ks-set-card">
+                <div class="ks-set-row">
+                    <label for="ename{{ $child->id }}">სახელი</label>
+                    <input type="text" id="ename{{ $child->id }}" name="name" value="{{ $child->name }}" maxlength="50" autocomplete="off">
+                </div>
+                <div class="ks-set-row">
+                    <label for="egid{{ $child->id }}">კლასი</label>
+                    <select id="egid{{ $child->id }}" name="grade_id" required>
+                        @foreach($grades as $grade)
+                        <option value="{{ $grade->id }}" @selected($es?->grade_id == $grade->id)>{{ $grade->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                @if($themes->where('is_active', true)->count())
+                @php $__selTheme = count($eThemeIds) ? $eThemeIds[0] : ($defaultThemeId ?? null); @endphp
+                <div class="ks-set-row">
+                    <label for="etheme{{ $child->id }}">თემატიკა</label>
+                    <select id="etheme{{ $child->id }}" name="theme_ids[]">
+                        @foreach($themes->where('is_active', true) as $theme)
+                        <option value="{{ $theme->id }}" @selected($__selTheme == $theme->id)>{{ $theme->icon }} {{ $theme->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                @endif
+            </div>
+
+            <div class="ks-set-sub">შეტყობინებები მშობელს</div>
+            <div class="ks-set-card">
+                @foreach(\App\Models\ChildSetting::PARENT_NOTIFY as $__nk => [$__nt, $__nd])
+                @php $__on = $es ? $es->wantsParentNotify($__nk) : true; @endphp
+                <label class="ks-set-row ks-set-sw">
+                    <span class="ks-set-sw-t"><b>{{ $__nt }}</b><small>{{ $__nd }}</small></span>
+                    <input type="checkbox" name="notify[{{ $__nk }}]" value="1" @checked($__on)>
+                    <span class="ks-set-track" aria-hidden="true"><span></span></span>
+                </label>
+                @endforeach
+            </div>
+            <div class="ks-set-hint">შეტყობინებები მოვა, თუ ამ მოწყობილობაზე შეტყობინებები ჩართული გაქვს.</div>
+
+            <div class="ks-set-actions">
+                <button type="submit" class="ks-set-save">შენახვა</button>
+                <button type="button" class="ks-set-del"
                     onclick="confirmDeleteChild({{ $child->id }}, '{{ addslashes($child->name) }}')">წაშლა</button>
             </div>
         </form>
@@ -1207,6 +1234,71 @@ function copyChildCode(el, code) {
             el.textContent = orig;
         }, 1500);
     });
+}
+
+
+// redesign-kidsmart: გაზიარება — კოდი / ბმული / QR
+function ksShareTab(id, k) {
+    var p = document.getElementById('sharePanel' + id);
+    p.dataset.mode = k;
+    p.querySelectorAll('.ks-share-tabs button').forEach(function (b) { b.setAttribute('aria-selected', b.dataset.k === k ? 'true' : 'false'); });
+    p.querySelectorAll('.ks-share-box').forEach(function (b) { b.hidden = b.dataset.p !== k; });
+    var copyBtn = document.getElementById('shareCopyBtn' + id);
+    copyBtn.innerHTML = k === 'qr' ? '<i class="bi bi-download"></i> ჩამოტვირთვა' : '<i class="bi bi-clipboard"></i> კოპირება';
+    if (k === 'qr') ksQrRender(id);
+}
+function ksQrRender(id, cb) {
+    var p = document.getElementById('sharePanel' + id), box = document.getElementById('shareQr' + id);
+    function draw() {
+        if (!box.dataset.done) { box.innerHTML = ''; new QRCode(box, { text: p.dataset.link, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.M }); box.dataset.done = '1'; }
+        if (cb) setTimeout(cb, 50);
+    }
+    if (window.QRCode) return draw();
+    var sc = document.createElement('script');
+    sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+    sc.onload = draw;
+    sc.onerror = function () { box.textContent = 'QR ვერ ჩაიტვირთა — სცადეთ ბმული'; };
+    document.head.appendChild(sc);
+}
+function ksQrBlob(id, cb) {
+    ksQrRender(id, function () {
+        var c = document.querySelector('#shareQr' + id + ' canvas');
+        if (c && c.toBlob) c.toBlob(cb, 'image/png'); else cb(null);
+    });
+}
+function ksShareFlash(id, html) {
+    var btn = document.getElementById('shareCopyBtn' + id), orig = btn.innerHTML;
+    btn.innerHTML = html; setTimeout(function () { btn.innerHTML = orig; }, 1500);
+}
+function ksShareCopy(id) {
+    var p = document.getElementById('sharePanel' + id), mode = p.dataset.mode || 'code';
+    if (mode === 'qr') {
+        ksQrBlob(id, function (blob) {
+            if (!blob) return;
+            var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+            a.download = 'KidSmart-' + p.dataset.name + '-QR.png'; a.click();
+            setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+        });
+        return;
+    }
+    var text = mode === 'code' ? p.dataset.code : p.dataset.link;
+    navigator.clipboard.writeText(text).then(function () { ksShareFlash(id, '✓ დაკოპირდა'); });
+}
+function ksShareSend(id) {
+    var p = document.getElementById('sharePanel' + id), mode = p.dataset.mode || 'code', name = p.dataset.name;
+    if (mode === 'qr') {
+        ksQrBlob(id, function (blob) {
+            var file = blob ? new File([blob], 'KidSmart-' + name + '-QR.png', { type: 'image/png' }) : null;
+            if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+                navigator.share({ title: 'KidSmart — ' + name, text: name + '-ის შესვლის QR', files: [file] }).catch(function () {});
+            } else { ksShareCopy(id); }
+        });
+        return;
+    }
+    var data = mode === 'code'
+        ? { title: 'KidSmart — ' + name, text: name + '-ის შესვლის კოდი: ' + p.dataset.code }
+        : { title: 'KidSmart — ' + name, text: name + '-ის შესვლის ბმული', url: p.dataset.link };
+    if (navigator.share) navigator.share(data).catch(function () {}); else ksShareCopy(id);
 }
 
 function toggleShare(childId) {

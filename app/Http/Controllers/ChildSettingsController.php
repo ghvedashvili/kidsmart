@@ -238,7 +238,13 @@ class ChildSettingsController extends Controller
             'theme_ids.*'   => 'exists:themes,id',
             'topic_ids'     => 'nullable|array',
             'topic_ids.*'   => 'exists:topics,id',
+            'avatar'        => 'nullable|in:boy,girl',
+            'notify'        => 'nullable|array',
         ]);
+
+        if (!empty($data['avatar'])) {
+            $child->update(['avatar' => $data['avatar']]);
+        }
 
         if (!empty($data['name'])) {
             $child->update(['name' => trim($data['name'])]);
@@ -281,6 +287,8 @@ class ChildSettingsController extends Controller
                 'grade_id'       => $data['grade_id'] ?? null,
                 'difficulty'     => $gradeChanged ? 1 : $data['difficulty'],
                 'tests_per_week' => $data['tests_per_week'],
+                ...($request->has('notify_form') ? ['parent_notify' => collect(array_keys(ChildSetting::PARENT_NOTIFY))
+                    ->mapWithKeys(fn ($k) => [$k => (bool) ($data['notify'][$k] ?? false)])->all()] : []),
                 ...($gradeChanged ? ['tests_since_level_review' => 0] : []),
             ]
         );

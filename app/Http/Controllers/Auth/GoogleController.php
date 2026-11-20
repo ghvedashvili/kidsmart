@@ -64,6 +64,10 @@ class GoogleController extends Controller
         if (! $user->parent_code) {
             $data['parent_code'] = $this->generateParentCode();
         }
+        // redesign-kidsmart: Google პროფილის სურათი მშობლის მთავარ გვერდზე
+        if ($googleUser->getAvatar() && $user->photo_url !== $googleUser->getAvatar()) {
+            $data['photo_url'] = $googleUser->getAvatar();
+        }
         if ($data) {
             $user->update($data);
         }

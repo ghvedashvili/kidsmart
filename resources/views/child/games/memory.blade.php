@@ -146,6 +146,7 @@ h1 { margin: 0; font-family:'Fredoka One',cursive; font-size: 1.15rem; color: #1
 </style>
 
 <div class="wrap">
+    <a href="{{ route('games.index') }}" class="back-btn ks-game-back"><i class="bi bi-arrow-left"></i> თამაშები</a>
     <div class="header-row">
         <h1>🧠 მეხსიერების თამაში</h1>
     </div>

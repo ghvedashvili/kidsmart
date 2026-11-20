@@ -66,26 +66,17 @@
     </aside>
 
     <main class="ks-cmain">
-        <div class="ks-ctop">
-            <a href="{{ route('dashboard') }}" class="ks-cbrand ks-ctop-brand">
+        {{-- ზედა ზოლი (ბავშვის გვერდების მსგავსად): მხოლოდ ლოგო და გასვლა, მიმაგრებული --}}
+        <header class="ks-ctop ks-ctop-bar">
+            <a href="{{ route('dashboard') }}" class="ks-cbrand">
                 <span class="ks-cbrand-mark">@include('partials.ks-fox', ['size' => 26])</span>
                 <span class="ks-cbrand-name">KidSmart</span>
             </a>
-            <button type="button" id="notifBtn" class="ks-iconbtn" aria-label="შეტყობინებები" onclick="window._notifToast=true;toggleNotifications()">
-                <i id="notifIcon" class="bi bi-bell"></i>
-            </button>
-            <form method="POST" action="{{ route('logout') }}" class="ks-mobile-only">
+            <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="ks-iconbtn" aria-label="გასვლა"><i class="bi bi-box-arrow-right"></i></button>
+                <button type="submit" class="ks-clogout-top"><i class="bi bi-box-arrow-right"></i><span>გასვლა</span></button>
             </form>
-            @if($__pKids->count() > 1 && !request()->routeIs('dashboard'))
-            <div class="ks-pkids-top">
-                @foreach($__pKids as $__k)
-                <a href="{{ $__pSwitchUrl($__k) }}" class="ks-pkid {{ $__k->id === $__pKid?->id ? 'on' : '' }}"><span class="ks-pkid-av {{ $__k->avatar }}">{{ $__pAv($__k) }}</span>{{ $__k->name }}</a>
-                @endforeach
-            </div>
-            @endif
-        </div>
+        </header>
 
         @yield('content')
     </main>

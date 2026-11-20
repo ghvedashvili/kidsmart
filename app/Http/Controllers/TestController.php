@@ -138,11 +138,31 @@ class TestController extends Controller
 
         $result = (new AchievementService)->handleTestCompletion($test, $child);
 
-        // Push notification to all linked parents
-        $title = '📊 ' . $child->name . '-მა ტესტი შეასრულა';
-        $body  = $correct . '/' . $test->total_questions . ' სწორი პასუხი · ' . round($correct / max($test->total_questions, 1) * 100) . '%';
+        // Push შეტყობინებები მშობლებს — მშობლის პარამეტრების მიხედვით (child_settings.parent_notify)
+        $prefs   = $child->childSetting;
+        $pctTxt  = round($correct / max($test->total_questions, 1) * 100) . '%';
+        $notes   = [];
+        $doneKey = $test->is_olympiad ? 'olympiad_done' : 'test_done';
+        if (! $prefs || $prefs->wantsParentNotify($doneKey)) {
+            $notes[] = [
+                ($test->is_olympiad ? '🏆 ' . $child->name . '-მა ოლიმპიადა დაასრულა' : '📊 ' . $child->name . '-მა ტესტი შეასრულა'),
+                $correct . '/' . $test->total_questions . ' სწორი პასუხი · ' . $pctTxt,
+            ];
+        }
+        $newAch = $result['new_achievements'] ?? [];
+        if (count($newAch) && (! $prefs || $prefs->wantsParentNotify('new_medal'))) {
+            $notes[] = ['🏅 ' . $child->name . '-მა ახალი მედალი მოიპოვა', collect($newAch)->pluck('name')->filter()->implode(', ')];
+        }
+        if (! empty($result['level_change']) && (! $prefs || $prefs->wantsParentNotify('level_change'))) {
+            $notes[] = [
+                $result['level_change'] === 'up' ? '🚀 ' . $child->name . '-ის დონე აიწია' : '📶 ' . $child->name . '-ის დონე შეიცვალა',
+                'ახალი დონე: ' . ($result['difficulty'] ?? ''),
+            ];
+        }
         foreach ($child->parents as $parent) {
-            PushController::sendToUser($parent->id, $title, $body, route('dashboard'));
+            foreach ($notes as [$title, $body]) {
+                PushController::sendToUser($parent->id, $title, $body, route('dashboard'));
+            }
         }
 
         return redirect()->route('test.result', $test)->with('achievement_result', $result);

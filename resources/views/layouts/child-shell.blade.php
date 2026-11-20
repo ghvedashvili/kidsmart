@@ -49,27 +49,17 @@
     </aside>
 
     <main class="ks-cmain">
-        <div class="ks-ctop">
-            <a href="{{ route('dashboard') }}" class="ks-cbrand ks-ctop-brand">
+        {{-- ზედა ზოლი (ყველა გვერდზე ერთნაირი, landing-ის მსგავსად მიმაგრებული): მხოლოდ ლოგო და გასვლა --}}
+        <header class="ks-ctop ks-ctop-bar">
+            <a href="{{ route('dashboard') }}" class="ks-cbrand">
                 <span class="ks-cbrand-mark">@include('partials.ks-fox', ['size' => 26])</span>
                 <span class="ks-cbrand-name">KidSmart</span>
             </a>
-            <a href="{{ route('market.child') }}" class="ks-pill" title="მონეტები">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#F5B301"/><circle cx="12" cy="12" r="6.5" fill="none" stroke="#FFE08A" stroke-width="2"/></svg>
-                <span>{{ $__cCoins }}</span>
-            </a>
-            <span class="ks-pill" title="ზედიზედ დღეები">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c1 4 5.5 5.5 5.5 11a5.5 5.5 0 0 1-11 0c0-3 2-4.5 2-7.5 1.5 1 2.6 2.2 3 3.4.6-2.2.5-4.6.5-6.9z" fill="{{ $__cStreak > 0 ? '#F26B1D' : '#D8CEC3' }}"/></svg>
-                <span>{{ $__cStreak }} დღე</span>
-            </span>
-            <button type="button" id="notifBtn" class="ks-iconbtn" aria-label="შეტყობინებები" onclick="window._notifToast=true;toggleNotifications()">
-                <i id="notifIcon" class="bi bi-bell"></i>
-            </button>
-            <form method="POST" action="{{ route('logout') }}" class="ks-mobile-only">
+            <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="ks-iconbtn" aria-label="გასვლა"><i class="bi bi-box-arrow-right"></i></button>
+                <button type="submit" class="ks-clogout-top"><i class="bi bi-box-arrow-right"></i><span>გასვლა</span></button>
             </form>
-        </div>
+        </header>
 
         @yield('content')
     </main>

@@ -12,8 +12,8 @@
     </div>
 
     <div class="ks-games">
-        @foreach($games as $__i => $game)
-        <a href="{{ route($game['route']) }}" class="ks-game" style="background: {{ $__gameBg[$__i % count($__gameBg)] }}; min-height: 170px;">
+        @foreach($games as $game)
+        <a href="{{ route($game['route']) }}" class="ks-game" style="background: {{ $__gameBg[$loop->index % count($__gameBg)] }}; min-height: 170px;">
             <span class="ks-game-ic" aria-hidden="true">{{ $game['icon'] }}</span>
             <span class="ks-game-n">{{ $game['name'] }}</span>
             <span class="ks-game-s">

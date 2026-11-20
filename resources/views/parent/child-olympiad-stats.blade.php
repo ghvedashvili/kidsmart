@@ -6,6 +6,7 @@
         <span class="ks-cp-eyebrow" style="color:#3D2A00;">ოლიმპიადის ტესტების ისტორია და შედეგები</span>
         <h1 class="ks-cp-title">{{ $child->name }} · ოლიმპიადა</h1>
     </div>
+    @include('parent.partials.kid-switcher')
 
     <div class="ks-cp-stats">
         <div class="ks-cp-stat"><b>{{ $totalOlympiad }}</b><span>ოლიმპიადა სულ</span></div>
