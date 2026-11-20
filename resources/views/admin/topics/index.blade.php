@@ -12,13 +12,13 @@
     .row.editing { border-color: var(--ks-orange); }
     .row.editing .row-view { display: none; }
     .row.editing .row-edit { display: flex; }
-    .badge { display: inline-flex; font-size: 12px; font-weight: 700; border-radius: 999px; padding: 4px 10px; background: #F1E8DE; color: var(--ks-ink-2); border: none; }
+    .badge { display: inline-flex; font-size: 12px; font-weight: 700; border-radius: 999px; padding: 4px 10px; background: #F1EFEB; color: var(--ks-ink-2); border: none; }
     .badge-btn { display: inline-flex; font-family: var(--ks-font); font-size: 12px; font-weight: 800; border-radius: 999px; padding: 4px 10px; background: var(--ks-purple-soft); color: var(--ks-purple-dark); border: none; cursor: pointer; }
-    .badge-btn:hover { background: #E2D9FF; }
-    .btn-vid { min-height: 34px; padding: 0 10px; border-radius: 10px; border: none; background: #F1E8DE; color: var(--ks-ink-2); font-family: var(--ks-font); font-size: 12px; font-weight: 800; cursor: pointer; }
+    .badge-btn:hover { background: #FFF3EA; }
+    .btn-vid { min-height: 34px; padding: 0 10px; border-radius: 10px; border: none; background: #F1EFEB; color: var(--ks-ink-2); font-family: var(--ks-font); font-size: 12px; font-weight: 800; cursor: pointer; }
     .btn-vid.has { background: var(--ks-blue-soft); color: var(--ks-blue-dark); }
     .btn-edit { min-width: 34px; min-height: 34px; border-radius: 10px; border: none; background: transparent; color: var(--ks-ink-2); cursor: pointer; font-size: 14px; }
-    .btn-edit:hover { background: #F1E8DE; color: var(--ks-ink); }
+    .btn-edit:hover { background: #F1EFEB; color: var(--ks-ink); }
     .btn-del { min-width: 34px; min-height: 34px; border-radius: 10px; border: none; background: transparent; color: var(--ks-muted); cursor: pointer; font-size: 13px; font-weight: 800; }
     .btn-del:hover { background: var(--ks-red-soft); color: var(--ks-red-dark); }
     .fc-inline { min-height: 38px; border-radius: 10px; border: 1px solid var(--ks-line); background: var(--ks-bg-admin); padding: 0 10px; font-family: var(--ks-font); font-size: 14px; color: var(--ks-ink); outline: none; }
@@ -102,7 +102,7 @@
                     <div class="row-view" style="flex:1;">
                         <span>{{ $topic->name }}</span>
                         @if($topic->sequence)
-                        <span class="badge" style="color:#2563eb;border-color:#bfdbfe;">#{{ $topic->sequence }}</span>
+                        <span class="badge" style="color:#C24A0A;border-color:#FFE3CC;">#{{ $topic->sequence }}</span>
                         @endif
                         @unless($topic->is_active)
                         <span class="badge" style="color:#b91c1c;border-color:#fecaca;">⏸ გაჩერებული</span>
@@ -178,9 +178,9 @@
                         <input type="number" class="tpl-seq" min="1" placeholder="—" value="{{ $tpl->sequence }}"
                             data-tpl-id="{{ $tpl->id }}" onchange="saveTplSequence(this)">
                         <div class="tpl-text" title="{{ $tpl->template_text }}">{{ $tpl->title ? '★ '.$tpl->title : Str::limit($tpl->template_text ?: '('.$tpl->question_type.')', 70) }}</div>
-                        <span class="tpl-tag" style="color:#94a3b8;">#{{ $tpl->id }}</span>
+                        <span class="tpl-tag" style="color:#8A8078;">#{{ $tpl->id }}</span>
                         @if($tpl->theme)
-                        <span class="tpl-tag" style="color:#4f46e5;border-color:#c7d2fe;">{{ $tpl->theme->icon ?? '' }} {{ $tpl->theme->name }}</span>
+                        <span class="tpl-tag" style="color:#C24A0A;border-color:#FFD9BF;">{{ $tpl->theme->icon ?? '' }} {{ $tpl->theme->name }}</span>
                         @endif
                         <span class="tpl-tag">დ{{ $tpl->difficulty }}</span>
                         @if(!$tpl->is_active)<span class="tpl-tag" style="color:#b91c1c;border-color:#fecaca;">გაჩერ.</span>@endif
@@ -210,7 +210,7 @@
             </select>
             <div class="tp-lbl">თემის სახელი</div>
             <input type="text" name="name" id="tpNameInput" class="tp-fc" placeholder="მაგ: გამრავლება" maxlength="100" required value="{{ old('name') }}">
-            <div class="tp-lbl">მიმდევრობა <span style="text-transform:none;letter-spacing:0;color:#94a3b8;">(სურვილისამებრ — ტესტში რიგითობის პრიორიტეტი)</span></div>
+            <div class="tp-lbl">მიმდევრობა <span style="text-transform:none;letter-spacing:0;color:#8A8078;">(სურვილისამებრ — ტესტში რიგითობის პრიორიტეტი)</span></div>
             <input type="number" name="sequence" class="tp-fc" min="1" placeholder="— შემთხვევითი რიგი —" value="{{ old('sequence') }}">
             <div class="tp-actions">
                 <button type="submit" class="tp-btn-add">+ დამატება</button>

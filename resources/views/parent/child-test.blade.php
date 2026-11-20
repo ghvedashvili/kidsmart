@@ -1,12 +1,12 @@
 @extends('layouts.app')
 @section('content')
 <style>
-    :root { --t-ink:#1D1A17; }
-    .wrap { max-width: 760px; margin: 0; padding: 0 0 60px; font-family: 'Noto Sans Georgian', system-ui, sans-serif; color: #1D1A17; }
+    :root { --t-ink:#2B2622; }
+    .wrap { max-width: 760px; margin: 0; padding: 0 0 60px; font-family: 'Noto Sans Georgian', system-ui, sans-serif; color: #2B2622; }
 
     .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 10px; }
-    .back { font-size: 0.86rem; font-weight: 800; color: #1D1A17; text-decoration: none; padding: 8px 14px; background: white; border-radius: 14px; border: 1px solid #F1E3D3; }
-    .back:hover { background: #FFF4EA; color: #1D1A17; }
+    .back { font-size: 0.86rem; font-weight: 800; color: #2B2622; text-decoration: none; padding: 8px 14px; background: white; border-radius: 14px; border: 1px solid #ECE9E4; }
+    .back:hover { background: #FFF3EA; color: #2B2622; }
     .test-date { font-size: 0.86rem; font-weight: 700; color: #6B625A; margin-left: auto; }
 
     /* Summary card */
@@ -31,23 +31,23 @@
     .q-card {
         background: white; border-radius: 26px;
         padding: 30px 22px 22px; margin-bottom: 24px;
-        box-shadow: 0 2px 0 #F1E3D3; position: relative;
+        box-shadow: 0 2px 0 #ECE9E4; position: relative;
     }
     .q-badge {
         position: absolute; top: -14px; left: 20px;
         background: #C24A0A; color: white; font-weight: 900; font-size: 0.95rem;
         padding: 3px 16px; border-radius: 99px;
     }
-    .q-card:nth-child(3n+2) .q-badge { background: #6D4FE0; }
-    .q-card:nth-child(3n+3) .q-badge { background: #2F6FD6; }
+    .q-card:nth-child(3n+2) .q-badge { background: #E2590F; }
+    .q-card:nth-child(3n+3) .q-badge { background: #E2590F; }
 
-    .q-text { font-size: clamp(1rem, 3vw, 1.15rem); font-weight: 700; color: #1D1A17; line-height: 1.65; margin-bottom: 6px; }
+    .q-text { font-size: clamp(1rem, 3vw, 1.15rem); font-weight: 700; color: #2B2622; line-height: 1.65; margin-bottom: 6px; }
     .q-hint { font-size: 0.86rem; color: #6B625A; margin-bottom: 14px; line-height: 1.5; border-left: 3px solid #FFE3CC; padding-left: 10px; }
 
     .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
     .opt-row {
         display: flex; align-items: center; justify-content: center; gap: 6px;
-        padding: 12px 10px; border-radius: 18px; border: 2.5px solid #F1E3D3; background: #FFF8F1;
+        padding: 12px 10px; border-radius: 18px; border: 2.5px solid #ECE9E4; background: #F7F6F3;
         font-weight: 900; font-size: clamp(1.05rem, 3.5vw, 1.25rem);
         color: #6B625A; text-align: center; min-height: 56px; position: relative;
     }
@@ -59,12 +59,12 @@
     .opt-tag { position: absolute; top: -10px; right: 8px; font-size: 0.66rem; font-weight: 800; padding: 1px 9px; border-radius: 99px; }
     .tag-correct { background: #1E8A4C; color: white; }
     .tag-wrong   { background: #C62828; color: white; }
-    .tag-answer  { background: #6D4FE0; color: white; }
+    .tag-answer  { background: #E2590F; color: white; }
 
     .no-ans { font-size: 0.86rem; font-weight: 800; color: #8A5A00; margin-top: 10px; }
 
-    .vid-btn { display:inline-flex; align-items:center; gap:6px; margin-top:12px; padding:8px 16px; background:#EEE8FF; border-radius:99px; font-weight:800; font-size:0.84rem; color:#4B33B8; border:none; cursor:pointer; text-decoration:none; font-family:inherit; }
-    .vid-btn:hover { background:#DDD3FF; }
+    .vid-btn { display:inline-flex; align-items:center; gap:6px; margin-top:12px; padding:8px 16px; background:#FFF3EA; border-radius:99px; font-weight:800; font-size:0.84rem; color:#A33E08; border:none; cursor:pointer; text-decoration:none; font-family:inherit; }
+    .vid-btn:hover { background:#FFF3EA; }
     .vid-panel-q { margin-top:10px; display:none; }
     .vid-panel-q iframe { width:100%; aspect-ratio:16/9; border:none; border-radius:16px; }
     .vid-title-q { font-weight:700; font-size:0.84rem; color:#6B625A; margin-top:6px; }
@@ -131,18 +131,18 @@
                     $cellOk = $sol !== null && (int)($uv ?? PHP_INT_MIN) === $sol;
                 @endphp
                 @if($val !== null)
-                <div style="width:44px;height:44px;border-radius:10px;background:#6D4FE0;color:white;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;">{{ $val }}</div>
+                <div style="width:44px;height:44px;border-radius:10px;background:#E2590F;color:white;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;">{{ $val }}</div>
                 @elseif($cellOk)
                 <div style="width:44px;height:44px;border-radius:10px;background:#16a34a;color:white;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;">{{ $sol }}</div>
                 @elseif($uv !== null)
                 <div style="width:54px;min-height:44px;border-radius:10px;background:#fee2e2;border:2px solid #ef4444;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px 3px;gap:1px;">
                     <span style="color:#ef4444;font-size:0.78rem;font-weight:800;line-height:1;">{{ $uv }}</span>
-                    <span style="color:#94a3b8;font-size:0.6rem;line-height:1;">/</span>
+                    <span style="color:#8A8078;font-size:0.6rem;line-height:1;">/</span>
                     <span style="color:#16a34a;font-size:0.78rem;font-weight:800;line-height:1;">{{ $sol }}</span>
                 </div>
                 @else
                 <div style="width:44px;height:44px;border-radius:10px;border:2px dashed #fca5a5;background:#fff1f2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;">
-                    <span style="color:#94a3b8;font-size:0.62rem;line-height:1;">—</span>
+                    <span style="color:#8A8078;font-size:0.62rem;line-height:1;">—</span>
                     <span style="color:#16a34a;font-size:0.72rem;font-weight:800;line-height:1;">{{ $sol }}</span>
                 </div>
                 @endif
@@ -202,7 +202,7 @@
                 if($_gv){$_bg='#d1fae5';$_fg='#065f46';$_bd='2.5px solid #6ee7b7';}
                 elseif($selected!==null&&$_ok){$_bg='#dcfce7';$_fg='#15803d';$_bd='2px solid #86efac';}
                 elseif($selected!==null&&$_uv!==null){$_bg='#fee2e2';$_fg='#991b1b';$_bd='2px solid #fca5a5';}
-                else{$_bg='#6D4FE0';$_fg='white';$_bd='none';}
+                else{$_bg='#E2590F';$_fg='white';$_bd='none';}
             }
         @endphp
         @if($_isDR&&$_isDC)
@@ -211,17 +211,17 @@
                 @if(!$_gv&&$selected!==null&&!$_ok&&$_uv!==null)<span style="font-size:0.48rem;color:#ef4444;line-height:1;">{{ $_uv }}</span>@endif
             </div>
         @elseif($_isDR&&$_isOC)
-            <div style="font-size:0.9rem;color:#64748b;font-weight:700;">{{ $_rops[$_r]??'+' }}</div>
+            <div style="font-size:0.9rem;color:#6B625A;font-weight:700;">{{ $_rops[$_r]??'+' }}</div>
         @elseif($_isDR&&$_isEqC)
-            <div style="font-size:0.75rem;color:#94a3b8;">=</div>
+            <div style="font-size:0.75rem;color:#8A8078;">=</div>
         @elseif($_isDR&&$_isRC)
-            <div style="width:52px;height:52px;border-radius:10px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;color:#374151;">{{ $_rres[$_r]??'' }}</div>
+            <div style="width:52px;height:52px;border-radius:10px;background:#F1EFEB;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;color:#374151;">{{ $_rres[$_r]??'' }}</div>
         @elseif($_isOR&&$_isDC)
-            <div style="font-size:0.75rem;color:#64748b;font-weight:700;">{{ $_cops[$_c]??'+' }}</div>
+            <div style="font-size:0.75rem;color:#6B625A;font-weight:700;">{{ $_cops[$_c]??'+' }}</div>
         @elseif($_isEqR&&$_isDC)
-            <div style="font-size:0.75rem;color:#94a3b8;">=</div>
+            <div style="font-size:0.75rem;color:#8A8078;">=</div>
         @elseif($_isRR&&$_isDC)
-            <div style="width:52px;height:52px;border-radius:10px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;color:#374151;">{{ $_cres[$_c]??'' }}</div>
+            <div style="width:52px;height:52px;border-radius:10px;background:#F1EFEB;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;color:#374151;">{{ $_cres[$_c]??'' }}</div>
         @else
             <div></div>
         @endif
@@ -250,7 +250,7 @@
             <div>{{ $eq }}</div>
             @endforeach
         </div>
-        <div style="font-size:0.6rem;color:#94a3b8;margin-bottom:6px;letter-spacing:0.08em;">სამიზნე კოდი</div>
+        <div style="font-size:0.6rem;color:#8A8078;margin-bottom:6px;letter-spacing:0.08em;">სამიზნე კოდი</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
             @foreach($codeQ['target'] ?? [] as $pos => $sym)
             @php
@@ -259,14 +259,14 @@
                 $ok   = $cv !== null && (int)($uv ?? PHP_INT_MIN) === (int)$cv;
             @endphp
             <div style="text-align:center;">
-                <div style="width:44px;height:44px;border-radius:8px;background:#6D4FE0;color:white;display:flex;align-items:center;justify-content:center;font-size:1.25rem;margin-bottom:3px;">{{ $sym }}</div>
+                <div style="width:44px;height:44px;border-radius:8px;background:#E2590F;color:white;display:flex;align-items:center;justify-content:center;font-size:1.25rem;margin-bottom:3px;">{{ $sym }}</div>
                 @if($selected !== null)
                     @if($ok)
                     <div style="font-size:0.78rem;font-weight:900;color:#16a34a;">{{ $cv }}</div>
                     @elseif($uv !== null)
                     <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
                         <span style="color:#ef4444;font-size:0.75rem;font-weight:800;line-height:1.2;">{{ $uv }}</span>
-                        <span style="color:#94a3b8;font-size:0.55rem;line-height:1;">/</span>
+                        <span style="color:#8A8078;font-size:0.55rem;line-height:1;">/</span>
                         <span style="color:#16a34a;font-size:0.75rem;font-weight:800;line-height:1.2;">{{ $cv }}</span>
                     </div>
                     @else
@@ -298,11 +298,11 @@
         @php $numOk = $answer?->is_correct; @endphp
         <div style="display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap;">
             @if($selected !== null)
-            <div style="font-size:0.68rem;color:#94a3b8;">პასუხი:</div>
+            <div style="font-size:0.68rem;color:#8A8078;">პასუხი:</div>
             <div style="font-weight:900;font-size:1rem;color:{{ $numOk ? '#16a34a' : '#ef4444' }};">{{ $selected }}</div>
             @endif
             @if(!$numOk)
-            <div style="font-size:0.68rem;color:#94a3b8;">სწორი:</div>
+            <div style="font-size:0.68rem;color:#8A8078;">სწორი:</div>
             <div style="font-weight:900;font-size:1rem;color:#16a34a;">{{ $correct }}</div>
             @endif
         </div>

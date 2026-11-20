@@ -8,21 +8,21 @@
     .pm-sec-h { display: flex; justify-content: space-between; align-items: center; }
     .pm-sec-h span { font-size: 15px; font-weight: 800; }
     .pm-sec-h small { font-size: 12px; color: #6B625A; }
-    .pm-req { background: #fff; border-radius: 20px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 0 #F1E3D3; }
+    .pm-req { background: #fff; border-radius: 20px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 0 #ECE9E4; }
     .pm-req form { margin: 0; }
     .pm-av { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 20px; }
     .pm-req-t { flex-grow: 1; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
     .pm-req-t b { font-size: 14px; font-weight: 800; }
     .pm-req-t small { font-size: 12px; color: #6B625A; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .pm-round { width: 44px; height: 44px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; }
-    .pm-round.no { background: #F4ECE3; color: #4F473F; }
-    .pm-round.no:hover { background: #EADFD3; }
+    .pm-round.no { background: #F1EFEB; color: #4F473F; }
+    .pm-round.no:hover { background: #E6E2DC; }
     .pm-round.ok { background: #1E8A4C; color: #fff; }
     .pm-round.ok:hover { background: #166B3A; }
     .pm-badge { font-size: 12px; font-weight: 700; border-radius: 999px; padding: 6px 10px; background: #DFF5E3; color: #14612F; flex-shrink: 0; }
     .pm-empty { font-size: 13px; color: #6B625A; padding: 4px 2px; }
-    .pm-list { background: #fff; border-radius: 22px; padding: 4px 14px; box-shadow: 0 2px 0 #F1E3D3; display: flex; flex-direction: column; }
-    .pm-item { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid #F4ECE3; }
+    .pm-list { background: #fff; border-radius: 22px; padding: 4px 14px; box-shadow: 0 2px 0 #ECE9E4; display: flex; flex-direction: column; }
+    .pm-item { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid #F1EFEB; }
     .pm-item:last-child { border-bottom: none; }
     .pm-item form { margin: 0; }
     .pm-item.off .pm-item-ic, .pm-item.off .pm-item-t { opacity: .5; }
@@ -32,27 +32,27 @@
     .pm-item-t small { font-size: 12px; color: #6B625A; }
     .pm-del { width: 36px; height: 36px; border-radius: 12px; border: none; background: transparent; color: #B5AAA0; cursor: pointer; font-size: 15px; }
     .pm-del:hover { color: #C62828; background: #FDECEA; }
-    .pm-switch { width: 52px; height: 32px; border-radius: 16px; border: none; padding: 3px; cursor: pointer; display: flex; background: #D8CEC3; justify-content: flex-start; }
+    .pm-switch { width: 52px; height: 32px; border-radius: 16px; border: none; padding: 3px; cursor: pointer; display: flex; background: #D9D4CC; justify-content: flex-start; }
     .pm-switch.on { background: #1E8A4C; justify-content: flex-end; }
     .pm-switch span { width: 26px; height: 26px; border-radius: 50%; background: #fff; display: block; }
     .pm-add-wrap { position: sticky; bottom: 16px; z-index: 40; padding-top: 6px; }
-    .pm-add { width: 100%; height: 56px; border-radius: 28px; border: none; background: #6D4FE0; color: #fff; font-family: inherit; font-size: 16px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; box-shadow: 0 8px 20px rgba(109,79,224,.3); }
-    .pm-add:hover { background: #5A3DD0; }
+    .pm-add { width: 100%; height: 56px; border-radius: 28px; border: none; background: #E2590F; color: #fff; font-family: inherit; font-size: 16px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; box-shadow: 0 8px 20px rgba(226,89,15,.3); }
+    .pm-add:hover { background: #E2590F; }
     @media (max-width: 900px) { .pm-add-wrap { bottom: calc(80px + env(safe-area-inset-bottom)); } }
     body { background: transparent !important; }
-    .aw { max-width: 1000px; margin: 0; padding: 0 0 60px; font-family: 'Noto Sans Georgian', system-ui, sans-serif; color: #1D1A17; display: flex; flex-direction: column; gap: 18px; }
-    .card  { background:#fff; border:none; border-radius:24px; padding:22px; margin-bottom:0; box-shadow:0 2px 0 #F1E3D3; }
-    .sec   { font-size:1.15rem; font-weight:800; color:#1D1A17; margin-bottom:14px; }
-    .fc    { background:#fff; border:1.5px solid #E8DFD5; border-radius:14px; color:#1D1A17; font-family:inherit; font-size:0.95rem; padding:10px 14px; outline:none; box-sizing:border-box; min-height:46px; }
+    .aw { max-width: 1000px; margin: 0; padding: 0 0 60px; font-family: 'Noto Sans Georgian', system-ui, sans-serif; color: #2B2622; display: flex; flex-direction: column; gap: 18px; }
+    .card  { background:#fff; border:none; border-radius:24px; padding:22px; margin-bottom:0; box-shadow:0 2px 0 #ECE9E4; }
+    .sec   { font-size:1.15rem; font-weight:800; color:#2B2622; margin-bottom:14px; }
+    .fc    { background:#fff; border:1.5px solid #E6E2DC; border-radius:14px; color:#2B2622; font-family:inherit; font-size:0.95rem; padding:10px 14px; outline:none; box-sizing:border-box; min-height:46px; }
     .fc:focus { border-color:#E2590F; box-shadow:0 0 0 3px rgba(226,89,15,.14); }
-    .aw .btn, .m-box .btn { background:#F5EFE8; border:none; color:#1D1A17; font-family:inherit; font-size:0.9rem; font-weight:800; padding:10px 18px; border-radius:999px; cursor:pointer; }
-    .aw .btn:hover { background:#EADFD3; color:#1D1A17; }
+    .aw .btn, .m-box .btn { background:#F1EFEB; border:none; color:#2B2622; font-family:inherit; font-size:0.9rem; font-weight:800; padding:10px 18px; border-radius:999px; cursor:pointer; }
+    .aw .btn:hover { background:#E6E2DC; color:#2B2622; }
     .btn-sm { padding:7px 14px !important; font-size:0.82rem !important; }
     .btn-ok { background:#1E8A4C !important; color:#fff !important; }
     .btn-ok:hover { background:#166B3A !important; }
     .btn-del { background:none; border:none; color:#B5AAA0; font-size:0.85rem; cursor:pointer; padding:0 4px; transition:color 0.2s; }
     .btn-del:hover { color:#C62828; }
-    .ks-mk-add { width:100%; height:56px; border:2px dashed #DCCFC2; background:#fff; border-radius:24px; font-family:inherit; font-size:1rem; font-weight:800; color:#1D1A17; cursor:pointer; }
+    .ks-mk-add { width:100%; height:56px; border:2px dashed #DDD8D1; background:#fff; border-radius:24px; font-family:inherit; font-size:1rem; font-weight:800; color:#2B2622; cursor:pointer; }
     .ks-mk-add:hover { border-color:#C24A0A; color:#C24A0A; }
 
     .toast-wrap {
@@ -65,12 +65,12 @@
     .toast-wrap.show { transform: translate(-50%, 0); }
     .toast-wrap .toast {
         display: block; font-family: 'Noto Sans Georgian', sans-serif; font-size: 0.9rem; font-weight: 800;
-        background: #1D1A17; color: #fff; border-radius: 999px; padding: 11px 20px; text-align: center;
+        background: #C24A0A; color: #fff; border-radius: 999px; padding: 11px 20px; text-align: center;
         box-shadow: 0 10px 30px rgba(0,0,0,0.18); max-width: 100%; opacity: 1; border: none; width: auto;
     }
 
     .item-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:12px; }
-    .item-card { background:#FFF8F1; border:none; border-radius:20px; padding:16px; display:flex; flex-direction:column; gap:6px; position:relative; }
+    .item-card { background:#F7F6F3; border:none; border-radius:20px; padding:16px; display:flex; flex-direction:column; gap:6px; position:relative; }
     .item-card-del { position:absolute; top:10px; right:10px; }
     .item-card-icon { font-size:2.2rem; line-height:1; }
     .item-card-title { font-size:0.95rem; font-weight:800; padding-right:18px; }
@@ -79,21 +79,21 @@
     .cost-badge { font-size:0.82rem; font-weight:800; background:#FFF1C9; color:#8A5A00; border-radius:999px; padding:3px 10px; white-space:nowrap; }
     .toggle-pill { font-size:0.75rem; font-weight:800; border-radius:999px; padding:4px 10px; border:none; cursor:pointer; font-family:inherit; }
     .toggle-pill.on  { background:#DFF5E3; color:#1E7A45; }
-    .toggle-pill.off { background:#EFE6DC; color:#6B625A; }
+    .toggle-pill.off { background:#ECE9E4; color:#6B625A; }
 
     /* template grid */
     .tpl-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px; margin-top:10px; }
-    .tpl-card { border:1.5px dashed #E8DFD5; border-radius:14px; padding:9px 11px; cursor:pointer; transition:all 0.15s; display:flex; align-items:center; gap:8px; background:none; width:100%; text-align:left; font-family:inherit; }
-    .tpl-card:hover { border-color:#C24A0A; background:#FFF4EA; }
+    .tpl-card { border:1.5px dashed #E6E2DC; border-radius:14px; padding:9px 11px; cursor:pointer; transition:all 0.15s; display:flex; align-items:center; gap:8px; background:none; width:100%; text-align:left; font-family:inherit; }
+    .tpl-card:hover { border-color:#C24A0A; background:#FFF3EA; }
     .tpl-card.added { border-color:#9FD9B5; background:#E8F7EE; opacity:0.7; pointer-events:none; cursor:default; }
     .tpl-icon { font-size:1.3rem; flex-shrink:0; }
     .tpl-info { flex:1; min-width:0; }
-    .tpl-name { font-size:0.82rem; font-weight:700; color:#1D1A17; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block; }
+    .tpl-name { font-size:0.82rem; font-weight:700; color:#2B2622; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block; }
     .tpl-cost { font-size:0.72rem; color:#1E7A45; font-weight:800; display:block; }
     .cat-lbl { font-size:0.72rem; font-weight:800; color:#6B625A; letter-spacing:0.06em; text-transform:uppercase; margin:14px 0 6px; }
 
     /* pending cards */
-    .pend-card { background:#FFF4EA; border:none; border-radius:18px; padding:14px 16px; margin-bottom:10px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+    .pend-card { background:#FFF3EA; border:none; border-radius:18px; padding:14px 16px; margin-bottom:10px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
     .pend-icon { font-size:1.9rem; flex-shrink:0; }
     .pend-info { flex:1; min-width:120px; }
     .pend-title { font-size:1rem; font-weight:800; }
@@ -101,25 +101,25 @@
     .pend-actions { display:flex; gap:6px; flex-shrink:0; }
     .pend-actions form { margin:0; }
 
-    .appr-row { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid #F5EFE8; font-size:0.92rem; font-weight:600; }
+    .appr-row { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid #F1EFEB; font-size:0.92rem; font-weight:600; }
     .appr-row:last-child { border-bottom:none; }
     .appr-date { font-size:0.78rem; color:#6B625A; margin-left:auto; white-space:nowrap; }
 
     /* ── Price modal ── */
     .m-overlay { position:fixed;inset:0;background:rgba(29,26,23,0.45);backdrop-filter:blur(3px);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px; }
     .m-overlay.open { display:flex; }
-    .m-box { background:#fff;border-radius:26px;padding:24px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:mIn 0.2s cubic-bezier(0.175,0.885,0.32,1.275);font-family:'Noto Sans Georgian',sans-serif;color:#1D1A17; }
+    .m-box { background:#fff;border-radius:26px;padding:24px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:mIn 0.2s cubic-bezier(0.175,0.885,0.32,1.275);font-family:'Noto Sans Georgian',sans-serif;color:#2B2622; }
     @keyframes mIn { from{transform:scale(0.92);opacity:0} to{transform:scale(1);opacity:1} }
     .m-title { font-size:1.1rem;font-weight:800;margin-bottom:18px;display:flex;align-items:center;gap:10px; }
     .m-lbl { font-size:0.75rem;font-weight:800;color:#6B625A;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:6px; }
     .m-actions { display:flex;gap:8px;margin-top:18px; }
-    .m-save { flex:1;background:#1D1A17;border:none;border-radius:24px;color:#fff;font-family:inherit;font-size:0.95rem;font-weight:800;height:48px;padding:0 16px;cursor:pointer; }
-    .m-save:hover { background:#000; }
-    .m-cancel { background:#F5EFE8;border:none;border-radius:24px;color:#1D1A17;font-family:inherit;font-size:0.9rem;font-weight:800;padding:11px 16px;cursor:pointer; }
-    .m-cancel:hover { background:#EADFD3; }
+    .m-save { flex:1;background:#C24A0A;border:none;border-radius:24px;color:#fff;font-family:inherit;font-size:0.95rem;font-weight:800;height:48px;padding:0 16px;cursor:pointer; }
+    .m-save:hover { background:#A33E08; }
+    .m-cancel { background:#F1EFEB;border:none;border-radius:24px;color:#2B2622;font-family:inherit;font-size:0.9rem;font-weight:800;padding:11px 16px;cursor:pointer; }
+    .m-cancel:hover { background:#E6E2DC; }
 
     /* ── Emoji picker ── */
-    .emoji-btn { width:54px;height:46px;background:#FFF8F1;border:1.5px solid #E8DFD5;border-radius:14px;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center; }
+    .emoji-btn { width:54px;height:46px;background:#F7F6F3;border:1.5px solid #E6E2DC;border-radius:14px;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center; }
     .emoji-btn:hover { border-color:#C24A0A; }
     .emoji-overlay { position:fixed;inset:0;background:rgba(29,26,23,0.45);backdrop-filter:blur(2px);z-index:1100;display:none;align-items:center;justify-content:center;padding:16px; }
     .emoji-overlay.open { display:flex; }
@@ -127,12 +127,12 @@
     .emoji-sheet-title { font-family:'Noto Sans Georgian',sans-serif;font-size:0.8rem;font-weight:800;color:#6B625A;margin-bottom:10px; }
     .emoji-grid { display:grid;grid-template-columns:repeat(8,1fr);gap:2px; }
     .ep { font-size:1.3rem;padding:5px;border-radius:8px;cursor:pointer;text-align:center;border:none;background:none;line-height:1.4; }
-    .ep:hover { background:#FFF4EA; }
+    .ep:hover { background:#FFF3EA; }
 
     /* ── Add-item modal tab switcher ── */
-    .tab-switch { display:flex; gap:6px; margin-bottom:16px; background:#F5EFE8; border-radius:999px; padding:4px; border:none; }
+    .tab-switch { display:flex; gap:6px; margin-bottom:16px; background:#F1EFEB; border-radius:999px; padding:4px; border:none; }
     .tab-btn { flex:1; background:none; border:none; border-radius:999px; font-family:inherit; font-size:0.88rem; font-weight:800; color:#6B625A; padding:9px; cursor:pointer; margin:0; }
-    .tab-btn.active { background:#fff; color:#1D1A17; box-shadow:0 1px 0 #E8DFD5; }
+    .tab-btn.active { background:#fff; color:#2B2622; box-shadow:0 1px 0 #E6E2DC; }
 
     @media(max-width:640px) { .card{padding:16px;border-radius:22px;} .tpl-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));} .emoji-grid{grid-template-columns:repeat(7,1fr);} .item-grid{grid-template-columns:repeat(2,minmax(0,1fr));} }
 </style>
@@ -169,7 +169,7 @@
         <div class="pm-sec-h"><span>მოთხოვნები</span>@if($pending->count())<small>{{ $pending->count() }} ელოდება</small>@endif</div>
         @forelse($pending as $p)
         <div class="pm-req">
-            <span class="pm-av" style="background: {{ $child->avatar === 'girl' ? '#FCE4EC' : ($child->avatar === 'boy' ? '#DCEBFF' : '#FFD9BF') }}">{{ $p->item->icon }}</span>
+            <span class="pm-av" style="background: {{ $child->avatar === 'girl' ? '#FFF3EA' : ($child->avatar === 'boy' ? '#FFF3EA' : '#FFD9BF') }}">{{ $p->item->icon }}</span>
             <span class="pm-req-t">
                 <b>{{ $p->item->title }}</b>
                 <small>{{ $child->name }} · {{ $p->coins_spent }} მონეტა · {{ $p->created_at->diffForHumans() }}</small>
@@ -188,7 +188,7 @@
         @endforelse
         @foreach($approved->take(3) as $ap)
         <div class="pm-req">
-            <span class="pm-av" style="background: {{ $child->avatar === 'girl' ? '#FCE4EC' : ($child->avatar === 'boy' ? '#DCEBFF' : '#FFD9BF') }}">{{ $ap->item->icon }}</span>
+            <span class="pm-av" style="background: {{ $child->avatar === 'girl' ? '#FFF3EA' : ($child->avatar === 'boy' ? '#FFF3EA' : '#FFD9BF') }}">{{ $ap->item->icon }}</span>
             <span class="pm-req-t">
                 <b>{{ $ap->item->title }}</b>
                 <small>{{ $child->name }} · {{ $ap->coins_spent }} მონეტა · {{ $ap->updated_at->format('d.m.Y') }}</small>

@@ -3,7 +3,7 @@
 @section('content')
 @include('admin.partials.settings-tabs', ['active' => 'grades'])
 
-@php $__gBg = ['#FFE3CC', '#EEE8FF', '#DCEBFF', '#DFF5E3', '#FFF1C2', '#FDE2EC']; @endphp
+@php $__gBg = ['#FFE3CC', '#FFF3EA', '#FFF3EA', '#DFF5E3', '#FFF1C2', '#FFF3EA']; @endphp
 
 <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;">
     <div style="flex:3 1 420px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">

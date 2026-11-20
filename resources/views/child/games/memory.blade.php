@@ -124,7 +124,7 @@ h1 { margin: 0; font-family:'Fredoka One',cursive; font-size: 1.15rem; color: #1
 </style>
 <style>
 /* redesign-kidsmart: ახალი დიზაინის ფერები (ორიგინალ სტილზე ზემოდან) */
-#container { background: #fff !important; border: none !important; box-shadow: 0 2px 0 #F1E3D3 !important; color: #1D1A17 !important; font-family: 'Noto Sans Georgian', system-ui, sans-serif !important; border-radius: 28px !important; }
+#container { background: #fff !important; border: none !important; box-shadow: 0 2px 0 #ECE9E4 !important; color: #1D1A17 !important; font-family: 'Noto Sans Georgian', system-ui, sans-serif !important; border-radius: 28px !important; }
 #startScreen { background: rgba(255,248,241,.97) !important; }
 #startScreen h2 { font-family: inherit !important; font-weight: 900 !important; color: #1D1A17 !important; font-size: 1.35rem !important; }
 #startScreen p { color: #6B625A !important; font-family: inherit !important; font-size: .9rem !important; }
@@ -133,15 +133,15 @@ h1 { margin: 0; font-family:'Fredoka One',cursive; font-size: 1.15rem; color: #1
 #bestScoreLine { color: #8A3407 !important; font-family: inherit !important; font-size: .85rem !important; }
 .foundTxt, .timeTxt { color: #1D1A17 !important; font-weight: 900 !important; }
 .timePlus { color: #1E8A4C !important; }
-#btnArea .btn { border-color: #F1E3D3 !important; box-shadow: none !important; }
+#btnArea .btn { border-color: #ECE9E4 !important; box-shadow: none !important; }
 #leaderboardBtn { background: #F5B301 !important; }
 #hintBtn { background: #6D4FE0 !important; }
 .mem-modal-box { font-family: 'Noto Sans Georgian', system-ui, sans-serif !important; border-radius: 24px !important; }
 .mem-modal-box h2, .mem-rank { font-family: inherit !important; font-weight: 900 !important; }
 .mem-rank { color: #C24A0A !important; }
 .mem-btn { background: #1D1A17 !important; box-shadow: none !important; border-radius: 24px !important; font-family: inherit !important; font-weight: 800 !important; font-size: .95rem !important; }
-.mem-btn-ghost { background: #F5EFE8 !important; color: #1D1A17 !important; }
-.lb-row.me { background: #FFF4EA !important; }
+.mem-btn-ghost { background: #F1EFEB !important; color: #1D1A17 !important; }
+.lb-row.me { background: #FFF3EA !important; }
 .lb-score { color: #C24A0A !important; }
 </style>
 

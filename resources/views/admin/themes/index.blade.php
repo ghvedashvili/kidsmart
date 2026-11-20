@@ -12,7 +12,7 @@
 <div class="ks-note" style="background:var(--ks-green-soft);color:var(--ks-green-dark);font-weight:700;">{{ session('success') }}</div>
 @endif
 
-@php $__thBg = ['#DFF5E3', '#DCEBFF', '#FDE2EC', '#FFF1C2', '#EEE8FF', '#FFE3CC']; @endphp
+@php $__thBg = ['#DFF5E3', '#FFF3EA', '#FFF3EA', '#FFF1C2', '#FFF3EA', '#FFE3CC']; @endphp
 
 <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;">
     <div style="flex:3 1 440px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">

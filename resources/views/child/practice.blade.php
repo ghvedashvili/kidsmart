@@ -6,27 +6,27 @@
 @include('partials.achievement-toast')
 <style>
     body { background: transparent !important; }
-    .wrap { max-width: 720px; margin: 0 auto; padding: 4px 0 40px; font-family: 'Noto Sans Georgian', system-ui, sans-serif; color: #1D1A17; }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 4px 0 40px; font-family: 'Noto Sans Georgian', system-ui, sans-serif; color: #2B2622; }
 
     /* ── Header ── */
     .topbar { display:flex; align-items:center; justify-content:space-between; padding:0 16px; }
-    .back { font-size:0.86rem; font-weight:800; color:#1D1A17; text-decoration:none; padding:8px 14px; background:white; border-radius:14px; border:1px solid #F1E3D3; }
-    .title { margin: 0; font-size: 48px; line-height: .95; font-weight: 900; font-stretch: 66%; text-transform: uppercase; color: #1D1A17; }
+    .back { font-size:0.86rem; font-weight:800; color:#2B2622; text-decoration:none; padding:8px 14px; background:white; border-radius:14px; border:1px solid #ECE9E4; }
+    .title { margin: 0; font-size: 48px; line-height: .95; font-weight: 900; font-stretch: 66%; text-transform: uppercase; color: #2B2622; }
     .topic-tag { font-weight:800; font-size:0.82rem; color:#8A3407; background:#FFE3CC; border-radius:99px; padding:5px 14px; margin:10px 16px 0; display:inline-block; }
     .topic-tag:empty { display: none; }
 
     /* ── Question card ── */
-    .q-card { background:white; border-radius:28px; margin:16px; padding:28px 22px 24px; box-shadow:0 2px 0 #F1E3D3; min-height:200px; }
+    .q-card { background:white; border-radius:28px; margin:16px; padding:28px 22px 24px; box-shadow:0 2px 0 #ECE9E4; min-height:200px; }
     .q-label { font-weight:800; font-size:0.78rem; color:#6B625A; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:14px; }
-    .q-text { font-size:clamp(1.05rem,3.4vw,1.25rem); font-weight:700; color:#1D1A17; line-height:1.6; margin-bottom:6px; white-space: pre-line; }
+    .q-text { font-size:clamp(1.05rem,3.4vw,1.25rem); font-weight:700; color:#2B2622; line-height:1.6; margin-bottom:6px; white-space: pre-line; }
     .q-hint { font-weight:600; font-size:0.86rem; color:#6B625A; margin-bottom:18px; border-left:3px solid #FFE3CC; padding-left:10px; }
 
     /* ── MC options ── */
     .opts { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top: 16px; }
     .opt-btn {
-        padding:14px 10px; min-height:62px; border-radius:18px; border:2.5px solid #F1E3D3;
-        font-family:inherit; font-weight:900; font-size:clamp(1.1rem,4.2vw,1.35rem); color:#1D1A17;
-        background:#FFF8F1; cursor:pointer; transition:all 0.15s; text-align:center;
+        padding:14px 10px; min-height:62px; border-radius:18px; border:2.5px solid #ECE9E4;
+        font-family:inherit; font-weight:900; font-size:clamp(1.1rem,4.2vw,1.35rem); color:#2B2622;
+        background:#F7F6F3; cursor:pointer; transition:all 0.15s; text-align:center;
     }
     .opt-btn:hover:not(:disabled) { border-color:#FFC49A; transform: translateY(-2px); }
     .opt-btn.correct  { border-color:#3FAE6E; background:#E8F7EE; color:#14532D; }
@@ -40,13 +40,13 @@
         width:58px; height:58px; border-radius:16px; display:flex; align-items:center; justify-content:center;
         font-family:inherit; font-weight:900; font-size:1.15rem;
     }
-    .pyr-cell.given { background:#6D4FE0; color:white; }
+    .pyr-cell.given { background:#E2590F; color:white; }
     .pyr-cell.hidden input {
-        width:100%; height:100%; border:2.5px solid #C9BBFF; border-radius:16px; background:#EEE8FF;
-        color:#4B33B8; font-family:inherit; font-weight:900; font-size:1.15rem;
+        width:100%; height:100%; border:2.5px solid #FFC49A; border-radius:16px; background:#FFF3EA;
+        color:#A33E08; font-family:inherit; font-weight:900; font-size:1.15rem;
         text-align:center; outline:none; padding:0;
     }
-    .pyr-cell.hidden input:focus { border-color:#6D4FE0; }
+    .pyr-cell.hidden input:focus { border-color:#E2590F; }
     .pyr-cell.hidden.correct-cell input { border-color:#3FAE6E !important; background:#E8F7EE !important; color:#14532D !important; }
     .pyr-cell.hidden.wrong-cell input   { border-color:#E5484D !important; background:#FDECEA !important; color:#B42318 !important; }
 
@@ -55,9 +55,9 @@
         display:block; width:calc(100% - 32px); margin:0 16px;
         height:58px; border:none; border-radius:29px;
         font-family:inherit; font-weight:800; font-size:1.1rem; color:white;
-        background:#1D1A17; cursor:pointer; transition:background 0.15s;
+        background:#C24A0A; cursor:pointer; transition:background 0.15s;
     }
-    .check-btn:hover { background:#000; }
+    .check-btn:hover { background:#A33E08; }
     .check-btn:disabled { opacity:0.45; cursor:not-allowed; }
 
     /* ── Feedback bar ── */
@@ -76,25 +76,25 @@
 
     /* ── Code question ── */
     .code-eq-box { background:#FFF6DC;border-radius:16px;padding:12px 16px;margin-bottom:14px;border:2px dashed #F2CF6B; }
-    .code-eq { font-weight:700; font-size:1.05rem; color:#1D1A17; margin:3px 0; }
+    .code-eq { font-weight:700; font-size:1.05rem; color:#2B2622; margin:3px 0; }
     .code-target-row { display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:10px; }
-    .code-sym-box { width:52px;height:52px;border-radius:14px;background:#6D4FE0;color:white;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0; }
+    .code-sym-box { width:52px;height:52px;border-radius:14px;background:#E2590F;color:white;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0; }
     .code-inp-row { display:flex;gap:8px;justify-content:center;flex-wrap:wrap; }
-    .code-inp { width:52px;height:52px;border-radius:14px;border:2.5px solid #C9BBFF;background:#EEE8FF;color:#4B33B8;font-family:inherit;font-weight:900;font-size:1.15rem;text-align:center;outline:none;padding:0;transition:border-color .15s; }
-    .code-inp:focus { border-color:#6D4FE0; }
+    .code-inp { width:52px;height:52px;border-radius:14px;border:2.5px solid #FFC49A;background:#FFF3EA;color:#A33E08;font-family:inherit;font-weight:900;font-size:1.15rem;text-align:center;outline:none;padding:0;transition:border-color .15s; }
+    .code-inp:focus { border-color:#E2590F; }
     .code-inp.correct-inp { border-color:#3FAE6E !important;background:#E8F7EE !important;color:#14532D !important; }
     .code-inp.wrong-inp   { border-color:#E5484D !important;background:#FDECEA !important;color:#B42318 !important; }
 
     /* ── Crossword ── */
     .cw-grid { display:grid;gap:4px;align-items:center;justify-items:center;margin:0 auto; }
-    .cw-inp { width:100%;height:100%;border:2.5px solid #C9BBFF;border-radius:14px;background:#EEE8FF;color:#4B33B8;font-family:inherit;font-weight:900;font-size:1.05rem;text-align:center;outline:none;padding:0;transition:border-color .15s; }
-    .cw-inp:focus { border-color:#6D4FE0; }
+    .cw-inp { width:100%;height:100%;border:2.5px solid #FFC49A;border-radius:14px;background:#FFF3EA;color:#A33E08;font-family:inherit;font-weight:900;font-size:1.05rem;text-align:center;outline:none;padding:0;transition:border-color .15s; }
+    .cw-inp:focus { border-color:#E2590F; }
     .cw-inp.correct-inp { border-color:#3FAE6E !important;background:#E8F7EE !important;color:#14532D !important; }
     .cw-inp.wrong-inp   { border-color:#E5484D !important;background:#FDECEA !important;color:#B42318 !important; }
     .cw-given { width:52px;height:52px;border-radius:14px;background:#DFF5E3;border:2.5px solid #9FD9B5;color:#14532D;font-family:inherit;font-weight:900;font-size:1.05rem;display:flex;align-items:center;justify-content:center; }
     .cw-op  { font-family:inherit;font-weight:900;font-size:1.05rem;color:#6B625A;text-align:center; }
     .cw-eq  { font-family:inherit;font-weight:900;font-size:0.9rem;color:#B5AAA0;text-align:center; }
-    .cw-res { width:100%;height:100%;border-radius:12px;background:#F5EFE8;display:flex;align-items:center;justify-content:center;font-family:inherit;font-size:1rem;color:#1D1A17;font-weight:900; }
+    .cw-res { width:100%;height:100%;border-radius:12px;background:#F1EFEB;display:flex;align-items:center;justify-content:center;font-family:inherit;font-size:1rem;color:#2B2622;font-weight:900; }
 
     /* ── Spinner ── */
     .spinner { display:none; text-align:center; padding:40px; font-weight:700; color:#6B625A; font-size:1rem; }

@@ -16,7 +16,7 @@
 @php
     $__ctxs = \App\Models\Achievement::CONTEXTS;
     $__used = $achievements->pluck('context')->unique();
-    $__tierC = ['#D98B4A', '#9AA3B2', '#F5B301', '#7B5CF0', '#1E8A4C'];
+    $__tierC = ['#D98B4A', '#9AA3B2', '#F5B301', '#F07A2E', '#1E8A4C'];
 @endphp
 
 <div role="tablist" aria-label="კატეგორია" style="display:flex;flex-wrap:wrap;gap:6px;">
@@ -38,7 +38,7 @@
             @else
             <span style="display:flex;gap:4px;">
                 @foreach($ach->tiers as $t)
-                <span title="{{ $t->label }}" style="width:24px;height:24px;border-radius:50%;background:{{ $ach->tiers->count() === 1 ? '#F5B301' : ($__tierC[$loop->index] ?? '#7B5CF0') }};"></span>
+                <span title="{{ $t->label }}" style="width:24px;height:24px;border-radius:50%;background:{{ $ach->tiers->count() === 1 ? '#F5B301' : ($__tierC[$loop->index] ?? '#F07A2E') }};"></span>
                 @endforeach
             </span>
             @endif

@@ -34,12 +34,12 @@
         'gold'   => ['#F5B301', '#FFF1C2', 'ოქრო',     '#6B4A00'],
         'silver' => ['#9AA3B2', '#EEF0F4', 'ვერცხლი',  '#4A5363'],
         'bronze' => ['#D98B4A', '#FCE6D4', 'ბრინჯაო',  '#7A3F12'],
-        'lock'   => ['#D8CEC3', '#FFFFFF', 'დახურული', '#6B625A'],
+        'lock'   => ['#D9D4CC', '#FFFFFF', 'დახურული', '#6B625A'],
     ];
     $__total = $achievements->count();
 @endphp
 <style>
-    .am { display: flex; flex-direction: column; gap: 14px; max-width: 760px; width: 100%; font-family: 'Noto Sans Georgian', system-ui, sans-serif; color: #1D1A17; }
+    .am { display: flex; flex-direction: column; gap: 14px; max-width: 760px; width: 100%; font-family: 'Noto Sans Georgian', system-ui, sans-serif; color: #2B2622; }
     .am-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
     .am-head small { font-size: 13px; color: #6B625A; }
     .am-title { margin: 4px 0 0; font-size: 46px; line-height: .95; font-weight: 900; font-stretch: 68%; text-transform: uppercase; }
@@ -47,21 +47,21 @@
     .am-count b { font-size: 24px; font-weight: 900; }
     .am-count b span { font-size: 15px; color: #6B625A; }
     .am-count small { font-size: 11px; }
-    .am-next { background: #fff; border-radius: 22px; padding: 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 0 #F1E3D3; }
+    .am-next { background: #fff; border-radius: 22px; padding: 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 0 #ECE9E4; }
     .am-next-ic { width: 48px; height: 48px; border-radius: 16px; background: #FFE3CC; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 24px; }
     .am-next-b { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
     .am-next-top { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; font-weight: 700; }
     .am-next-top span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .am-next-top span:last-child { color: #6B625A; flex-shrink: 0; }
-    .am-bar { height: 8px; border-radius: 4px; background: #F4ECE3; overflow: hidden; }
+    .am-bar { height: 8px; border-radius: 4px; background: #F1EFEB; overflow: hidden; }
     .am-bar span { display: block; height: 8px; border-radius: 4px; background: #E2590F; }
-    .am-tabs { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 6px; background: #F4ECE3; border-radius: 999px; padding: 4px; }
+    .am-tabs { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 6px; background: #F1EFEB; border-radius: 999px; padding: 4px; }
     .am-tab { height: 40px; border: none; border-radius: 999px; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; background: transparent; color: #6B625A; padding: 0 4px; }
-    .am-tab[aria-selected="true"] { background: #fff; color: #1D1A17; box-shadow: 0 2px 6px rgba(150,80,20,.15); }
+    .am-tab[aria-selected="true"] { background: #fff; color: #2B2622; box-shadow: 0 2px 6px rgba(150,80,20,.15); }
     .am-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; }
     .am-grid[hidden] { display: none; }
     .am-medal { border-radius: 20px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; gap: 6px; border: 2px solid transparent; text-align: center; }
-    .am-medal.lock { border: 2px dashed #E6D9CB; }
+    .am-medal.lock { border: 2px dashed #E6E2DC; }
     .am-ring { width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 4px rgba(255,255,255,.45); overflow: hidden; }
     .am-ring img { width: 40px; height: 40px; object-fit: contain; }
     .am-medal.lock .am-ring img { filter: grayscale(1); opacity: .5; }

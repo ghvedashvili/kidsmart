@@ -121,9 +121,9 @@ button.action-btn:hover { opacity: 0.9; }
 </style>
 <style>
 /* redesign-kidsmart: ახალი დიზაინის ფერები (ორიგინალ სტილზე ზემოდან) */
-#info-btn { background: #fff !important; color: #1D1A17 !important; border: 1px solid #F1E3D3 !important; width: 40px !important; height: 40px !important; border-radius: 14px !important; }
-.player-box { background: #fff !important; border-color: #F1E3D3 !important; }
-.player-box.active { border-color: #E2590F !important; background: #FFF4EA !important; box-shadow: 0 0 0 3px rgba(226,89,15,.15) !important; }
+#info-btn { background: #fff !important; color: #1D1A17 !important; border: 1px solid #ECE9E4 !important; width: 40px !important; height: 40px !important; border-radius: 14px !important; }
+.player-box { background: #fff !important; border-color: #ECE9E4 !important; }
+.player-box.active { border-color: #E2590F !important; background: #FFF3EA !important; box-shadow: 0 0 0 3px rgba(226,89,15,.15) !important; }
 .player-title, .wall-count, .instructions { font-family: inherit !important; }
 #wall-btn { background: #1D1A17 !important; font-family: inherit !important; font-weight: 800 !important; border-radius: 22px !important; padding: 12px !important; font-size: 15px !important; }
 #wall-btn.active { background: #C24A0A !important; }

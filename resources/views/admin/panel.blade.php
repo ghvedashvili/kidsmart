@@ -5,11 +5,11 @@
 @php
 $_map = [
     'admin.questions' => ['route' => 'admin.questions.index',   'name' => 'ახალი შაბლონი',     'sub' => 'კითხვის კონსტრუქტორი', 'bg' => '#FFE3CC', 'create' => true],
-    'admin.topics'    => ['route' => 'admin.topics.index',      'name' => 'თემები',            'sub' => 'კლასების თემები',      'bg' => '#EEE8FF'],
-    'admin.themes'    => ['route' => 'admin.themes.index',      'name' => 'ცვლადები',          'sub' => 'თემატიკის სიტყვები',   'bg' => '#DCEBFF'],
+    'admin.topics'    => ['route' => 'admin.topics.index',      'name' => 'თემები',            'sub' => 'კლასების თემები',      'bg' => '#FFF3EA'],
+    'admin.themes'    => ['route' => 'admin.themes.index',      'name' => 'ცვლადები',          'sub' => 'თემატიკის სიტყვები',   'bg' => '#FFF3EA'],
     'admin.olympiadrules' => ['route' => 'admin.olympiad-rules.index', 'name' => 'ოლიმპიადა', 'sub' => 'თარიღი და წესები',     'bg' => '#FFF1C2'],
     'admin.users'     => ['route' => 'admin.users.index',       'name' => 'პაკეტის მინიჭება',  'sub' => 'მომხმარებლებში',       'bg' => '#DFF5E3'],
-    'admin.grades'    => ['route' => 'admin.grades.index',      'name' => 'კლასები',           'sub' => 'მაქს. დონე, სტატუსი',  'bg' => '#FDE2EC'],
+    'admin.grades'    => ['route' => 'admin.grades.index',      'name' => 'კლასები',           'sub' => 'მაქს. დონე, სტატუსი',  'bg' => '#FFF3EA'],
 ];
 $_visibleMap = $isAdmin
     ? $_map
@@ -84,7 +84,7 @@ if ($isAdmin) {
                             @for($d = 1; $d <= 5; $d++)
                                 @php $_has = ($_byDiff[$d] ?? 0) > 0; $_out = $d > $_maxLvl; @endphp
                                 <span title="დონე {{ $d }}: {{ $_out ? 'კლასის ზღვარს გარეთ' : ($_byDiff[$d] ?? 0).' შაბლონი' }}"
-                                      style="width:22px;height:22px;border-radius:6px;background:{{ $_out ? 'transparent' : ($_has ? '#7B5CF0' : '#EFE3D6') }};{{ $_out ? 'border:1px dashed #E3D9CF;' : '' }}"></span>
+                                      style="width:22px;height:22px;border-radius:6px;background:{{ $_out ? 'transparent' : ($_has ? '#F07A2E' : '#ECE9E4') }};{{ $_out ? 'border:1px dashed #E3D9CF;' : '' }}"></span>
                             @endfor
                             </span>
                         </td>
@@ -139,7 +139,7 @@ if ($isAdmin) {
                 <span style="font-size:12px;color:var(--ks-ink-2);">{{ $_info['sub'] }}</span>
             </a>
             @endforeach
-            <a href="{{ route('test.preview') }}" style="text-decoration:none;color:var(--ks-ink);border-radius:16px;padding:14px;min-height:70px;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;background:#F1E8DE;">
+            <a href="{{ route('test.preview') }}" style="text-decoration:none;color:var(--ks-ink);border-radius:16px;padding:14px;min-height:70px;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;background:#F1EFEB;">
                 <span style="font-size:14px;font-weight:800;">ტესტის გადახედვა</span>
                 <span style="font-size:12px;color:var(--ks-ink-2);">როგორ ხედავს ბავშვი</span>
             </a>
@@ -160,7 +160,7 @@ if ($isAdmin) {
         @foreach($users->take(6) as $u)
         @php $hasSub = $subscriptions->where('user_id', $u->id)->count() > 0; @endphp
         <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--ks-line-soft);">
-            <span style="width:34px;height:34px;border-radius:50%;background:#F1E8DE;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">{{ mb_substr($u->name, 0, 1) }}</span>
+            <span style="width:34px;height:34px;border-radius:50%;background:#F1EFEB;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">{{ mb_substr($u->name, 0, 1) }}</span>
             <span style="flex-grow:1;min-width:0;display:flex;flex-direction:column;">
                 <span style="font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $u->name }}</span>
                 <span class="ks-muted" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $u->email }}</span>

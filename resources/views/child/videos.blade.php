@@ -19,7 +19,7 @@
         @foreach($topics as $topic)
         <div class="ks-cp-acc" id="tc{{ $topic->id }}">
             <div class="ks-cp-acc-h" onclick="toggleTopic({{ $topic->id }})">
-                <span class="ks-cp-row-ic" style="background:#EEE8FF;">▶</span>
+                <span class="ks-cp-row-ic" style="background:#FFF3EA;">▶</span>
                 <span class="ks-cp-acc-t">{{ $topic->name }}</span>
                 <span class="ks-cp-chip">{{ $topic->videos->count() }} ვიდეო</span>
                 <i class="bi bi-chevron-right ks-cp-acc-arrow"></i>

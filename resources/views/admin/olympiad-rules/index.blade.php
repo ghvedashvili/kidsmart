@@ -8,14 +8,14 @@
     ცარიელი თარიღი ნიშნავს, რომ ოლიმპიადა ჯერ არ არის დანიშნული. ბავშვი დაიშვება, თუ ბოლო N დღეში საკმარისი ტესტი დაწერა.
 </div>
 
-<form method="POST" action="{{ route('admin.olympiad-rules.global') }}" style="background:#1D1A17;color:#fff;border-radius:22px;padding:18px;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;">
+<form method="POST" action="{{ route('admin.olympiad-rules.global') }}" style="background:#C24A0A;color:#fff;border-radius:22px;padding:18px;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;">
     @csrf @method('PUT')
     <span style="flex:1 1 100%;font-size:16px;font-weight:800;">გლობალური ნაგულისხმევი — ყველა კლასზე</span>
-    <div class="ks-field" style="flex:1 1 160px;"><label class="ks-label" style="color:#E8DCCF;" for="ogDate">ოლიმპიადის თარიღი</label><input type="date" id="ogDate" name="olympiad_date" class="ks-input" value="{{ old('olympiad_date', optional($global?->olympiad_date)->format('Y-m-d')) }}"></div>
-    <div class="ks-field" style="flex:1 1 150px;"><label class="ks-label" style="color:#E8DCCF;" for="ogTests">ტესტი ბოლო N დღეში</label><input type="number" id="ogTests" name="tests_required" class="ks-input" min="1" max="50" value="{{ old('tests_required', $global?->tests_required ?? \App\Models\OlympiadRule::DEFAULT_TESTS_REQUIRED) }}" required></div>
-    <div class="ks-field" style="flex:1 1 150px;"><label class="ks-label" style="color:#E8DCCF;" for="ogDays">დღეები (N)</label><input type="number" id="ogDays" name="days_window" class="ks-input" min="1" max="90" value="{{ old('days_window', $global?->days_window ?? \App\Models\OlympiadRule::DEFAULT_DAYS_WINDOW) }}" required></div>
-    <div class="ks-field" style="flex:1 1 150px;"><label class="ks-label" style="color:#E8DCCF;" for="ogQ">კითხვა ოლიმპიადაში</label><input type="number" id="ogQ" name="questions_count" class="ks-input" min="1" max="100" value="{{ old('questions_count', $global?->questions_count ?? \App\Models\OlympiadRule::DEFAULT_QUESTIONS_COUNT) }}" required></div>
-    <button type="submit" class="ks-btn" style="background:#F7883E;color:#1D1A17;">შენახვა</button>
+    <div class="ks-field" style="flex:1 1 160px;"><label class="ks-label" style="color:#FFE3CC;" for="ogDate">ოლიმპიადის თარიღი</label><input type="date" id="ogDate" name="olympiad_date" class="ks-input" value="{{ old('olympiad_date', optional($global?->olympiad_date)->format('Y-m-d')) }}"></div>
+    <div class="ks-field" style="flex:1 1 150px;"><label class="ks-label" style="color:#FFE3CC;" for="ogTests">ტესტი ბოლო N დღეში</label><input type="number" id="ogTests" name="tests_required" class="ks-input" min="1" max="50" value="{{ old('tests_required', $global?->tests_required ?? \App\Models\OlympiadRule::DEFAULT_TESTS_REQUIRED) }}" required></div>
+    <div class="ks-field" style="flex:1 1 150px;"><label class="ks-label" style="color:#FFE3CC;" for="ogDays">დღეები (N)</label><input type="number" id="ogDays" name="days_window" class="ks-input" min="1" max="90" value="{{ old('days_window', $global?->days_window ?? \App\Models\OlympiadRule::DEFAULT_DAYS_WINDOW) }}" required></div>
+    <div class="ks-field" style="flex:1 1 150px;"><label class="ks-label" style="color:#FFE3CC;" for="ogQ">კითხვა ოლიმპიადაში</label><input type="number" id="ogQ" name="questions_count" class="ks-input" min="1" max="100" value="{{ old('questions_count', $global?->questions_count ?? \App\Models\OlympiadRule::DEFAULT_QUESTIONS_COUNT) }}" required></div>
+    <button type="submit" class="ks-btn" style="background:#F7883E;color:#2B2622;">შენახვა</button>
 </form>
 
 <form method="POST" action="{{ route('admin.olympiad-rules.store') }}" class="ks-card" style="display:flex;flex-direction:column;gap:12px;">
@@ -60,7 +60,7 @@
                         </form>
                     </td>
                 </tr>
-                <tr id="oe{{ $row->id }}" style="display:none;background:#FFF4EA;">
+                <tr id="oe{{ $row->id }}" style="display:none;background:#FFF3EA;">
                     <td colspan="5">
                         <form method="POST" action="{{ route('admin.olympiad-rules.update', $row) }}" style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
                             @csrf @method('PUT')

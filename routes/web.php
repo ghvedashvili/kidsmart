@@ -104,6 +104,34 @@ Route::get('/child-login/{code}', function (string $code) {
 Route::middleware(['auth'])->post('/children', [ChildController::class, 'store'])->name('child.store');
 Route::middleware(['auth'])->post('/children/link', [ChildController::class, 'link'])->name('child.link');
 
+// ადმინი (მშობლად) → საკუთარი შვილის რეჟიმი; სესიაში ვინახავთ, ვინ შევიდა, რომ უკან დაბრუნდეს
+Route::middleware(['auth'])->post('/children/{child}/as-child', function (User $child) {
+    $me = auth()->user();
+    abort_unless($me->isAdmin(), 403);
+    abort_unless($child->role === 'child' && $me->children()->where('users.id', $child->id)->exists(), 403);
+
+    \Illuminate\Support\Facades\Auth::login($child);
+    session()->regenerate();
+    session(['ks_impersonator' => $me->id]);
+
+    return redirect()->route('dashboard');
+})->name('child.as-child');
+
+// ბავშვის რეჟიმიდან დაბრუნება: to=parent (მშობლის მთავარი) ან to=admin (ადმინ პანელი)
+Route::middleware(['auth'])->post('/as-child/leave', function (Request $request) {
+    $back = User::find(session('ks_impersonator'));
+    abort_unless($back, 403);
+    $childId = auth()->id();
+
+    session()->forget('ks_impersonator');
+    \Illuminate\Support\Facades\Auth::login($back);
+    session()->regenerate();
+
+    return $request->input('to') === 'admin' && $back->isAdmin()
+        ? redirect()->route('admin.panel')
+        : redirect()->route('dashboard', ['kid' => $childId]);
+})->name('child.as-child.leave');
+
 Route::middleware(['auth', 'role.permission'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard', [

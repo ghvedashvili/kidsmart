@@ -17,7 +17,7 @@
     @if($topicStats->count())
     <div class="ks-cp-acc open" id="secTopics">
         <div class="ks-cp-acc-h" onclick="toggleSection('secTopics')">
-            <span class="ks-cp-row-ic" style="background:#EEE8FF;">📚</span>
+            <span class="ks-cp-row-ic" style="background:#FFF3EA;">📚</span>
             <span class="ks-cp-acc-t">თემების მიხედვით</span>
             <span class="ks-cp-chip">{{ $topicStats->count() }}</span>
             <i class="bi bi-chevron-right ks-cp-acc-arrow"></i>
@@ -25,7 +25,7 @@
         <div class="ks-cp-acc-b">
             <div class="ks-cp-list">
             @foreach($topicStats as $topicName => $levels)
-            <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:12px 14px;background:#FFF8F1;border-radius:16px;">
+            <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:12px 14px;background:#F7F6F3;border-radius:16px;">
                 <span style="flex:1 1 180px;font-weight:800;">{{ $topicName }}</span>
                 <span style="display:flex;flex-wrap:wrap;gap:6px;">
                     @foreach($levels as $lvl)
@@ -50,7 +50,7 @@
             <div class="ks-cp-list">
             @forelse($tests as $test)
             @php $pct = round($test->correct_count / max($test->total_questions, 1) * 100); @endphp
-            <a href="{{ route('child.test.show', [$child, $test]) }}" class="ks-cp-row" style="background:#FFF8F1;box-shadow:none;">
+            <a href="{{ route('child.test.show', [$child, $test]) }}" class="ks-cp-row" style="background:#F7F6F3;box-shadow:none;">
                 <span class="ks-cp-row-ic" style="background:#fff;">{{ $test->theme?->icon ?? '📝' }}</span>
                 <span class="ks-cp-row-b">
                     <span class="ks-cp-row-t">{{ $test->correct_count }} / {{ $test->total_questions }} სწორი</span>
@@ -87,7 +87,7 @@
             <div class="ks-cp-list">
             @forelse($gTests as $test)
             @php $pct = round($test->correct_count / max($test->total_questions, 1) * 100); @endphp
-            <a href="{{ route('child.test.show', [$child, $test]) }}" class="ks-cp-row" style="background:#FFF8F1;box-shadow:none;">
+            <a href="{{ route('child.test.show', [$child, $test]) }}" class="ks-cp-row" style="background:#F7F6F3;box-shadow:none;">
                 <span class="ks-cp-row-ic" style="background:#fff;">{{ $test->theme?->icon ?? '📝' }}</span>
                 <span class="ks-cp-row-b">
                     <span class="ks-cp-row-t">{{ $test->correct_count }} / {{ $test->total_questions }} სწორი</span>

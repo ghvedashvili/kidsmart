@@ -1,7 +1,7 @@
 ﻿@extends('layouts.app')
 @section('content')
 <style>
-    .aw { max-width: 1240px; margin: 0; padding: 0 0 72px; font-family: 'Noto Sans Georgian', system-ui, sans-serif; color: #1D1A17; }
+    .aw { max-width: 1240px; margin: 0; padding: 0 0 72px; font-family: 'Noto Sans Georgian', system-ui, sans-serif; color: #2B2622; }
 
     .pg { display: grid; grid-template-columns: minmax(0,1fr) 340px; gap: 18px; align-items: start; }
     .card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
@@ -17,12 +17,12 @@
         .chip { font-size: .72rem; padding: 4px 8px; }
     }
 
-    .card { background: #fff; border: 1.5px solid #EFE6DC; border-radius: 20px; padding: 22px 24px; margin-bottom: 14px; }
-    .sec-title { font-size: .95rem; font-weight: 800; color: #1D1A17; letter-spacing: 0; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px dashed #EFE6DC; }
+    .card { background: #fff; border: 1.5px solid #ECE9E4; border-radius: 20px; padding: 22px 24px; margin-bottom: 14px; }
+    .sec-title { font-size: .95rem; font-weight: 800; color: #2B2622; letter-spacing: 0; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px dashed #ECE9E4; }
     .lbl { font-size: .74rem; font-weight: 800; color: #6B625A; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 6px; }
     .lbl span { color: #C24A0A; }
     .hint { font-size: .76rem; color: #8A8078; margin-top: -4px; margin-bottom: 12px; line-height: 1.5; }
-    .fc { background: #fff; border: 1.5px solid #E8DFD5; border-radius: 12px; color: #1D1A17; font-family: inherit; font-size: .9rem; padding: 10px 13px; width: 100%; outline: none; margin-bottom: 12px; box-sizing: border-box; transition: border-color .15s, box-shadow .15s; }
+    .fc { background: #fff; border: 1.5px solid #E6E2DC; border-radius: 12px; color: #2B2622; font-family: inherit; font-size: .9rem; padding: 10px 13px; width: 100%; outline: none; margin-bottom: 12px; box-sizing: border-box; transition: border-color .15s, box-shadow .15s; }
     .fc:focus { border-color: #E2590F; box-shadow: 0 0 0 3px rgba(226,89,15,.14); }
     .fc::placeholder { color: #B5AAA0; }
     .fc:disabled { background: #F8F4EF; color: #8A8078; }
@@ -31,15 +31,15 @@
     .err { color: #B42318; font-size: .78rem; font-weight: 600; margin-top: -8px; margin-bottom: 12px; }
 
     .diff-row { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
-    .diff-btn { background: #fff; border: 1.5px solid #E8DFD5; color: #6B625A; font-family: inherit; font-weight: 800; font-size: .86rem; height: 40px; width: 44px; text-align: center; border-radius: 12px; cursor: pointer; transition: all .15s; }
-    .diff-btn:hover { border-color: #1D1A17; color: #1D1A17; }
+    .diff-btn { background: #fff; border: 1.5px solid #E6E2DC; color: #6B625A; font-family: inherit; font-weight: 800; font-size: .86rem; height: 40px; width: 44px; text-align: center; border-radius: 12px; cursor: pointer; transition: all .15s; }
+    .diff-btn:hover { border-color: #2B2622; color: #2B2622; }
     .diff-btn.sel { border-color: #C24A0A; color: #fff; background: #C24A0A; }
     .diff-btn:disabled { opacity: .35; cursor: not-allowed; }
 
     .chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
     .chip { font-family: inherit; font-size: .76rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; cursor: pointer; transition: all .12s; user-select: none; white-space: nowrap; }
-    .chip-theme { background: #F5EFE8; border: 1.5px solid #F5EFE8; color: #6B625A; }
-    .chip-theme:hover { border-color: #DCCFC2; color: #1D1A17; }
+    .chip-theme { background: #F1EFEB; border: 1.5px solid #F1EFEB; color: #6B625A; }
+    .chip-theme:hover { border-color: #DDD8D1; color: #2B2622; }
     .chip-num { background: #E8F7EE; border: 1.5px solid #E8F7EE; color: #1E7A45; }
     .chip-num:hover { border-color: #7FCB9C; color: #14532D; }
     .chip-op { background: #FDE9DC; border: 1.5px solid #FDE9DC; color: #A53E08; min-width: 30px; text-align: center; }
@@ -49,20 +49,20 @@
     .nc-hdr span { font-size: .66rem; font-weight: 800; color: #8A8078; letter-spacing: .05em; text-transform: uppercase; text-align: center; }
     .nc-hdr span:first-child { text-align: left; padding-left: 2px; }
     .nc-row { display: grid; grid-template-columns: 72px 1fr 1fr 66px 24px 24px; gap: 6px; align-items: center; margin-bottom: 6px; }
-    .nc-inp { background: #fff; border: 1.5px solid #E8DFD5; border-radius: 10px; color: #1D1A17; font-family: inherit; font-size: .84rem; padding: 7px 9px; outline: none; box-sizing: border-box; width: 100%; transition: border-color .15s; }
+    .nc-inp { background: #fff; border: 1.5px solid #E6E2DC; border-radius: 10px; color: #2B2622; font-family: inherit; font-size: .84rem; padding: 7px 9px; outline: none; box-sizing: border-box; width: 100%; transition: border-color .15s; }
     .nc-inp:focus { border-color: #E2590F; }
     .nc-name { color: #1E7A45; font-weight: 800; text-transform: uppercase; text-align: center; background: #F2FAF5; }
     .nc-del { background: none; border: none; color: #B5AAA0; cursor: pointer; padding: 0; font-size: .85rem; text-align: center; transition: color .15s; line-height: 1; }
     .nc-del:hover { color: #C62828; }
     .nc-toggle { background: none; border: none; color: #B5AAA0; cursor: pointer; padding: 0; font-size: .88rem; text-align: center; transition: color .15s; line-height: 1; }
-    .nc-toggle:hover, .nc-toggle.on { color: #6D4FE0; }
-    .nc-add { background: #fff; border: 1.5px dashed #DCCFC2; color: #6B625A; font-family: inherit; font-weight: 700; font-size: .78rem; padding: 7px 16px; border-radius: 999px; cursor: pointer; transition: all .15s; margin-top: 6px; }
+    .nc-toggle:hover, .nc-toggle.on { color: #E2590F; }
+    .nc-add { background: #fff; border: 1.5px dashed #DDD8D1; color: #6B625A; font-family: inherit; font-weight: 700; font-size: .78rem; padding: 7px 16px; border-radius: 999px; cursor: pointer; transition: all .15s; margin-top: 6px; }
     .nc-add:hover { border-color: #C24A0A; color: #C24A0A; }
     .nc-add:disabled { opacity: .4; cursor: not-allowed; }
-    .nc-add:disabled:hover { border-color: #DCCFC2; color: #6B625A; }
+    .nc-add:disabled:hover { border-color: #DDD8D1; color: #6B625A; }
 
     .cond-row { display: grid; grid-template-columns: 1fr 110px 1fr 24px; gap: 6px; align-items: center; margin-bottom: 6px; }
-    .cond-sel { background: #fff; border: 1.5px solid #E8DFD5; border-radius: 10px; color: #1D1A17; font-family: inherit; font-size: .84rem; padding: 7px 9px; outline: none; box-sizing: border-box; width: 100%; cursor: pointer; }
+    .cond-sel { background: #fff; border: 1.5px solid #E6E2DC; border-radius: 10px; color: #2B2622; font-family: inherit; font-size: .84rem; padding: 7px 9px; outline: none; box-sizing: border-box; width: 100%; cursor: pointer; }
     .cond-sel:focus { border-color: #E2590F; }
     .cond-op { color: #A53E08; border-color: #F6CDB4; background: #FFF4EC; font-weight: 800; }
     .cond-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
@@ -71,48 +71,48 @@
     .cond-op-chip { background: #FDE9DC; border-color: #FDE9DC; color: #A53E08; min-width: 24px; text-align: center; }
     .cond-op-chip:hover { border-color: #F2A57A; }
 
-    .form-actions { display: flex; gap: 12px; align-items: center; margin-top: 6px; position: sticky; bottom: 12px; z-index: 50; background: rgba(255,255,255,.94); backdrop-filter: blur(6px); border: 1.5px solid #EFE6DC; border-radius: 999px; padding: 10px 12px; box-shadow: 0 10px 28px rgba(60,40,20,.10); }
+    .form-actions { display: flex; gap: 12px; align-items: center; margin-top: 6px; position: sticky; bottom: 12px; z-index: 50; background: rgba(255,255,255,.94); backdrop-filter: blur(6px); border: 1.5px solid #ECE9E4; border-radius: 999px; padding: 10px 12px; box-shadow: 0 10px 28px rgba(60,40,20,.10); }
     .btn-save { background: #C24A0A; border: none; color: #fff; font-family: inherit; font-size: .92rem; font-weight: 800; padding: 12px 28px; border-radius: 999px; cursor: pointer; transition: background .15s; }
     .btn-save:hover { background: #A53E08; }
     .btn-cancel { background: none; border: 1.5px solid transparent; border-radius: 999px; color: #6B625A; font-family: inherit; font-size: .84rem; font-weight: 700; text-decoration: none; cursor: pointer; transition: all .15s; }
-    .btn-cancel:hover { color: #1D1A17; border-color: #E8DFD5; }
+    .btn-cancel:hover { color: #2B2622; border-color: #E6E2DC; }
 
-    .preview-panel { background: #1D1A17; color: #fff; border: none; border-radius: 22px; padding: 20px; position: sticky; top: 20px; max-height: calc(100vh - 40px); overflow-y: auto; }
+    .preview-panel { background: #C24A0A; color: #fff; border: none; border-radius: 22px; padding: 20px; position: sticky; top: 20px; max-height: calc(100vh - 40px); overflow-y: auto; }
     .preview-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,.12); padding-bottom: 12px; }
     .preview-label { font-size: .74rem; font-weight: 800; color: #F7B48A; letter-spacing: .08em; text-transform: uppercase; }
     .preview-regen { background: rgba(255,255,255,.1); border: none; color: #fff; font-family: inherit; font-size: .74rem; font-weight: 700; padding: 6px 12px; border-radius: 999px; cursor: pointer; transition: background .15s; }
     .preview-regen:hover { background: rgba(255,255,255,.2); }
-    .preview-q { color: #1D1A17; background: #FFF8F1; border-radius: 16px; padding: 14px; font-size: .95rem; line-height: 1.7; margin-bottom: 12px; min-height: 48px; font-weight: 600; }
+    .preview-q { color: #2B2622; background: #F7F6F3; border-radius: 16px; padding: 14px; font-size: .95rem; line-height: 1.7; margin-bottom: 12px; min-height: 48px; font-weight: 600; }
     .preview-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .preview-opt { background: #fff; border: 2px solid #fff; border-radius: 14px; padding: 10px 8px; font-family: inherit; font-size: .95rem; font-weight: 800; color: #1D1A17; text-align: center; }
+    .preview-opt { background: #fff; border: 2px solid #fff; border-radius: 14px; padding: 10px 8px; font-family: inherit; font-size: .95rem; font-weight: 800; color: #2B2622; text-align: center; }
     .preview-opt.c { border-color: #4CC38A; color: #14532D; background: #E8F7EE; }
     .preview-formula { margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.12); font-size: .76rem; color: #CFC6BD; font-family: ui-monospace, Menlo, monospace; word-break: break-word; }
     .preview-vars { margin-top: 8px; font-size: .74rem; color: #A39A91; line-height: 1.7; font-family: ui-monospace, Menlo, monospace; }
     .preview-warn { margin-top: 10px; font-size: .78rem; font-weight: 700; color: #FF9B8A; }
     .tog { margin-left: 6px; transition: transform .2s; }
     .at-row, .qt-row { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
-    .at-btn, .qt-btn { background: #fff; border: 1.5px solid #E8DFD5; color: #6B625A; font-family: inherit; font-size: .84rem; font-weight: 700; padding: 8px 16px; border-radius: 999px; cursor: pointer; transition: all .15s; }
-    .at-btn:hover, .qt-btn:hover { border-color: #1D1A17; color: #1D1A17; }
-    .at-btn.at-sel { border-color: #1D1A17; color: #fff; background: #1D1A17; }
-    .qt-btn.sel { border-color: #6D4FE0; color: #fff; background: #6D4FE0; }
-    .chip-txt { background: #EFEAFE; border: 1.5px solid #EFEAFE; color: #5B3FD6; }
-    .chip-txt:hover { border-color: #B9A8F7; }
-    .chip-txt.sel { background: #6D4FE0; color: #fff; border-color: #6D4FE0; }
+    .at-btn, .qt-btn { background: #fff; border: 1.5px solid #E6E2DC; color: #6B625A; font-family: inherit; font-size: .84rem; font-weight: 700; padding: 8px 16px; border-radius: 999px; cursor: pointer; transition: all .15s; }
+    .at-btn:hover, .qt-btn:hover { border-color: #2B2622; color: #2B2622; }
+    .at-btn.at-sel { border-color: #2B2622; color: #fff; background: #C24A0A; }
+    .qt-btn.sel { border-color: #E2590F; color: #fff; background: #E2590F; }
+    .chip-txt { background: #FFF3EA; border: 1.5px solid #FFF3EA; color: #C24A0A; }
+    .chip-txt:hover { border-color: #FFE3CC; }
+    .chip-txt.sel { background: #E2590F; color: #fff; border-color: #E2590F; }
     .pyr-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-    .pyr-inp { background: #fff; border: 1.5px solid #E8DFD5; border-radius: 12px; color: #1D1A17; font-family: inherit; font-size: .9rem; padding: 9px 12px; width: 100%; outline: none; box-sizing: border-box; }
+    .pyr-inp { background: #fff; border: 1.5px solid #E6E2DC; border-radius: 12px; color: #2B2622; font-family: inherit; font-size: .9rem; padding: 9px 12px; width: 100%; outline: none; box-sizing: border-box; }
     .pyr-inp:focus { border-color: #E2590F; }
     .code-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
     .op-check { display: flex; gap: 14px; margin-bottom: 8px; align-items: center; flex-wrap: wrap; }
-    .op-check label { font-family: inherit; font-size: .86rem; font-weight: 600; color: #1D1A17; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+    .op-check label { font-family: inherit; font-size: .86rem; font-weight: 600; color: #2B2622; display: flex; align-items: center; gap: 6px; cursor: pointer; }
     .op-check input { accent-color: #C24A0A; }
     .load-search-wrap { position: relative; }
-    .load-search-results { display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 200; background: #fff; border: 1.5px solid #EFE6DC; border-radius: 14px; box-shadow: 0 12px 28px rgba(60,40,20,.14); max-height: 260px; overflow-y: auto; margin-top: 4px; }
-    .load-search-item { padding: 9px 14px; font-size: .86rem; color: #1D1A17; cursor: pointer; border-bottom: 1px solid #F5EFE8; }
+    .load-search-results { display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 200; background: #fff; border: 1.5px solid #ECE9E4; border-radius: 14px; box-shadow: 0 12px 28px rgba(60,40,20,.14); max-height: 260px; overflow-y: auto; margin-top: 4px; }
+    .load-search-item { padding: 9px 14px; font-size: .86rem; color: #2B2622; cursor: pointer; border-bottom: 1px solid #F1EFEB; }
     .load-search-item:last-child { border-bottom: none; }
     .load-search-item:hover, .load-search-item.hi { background: #FFF4EC; }
     .load-search-empty { padding: 10px 14px; font-size: .84rem; color: #8A8078; }
-    .load-selected-badge { display: none; font-size: .8rem; font-weight: 700; color: #5B3FD6; background: #EFEAFE; border-radius: 999px; padding: 5px 12px; margin-top: 8px; }
-    .aw .card[style*="#eef2ff"], .aw .card[style*="#fafaff"] { background: #F6F2FF !important; border-color: #E2D9FD !important; }
+    .load-selected-badge { display: none; font-size: .8rem; font-weight: 700; color: #C24A0A; background: #FFF3EA; border-radius: 999px; padding: 5px 12px; margin-top: 8px; }
+    .aw .card[style*="#FFF3EA"], .aw .card[style*="#fafaff"] { background: #FFF3EA !important; border-color: #FFF3EA !important; }
 </style>
 
 <div class="aw">
@@ -134,13 +134,13 @@
 
             @if($group ?? null)
             <input type="hidden" name="question_group_id" value="{{ $group->id }}">
-            <div class="card" style="background:#eef2ff;border-color:#c7d2fe;padding:12px 16px;">
-                <span style="font-size:0.72rem;color:#4338ca;">➕ ემატება ჯგუფს: <b>{{ $group->name }}</b></span>
+            <div class="card" style="background:#FFF3EA;border-color:#FFD9BF;padding:12px 16px;">
+                <span style="font-size:0.72rem;color:#E2590F;">➕ ემატება ჯგუფს: <b>{{ $group->name }}</b></span>
             </div>
             @elseif($baseTemplate ?? null)
             <input type="hidden" name="base_template_id" value="{{ $baseTemplate->id }}">
-            <div class="card" style="background:#eef2ff;border-color:#c7d2fe;padding:12px 16px;">
-                <div style="font-size:0.72rem;color:#4338ca;margin-bottom:8px;">
+            <div class="card" style="background:#FFF3EA;border-color:#FFD9BF;padding:12px 16px;">
+                <div style="font-size:0.72rem;color:#E2590F;margin-bottom:8px;">
                     ➕ ახალი ჯგუფის შექმნა — ამ კითხვასთან ({{ $baseTemplate->title ?: ('#'.$baseTemplate->id) }}, დონე {{ $baseTemplate->difficulty }}) ერთიანდება
                 </div>
                 <div class="lbl">ჯგუფის სახელი <span>*</span></div>
@@ -152,8 +152,8 @@
 
             @unless($template)
             {{-- Load an existing template as a starting point --}}
-            <div class="card" style="background:#fafaff;border-color:#e0e7ff;">
-                <div class="sec-title">⚡ შაბლონის ჩატვირთვა <span style="color:#94a3b8;font-size:0.54rem;letter-spacing:0.06em;">(სურვილისამებრ)</span></div>
+            <div class="card" style="background:#fafaff;border-color:#FFE3CC;">
+                <div class="sec-title">⚡ შაბლონის ჩატვირთვა <span style="color:#8A8078;font-size:0.54rem;letter-spacing:0.06em;">(სურვილისამებრ)</span></div>
                 <div class="load-search-wrap">
                     <input type="text" id="loadSearchInput" class="fc" style="margin-bottom:0;" autocomplete="off"
                         placeholder="🔍 ძებნა სათაურით ან ID-ით..." oninput="onLoadSearchInput()"
@@ -181,7 +181,7 @@
                     </select>
                     <button type="button" class="nc-add" onclick="loadSelectedTemplate()" style="white-space:nowrap;">ჩატვირთვა</button>
                 </div>
-                <div style="font-size:0.6rem;color:#94a3b8;margin-top:4px;">აკოპირებს არჩეული შაბლონის ყველა პარამეტრს — თემა, ტიპი, ტექსტი, ფორმულა, ცვლადები — თქვენ შეასწორებთ და შეინახავთ როგორც ახალს.</div>
+                <div style="font-size:0.6rem;color:#8A8078;margin-top:4px;">აკოპირებს არჩეული შაბლონის ყველა პარამეტრს — თემა, ტიპი, ტექსტი, ფორმულა, ცვლადები — თქვენ შეასწორებთ და შეინახავთ როგორც ახალს.</div>
             </div>
             @endunless
 
@@ -201,7 +201,7 @@
                     $dtCfg   = ($existingQType === 'data_table') ? ($template->num_config ?? []) : [];
                 @endphp
 
-                <div class="lbl">სათაური <span style="color:#94a3b8;font-size:0.6rem;">(მხოლოდ ადმინისთვის — ტესტში ბავშვს არ გამოუჩნდება)</span></div>
+                <div class="lbl">სათაური <span style="color:#8A8078;font-size:0.6rem;">(მხოლოდ ადმინისთვის — ტესტში ბავშვს არ გამოუჩნდება)</span></div>
                 <input type="text" name="title" id="titleInput" class="fc" maxlength="150"
                     placeholder="მაგ: ორნიშნა რიცხვის პოვნა — 2 ციფრის წაშლა"
                     value="{{ old('title', $template?->title) }}">
@@ -240,7 +240,7 @@
                         @error('topic_id')<div class="err">{{ $message }}</div>@enderror
                     </div>
                     <div id="themeFieldWrap">
-                        <div class="lbl">თემატიკა <span style="color:#94a3b8;font-size:0.55rem;">(სურვილისამებრ)</span></div>
+                        <div class="lbl">თემატიკა <span style="color:#8A8078;font-size:0.55rem;">(სურვილისამებრ)</span></div>
                         <select name="theme_id" id="themeSelect" class="fc" style="margin-bottom:0;"
                             onchange="onThemeChange(this.value)">
                             <option value="">— თემატიკა —</option>
@@ -281,7 +281,7 @@
                     <button type="button" id="activeBtn" class="diff-btn {{ old('is_active', $template?->is_active ?? true) ? 'sel' : '' }}" style="width:auto;padding:7px 14px;"
                         onclick="toggleActive()">✓ აქტიური</button>
                     <div style="display:flex;align-items:center;gap:6px;">
-                        <span style="font-size:0.68rem;color:#94a3b8;">რიგითობა თემაში</span>
+                        <span style="font-size:0.68rem;color:#8A8078;">რიგითობა თემაში</span>
                         <input type="number" name="sequence" class="fc" style="width:70px;padding:7px 8px;"
                             min="1" placeholder="—" value="{{ old('sequence', $template?->sequence) }}">
                     </div>
@@ -292,7 +292,7 @@
                     value="{{ old('is_active', ($template?->is_active ?? true) ? 1 : 0) }}">
 
                 {{-- Pyramid config (shown only for pyramid type) --}}
-                <div id="pyrFields" style="display:none;margin-top:14px;border-top:1px solid #f1f5f9;padding-top:14px;">
+                <div id="pyrFields" style="display:none;margin-top:14px;border-top:1px solid #F1EFEB;padding-top:14px;">
                     <div class="sec-title" style="margin-bottom:10px;">🔺 პირამიდის პარამეტრები</div>
                     @php
                         $pyrCfg = ($template?->question_type === 'pyramid') ? ($template->num_config ?? []) : [];
@@ -317,13 +317,13 @@
                                 value="{{ $pyrCfg['hidden_count'] ?? 2 }}" onchange="syncPyrConfig()">
                         </div>
                     </div>
-                    <div style="font-size:0.58rem;color:#94a3b8;margin-top:8px;" id="pyrHint">
+                    <div style="font-size:0.58rem;color:#8A8078;margin-top:8px;" id="pyrHint">
                         3-ძირი → 6 კვანძი; 4-ძირი → 10 კვანძი; 5-ძირი → 15 კვანძი
                     </div>
                 </div>{{-- /pyrFields --}}
 
                 {{-- Code config — separate from pyrFields so visibility is independent --}}
-                <div id="codeFields" style="display:none;margin-top:14px;border-top:1px solid #f1f5f9;padding-top:14px;">
+                <div id="codeFields" style="display:none;margin-top:14px;border-top:1px solid #F1EFEB;padding-top:14px;">
                     <div class="sec-title" style="margin-bottom:10px;">🕵️ კოდის პარამეტრები</div>
 
                     {{-- Row 1: symbol count + min + max --}}
@@ -382,7 +382,7 @@
                 </div>{{-- /codeFields --}}
 
                 {{-- Crossword config --}}
-                <div id="cwFields" style="display:none;margin-top:14px;border-top:1px solid #f1f5f9;padding-top:14px;">
+                <div id="cwFields" style="display:none;margin-top:14px;border-top:1px solid #F1EFEB;padding-top:14px;">
                     <div class="sec-title" style="margin-bottom:10px;">🧮 კროსვორდის პარამეტრები</div>
                     <div class="lbl">ბადის ზომა</div>
                     <div class="op-check" style="margin-bottom:10px;">
@@ -416,23 +416,23 @@
                             {{ in_array('÷', $cwCfg['operators'] ?? []) ? 'checked' : '' }}> ÷</label>
                     </div>
                     <div style="margin-top:12px;">
-                        <div class="lbl">წინასწარ გახსნილი უჯრები <span id="cwRevHint" style="color:#94a3b8;font-size:0.7rem;font-weight:600;"></span></div>
+                        <div class="lbl">წინასწარ გახსნილი უჯრები <span id="cwRevHint" style="color:#8A8078;font-size:0.7rem;font-weight:600;"></span></div>
                         <input type="number" class="pyr-inp" id="cwRevealedCount" min="0" max="8"
                             value="{{ $cwCfg['revealed_count'] ?? 0 }}" onchange="syncCwConfig()"
                             style="width:80px;">
-                        <span style="font-size:0.7rem;color:#64748b;margin-left:8px;">0 = ყველა ცარიელი</span>
+                        <span style="font-size:0.7rem;color:#6B625A;margin-left:8px;">0 = ყველა ცარიელი</span>
                     </div>
                 </div>{{-- /cwFields --}}
 
                 {{-- Scale config --}}
-                <div id="scaleFields" style="display:none;margin-top:14px;border-top:1px solid #f1f5f9;padding-top:14px;">
+                <div id="scaleFields" style="display:none;margin-top:14px;border-top:1px solid #F1EFEB;padding-top:14px;">
                     <div class="sec-title" style="margin-bottom:10px;">⚖ სასწორის პარამეტრები</div>
 
-                    <div class="lbl">კითხვის ტექსტი <span style="color:#94a3b8;font-size:0.6rem;">(არასავალდებულო — ცარიელი დატოვებისას ავტომატურად დაგენერირდება პირობის მიხედვით)</span></div>
+                    <div class="lbl">კითხვის ტექსტი <span style="color:#8A8078;font-size:0.6rem;">(არასავალდებულო — ცარიელი დატოვებისას ავტომატურად დაგენერირდება პირობის მიხედვით)</span></div>
                     <textarea id="scaleTemplateText" class="fc" rows="2" placeholder="⚖️ რომელი ვარიანტი დააბალანსებს სასწორს?"
                         oninput="document.getElementById('templateText').value = this.value; previewDebounce();"></textarea>
 
-                    <div class="lbl">სიმბოლოები <span style="color:#94a3b8;font-size:0.6rem;">(წონის ერთეულები — ემოჯი ან რიცხვი)</span></div>
+                    <div class="lbl">სიმბოლოები <span style="color:#8A8078;font-size:0.6rem;">(წონის ერთეულები — ემოჯი ან რიცხვი)</span></div>
                     <div class="nc-hdr" style="grid-template-columns:34px 1fr 70px 56px 56px 28px;">
                         <span></span><span>ტიპი</span><span>ემოჯი</span><span>min</span><span>max</span><span></span>
                     </div>
@@ -441,24 +441,24 @@
 
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;">
                         <div>
-                            <div class="lbl" style="display:flex;justify-content:space-between;">⬅ მარცხენა პინა <span id="scaleLeftCap" style="color:#94a3b8;font-weight:600;">0/4</span></div>
+                            <div class="lbl" style="display:flex;justify-content:space-between;">⬅ მარცხენა პინა <span id="scaleLeftCap" style="color:#8A8078;font-weight:600;">0/4</span></div>
                             <div id="scaleLeftRows"></div>
                             <button type="button" class="nc-add" id="scaleLeftAddBtn" onclick="addScalePanItem('left')">+ დამატება</button>
                         </div>
                         <div>
-                            <div class="lbl" style="display:flex;justify-content:space-between;">➡ მარჯვენა პინა <span id="scaleRightCap" style="color:#94a3b8;font-weight:600;">0/4</span></div>
+                            <div class="lbl" style="display:flex;justify-content:space-between;">➡ მარჯვენა პინა <span id="scaleRightCap" style="color:#8A8078;font-weight:600;">0/4</span></div>
                             <div id="scaleRightRows"></div>
                             <button type="button" class="nc-add" id="scaleRightAddBtn" onclick="addScalePanItem('right')">+ დამატება</button>
                         </div>
                     </div>
-                    <div style="font-size:0.58rem;color:#94a3b8;margin-top:4px;">თითო მხარეს მაქსიმუმ 4 საგანი ეტევა ვიზუალურად (სულ რაოდენობა — ცალკეული ციფრების/ემოჯების ჯამი)</div>
+                    <div style="font-size:0.58rem;color:#8A8078;margin-top:4px;">თითო მხარეს მაქსიმუმ 4 საგანი ეტევა ვიზუალურად (სულ რაოდენობა — ცალკეული ციფრების/ემოჯების ჯამი)</div>
 
-                    <div style="font-size:0.6rem;color:#94a3b8;margin-top:10px;">პასუხის სიმბოლო ავტომატურად აირჩევა — ნებისმიერი სიმბოლო, რომელიც არცერთ პინაზე არ დევს. ემოჯი-ტიპის სიმბოლო ამ როლისთვის მხოლოდ მაშინ გამოდგება, თუ ზემოთ კითხვის ტექსტიც დაწერეთ (მისი წონა ბავშვს პირდაპირ არასდროს უჩანს).</div>
+                    <div style="font-size:0.6rem;color:#8A8078;margin-top:10px;">პასუხის სიმბოლო ავტომატურად აირჩევა — ნებისმიერი სიმბოლო, რომელიც არცერთ პინაზე არ დევს. ემოჯი-ტიპის სიმბოლო ამ როლისთვის მხოლოდ მაშინ გამოდგება, თუ ზემოთ კითხვის ტექსტიც დაწერეთ (მისი წონა ბავშვს პირდაპირ არასდროს უჩანს).</div>
                     <div style="font-size:0.6rem;margin-top:4px;" id="scaleAtHint"></div>
 
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
                         <div>
-                            <div class="lbl">რაოდენობა min <span style="color:#94a3b8;font-size:0.55rem;">(ემოჯი-პასუხის რაოდენობის ფარგლები)</span></div>
+                            <div class="lbl">რაოდენობა min <span style="color:#8A8078;font-size:0.55rem;">(ემოჯი-პასუხის რაოდენობის ფარგლები)</span></div>
                             <input type="number" class="pyr-inp" id="scaleCountMin" min="1" value="1" onchange="syncScaleConfig()">
                         </div>
                         <div>
@@ -467,22 +467,22 @@
                         </div>
                     </div>
 
-                    <div class="lbl" style="margin-top:12px;">პირობები <span style="color:#94a3b8;font-size:0.6rem;">(სურვილისამებრ — სიმბოლოების წონებს შორის მიმართება, ასო-სახელებით)</span></div>
-                    <div class="hint" style="margin-bottom:6px;">ორივე მხარეს შეიძლება გამოთქმა, ფუნქციების ჩათვლით: <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">A &gt; B+1</code> &nbsp;·&nbsp; <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">round(A/2) &gt;= B</code></div>
+                    <div class="lbl" style="margin-top:12px;">პირობები <span style="color:#8A8078;font-size:0.6rem;">(სურვილისამებრ — სიმბოლოების წონებს შორის მიმართება, ასო-სახელებით)</span></div>
+                    <div class="hint" style="margin-bottom:6px;">ორივე მხარეს შეიძლება გამოთქმა, ფუნქციების ჩათვლით: <code style="background:#F1EFEB;padding:1px 5px;border-radius:2px;">A &gt; B+1</code> &nbsp;·&nbsp; <code style="background:#F1EFEB;padding:1px 5px;border-radius:2px;">round(A/2) &gt;= B</code></div>
                     <div id="scaleCondChips" class="cond-chips" style="display:none;"></div>
                     <div id="scaleCondRows"></div>
                     <button type="button" class="nc-add" id="scaleAddCondBtn" onclick="addScaleCond()" style="display:none;">+ პირობის დამატება</button>
-                    <span id="scaleCondNoVars" style="font-size:0.6rem;color:#94a3b8;">ჯერ დაამატეთ სიმბოლო</span>
+                    <span id="scaleCondNoVars" style="font-size:0.6rem;color:#8A8078;">ჯერ დაამატეთ სიმბოლო</span>
 
                     <div class="lbl" style="margin-top:12px;">პასუხის ტიპი</div>
                     <div class="at-row">
                         <button type="button" id="scaleAtInput" class="at-btn" onclick="setScaleAnswerMode('numeric_input')">⌨️ ჩაწერა (რიცხვი)</button>
                         <button type="button" id="scaleAtMc" class="at-btn" onclick="setScaleAnswerMode('numeric')">🔢 არჩევანი (4 ვარიანტი)</button>
                     </div>
-                    <div style="font-size:0.6rem;color:#94a3b8;margin-top:4px;">⌨️ ჩაწერა — ბავშვი თავად წერს რიცხვს (ემოჯი-პასუხისას კითხვაში ეტყობა რომელი ემოჯი). 🔢 არჩევანი — 4 ვარიანტიდან ირჩევს "{{'რაოდენობა + ემოჯი'}}" ან რიცხვს, ემოჯის ტიპი წინასწარ არ ეტყობა.</div>
+                    <div style="font-size:0.6rem;color:#8A8078;margin-top:4px;">⌨️ ჩაწერა — ბავშვი თავად წერს რიცხვს (ემოჯი-პასუხისას კითხვაში ეტყობა რომელი ემოჯი). 🔢 არჩევანი — 4 ვარიანტიდან ირჩევს "{{'რაოდენობა + ემოჯი'}}" ან რიცხვს, ემოჯის ტიპი წინასწარ არ ეტყობა.</div>
 
-                    <div id="scaleDistSection" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9;">
-                        <div class="lbl">მცდარი პასუხების დიაპაზონი <span style="color:#94a3b8;font-size:0.6rem;">± (წონა-ტიპის პასუხის არჩევანისთვის)</span></div>
+                    <div id="scaleDistSection" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid #F1EFEB;">
+                        <div class="lbl">მცდარი პასუხების დიაპაზონი <span style="color:#8A8078;font-size:0.6rem;">± (წონა-ტიპის პასუხის არჩევანისთვის)</span></div>
                         <div style="display:flex;gap:10px;align-items:center;">
                             <div class="lbl" style="margin:0;white-space:nowrap;">min</div>
                             <input type="number" id="scaleDistMin" class="nc-inp" style="width:76px;" min="1" value="1" onchange="syncScaleConfig()">
@@ -493,10 +493,10 @@
                 </div>{{-- /scaleFields --}}
 
                 {{-- Data table config --}}
-                <div id="dtFields" style="display:none;margin-top:14px;border-top:1px solid #f1f5f9;padding-top:14px;">
+                <div id="dtFields" style="display:none;margin-top:14px;border-top:1px solid #F1EFEB;padding-top:14px;">
                     <div class="sec-title" style="margin-bottom:10px;">📊 ცხრილის ანალიზის პარამეტრები</div>
 
-                    <div class="lbl">კითხვის ტექსტი <span style="color:#94a3b8;font-size:0.6rem;">(სავალდებულო)</span></div>
+                    <div class="lbl">კითხვის ტექსტი <span style="color:#8A8078;font-size:0.6rem;">(სავალდებულო)</span></div>
                     <textarea id="dtTemplateText" class="fc" rows="2" placeholder="რომელ თვეში იყო ყველაზე მაღალი ტემპერატურა?"
                         oninput="document.getElementById('templateText').value = this.value; previewDebounce();"></textarea>
                     @error('template_text')<div class="err">{{ $message }}</div>@enderror
@@ -521,7 +521,7 @@
                     <div id="dtColHeaderRows"></div>
 
                     <div id="dtAxisWrap" style="margin-top:10px;display:none;">
-                        <div class="lbl">პასუხი იქნება <span style="color:#94a3b8;font-size:0.6rem;">(რას ირჩევს ბავშვი)</span></div>
+                        <div class="lbl">პასუხი იქნება <span style="color:#8A8078;font-size:0.6rem;">(რას ირჩევს ბავშვი)</span></div>
                         <select class="fc" id="dtAnswerAxis" style="margin-bottom:0;" onchange="onDtAxisChange()">
                             <option value="row">მწკრივი (მაგ: "რომელ წრეზე...")</option>
                             <option value="col">სვეტი (მაგ: "რომელ სქესს...")</option>
@@ -529,7 +529,7 @@
                     </div>
 
                     <div id="dtAnalyzedColWrap" style="margin-top:10px;display:none;">
-                        <div class="lbl" id="dtAnalyzedLbl">ანალიზის სვეტ(ებ)ი <span style="color:#94a3b8;font-size:0.6rem;">(რომელი სვეტ(ებ)ის მიხედვით ვეძებთ გამარჯვებულ მწკრივს)</span></div>
+                        <div class="lbl" id="dtAnalyzedLbl">ანალიზის სვეტ(ებ)ი <span style="color:#8A8078;font-size:0.6rem;">(რომელი სვეტ(ებ)ის მიხედვით ვეძებთ გამარჯვებულ მწკრივს)</span></div>
                         <div id="dtAnalyzedColChecks" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;"></div>
                         <div id="dtAnalysisOpWrap" style="display:none;">
                             <div class="lbl">ოპერაცია</div>
@@ -539,11 +539,11 @@
                                 <option value="max">მაქსიმუმი</option>
                                 <option value="min">მინიმუმი</option>
                             </select>
-                            <div style="font-size:0.58rem;color:#94a3b8;margin-top:4px;" id="dtOpHint"></div>
+                            <div style="font-size:0.58rem;color:#8A8078;margin-top:4px;" id="dtOpHint"></div>
                         </div>
                     </div>
 
-                    <div class="lbl" style="margin-top:10px;" id="dtWinnerLbl">გამარჯვებული მწკრივი <span style="color:#94a3b8;font-size:0.6rem;">(რომელ მნიშვნელობას ვეძებთ)</span></div>
+                    <div class="lbl" style="margin-top:10px;" id="dtWinnerLbl">გამარჯვებული მწკრივი <span style="color:#8A8078;font-size:0.6rem;">(რომელ მნიშვნელობას ვეძებთ)</span></div>
                     <select class="fc" id="dtWinnerMode" style="margin-bottom:0;" onchange="syncDtConfig()">
                         <option value="max">ყველაზე მაღალი (მაგ: "ყველაზე მეტი")</option>
                         <option value="min">ყველაზე დაბალი (მაგ: "ყველაზე ცოტა")</option>
@@ -561,7 +561,7 @@
                                 value="{{ $dtCfg['max_val'] ?? 100 }}" onchange="syncDtConfig()">
                         </div>
                     </div>
-                    <div style="font-size:0.6rem;color:#94a3b8;margin-top:6px;" id="dtExplainHint"></div>
+                    <div style="font-size:0.6rem;color:#8A8078;margin-top:6px;" id="dtExplainHint"></div>
                 </div>{{-- /dtFields --}}
             </div>
 
@@ -601,7 +601,7 @@
             <div class="card-row">
                 {{-- 2. Numeric vars --}}
                 <div class="card">
-                    <div class="sec-title">② რიცხვის ცვლადები <span style="color:#94a3b8;font-size:0.54rem;letter-spacing:0.06em;">(სახელი · min · max · ნაბიჯი)</span></div>
+                    <div class="sec-title">② რიცხვის ცვლადები <span style="color:#8A8078;font-size:0.54rem;letter-spacing:0.06em;">(სახელი · min · max · ნაბიჯი)</span></div>
 
                     <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:10px;margin-bottom:12px;">
                         <label style="display:flex;align-items:center;gap:6px;font-size:0.76rem;font-weight:700;color:#166534;cursor:pointer;margin-bottom:0;">
@@ -633,7 +633,7 @@
                             </div>
                             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
                                 <div>
-                                    <div class="lbl">მარჯვენა მხარის ცვლადები <span style="color:#94a3b8;font-size:0.9em;">(სურვილისამებრ)</span></div>
+                                    <div class="lbl">მარჯვენა მხარის ცვლადები <span style="color:#8A8078;font-size:0.9em;">(სურვილისამებრ)</span></div>
                                     <select class="pyr-inp" id="autoRightCount" onchange="onAutoRightCountChange()">
                                         @foreach([0,2,3] as $rn)
                                         <option value="{{ $rn }}" {{ $autoRightCount == $rn ? 'selected' : '' }}>{{ $rn == 0 ? 'გამორთული (= რიცხვი)' : $rn . ' ცვლადი' }}</option>
@@ -665,7 +665,7 @@
                                     {{ (!array_key_exists('mix_blank', $autoCfg) || $autoCfg['mix_blank'] || $autoRightCount >= 2) ? 'checked' : '' }}
                                     {{ $autoRightCount >= 2 ? 'disabled' : '' }}>
                                 ცვლადი დავმალოთ შედეგის მაგივრად — მაგ. 4 + ? = 9 (გამორთული = ყოველთვის "...= ?")
-                                <span id="autoMixBlankLockedNote" style="color:#94a3b8;font-weight:600;{{ $autoRightCount >= 2 ? '' : 'display:none;' }}">(სავალდებულოა მარჯვენა მხარის ცვლადებთან)</span>
+                                <span id="autoMixBlankLockedNote" style="color:#8A8078;font-weight:600;{{ $autoRightCount >= 2 ? '' : 'display:none;' }}">(სავალდებულოა მარჯვენა მხარის ცვლადებთან)</span>
                             </label>
                             <button type="button" class="nc-add" onclick="applyAutoBuild()">⚡ ცვლადების შექმნა</button>
                             <div style="font-size:0.62rem;color:#4b8a63;margin-top:6px;">აწყობს ქვემოთ ცვლადების მწკრივებს (N1, N2, ... და, თუ არჩეულია, R1, R2, ...) — თქვენ მხოლოდ min/max/ნაბიჯი დააზუსტეთ.</div>
@@ -677,11 +677,11 @@
                     </div>
                     <div id="ncRows"></div>
                     <button type="button" class="nc-add" onclick="addNcRow()">+ ცვლადის დამატება</button>
-                    <div style="font-size:0.62rem;color:#94a3b8;margin-top:4px;">ƒ/± ღილაკი ცვლის ტიპს: შემთხვევითი → „გამოთვლილი" (მაგ. N1+3) → „ოპერატორი" (ით მეტი/ნაკლები, ჯერ მეტი/ნაკლები — ფორმულაში ნიშნად, ტექსტში სიტყვად გამოჩნდება) → „პირობითი" (A&gt;B?X:Y)</div>
-                    <div style="font-size:0.62rem;color:#94a3b8;margin-top:2px;">
-                        „გამოთვლილი" და „პირობითი" ველებში: ოპერატორები <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">+ − × / %</code>,
-                        ფუნქციები <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">round(x) floor(x) ceil(x) abs(x) min(a,b) max(a,b) pow(a,b) sqrt(x)</code>,
-                        „პირობითი"-ში ასევე შედარება <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">&gt; &lt; &gt;= &lt;= == !=</code> და <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">?</code>/<code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">:</code> — მაგ. <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">N1&gt;N2?round(N1/2):max(N1,N2)</code>
+                    <div style="font-size:0.62rem;color:#8A8078;margin-top:4px;">ƒ/± ღილაკი ცვლის ტიპს: შემთხვევითი → „გამოთვლილი" (მაგ. N1+3) → „ოპერატორი" (ით მეტი/ნაკლები, ჯერ მეტი/ნაკლები — ფორმულაში ნიშნად, ტექსტში სიტყვად გამოჩნდება) → „პირობითი" (A&gt;B?X:Y)</div>
+                    <div style="font-size:0.62rem;color:#8A8078;margin-top:2px;">
+                        „გამოთვლილი" და „პირობითი" ველებში: ოპერატორები <code style="background:#F1EFEB;padding:1px 5px;border-radius:2px;">+ − × / %</code>,
+                        ფუნქციები <code style="background:#F1EFEB;padding:1px 5px;border-radius:2px;">round(x) floor(x) ceil(x) abs(x) min(a,b) max(a,b) pow(a,b) sqrt(x)</code>,
+                        „პირობითი"-ში ასევე შედარება <code style="background:#F1EFEB;padding:1px 5px;border-radius:2px;">&gt; &lt; &gt;= &lt;= == !=</code> და <code style="background:#F1EFEB;padding:1px 5px;border-radius:2px;">?</code>/<code style="background:#F1EFEB;padding:1px 5px;border-radius:2px;">:</code> — მაგ. <code style="background:#F1EFEB;padding:1px 5px;border-radius:2px;">N1&gt;N2?round(N1/2):max(N1,N2)</code>
                     </div>
                     <label style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:0.75rem;font-weight:700;color:#374151;cursor:pointer;">
                         <input type="checkbox" id="uniqueNumVars" onchange="syncAll();previewDebounce();">
@@ -690,12 +690,12 @@
                     <input type="hidden" name="num_config" id="numConfigJson">
                     @error('num_config')<div class="err">{{ $message }}</div>@enderror
 
-                    <div class="lbl" style="margin-top:10px;">პირობები <span style="color:#94a3b8;font-size:0.6rem;">(სურვილისამებრ)</span></div>
-                    <div class="hint" style="margin-bottom:6px;">ორივე მხარეს შეიძლება გამოთქმა, ფუნქციების ჩათვლით: <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">N1 &gt; N2+N3</code> &nbsp;·&nbsp; <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">round(N1/2) &gt;= N2</code></div>
+                    <div class="lbl" style="margin-top:10px;">პირობები <span style="color:#8A8078;font-size:0.6rem;">(სურვილისამებრ)</span></div>
+                    <div class="hint" style="margin-bottom:6px;">ორივე მხარეს შეიძლება გამოთქმა, ფუნქციების ჩათვლით: <code style="background:#F1EFEB;padding:1px 5px;border-radius:2px;">N1 &gt; N2+N3</code> &nbsp;·&nbsp; <code style="background:#F1EFEB;padding:1px 5px;border-radius:2px;">round(N1/2) &gt;= N2</code></div>
                     <div id="condChips" class="cond-chips" style="display:none;"></div>
                     <div id="condRows"></div>
                     <button type="button" class="nc-add" id="addCondBtn" onclick="addCond()" style="display:none;">+ პირობის დამატება</button>
-                    <span id="condNoVars" style="font-size:0.6rem;color:#94a3b8;">ჯერ დაამატეთ ცვლადები</span>
+                    <span id="condNoVars" style="font-size:0.6rem;color:#8A8078;">ჯერ დაამატეთ ცვლადები</span>
                     <input type="hidden" name="conditions" id="conditionsJson">
                 </div>
 
@@ -715,7 +715,7 @@
                     <div id="numAnsUi">
                         <div class="lbl">ცვლადები</div>
                         <div class="chips" id="formulaChipBar">
-                            <span style="font-size:0.56rem;color:#94a3b8;padding:4px 2px;">② ცვლადების შემდეგ გამოჩნდება</span>
+                            <span style="font-size:0.56rem;color:#8A8078;padding:4px 2px;">② ცვლადების შემდეგ გამოჩნდება</span>
                         </div>
                         <div class="lbl">ოპერატორები</div>
                         <div class="chips">
@@ -740,8 +740,8 @@
                             value="{{ old('answer_type', $template?->answer_type) !== 'text' ? old('correct_formula', $template?->correct_formula) : '' }}"
                             oninput="previewDebounce()">
                         <div class="hint">
-                            ოპერატორები: <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">+ − × / %</code> და ფრჩხილები &nbsp;·&nbsp;
-                            ფუნქციები (ორარგუმენტიანებს მძიმით გამოყავით): <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">round(x) floor(x) ceil(x) abs(x) min(a,b) max(a,b) pow(a,b) sqrt(x)</code>
+                            ოპერატორები: <code style="background:#F1EFEB;padding:1px 5px;border-radius:2px;">+ − × / %</code> და ფრჩხილები &nbsp;·&nbsp;
+                            ფუნქციები (ორარგუმენტიანებს მძიმით გამოყავით): <code style="background:#F1EFEB;padding:1px 5px;border-radius:2px;">round(x) floor(x) ceil(x) abs(x) min(a,b) max(a,b) pow(a,b) sqrt(x)</code>
                             <br>მაგ: N1+N2 &nbsp;·&nbsp; (N1+N2)*N3 &nbsp;·&nbsp; round((N1+N2)/2) &nbsp;·&nbsp; min(N1,N2)*2 &nbsp;·&nbsp; pow(N1,2)
                         </div>
                         @error('correct_formula')<div class="err">{{ $message }}</div>@enderror
@@ -749,7 +749,7 @@
                         {{-- Only "numeric" (multiple-choice) needs distractors — "numeric_input"
                              (⌨️ child types the number) has no options to build. --}}
                         <div id="distractorSection">
-                            <div class="lbl" style="margin-top:10px;">მცდარი პასუხების დიაპაზონი <span style="color:#94a3b8;font-size:0.6rem;">±</span></div>
+                            <div class="lbl" style="margin-top:10px;">მცდარი პასუხების დიაპაზონი <span style="color:#8A8078;font-size:0.6rem;">±</span></div>
                             <div style="display:flex;gap:10px;align-items:center;">
                                 <div class="lbl" style="margin:0;white-space:nowrap;">min</div>
                                 <input type="number" id="distMin" class="nc-inp" style="width:76px;" min="1"
@@ -761,12 +761,12 @@
                                 <input type="number" id="distStep" class="nc-inp" style="width:60px;" min="1" title="ნაბიჯი: 1=ნებ, 2=ლუწი, 5=მრ5"
                                     value="{{ $template?->answer_type !== 'text' ? ($template?->distractors['step'] ?? 1) : 1 }}" oninput="previewDebounce()">
                             </div>
-                            <div style="margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9;">
+                            <div style="margin-top:10px;padding-top:10px;border-top:1px solid #F1EFEB;">
                                 <button type="button" id="noneCorrectBtn" class="at-btn" onclick="toggleNoneCorrect()">☐ არცერთი სწორეა</button>
                             </div>
-                            <div style="margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9;">
-                                <div class="lbl">ფორმულებით არასწორი პასუხები <span style="color:#94a3b8;font-size:0.6rem;">(სურვილისამებრ)</span></div>
-                                <div class="hint" style="margin:-2px 0 6px;">იგივე სინტაქსი, რაც ზემოთ "სწორი ფორმულა" ველშია — მაგ. <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">N1*N2</code>, <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">N1+N2+1</code>. ეს ფორმულები პირველად ივსება, დარჩენილ ადგილებს ზემოთა დიაპაზონი შეავსებს.</div>
+                            <div style="margin-top:10px;padding-top:10px;border-top:1px solid #F1EFEB;">
+                                <div class="lbl">ფორმულებით არასწორი პასუხები <span style="color:#8A8078;font-size:0.6rem;">(სურვილისამებრ)</span></div>
+                                <div class="hint" style="margin:-2px 0 6px;">იგივე სინტაქსი, რაც ზემოთ "სწორი ფორმულა" ველშია — მაგ. <code style="background:#F1EFEB;padding:1px 5px;border-radius:2px;">N1*N2</code>, <code style="background:#F1EFEB;padding:1px 5px;border-radius:2px;">N1+N2+1</code>. ეს ფორმულები პირველად ივსება, დარჩენილ ადგილებს ზემოთა დიაპაზონი შეავსებს.</div>
                                 <div style="display:flex;gap:4px;">
                                     <input type="text" id="distFormulaInput" class="fc" style="margin:0;" placeholder="მაგ: N1*N2"
                                         onkeydown="if(event.key==='Enter'){event.preventDefault();addDistFormula();}">
@@ -786,19 +786,19 @@
                         <select id="textCorrectVar" class="fc" onchange="syncAll();previewDebounce();">
                             <option value="">— ცვლადი —</option>
                         </select>
-                        <div id="noVarsHint" style="display:none;font-size:0.6rem;color:#94a3b8;margin-top:-6px;margin-bottom:10px;">სტრიქონის ცვლადები არ არის — თემატიკაში დაამატეთ</div>
+                        <div id="noVarsHint" style="display:none;font-size:0.6rem;color:#8A8078;margin-top:-6px;margin-bottom:10px;">სტრიქონის ცვლადები არ არის — თემატიკაში დაამატეთ</div>
 
                         {{-- Conditional formula (hidden unless toggled on) --}}
                         <div id="textCondWrap" style="display:none;">
                             <input type="text" id="textCondFormula" class="fc" placeholder="მაგ: TOTAL1>TOTAL2?CITY1:CITY2"
                                 oninput="syncAll();previewDebounce();">
                             <div class="chips" id="textCondChips"></div>
-                            <div class="hint">პირობა რიცხვით ცვლადებზე (&gt;, &lt;, &gt;=, &lt;=, ==, !=) — შედარების მხარეს ასევე გამოთქმა/ფუნქციებიც შეიძლება, მაგ. <code style="background:#f1f5f9;padding:1px 5px;border-radius:2px;">round(N1/2)&gt;N2</code> — მერე ? და : შორის — თითო მხარეს ცვლადის სახელი ან ტექსტი. ჯაჭვურადაც შეიძლება: A&gt;B?X:C&gt;D?Y:Z</div>
+                            <div class="hint">პირობა რიცხვით ცვლადებზე (&gt;, &lt;, &gt;=, &lt;=, ==, !=) — შედარების მხარეს ასევე გამოთქმა/ფუნქციებიც შეიძლება, მაგ. <code style="background:#F1EFEB;padding:1px 5px;border-radius:2px;">round(N1/2)&gt;N2</code> — მერე ? და : შორის — თითო მხარეს ცვლადის სახელი ან ტექსტი. ჯაჭვურადაც შეიძლება: A&gt;B?X:C&gt;D?Y:Z</div>
                         </div>
 
                         <div class="lbl" style="margin-top:4px;display:flex;align-items:center;gap:6px;justify-content:space-between;">
-                            <span>ვარიანტების ცვლადები <span style="color:#94a3b8;font-size:0.6rem;">(კლიკით)</span></span>
-                            <span style="font-size:0.62rem;color:#64748b;white-space:nowrap;">
+                            <span>ვარიანტების ცვლადები <span style="color:#8A8078;font-size:0.6rem;">(კლიკით)</span></span>
+                            <span style="font-size:0.62rem;color:#6B625A;white-space:nowrap;">
                                 რამდენი არასწორი:
                                 <input type="number" id="textDistCount" class="fc" value="3" min="1" max="8"
                                     style="width:40px;display:inline-block;margin:0;padding:2px 4px;text-align:center;"
@@ -807,14 +807,14 @@
                         </div>
                         <div class="hint" style="margin:-2px 0 4px;">მონიშნეთ ნებისმიერი რაოდენობა — თითო გენერაციაზე ზემოთ მითითებული რაოდენობა შემთხვევით შეირჩევა მათგან (მათ გამორჩევით, რაც ამ რაუნდში სწორ პასუხს დაემთხვა)</div>
                         <div id="textOptChips"></div>
-                        <div id="noVarsHint2" style="display:none;font-size:0.6rem;color:#94a3b8;margin-top:4px;">ცვლადები არ არის</div>
+                        <div id="noVarsHint2" style="display:none;font-size:0.6rem;color:#8A8078;margin-top:4px;">ცვლადები არ არის</div>
 
                         {{-- Hand-typed distractor templates, e.g. a combined var token
                              string — a combination the chip picker above can't express
                              since each chip is a single existing variable's value, not
                              several combined into one custom string. Also joins the
                              random pool above, not the pinned "ყველა სწორია"-style ones. --}}
-                        <div class="lbl" style="margin-top:8px;">სავარაუდო პასუხის ხელით ჩაწერა <span style="color:#94a3b8;font-size:0.6rem;">(მაგ: @{{N1}} და @{{N2}})</span></div>
+                        <div class="lbl" style="margin-top:8px;">სავარაუდო პასუხის ხელით ჩაწერა <span style="color:#8A8078;font-size:0.6rem;">(მაგ: @{{N1}} და @{{N2}})</span></div>
                         <div class="hint" style="margin:-2px 0 4px;">@{{*}} — ავტომატურად ავირჩევთ შემთხვევით ცვლადს ამ ადგილზე ყოველ გენერაციაზე, ანუ ერთი შაბლონი @{{*}} და @{{*}} თავისთავად დააგენერირებს "რამდენი არასწორი"-ით მითითებულ რაოდენობას სხვადასხვა კომბინაციით — ცალ-ცალკე ხელით ჩაწერა არ გჭირდებათ</div>
                         <div style="display:flex;gap:4px;">
                             <input type="text" id="textOptCustomInput" class="fc" style="margin:0;"
@@ -835,7 +835,7 @@
 
             {{-- Hint — shown under the question regardless of type (pyramid/code/crossword too) --}}
             <div class="card">
-                <div class="lbl">მინიშნება <span style="color:#94a3b8;font-size:0.6rem;">(გამოჩნდება კითხვის ქვეშ)</span></div>
+                <div class="lbl">მინიშნება <span style="color:#8A8078;font-size:0.6rem;">(გამოჩნდება კითხვის ქვეშ)</span></div>
                 <textarea name="hint_text" id="hintText" class="fc" rows="2"
                     placeholder="მინიშნება..."
                     oninput="previewDebounce()">{{ old('hint_text', $template?->hint_text) }}</textarea>
@@ -853,8 +853,8 @@
                 <span class="preview-label">Live Preview</span>
                 <button type="button" class="preview-regen" onclick="genPreview()">↺ ახალი</button>
             </div>
-            <div class="preview-q" id="prevQ"><span style="color:#94a3b8;font-size:0.72rem;line-height:1.8;">② სწრაფი შაბლონი ან<br>③ კითხვის ტექსტი + ④ ფორმულა<br>შეავსეთ preview-სთვის</span></div>
-            <div id="prevHint" style="font-size:0.7rem;color:#64748b;margin:4px 0 8px;font-style:italic;min-height:0;"></div>
+            <div class="preview-q" id="prevQ"><span style="color:#8A8078;font-size:0.72rem;line-height:1.8;">② სწრაფი შაბლონი ან<br>③ კითხვის ტექსტი + ④ ფორმულა<br>შეავსეთ preview-სთვის</span></div>
+            <div id="prevHint" style="font-size:0.7rem;color:#6B625A;margin:4px 0 8px;font-style:italic;min-height:0;"></div>
             <div class="preview-opts" id="prevOpts"></div>
             <div class="preview-formula" id="prevFormula"></div>
             <div class="preview-vars" id="prevVars"></div>
@@ -958,7 +958,7 @@ function renderStrVarSection(data) {
     let html = '<div class="lbl">სტრიქონის ცვლადები</div>';
     data.groups.forEach(function(grp) {
         html += '<div style="margin-bottom:6px;">'
-            + '<div style="font-size:0.54rem;color:#7c3aed;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:3px;">' + grp.name + '</div>'
+            + '<div style="font-size:0.54rem;color:#F07A2E;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:3px;">' + grp.name + '</div>'
             + '<div class="chips" style="margin-bottom:0;">'
             + grp.slots.map(function(s) {
                 return '<span class="chip chip-theme" onclick="insertVar(\'' + s + '\')">' + OB + s + CB + '</span>';
@@ -1023,7 +1023,7 @@ function renderTextOptChips(data) {
     data.groups.forEach(function(grp) {
         const slots = grp.slots.filter(function(s) { return used.has(s); });
         if (!slots.length) return;
-        html += '<div style="font-size:0.52rem;color:#7c3aed;letter-spacing:0.1em;text-transform:uppercase;margin:4px 0 2px;">' + grp.name + '</div>'
+        html += '<div style="font-size:0.52rem;color:#F07A2E;letter-spacing:0.1em;text-transform:uppercase;margin:4px 0 2px;">' + grp.name + '</div>'
             + '<div class="chips" style="margin-bottom:4px;">'
             + slots.map(function(s) {
                 return '<span class="chip chip-txt text-opt-chip' + (prevSel.has(s) ? ' sel' : '') + '" data-varname="' + s + '" onclick="toggleTextOpt(this)">' + s + '</span>';
@@ -1044,14 +1044,14 @@ function renderTextOptChips(data) {
     // theme-var chip -- only __ALL__/__NONE__/__EQUAL__ are pinned.
     const ncNames = ncRows.filter(function(r) { return r.name; }).map(function(r) { return r.name; });
     if (ncNames.length) {
-        html += '<div style="font-size:0.52rem;color:#7c3aed;letter-spacing:0.1em;text-transform:uppercase;margin:4px 0 2px;">რიცხვითი ცვლადები</div>'
+        html += '<div style="font-size:0.52rem;color:#F07A2E;letter-spacing:0.1em;text-transform:uppercase;margin:4px 0 2px;">რიცხვითი ცვლადები</div>'
             + '<div class="chips" style="margin-bottom:4px;">'
             + ncNames.map(function(n) {
                 return '<span class="chip chip-txt text-opt-chip' + (prevSel.has(n) ? ' sel' : '') + '" data-varname="' + n + '" onclick="toggleTextOpt(this)">' + n + '</span>';
             }).join('')
             + '</div>';
     }
-    html += '<div style="font-size:0.52rem;color:#94a3b8;margin-top:6px;border-top:1px solid #f1f5f9;padding-top:6px;">ეს ყოველთვის დაემატება, ზემოთ მითითებული რაოდენობის გარდა:</div>'
+    html += '<div style="font-size:0.52rem;color:#8A8078;margin-top:6px;border-top:1px solid #F1EFEB;padding-top:6px;">ეს ყოველთვის დაემატება, ზემოთ მითითებული რაოდენობის გარდა:</div>'
         + '<div class="chips">'
         + Object.entries(SPEC).map(function(e) {
             return '<span class="chip chip-txt text-opt-chip' + (prevSel.has(e[0]) ? ' sel' : '') + '" data-varname="' + e[0] + '" onclick="toggleTextOpt(this)">' + e[1] + '</span>';
@@ -1258,12 +1258,12 @@ function genPreviewCw() {
 
     const SZ=40, OP=20, EQ=20, RES=40;
     const cellSt = `width:${SZ}px;height:${SZ}px;border-radius:8px;`;
-    const cellHidden = `<div style="${cellSt}border:2px dashed #a5b4fc;background:#eef2ff;display:flex;align-items:center;justify-content:center;font-size:0.75rem;color:#4f46e5;font-weight:700;">?</div>`;
+    const cellHidden = `<div style="${cellSt}border:2px dashed #FFC49A;background:#FFF3EA;display:flex;align-items:center;justify-content:center;font-size:0.75rem;color:#C24A0A;font-weight:700;">?</div>`;
     const cellGiven = v => `<div style="${cellSt}background:#d1fae5;border:2px solid #6ee7b7;display:flex;align-items:center;justify-content:center;font-size:0.85rem;color:#065f46;font-weight:700;">${v}</div>`;
-    const cellRes   = v => `<div style="${cellSt}background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-size:0.85rem;color:#374151;font-weight:700;">${v}</div>`;
-    const opEl  = v => `<div style="width:${OP}px;text-align:center;font-size:0.9rem;color:#64748b;">${v}</div>`;
-    const eqEl  = `<div style="width:${EQ}px;text-align:center;font-size:0.8rem;color:#94a3b8;">=</div>`;
-    const resEl = v => `<div style="width:${RES}px;height:${SZ}px;background:#e2e8f0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;color:#374151;font-weight:700;">${v}</div>`;
+    const cellRes   = v => `<div style="${cellSt}background:#ECE9E4;display:flex;align-items:center;justify-content:center;font-size:0.85rem;color:#374151;font-weight:700;">${v}</div>`;
+    const opEl  = v => `<div style="width:${OP}px;text-align:center;font-size:0.9rem;color:#6B625A;">${v}</div>`;
+    const eqEl  = `<div style="width:${EQ}px;text-align:center;font-size:0.8rem;color:#8A8078;">=</div>`;
+    const resEl = v => `<div style="width:${RES}px;height:${SZ}px;background:#ECE9E4;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;color:#374151;font-weight:700;">${v}</div>`;
     const emp   = `<div></div>`;
 
     // Build CSS grid columns: C cells + (C-1) ops + eq + result
@@ -1363,7 +1363,7 @@ function renderScaleSymbols() {
     const el = document.getElementById('scaleSymRows');
     el.innerHTML = scaleSymbols.map((s, i) => `
         <div style="display:grid;grid-template-columns:34px 1fr 70px 56px 56px 28px;gap:4px;align-items:center;margin-bottom:4px;">
-            <div style="font-weight:800;color:#94a3b8;text-align:center;">${scaleSymbolLabel(i)}</div>
+            <div style="font-weight:800;color:#8A8078;text-align:center;">${scaleSymbolLabel(i)}</div>
             <select class="nc-inp" onchange="scaleSymbols[${i}].kind=this.value; renderScaleSymbols(); syncScaleConfig();">
                 <option value="weight" ${s.kind === 'weight' ? 'selected' : ''}>წონა (რიცხვი)</option>
                 <option value="emoji" ${s.kind === 'emoji' ? 'selected' : ''}>ემოჯი</option>
@@ -1372,7 +1372,7 @@ function renderScaleSymbols() {
                 ? `<select class="nc-inp" style="text-align:center;font-size:1.1rem;" onchange="scaleSymbols[${i}].symbol=this.value; renderScaleSymbols(); syncScaleConfig();">
                     ${SCALE_EMOJI_POOL.map(e => `<option value="${e}" ${e === s.symbol ? 'selected' : ''}>${e}</option>`).join('')}
                   </select>`
-                : `<div style="font-size:0.58rem;color:#94a3b8;text-align:center;">(ჩანს რიცხვი)</div>`}
+                : `<div style="font-size:0.58rem;color:#8A8078;text-align:center;">(ჩანს რიცხვი)</div>`}
             <input type="number" class="nc-inp" value="${s.min}" onchange="scaleSymbols[${i}].min=+this.value; syncScaleConfig();">
             <input type="number" class="nc-inp" value="${s.max}" onchange="scaleSymbols[${i}].max=+this.value; syncScaleConfig();">
             <button type="button" class="nc-del" onclick="removeScaleSymbol(${i})">✕</button>
@@ -1634,7 +1634,7 @@ function genPreviewScale() {
     let cfg;
     try { cfg = JSON.parse(document.getElementById('numConfigJson').value); } catch (e) { cfg = null; }
     if (!cfg || !cfg.symbols || !Object.keys(cfg.symbols).length) {
-        document.getElementById('prevQ').innerHTML = '<span style="color:#94a3b8;font-size:0.72rem;">სიმბოლოები და პინები შეავსეთ preview-სთვის</span>';
+        document.getElementById('prevQ').innerHTML = '<span style="color:#8A8078;font-size:0.72rem;">სიმბოლოები და პინები შეავსეთ preview-სთვის</span>';
         document.getElementById('prevOpts').innerHTML = '';
         document.getElementById('prevHint').innerHTML = '';
         document.getElementById('prevFormula').innerHTML = '';
@@ -1845,12 +1845,12 @@ function genPreviewScale() {
             // the same dashed "?" plate the separately-appended blank uses.
             if (result.inline && it.key === answerKey) {
                 return Array.from({ length: count }, () =>
-                    `<div style="width:26px;height:26px;border-radius:6px;border:2.5px dashed #94a3b8;background:#f8fafc;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.75rem;color:#94a3b8;flex-shrink:0;">?</div>`
+                    `<div style="width:26px;height:26px;border-radius:6px;border:2.5px dashed #8A8078;background:#F7F6F3;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.75rem;color:#8A8078;flex-shrink:0;">?</div>`
                 ).join('');
             }
             if ((conf.kind || 'emoji') === 'weight') {
                 return Array.from({ length: count }, () =>
-                    `<div style="width:26px;height:26px;border-radius:6px;background:#4f46e5;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.7rem;flex-shrink:0;">${result.weights[it.key]}</div>`
+                    `<div style="width:26px;height:26px;border-radius:6px;background:#C24A0A;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.7rem;flex-shrink:0;">${result.weights[it.key]}</div>`
                 ).join('');
             }
             return Array.from({ length: count }, () =>
@@ -1863,10 +1863,10 @@ function genPreviewScale() {
             // too, same as weight-kind, instead of leaking which emoji it is.
             const revealSymbol = !isMc;
             html += answerKind === 'weight'
-                ? `<div style="width:26px;height:26px;border-radius:6px;border:2.5px dashed #94a3b8;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-weight:800;font-size:0.75rem;flex-shrink:0;">?</div>`
+                ? `<div style="width:26px;height:26px;border-radius:6px;border:2.5px dashed #8A8078;display:flex;align-items:center;justify-content:center;color:#8A8078;font-weight:800;font-size:0.75rem;flex-shrink:0;">?</div>`
                 : (revealSymbol
-                    ? `<div style="font-size:1.15rem;line-height:1;border:2.5px dashed #94a3b8;border-radius:7px;padding:2px 4px;text-align:center;flex-shrink:0;">${answerConf.symbol || '❓'}<span style="font-size:0.5rem;color:#94a3b8;display:block;line-height:1;">?</span></div>`
-                    : `<div style="width:26px;height:26px;border-radius:6px;border:2.5px dashed #94a3b8;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-weight:800;font-size:0.95rem;flex-shrink:0;">?</div>`);
+                    ? `<div style="font-size:1.15rem;line-height:1;border:2.5px dashed #8A8078;border-radius:7px;padding:2px 4px;text-align:center;flex-shrink:0;">${answerConf.symbol || '❓'}<span style="font-size:0.5rem;color:#8A8078;display:block;line-height:1;">?</span></div>`
+                    : `<div style="width:26px;height:26px;border-radius:6px;border:2.5px dashed #8A8078;display:flex;align-items:center;justify-content:center;color:#8A8078;font-weight:800;font-size:0.95rem;flex-shrink:0;">?</div>`);
         }
         return html;
     };
@@ -1983,10 +1983,10 @@ function renderDtAnalyzedIndexChecks() {
     const fallbackPrefix = isCol ? 'მწკრივი ' : 'სვეტი ';
 
     document.getElementById('dtAnalyzedLbl').innerHTML = isCol
-        ? 'ანალიზის მწკრივ(ებ)ი <span style="color:#94a3b8;font-size:0.6rem;">(რომელი მწკრივ(ებ)ის მიხედვით ვეძებთ გამარჯვებულ სვეტს)</span>'
-        : 'ანალიზის სვეტ(ებ)ი <span style="color:#94a3b8;font-size:0.6rem;">(რომელი სვეტ(ებ)ის მიხედვით ვეძებთ გამარჯვებულ მწკრივს)</span>';
+        ? 'ანალიზის მწკრივ(ებ)ი <span style="color:#8A8078;font-size:0.6rem;">(რომელი მწკრივ(ებ)ის მიხედვით ვეძებთ გამარჯვებულ სვეტს)</span>'
+        : 'ანალიზის სვეტ(ებ)ი <span style="color:#8A8078;font-size:0.6rem;">(რომელი სვეტ(ებ)ის მიხედვით ვეძებთ გამარჯვებულ მწკრივს)</span>';
     document.getElementById('dtWinnerLbl').innerHTML = (isCol ? 'გამარჯვებული სვეტი' : 'გამარჯვებული მწკრივი')
-        + ' <span style="color:#94a3b8;font-size:0.6rem;">(რომელ მნიშვნელობას ვეძებთ)</span>';
+        + ' <span style="color:#8A8078;font-size:0.6rem;">(რომელ მნიშვნელობას ვეძებთ)</span>';
     document.getElementById('dtExplainHint').textContent = isCol
         ? 'ბავშვს ეკითხება, რომელ სვეტშია (მონიშნული მწკრივების მიხედვით) საძიებელი მნიშვნელობა — სავარაუდო პასუხები ყოველთვის ამ ცხრილის სხვა რეალური სვეტის სათაურებია (არასდროს გამოგონილი).'
         : 'ბავშვს ეკითხება, რომელ მწკრივშია (მონიშნული სვეტების მიხედვით) საძიებელი მნიშვნელობა — სავარაუდო პასუხები ყოველთვის ამ ცხრილის სხვა რეალური მწკრივის სახელებია (არასდროს გამოგონილი).';
@@ -2121,7 +2121,7 @@ function genPreviewDt() {
     const colHeaders = (cfg && cfg.col_headers) || [];
     const rows = rowLabels.length, cols = colHeaders.length;
     if (!rows || !cols || rowLabels.some(l => !String(l).trim()) || colHeaders.some(h => !String(h).trim())) {
-        document.getElementById('prevQ').innerHTML = '<span style="color:#94a3b8;font-size:0.72rem;">შეავსეთ მწკრივების/სვეტების სახელები preview-სთვის</span>';
+        document.getElementById('prevQ').innerHTML = '<span style="color:#8A8078;font-size:0.72rem;">შეავსეთ მწკრივების/სვეტების სახელები preview-სთვის</span>';
         document.getElementById('prevOpts').innerHTML = '';
         document.getElementById('prevHint').innerHTML = '';
         document.getElementById('prevFormula').innerHTML = '';
@@ -2170,12 +2170,12 @@ function genPreviewDt() {
     document.getElementById('prevWarn').innerHTML = '';
 
     let tableHtml = '<div style="grid-column:1/-1;overflow-x:auto;"><table style="border-collapse:collapse;margin:0 auto;font-size:0.8rem;">';
-    tableHtml += '<tr><th style="border:1px solid #cbd5e1;background:#f1f5f9;padding:5px 8px;"></th>'
-        + colHeaders.map(h => `<th style="border:1px solid #cbd5e1;background:#f1f5f9;padding:5px 8px;">${escHtmlFormLp(h)}</th>`).join('')
+    tableHtml += '<tr><th style="border:1px solid #D9D4CC;background:#F1EFEB;padding:5px 8px;"></th>'
+        + colHeaders.map(h => `<th style="border:1px solid #D9D4CC;background:#F1EFEB;padding:5px 8px;">${escHtmlFormLp(h)}</th>`).join('')
         + '</tr>';
     data.forEach((row, i) => {
-        tableHtml += `<tr><th style="border:1px solid #cbd5e1;background:#f8fafc;padding:5px 8px;text-align:left;">${escHtmlFormLp(rowLabels[i])}</th>`
-            + row.map(v => `<td style="border:1px solid #cbd5e1;padding:5px 8px;text-align:center;">${v}</td>`).join('')
+        tableHtml += `<tr><th style="border:1px solid #D9D4CC;background:#F7F6F3;padding:5px 8px;text-align:left;">${escHtmlFormLp(rowLabels[i])}</th>`
+            + row.map(v => `<td style="border:1px solid #D9D4CC;padding:5px 8px;text-align:center;">${v}</td>`).join('')
             + '</tr>';
     });
     tableHtml += '</table></div>';
@@ -2476,7 +2476,7 @@ function toggleAutoBuild() {
     // their own instruction text via the {{EXPR}} placeholder (see exprHint below).
     document.getElementById('correctFormula').readOnly = on;
     document.getElementById('exprHint').style.display = on ? '' : 'none';
-    document.getElementById('correctFormula').style.background = on ? '#f8fafc' : '';
+    document.getElementById('correctFormula').style.background = on ? '#F7F6F3' : '';
     if (!on) previewDebounce();
     syncAll(); previewDebounce();
 }
@@ -2585,7 +2585,7 @@ function renderNcRows() {
     ncRows.forEach(row => {
         if (!rightHeaderShown && /^R\d+$/.test(row.name)) {
             const hdr = document.createElement('div');
-            hdr.style.cssText = 'font-size:0.66rem;font-weight:700;color:#6b21a8;margin:8px 0 4px;grid-column:1/-1;';
+            hdr.style.cssText = 'font-size:0.66rem;font-weight:700;color:#C24A0A;margin:8px 0 4px;grid-column:1/-1;';
             hdr.textContent = '→ მარჯვენა მხარე';
             c.appendChild(hdr);
             rightHeaderShown = true;
@@ -3005,7 +3005,7 @@ function buildDisplayVars(numVars, ncConfRows) {
     return display;
 }
 function clearPreview() {
-    document.getElementById('prevQ').innerHTML = '<span style="color:#94a3b8;font-size:0.72rem;line-height:1.8;">③ კითხვის ტექსტი + ④ სწორი პასუხი<br>შეავსეთ preview-სთვის</span>';
+    document.getElementById('prevQ').innerHTML = '<span style="color:#8A8078;font-size:0.72rem;line-height:1.8;">③ კითხვის ტექსტი + ④ სწორი პასუხი<br>შეავსეთ preview-სთვის</span>';
     ['prevHint','prevFormula','prevVars','prevWarn'].forEach(id => document.getElementById(id).innerHTML = '');
     document.getElementById('prevOpts').innerHTML = '';
 }
@@ -3086,9 +3086,9 @@ function genPreviewPyramid() {
             const pos = r + ',' + c;
             const isHidden = hidden.has(pos);
             if (isHidden) {
-                html += `<div style="width:40px;height:40px;border-radius:8px;border:2px dashed #a5b4fc;background:#eef2ff;display:flex;align-items:center;justify-content:center;font-family:'Goldman',monospace;font-size:0.82rem;color:#a5b4fc;">?</div>`;
+                html += `<div style="width:40px;height:40px;border-radius:8px;border:2px dashed #FFC49A;background:#FFF3EA;display:flex;align-items:center;justify-content:center;font-family:'Goldman',monospace;font-size:0.82rem;color:#FFC49A;">?</div>`;
             } else {
-                html += `<div style="width:40px;height:40px;border-radius:8px;background:#4f46e5;color:white;display:flex;align-items:center;justify-content:center;font-family:'Goldman',monospace;font-size:0.82rem;font-weight:700;">${val}</div>`;
+                html += `<div style="width:40px;height:40px;border-radius:8px;background:#C24A0A;color:white;display:flex;align-items:center;justify-content:center;font-family:'Goldman',monospace;font-size:0.82rem;font-weight:700;">${val}</div>`;
             }
         });
         html += '</div>';
@@ -3100,7 +3100,7 @@ function genPreviewPyramid() {
     document.getElementById('prevOpts').innerHTML = html;
     const hiddenActual = hidden.size;
     document.getElementById('prevFormula').innerHTML =
-        `<span style="color:#4f46e5;">ლურჯი</span> = ცნობილი &nbsp;·&nbsp; <span style="color:#a5b4fc;">?</span> = ცარიელი (${hiddenActual} უჯრა)`;
+        `<span style="color:#C24A0A;">ლურჯი</span> = ცნობილი &nbsp;·&nbsp; <span style="color:#FFC49A;">?</span> = ცარიელი (${hiddenActual} უჯრა)`;
     document.getElementById('prevVars').innerHTML = `მაქს. ძირი: ${mx} · ნამდვილი ჯამები · ✓ ამოხსნადი`;
     document.getElementById('prevWarn').innerHTML = hiddenActual < hide
         ? `<span style="color:#f87171;">⚠ ${hide} ცარიელი ვერ მოიძებნა — ${hiddenActual} ჩაისვა</span>`
@@ -3209,9 +3209,9 @@ function genPreviewCode() {
     equations.forEach(eq => { eqHtml += `<div style="font-size:1.05rem;font-weight:700;color:#374151;margin:4px 0;">${eq}</div>`; });
     eqHtml += '</div>';
 
-    let targetHtml = '<div style="font-size:0.6rem;color:#94a3b8;margin-bottom:5px;letter-spacing:0.1em;">სამიზნე კოდი:</div>';
+    let targetHtml = '<div style="font-size:0.6rem;color:#8A8078;margin-bottom:5px;letter-spacing:0.1em;">სამიზნე კოდი:</div>';
     targetHtml += '<div style="display:flex;gap:6px;justify-content:center;margin-bottom:10px;">';
-    target.forEach(sym => { targetHtml += `<div style="width:40px;height:40px;border-radius:8px;background:#4f46e5;color:white;display:flex;align-items:center;justify-content:center;font-size:1.3rem;">${sym}</div>`; });
+    target.forEach(sym => { targetHtml += `<div style="width:40px;height:40px;border-radius:8px;background:#C24A0A;color:white;display:flex;align-items:center;justify-content:center;font-size:1.3rem;">${sym}</div>`; });
     targetHtml += '</div>';
 
     let ansHtml = '<div style="display:flex;gap:6px;justify-content:center;">';
@@ -3556,7 +3556,7 @@ function genPreviewText(tmpl) {
         ? document.getElementById('textCondFormula').value.trim()
         : document.getElementById('textCorrectVar').value;
     if (!formula) {
-        document.getElementById('prevOpts').innerHTML = '<span style="font-size:0.64rem;color:#94a3b8;">სწორი პასუხის ცვლადი აირჩიეთ...</span>';
+        document.getElementById('prevOpts').innerHTML = '<span style="font-size:0.64rem;color:#8A8078;">სწორი პასუხის ცვლადი აირჩიეთ...</span>';
         document.getElementById('prevFormula').innerHTML = '';
         document.getElementById('prevVars').innerHTML = Object.entries(themeMap).map(([k,v]) => `${k}=${v}`).join(' · ');
         return;
@@ -3656,7 +3656,7 @@ function genPreviewText(tmpl) {
     document.getElementById('prevOpts').innerHTML = opts.map(o =>
         `<div class="preview-opt ${o.c?'c':''}">${o.v}</div>`).join('');
     document.getElementById('prevFormula').innerHTML =
-        `სწ. პასუხი: <span style="color:#2a7a2a;">${correct}</span> <span style="color:#94a3b8;">(${formula})</span>`;
+        `სწ. პასუხი: <span style="color:#2a7a2a;">${correct}</span> <span style="color:#8A8078;">(${formula})</span>`;
     document.getElementById('prevVars').innerHTML = Object.entries({...themeMap, ...numVars}).map(([k,v]) => `${k}=${v}`).join(' · ');
     // "რამდენი არასწორი" only picks N from the candidates already marked
     // below it -- it can't invent any on its own, so an admin who filled it
@@ -3717,7 +3717,7 @@ function genPreviewNumeric(tmpl) {
     document.getElementById('prevWarn').innerHTML = condOk ? '' : '<span>⚠ პირობები/ფორმულა ვერ შეხვდა 200 მცდელობაში</span>';
 
     if (!formula) {
-        document.getElementById('prevOpts').innerHTML = '<span style="font-size:0.64rem;color:#94a3b8;">④ ფორმულა ჩაწერეთ პასუხისთვის...</span>';
+        document.getElementById('prevOpts').innerHTML = '<span style="font-size:0.64rem;color:#8A8078;">④ ფორმულა ჩაწერეთ პასუხისთვის...</span>';
         document.getElementById('prevFormula').innerHTML = '';
         document.getElementById('prevVars').innerHTML = Object.entries(numVars).map(([k,v]) => `${k}=${v}`).join(' · ') || '';
         return;
@@ -3736,7 +3736,7 @@ function genPreviewNumeric(tmpl) {
     if (document.getElementById('answerTypeInput').value === 'numeric_input') {
         document.getElementById('prevOpts').innerHTML =
             `<div class="preview-opt c" style="cursor:default;">✍️ ${correct}</div>
-             <div style="font-size:0.6rem;color:#94a3b8;margin-top:4px;">(მოსწავლე თავად ჩაწერს რიცხვს — ვარიანტები არ გენერირდება)</div>`;
+             <div style="font-size:0.6rem;color:#8A8078;margin-top:4px;">(მოსწავლე თავად ჩაწერს რიცხვს — ვარიანტები არ გენერირდება)</div>`;
         document.getElementById('prevFormula').innerHTML =
             `სწ. პასუხი: <span style="color:#2a7a2a;">${correct}</span>&nbsp;·&nbsp;<span style="color:#1e1e1e;">${formula} = ${substituted} = ${correct}</span>`;
         document.getElementById('prevVars').innerHTML = Object.entries(numVars).map(([k,v]) => `${k}=${v}`).join(' · ') || '';
@@ -3769,7 +3769,7 @@ function genPreviewNumeric(tmpl) {
     document.getElementById('prevOpts').innerHTML = opts.map(o =>
         `<div class="preview-opt ${o.c?'c':''}">${o.v}</div>`).join('');
     document.getElementById('prevFormula').innerHTML = noneCorrect
-        ? `სწ. პასუხი: <span style="color:#2a7a2a;">არცერთი სწორი არ არის</span>&nbsp;·&nbsp;<span style="color:#94a3b8;">${formula} = ${correct} (hidden)</span>`
+        ? `სწ. პასუხი: <span style="color:#2a7a2a;">არცერთი სწორი არ არის</span>&nbsp;·&nbsp;<span style="color:#8A8078;">${formula} = ${correct} (hidden)</span>`
         : `სწ. პასუხი: <span style="color:#2a7a2a;">${correct}</span>&nbsp;·&nbsp;<span style="color:#1e1e1e;">${formula} = ${f} = ${correct}</span>`;
     document.getElementById('prevVars').innerHTML = Object.entries(numVars).map(([k,v]) => `${k}=${v}`).join(' · ') || '';
 }
@@ -4154,7 +4154,7 @@ function array_key_exists_js(key, obj) { return obj && Object.prototype.hasOwnPr
             document.getElementById('autoBuildFields').style.display = '';
             document.getElementById('correctFormula').readOnly = true;
             document.getElementById('exprHint').style.display = '';
-            document.getElementById('correctFormula').style.background = '#f8fafc';
+            document.getElementById('correctFormula').style.background = '#F7F6F3';
         }
     } else if (!isTxtInit) {
         addNcRow('N1', 1, 9, 1);

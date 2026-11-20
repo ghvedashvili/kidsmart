@@ -150,7 +150,7 @@
     // Child AND parent pages replace the shared top/bottom nav with one compact bar
     // (logo + notification + logout) — navigation between sections happens via
     // each page's own "back" link and the dashboard's cards instead.
-    $__hideChildChrome = auth()->check() && in_array(auth()->user()->role, ['child', 'parent']);
+    $__hideChildChrome = auth()->check() && (in_array(auth()->user()->role, ['child', 'parent']) || !empty($__ksParent));
 @endphp
 @if($__hideChildChrome && empty($__ksChild) && empty($__ksParent))
 <style>
@@ -437,7 +437,7 @@
 <div id="loginModal" class="auth-modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
     <div class="auth-modal-box">
         <div class="auth-modal-head">
-            <span class="auth-modal-title">KidSmart-ზე შესვლა</span>
+            <span class="auth-modal-title"><img src="/img/logo.png" alt="KidSmart" style="height:36px;width:auto;display:block;margin-bottom:6px;">შესვლა</span>
             <button type="button" class="auth-modal-close" onclick="document.getElementById('loginModal').classList.remove('open')">✕</button>
         </div>
 
@@ -448,6 +448,7 @@
 
         {{-- Parent panel --}}
         <div id="lmPanelParent" class="auth-modal-panel">
+            <p class="auth-modal-note">შედი Google-ის ანგარიშით — შექმენი შვილის პროფილი და ადევნე თვალი მის პროგრესს.</p>
             <a href="{{ route('google.login') }}" data-loader data-loader-text="შესვლა…" class="auth-google-btn">
                 <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#fff"/>
@@ -457,10 +458,12 @@
                 </svg>
                 Google-ით შესვლა
             </a>
+            <small class="auth-modal-small">ბარათი არ სჭირდება · უფასოდ დაწყება</small>
         </div>
 
         {{-- Child panel --}}
         <div id="lmPanelChild" class="auth-modal-panel" style="display:none;">
+            <p class="auth-modal-note">ჩაწერე კოდი, რომელიც მშობელმა მოგცა.</p>
             <form method="POST" action="{{ route('child-login') }}">
                 @csrf
                 <input type="text" name="child_code" class="auth-code-input"

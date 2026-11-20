@@ -25,8 +25,7 @@
 <div class="ks-child-shell">
     <aside class="ks-cside" role="navigation" aria-label="მთავარი მენიუ">
         <a href="{{ route('dashboard') }}" class="ks-cbrand">
-            <span class="ks-cbrand-mark">@include('partials.ks-fox', ['size' => 26])</span>
-            <span class="ks-cbrand-name">KidSmart</span>
+            <img src="{{ asset('img/logo.png') }}" alt="KidSmart" class="ks-logo">
         </a>
         <div class="ks-cnav">
             @foreach($__cLinks as [$__r, $__p, $__i, $__l, $__m])
@@ -41,10 +40,21 @@
             <span class="ks-clevel-s">{{ $__cs?->grade?->name ?? 'კლასი ჯერ არ არის არჩეული' }}</span>
         </div>
         <div class="ks-cside-foot">
+            @if(session('ks_impersonator'))
+            <div class="ks-cback">
+                <span class="ks-cback-l">ბავშვის რეჟიმი · დაბრუნება:</span>
+                <form method="POST" action="{{ route('child.as-child.leave') }}">
+                    @csrf
+                    <button type="submit" name="to" value="parent" class="ks-cback-btn"><i class="bi bi-people"></i>მშობლის რეჟიმი</button>
+                    <button type="submit" name="to" value="admin" class="ks-cback-btn dark"><i class="bi bi-shield-lock"></i>ადმინ რეჟიმი</button>
+                </form>
+            </div>
+            @else
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="ks-clogout"><i class="bi bi-box-arrow-left"></i>გასვლა</button>
             </form>
+            @endif
         </div>
     </aside>
 
@@ -52,13 +62,20 @@
         {{-- ზედა ზოლი (ყველა გვერდზე ერთნაირი, landing-ის მსგავსად მიმაგრებული): მხოლოდ ლოგო და გასვლა --}}
         <header class="ks-ctop ks-ctop-bar">
             <a href="{{ route('dashboard') }}" class="ks-cbrand">
-                <span class="ks-cbrand-mark">@include('partials.ks-fox', ['size' => 26])</span>
-                <span class="ks-cbrand-name">KidSmart</span>
+                <img src="{{ asset('img/logo.png') }}" alt="KidSmart" class="ks-logo">
             </a>
+            @if(session('ks_impersonator'))
+            <form method="POST" action="{{ route('child.as-child.leave') }}" class="ks-ctop-r">
+                @csrf
+                <button type="submit" name="to" value="parent" class="ks-cback-top"><i class="bi bi-people"></i><span>მშობელი</span></button>
+                <button type="submit" name="to" value="admin" class="ks-cback-top dark"><i class="bi bi-shield-lock"></i><span>ადმინი</span></button>
+            </form>
+            @else
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="ks-clogout-top"><i class="bi bi-box-arrow-right"></i><span>გასვლა</span></button>
             </form>
+            @endif
         </header>
 
         @yield('content')

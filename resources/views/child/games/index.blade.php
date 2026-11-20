@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('content')
 @php
-    $__gameBg = ['#FFE3CC', '#EEE8FF', '#DCEBFF', '#DFF5E3', '#FCE4EC', '#FFF1C9'];
+    $__gameBg = ['#FFE3CC', '#FFF3EA', '#FFF3EA', '#DFF5E3', '#FFF3EA', '#FFF1C9'];
 @endphp
 <div class="ks-cp">
     <div class="ks-cp-hero green">

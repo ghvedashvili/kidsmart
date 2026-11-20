@@ -14,7 +14,7 @@
     }
     .ach-toast-pill {
         display: inline-flex; align-items: center; gap: 8px;
-        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        background: linear-gradient(135deg, #E2590F, #F07A2E);
         color: white; border-radius: 99px;
         padding: 10px 18px; font-size: 0.82rem; font-weight: 800;
         box-shadow: 0 6px 20px rgba(99,102,241,0.4);

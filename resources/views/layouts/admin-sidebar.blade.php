@@ -52,10 +52,7 @@
 @endphp
 <aside class="ks-admin-side" aria-label="ადმინის მენიუ">
     <a href="{{ route('admin.panel') }}" class="ks-side-brand">
-        <span class="ks-side-logo">
-            <svg width="24" height="24" viewBox="0 0 120 120" aria-hidden="true"><path d="M22 18 L48 40 L26 56 Z" fill="#E2590F"/><path d="M98 18 L72 40 L94 56 Z" fill="#E2590F"/><ellipse cx="60" cy="66" rx="40" ry="36" fill="#E2590F"/><path d="M20 70 Q40 66 60 86 Q80 66 100 70 Q96 100 60 104 Q24 100 20 70 Z" fill="#FFF8F1"/><circle cx="45" cy="62" r="6" fill="#1D1A17"/><circle cx="75" cy="62" r="6" fill="#1D1A17"/><ellipse cx="60" cy="82" rx="6" ry="4.5" fill="#1D1A17"/></svg>
-        </span>
-        <span class="ks-side-name"><b>KidSmart</b><small>ადმინ პანელი</small></span>
+        <span class="ks-side-name"><img src="{{ asset('img/logo.png') }}" alt="KidSmart" class="ks-logo"><small>ადმინ პანელი</small></span>
     </a>
 
     <nav class="ks-side-nav">
@@ -78,6 +75,12 @@
         @endforeach
     </nav>
 
+    @if(in_array($__su->role, ['admin', 'parent']))
+    <a href="{{ route('dashboard') }}" class="ks-side-link ks-side-parent">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21a7 7 0 0 1 14 0M17 4a4 4 0 0 1 0 7.5M22 21a7 7 0 0 0-4-6.3"/></svg>
+        <span>მშობლის რეჟიმი</span>
+    </a>
+    @endif
     <div class="ks-side-user">
         <span class="ks-side-avatar">{{ mb_substr($__su->name, 0, 1) }}</span>
         <span style="flex-grow:1;display:flex;flex-direction:column;min-width:0;">

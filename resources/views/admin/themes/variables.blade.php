@@ -2,7 +2,7 @@
 {{-- redesign-kidsmart: თემატიკის ცვლადები (დიზაინი A6) --}}
 @section('content')
 <style>
-    .ks-vtabs { display: inline-flex; gap: 4px; background: #F1E8DE; border-radius: 12px; padding: 4px; align-self: flex-start; }
+    .ks-vtabs { display: inline-flex; gap: 4px; background: #F1EFEB; border-radius: 12px; padding: 4px; align-self: flex-start; }
     .ks-vtab { min-height: 38px; padding: 0 14px; border-radius: 9px; border: none; background: transparent; color: var(--ks-ink-2); font-family: var(--ks-font); font-size: 13px; font-weight: 700; cursor: pointer; }
     .ks-vtab.act { background: #fff; color: var(--ks-ink); }
     .ks-vpanel { display: none; }
@@ -10,7 +10,7 @@
     .ks-pool-tag { display: inline-flex; font-size: 13px; font-weight: 700; background: #fff; border: 1px solid var(--ks-line); border-radius: 999px; padding: 5px 12px; margin: 0 6px 6px 0; }
     .ks-slot { font-family: var(--ks-mono); font-size: 13px; font-weight: 800; background: var(--ks-purple-soft); color: var(--ks-purple-dark); border-radius: 8px; padding: 4px 8px; }
     .ks-icon-btn { min-width: 30px; min-height: 30px; border-radius: 8px; border: none; background: transparent; cursor: pointer; font-size: 13px; font-weight: 800; color: var(--ks-muted); }
-    .ks-icon-btn:hover { background: #F1E8DE; color: var(--ks-ink); }
+    .ks-icon-btn:hover { background: #F1EFEB; color: var(--ks-ink); }
     .ks-icon-btn.del:hover { background: var(--ks-red-soft); color: var(--ks-red-dark); }
 </style>
 
@@ -37,7 +37,7 @@
             @forelse($theme->varGroups as $group)
             <div style="background:var(--ks-bg-admin);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px;">
                 <div id="grp-hdr-{{ $group->id }}" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
-                    <span class="ks-mono" style="font-size:15px;font-weight:800;background:var(--ks-ink);color:#fff;border-radius:8px;padding:4px 10px;">{{ $group->name }}</span>
+                    <span class="ks-mono" style="font-size:15px;font-weight:800;background:var(--ks-orange-strong);color:#fff;border-radius:8px;padding:4px 10px;">{{ $group->name }}</span>
                     <span style="flex-grow:1;"></span>
                     <button type="button" class="ks-btn ks-btn-soft ks-btn-sm" onclick="toggleGrpEdit({{ $group->id }})">რედ.</button>
                     <form method="POST" action="{{ route('admin.themes.groups.destroy', $group) }}" style="display:inline;">

@@ -61,7 +61,7 @@
                         </form>
                     </td>
                 </tr>
-                <tr id="le{{ $row->id }}" style="display:none;background:#FFF4EA;">
+                <tr id="le{{ $row->id }}" style="display:none;background:#FFF3EA;">
                     <td colspan="5">
                         <form method="POST" action="{{ route('admin.level-rules.update', $row) }}" style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
                             @csrf @method('PUT')

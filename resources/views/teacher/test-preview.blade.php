@@ -3,12 +3,12 @@
 <style>
     body { background: transparent !important; }
     .aw { max-width: 700px; margin: 0 auto; padding: 32px 16px 64px; font-family: 'Goldman', monospace; }
-    .card-filter { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 18px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-    .card-dark   { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .card-filter { background: #fff; border: 1px solid #ECE9E4; border-radius: 8px; padding: 16px 18px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .card-dark   { background: #fff; border: 1px solid #ECE9E4; border-radius: 8px; padding: 20px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
 
     /* pill button groups */
     .filter-group { margin-bottom: 10px; }
-    .filter-lbl { font-size: 0.6rem; color: #94a3b8; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 5px; }
+    .filter-lbl { font-size: 0.6rem; color: #8A8078; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 5px; }
     .pill-row { display: flex; flex-wrap: wrap; gap: 5px; }
     .pill-btn { position: relative; }
     .pill-btn input[type=radio] { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
@@ -17,46 +17,46 @@
         font-family: 'Goldman', monospace;
         font-size: 0.72rem;
         padding: 4px 12px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #ECE9E4;
         border-radius: 20px;
-        color: #64748b;
-        background: #f8fafc;
+        color: #6B625A;
+        background: #F7F6F3;
         cursor: pointer;
         transition: all 0.14s;
         user-select: none;
         white-space: nowrap;
     }
-    .pill-btn:has(input:checked) span { background: #1e293b; border-color: #1e293b; color: #fff; }
-    .pill-btn span:hover { border-color: #94a3b8; color: #1e293b; }
+    .pill-btn:has(input:checked) span { background: #2B2622; border-color: #2B2622; color: #fff; }
+    .pill-btn span:hover { border-color: #8A8078; color: #2B2622; }
 
     /* dropdowns + generate row */
     .dd-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
-    .fc-sm { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; color: #374151; font-family: 'Goldman', monospace; font-size: 0.74rem; padding: 5px 10px; outline: none; cursor: pointer; }
-    .fc-sm:focus { border-color: #94a3b8; }
-    .btn-gen { background: #f8fafc; border: 1px solid #e2e8f0; color: #64748b; font-family: 'Goldman', monospace; font-size: 0.74rem; padding: 5px 18px; border-radius: 4px; cursor: pointer; transition: all 0.15s; white-space: nowrap; margin-left: auto; }
-    .btn-gen:hover { border-color: #94a3b8; color: #1e293b; }
+    .fc-sm { background: #F7F6F3; border: 1px solid #ECE9E4; border-radius: 4px; color: #374151; font-family: 'Goldman', monospace; font-size: 0.74rem; padding: 5px 10px; outline: none; cursor: pointer; }
+    .fc-sm:focus { border-color: #8A8078; }
+    .btn-gen { background: #F7F6F3; border: 1px solid #ECE9E4; color: #6B625A; font-family: 'Goldman', monospace; font-size: 0.74rem; padding: 5px 18px; border-radius: 4px; cursor: pointer; transition: all 0.15s; white-space: nowrap; margin-left: auto; }
+    .btn-gen:hover { border-color: #8A8078; color: #2B2622; }
 
     /* question cards */
-    .q-card { background: #fafcff; border: 1px solid #e8eef6; border-radius: 7px; padding: 16px 18px; margin-bottom: 12px; }
-    .q-num { font-size: 0.62rem; color: #94a3b8; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px; }
-    .q-topic { display: inline-block; font-size: 0.6rem; color: #64748b; border: 1px solid #e2e8f0; border-radius: 2px; padding: 1px 6px; margin-left: 6px; }
-    .q-text { font-size: 0.86rem; color: #1e293b; line-height: 1.5; margin-bottom: 12px; }
+    .q-card { background: #fafcff; border: 1px solid #F1EFEB; border-radius: 7px; padding: 16px 18px; margin-bottom: 12px; }
+    .q-num { font-size: 0.62rem; color: #8A8078; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px; }
+    .q-topic { display: inline-block; font-size: 0.6rem; color: #6B625A; border: 1px solid #ECE9E4; border-radius: 2px; padding: 1px 6px; margin-left: 6px; }
+    .q-text { font-size: 0.86rem; color: #2B2622; line-height: 1.5; margin-bottom: 12px; }
     .opts { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 8px; }
-    .opt { font-size: 0.78rem; padding: 6px 14px; border-radius: 4px; border: 1px solid #e2e8f0; color: #374151; background: #fff; }
+    .opt { font-size: 0.78rem; padding: 6px 14px; border-radius: 4px; border: 1px solid #ECE9E4; color: #374151; background: #fff; }
     .opt.correct { background: #ecfdf5; border-color: #6ee7b7; color: #065f46; font-weight: 600; }
-    .hint { font-size: 0.7rem; color: #64748b; border-left: 2px solid #e2e8f0; padding-left: 9px; margin-top: 2px; }
+    .hint { font-size: 0.7rem; color: #6B625A; border-left: 2px solid #ECE9E4; padding-left: 9px; margin-top: 2px; }
     .err { font-size: 0.76rem; color: #ef4444; padding: 10px 0; }
-    .result-meta { font-family:'Goldman',monospace; font-size:0.66rem; color:#94a3b8; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:12px; }
+    .result-meta { font-family:'Goldman',monospace; font-size:0.66rem; color:#8A8078; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:12px; }
     .theme-tag { color:#374151; }
 
     /* child search dropdown */
     .child-search-wrap { position: relative; flex: 1; min-width: 220px; }
-    .child-search-results { display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 200; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; box-shadow: 0 6px 20px rgba(0,0,0,0.1); max-height: 260px; overflow-y: auto; margin-top: 2px; }
-    .child-search-item { padding: 8px 12px; font-size: 0.74rem; color: #374151; cursor: pointer; border-bottom: 1px solid #f1f5f9; }
+    .child-search-results { display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 200; background: #fff; border: 1px solid #ECE9E4; border-radius: 6px; box-shadow: 0 6px 20px rgba(0,0,0,0.1); max-height: 260px; overflow-y: auto; margin-top: 2px; }
+    .child-search-item { padding: 8px 12px; font-size: 0.74rem; color: #374151; cursor: pointer; border-bottom: 1px solid #F1EFEB; }
     .child-search-item:last-child { border-bottom: none; }
-    .child-search-item:hover { background: #eef2ff; }
-    .child-search-empty { padding: 10px 12px; font-size: 0.72rem; color: #94a3b8; }
-    .child-selected-badge { display: none; font-size: 0.68rem; color: #4f46e5; background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 4px; padding: 4px 10px; margin-top: 6px; }
+    .child-search-item:hover { background: #FFF3EA; }
+    .child-search-empty { padding: 10px 12px; font-size: 0.72rem; color: #8A8078; }
+    .child-selected-badge { display: none; font-size: 0.68rem; color: #C24A0A; background: #FFF3EA; border: 1px solid #FFD9BF; border-radius: 4px; padding: 4px 10px; margin-top: 6px; }
 
     @media (max-width: 640px) {
         .aw { padding: 14px 10px 48px; }
@@ -137,11 +137,11 @@
             <button type="submit" class="btn-gen" style="margin-left:0;">👶 ბავშვის ტესტის ნახვა →</button>
         </form>
         <div id="childSelectedBadge" class="child-selected-badge"></div>
-        <div style="font-size:0.6rem;color:#94a3b8;margin-top:6px;">აჩვენებს ზუსტად იმას, რასაც ეს ბავშვი ახლა ტესტის დაწყებისას მიიღებდა — არაფერი არ ინახება, ბავშვის ისტორია/rotation არ ეცვლება.</div>
+        <div style="font-size:0.6rem;color:#8A8078;margin-top:6px;">აჩვენებს ზუსტად იმას, რასაც ეს ბავშვი ახლა ტესტის დაწყებისას მიიღებდა — არაფერი არ ინახება, ბავშვის ისტორია/rotation არ ეცვლება.</div>
     </div>
 
     <div class="card-filter" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
-        <div style="font-size:0.72rem;color:#64748b;">შეამოწმე ყველა აქტიური შაბლონი — თუ რომელიმეს ფორმულა ვერ გამოითვლება, აქ გამოჩნდება</div>
+        <div style="font-size:0.72rem;color:#6B625A;">შეამოწმე ყველა აქტიური შაბლონი — თუ რომელიმეს ფორმულა ვერ გამოითვლება, აქ გამოჩნდება</div>
         <form method="GET" action="{{ route('test.preview') }}">
             <input type="hidden" name="check_templates" value="1">
             <button type="submit" class="btn-gen" style="margin-left:0;">🔍 ყველა შაბლონის შემოწმება</button>
@@ -200,9 +200,9 @@
                 @foreach($row as $c => $val)
                 @php $pos = "$r,$c"; $sol = $pyrSols[$pos] ?? null; @endphp
                 @if($val === null)
-                <div style="width:44px;height:44px;border-radius:10px;border:2px dashed #a5b4fc;background:#eef2ff;display:flex;align-items:center;justify-content:center;font-size:0.85rem;color:#4f46e5;font-weight:700;">{{ $sol }}</div>
+                <div style="width:44px;height:44px;border-radius:10px;border:2px dashed #FFC49A;background:#FFF3EA;display:flex;align-items:center;justify-content:center;font-size:0.85rem;color:#C24A0A;font-weight:700;">{{ $sol }}</div>
                 @else
-                <div style="width:44px;height:44px;border-radius:10px;background:#4f46e5;color:white;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;">{{ $val }}</div>
+                <div style="width:44px;height:44px;border-radius:10px;background:#C24A0A;color:white;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;">{{ $val }}</div>
                 @endif
                 @endforeach
             </div>
@@ -246,7 +246,7 @@
             if($_isDR&&$_isDC){
                 $_pos=$_r*$cwC+$_c; $_gv=in_array($_pos,$cwRevealed);
                 $_cv=$cwAns[(string)$_pos]??'?';
-                $_bg=$_gv?'#d1fae5':'#4f46e5';
+                $_bg=$_gv?'#d1fae5':'#C24A0A';
                 $_fg=$_gv?'#065f46':'white';
                 $_bd=$_gv?'2.5px solid #6ee7b7':'none';
             }
@@ -254,17 +254,17 @@
         @if($_isDR&&$_isDC)
             <div style="width:52px;height:52px;border-radius:10px;background:{{ $_bg }};color:{{ $_fg }};border:{{ $_bd }};display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;">{{ $_cv }}</div>
         @elseif($_isDR&&$_isOC)
-            <div style="font-size:0.9rem;color:#64748b;font-weight:700;">{{ $_rops[$_r]??'+' }}</div>
+            <div style="font-size:0.9rem;color:#6B625A;font-weight:700;">{{ $_rops[$_r]??'+' }}</div>
         @elseif($_isDR&&$_isEqC)
-            <div style="font-size:0.75rem;color:#94a3b8;">=</div>
+            <div style="font-size:0.75rem;color:#8A8078;">=</div>
         @elseif($_isDR&&$_isRC)
-            <div style="width:52px;height:52px;border-radius:10px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;color:#374151;">{{ $_rres[$_r]??'' }}</div>
+            <div style="width:52px;height:52px;border-radius:10px;background:#F1EFEB;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;color:#374151;">{{ $_rres[$_r]??'' }}</div>
         @elseif($_isOR&&$_isDC)
-            <div style="font-size:0.75rem;color:#64748b;font-weight:700;">{{ $_cops[$_c]??'+' }}</div>
+            <div style="font-size:0.75rem;color:#6B625A;font-weight:700;">{{ $_cops[$_c]??'+' }}</div>
         @elseif($_isEqR&&$_isDC)
-            <div style="font-size:0.75rem;color:#94a3b8;">=</div>
+            <div style="font-size:0.75rem;color:#8A8078;">=</div>
         @elseif($_isRR&&$_isDC)
-            <div style="width:52px;height:52px;border-radius:10px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;color:#374151;">{{ $_cres[$_c]??'' }}</div>
+            <div style="width:52px;height:52px;border-radius:10px;background:#F1EFEB;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;color:#374151;">{{ $_cres[$_c]??'' }}</div>
         @else
             <div></div>
         @endif
@@ -284,12 +284,12 @@
             <div>{{ $eq }}</div>
             @endforeach
         </div>
-        <div style="font-size:0.6rem;color:#94a3b8;margin-bottom:6px;letter-spacing:0.08em;">სამიზნე კოდი</div>
+        <div style="font-size:0.6rem;color:#8A8078;margin-bottom:6px;letter-spacing:0.08em;">სამიზნე კოდი</div>
         <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:4px;">
             @foreach($codeQ['target'] ?? [] as $pos => $sym)
             @php $cv = $codeAns[$pos] ?? '?'; @endphp
             <div style="text-align:center;">
-                <div style="width:40px;height:40px;border-radius:8px;background:#4f46e5;color:white;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:3px;">{{ $sym }}</div>
+                <div style="width:40px;height:40px;border-radius:8px;background:#C24A0A;color:white;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:3px;">{{ $sym }}</div>
                 <div style="font-size:0.78rem;font-weight:800;color:#15803d;">{{ $cv }}</div>
             </div>
             @endforeach

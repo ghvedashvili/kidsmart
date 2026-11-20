@@ -6,22 +6,22 @@
     .u-table { width: 100%; border-collapse: collapse; font-size: 14px; }
     .u-table th { text-align: left; font-size: 12px; font-weight: 700; color: var(--ks-muted); padding: 10px 12px; white-space: nowrap; }
     .u-table td { padding: 10px 12px; border-top: 1px solid var(--ks-line-soft); vertical-align: middle; }
-    .u-table tr:hover td { background: #FFF8F1; }
+    .u-table tr:hover td { background: #F7F6F3; }
     .table-scroll { overflow-x: auto; }
     .role-sel { min-height: 34px; border-radius: 999px; border: 1px solid var(--ks-line); background: #fff; padding: 0 10px; font-family: var(--ks-font); font-size: 12px; font-weight: 800; cursor: pointer; }
     .role-sel:focus { border-color: var(--ks-orange); outline: none; }
     .save-icon { display: none; margin-left: 4px; color: var(--ks-green); font-weight: 800; }
     .pkg-badge { display: inline-flex; font-size: 12px; font-weight: 800; border-radius: 999px; padding: 4px 10px; }
     .pkg-paid { background: var(--ks-purple-soft); color: var(--ks-purple-dark); }
-    .pkg-free { background: #F1E8DE; color: var(--ks-ink-2); }
+    .pkg-free { background: #F1EFEB; color: var(--ks-ink-2); }
     .pkg-expired { background: var(--ks-red-soft); color: var(--ks-red-dark); }
-    .sub-btn { display: inline-flex; align-items: center; min-height: 32px; padding: 0 10px; border-radius: 10px; border: none; background: #F1E8DE; color: var(--ks-ink); font-family: var(--ks-font); font-size: 12px; font-weight: 800; cursor: pointer; text-decoration: none; white-space: nowrap; }
+    .sub-btn { display: inline-flex; align-items: center; min-height: 32px; padding: 0 10px; border-radius: 10px; border: none; background: #F1EFEB; color: var(--ks-ink); font-family: var(--ks-font); font-size: 12px; font-weight: 800; cursor: pointer; text-decoration: none; white-space: nowrap; }
     .sub-btn:hover { background: #E9DDD0; color: var(--ks-ink); }
     .filter-banner { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--ks-blue-soft); color: var(--ks-blue-dark); border-radius: 14px; padding: 10px 14px; font-size: 14px; }
     .filter-banner a { font-weight: 800; color: var(--ks-blue-dark); }
     .pagination-wrap { display: flex; justify-content: center; }
     .pagination-wrap a, .pagination-wrap span { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; min-height: 40px; padding: 0 10px; margin: 0 3px; border-radius: 12px; border: 1px solid var(--ks-line); background: #fff; color: var(--ks-ink); text-decoration: none; font-weight: 700; font-family: var(--ks-font); }
-    .pagination-wrap a:hover { border-color: #D8CEC3; }
+    .pagination-wrap a:hover { border-color: #D9D4CC; }
     /* მოდალები */
     .modal-bg { position: fixed; inset: 0; z-index: 2000; background: rgba(29, 26, 23, .45); display: none; align-items: center; justify-content: center; padding: 16px; }
     .modal-bg.open { display: flex; }
@@ -33,7 +33,7 @@
     .fc:focus { border-color: var(--ks-orange); box-shadow: 0 0 0 3px rgba(226, 89, 15, .15); }
     .sub-box-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
     .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--ks-line); background: #fff; color: var(--ks-ink); font-family: var(--ks-font); font-size: 14px; font-weight: 800; cursor: pointer; }
-    .btn:hover { border-color: #D8CEC3; }
+    .btn:hover { border-color: #D9D4CC; }
     .btn-primary { background: var(--ks-orange-strong) !important; border-color: var(--ks-orange-strong) !important; color: #fff !important; }
     .btn-primary:hover { background: #A63E07 !important; }
     .btn-cancel { background: #fff; }
@@ -42,7 +42,7 @@
     .history-list { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
     .history-item { font-size: 13px; padding: 8px 10px; border-radius: 10px; background: var(--ks-bg-admin); }
     .cm-diff-row { display: flex; gap: 6px; flex-wrap: wrap; }
-    .cm-diff-btn { min-width: 44px; min-height: 40px; border-radius: 10px; border: 1px solid #D9CFFC; background: #fff; color: var(--ks-purple-dark); font-family: var(--ks-font); font-size: 14px; font-weight: 800; cursor: pointer; }
+    .cm-diff-btn { min-width: 44px; min-height: 40px; border-radius: 10px; border: 1px solid #FFE3CC; background: #fff; color: var(--ks-purple-dark); font-family: var(--ks-font); font-size: 14px; font-weight: 800; cursor: pointer; }
     .cm-diff-btn.sel { background: var(--ks-purple); border-color: var(--ks-purple); color: #fff; }
     .cm-unlimited-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
     .cm-unlimited-row label { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
@@ -57,7 +57,7 @@
     .rel-search-results { margin-top: 4px; border: 1px solid var(--ks-line); border-radius: 12px; overflow: hidden; }
     .rel-search-item { padding: 10px 12px; font-size: 14px; cursor: pointer; border-bottom: 1px solid var(--ks-line-soft); }
     .rel-search-item:last-child { border-bottom: none; }
-    .rel-search-item:hover { background: #FFF8F1; }
+    .rel-search-item:hover { background: #F7F6F3; }
     .msg { font-weight: 700; }
 </style>
 
@@ -148,7 +148,7 @@
                         <span class="pkg-badge pkg-free">Free</span>
                     @endif
                 </td>
-                <td style="font-size:0.68rem;color:#94a3b8;">
+                <td style="font-size:0.68rem;color:#8A8078;">
                     @if($sub?->expires_at)
                         {{ $sub->expires_at->format('d.m.Y') }}
                     @elseif($sub)
@@ -157,7 +157,7 @@
                         —
                     @endif
                 </td>
-                <td style="color:#94a3b8;font-size:0.68rem;">{{ $user->created_at->format('d.m.Y') }}</td>
+                <td style="color:#8A8078;font-size:0.68rem;">{{ $user->created_at->format('d.m.Y') }}</td>
                 <td>
                     <div style="display:grid;grid-template-columns:repeat(2, auto);gap:4px;width:max-content;">
                     <button type="button" class="sub-btn"
@@ -193,7 +193,7 @@
                 </td>
             </tr>
             @empty
-            <tr><td colspan="7" style="color:#94a3b8;font-size:0.75rem;">მომხმარებელი არ მოიძებნა</td></tr>
+            <tr><td colspan="7" style="color:#8A8078;font-size:0.75rem;">მომხმარებელი არ მოიძებნა</td></tr>
             @endforelse
             </tbody>
         </table>
@@ -264,7 +264,7 @@
             <button type="button" class="cm-diff-btn" data-d="{{ $i }}" onclick="setCmDiff({{ $i }})">{{ $i }}</button>
             @endfor
         </div>
-        <div id="cmMaxHint" style="font-size:0.62rem;color:#94a3b8;margin:-2px 0 8px;display:none;"></div>
+        <div id="cmMaxHint" style="font-size:0.62rem;color:#8A8078;margin:-2px 0 8px;display:none;"></div>
 
         <div class="lbl">თემატიკები</div>
         <select class="fc" id="cmThemes" multiple style="height:96px;">
@@ -385,10 +385,10 @@ async function saveSubscription() {
 
 async function loadHistory(userId) {
     const el = document.getElementById('mHistory');
-    el.innerHTML = '<span style="color:#94a3b8;font-size:0.65rem;">ისტორია...</span>';
+    el.innerHTML = '<span style="color:#8A8078;font-size:0.65rem;">ისტორია...</span>';
     const res  = await fetch(`/admin/users/${userId}/subscriptions`);
     const data = await res.json();
-    if (!data.length) { el.innerHTML = '<span style="color:#94a3b8;font-size:0.65rem;">ისტორია ცარიელია</span>'; return; }
+    if (!data.length) { el.innerHTML = '<span style="color:#8A8078;font-size:0.65rem;">ისტორია ცარიელია</span>'; return; }
     el.innerHTML = data.map(s => {
         const exp = s.expires_at ? s.expires_at : 'უვადო';
         const active = !s.expires_at || new Date(s.expires_at) > new Date();

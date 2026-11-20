@@ -16,12 +16,12 @@
         <span class="ks-eyebrow">სისტემის საბაზისო პარამეტრები</span>
         <h1 class="ks-display ks-h1">{{ $__tTabs[$active][2] ?? 'პარამეტრები' }}</h1>
     </div>
-    <nav aria-label="განყოფილება" style="display:flex;gap:4px;background:#F1E8DE;border-radius:14px;padding:4px;">
+    <nav aria-label="განყოფილება" style="display:flex;gap:4px;background:#F1EFEB;border-radius:14px;padding:4px;">
         @foreach($__tTabs as $__key => $__t)
             @if($__tCan($__t[0]))
             @php $__on = ($active ?? '') === $__key; @endphp
             <a href="{{ route($__t[1]) }}" @if($__on) aria-current="page" @endif
-               style="min-height:40px;padding:0 16px;border-radius:10px;display:flex;align-items:center;text-decoration:none;font-size:14px;font-weight:800;{{ $__on ? 'background:#fff;color:#1D1A17;' : 'color:#4F473F;' }}">{{ $__t[2] }}</a>
+               style="min-height:40px;padding:0 16px;border-radius:10px;display:flex;align-items:center;text-decoration:none;font-size:14px;font-weight:800;{{ $__on ? 'background:#fff;color:#2B2622;' : 'color:#4F473F;' }}">{{ $__t[2] }}</a>
             @endif
         @endforeach
     </nav>

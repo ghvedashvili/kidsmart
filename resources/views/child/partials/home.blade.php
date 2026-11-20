@@ -52,7 +52,7 @@
     {{-- მონაცემები: ზედიზედ დღეები · მონეტები (→ მარკეტი) · მედლები (→ მედლები) --}}
     <div class="kh-stats">
         <div class="kh-stat">
-            <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c1 4 5.5 5.5 5.5 11a5.5 5.5 0 0 1-11 0c0-3 2-4.5 2-7.5 1.5 1 2.6 2.2 3 3.4.6-2.2.5-4.6.5-6.9z" fill="{{ $streak > 0 ? '#F26B1D' : '#D8CEC3' }}"/></svg>
+            <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c1 4 5.5 5.5 5.5 11a5.5 5.5 0 0 1-11 0c0-3 2-4.5 2-7.5 1.5 1 2.6 2.2 3 3.4.6-2.2.5-4.6.5-6.9z" fill="{{ $streak > 0 ? '#F26B1D' : '#D9D4CC' }}"/></svg>
             <b>{{ $streak }}</b><span>დღე ზედიზედ</span>
         </div>
         <a href="{{ route('market.child') }}" class="kh-stat">
@@ -72,7 +72,7 @@
         <div class="kh-mission-txt">
             <span class="kh-mission-hi">
                 <span class="kh-av kh-av-sm {{ $__u->avatar }}" aria-hidden="true">
-                    @if($__u->avatar === 'boy') 👦 @elseif($__u->avatar === 'girl') 👧 @else @include('partials.ks-fox', ['size' => 22]) @endif
+                    @if($__u->avatarUrl() || in_array($__u->avatar, ['boy', 'girl'])) @include('partials.kid-av', ['k' => $__u]) @else @include('partials.ks-fox', ['size' => 22]) @endif
                 </span>
                 გამარჯობა, {{ $__u->name }}!
             </span>
@@ -112,16 +112,16 @@
             <span class="kh-quick-ic" style="background:#E2590F;"><i class="bi bi-bullseye"></i></span>
             <b>ვარჯიში</b><small>{{ $practiceTopicsCount }} თემა</small>
         </a>
-        <a href="{{ route('games.index') }}" style="background:#DCEBFF;">
-            <span class="kh-quick-ic" style="background:#2F6FD6;"><i class="bi bi-controller"></i></span>
+        <a href="{{ route('games.index') }}" style="background:#FFF3EA;">
+            <span class="kh-quick-ic" style="background:#E2590F;"><i class="bi bi-controller"></i></span>
             <b>თამაშები</b><small>4 თამაში</small>
         </a>
         <a href="{{ Route::has('videos.library') ? route('videos.library') : route('practice.topics') . '#secVideos' }}" style="background:#FFF1C2;">
             <span class="kh-quick-ic" style="background:#C98A00;"><i class="bi bi-play-fill"></i></span>
             <b>ვიდეოები</b><small>გაკვეთილები</small>
         </a>
-        <a href="{{ route('market.child') }}" style="background:#EEE8FF;">
-            <span class="kh-quick-ic" style="background:#7B5CF0;"><i class="bi bi-bag"></i></span>
+        <a href="{{ route('market.child') }}" style="background:#FFF3EA;">
+            <span class="kh-quick-ic" style="background:#F07A2E;"><i class="bi bi-bag"></i></span>
             <b>მარკეტი</b><small>ჯილდოები</small>
         </a>
     </div>
@@ -137,7 +137,7 @@
             <span class="kh-today-v">+{{ $__fmt($__tCoins) }}</span>
         </div>
         <div class="kh-today-row">
-            <span class="kh-today-ic" style="background:#EEE8FF;">🏅</span>
+            <span class="kh-today-ic" style="background:#FFF3EA;">🏅</span>
             <span class="kh-today-t"><b>ახალი მედლები</b><small>{{ $__tMedalNames->isNotEmpty() ? $__tMedalNames->implode(', ') : 'დღეს ჯერ არ მოგიგია' }}</small></span>
             <span class="kh-today-v">{{ $__tMedals->count() }}</span>
         </div>

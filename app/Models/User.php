@@ -28,6 +28,7 @@ class User extends Authenticatable
         'child_code',
         'is_active',
         'avatar',
+        'avatar_img',
         'photo_url',
         'first_login_at',
     ];
@@ -137,4 +138,36 @@ class User extends Authenticatable
         'is_active'         => 'boolean',
         'first_login_at'    => 'datetime',
     ];
+
+    /** ბავშვის პროფილის სურათების სია სქესის მიხედვით: ['boys/b01', ...] */
+    public static function avatarChoices(?string $gender): array
+    {
+        $dir = $gender === 'girl' ? 'girls' : ($gender === 'boy' ? 'boys' : null);
+        if (! $dir) return [];
+        return collect(glob(public_path("avatars/{$dir}/*.webp")) ?: [])
+            ->map(fn ($f) => $dir . '/' . pathinfo($f, PATHINFO_FILENAME))
+            ->sort()->values()->all();
+    }
+
+    /**
+     * პროფილის სურათის გასაღები: არჩეული, ან — თუ არ აურჩევიათ — სქესის მიხედვით
+     * „შემთხვევითი“, მაგრამ მუდმივი (ბავშვის id-ით), რომ ყოველ ჩატვირთვაზე არ შეიცვალოს.
+     */
+    public function avatarKey(): ?string
+    {
+        $img = $this->avatar_img;
+        if ($img && preg_match('#^(boys/b|girls/g)\d{2}$#', $img)) return $img;
+        $pool = in_array($this->avatar, ['boy', 'girl'], true)
+            ? self::avatarChoices($this->avatar)
+            : array_merge(self::avatarChoices('boy'), self::avatarChoices('girl'));
+        if (! $pool) return null;
+        return $pool[abs(crc32('ks-av-' . $this->id)) % count($pool)];
+    }
+
+    /** პროფილის სურათის URL (ყოველთვის სურათი, თუ public/avatars-ში ფაილებია) */
+    public function avatarUrl(): ?string
+    {
+        $key = $this->avatarKey();
+        return $key ? asset("avatars/{$key}.webp") : null;
+    }
 }

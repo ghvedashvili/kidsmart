@@ -24,7 +24,7 @@
             <div class="ks-cp-list">
             @forelse($olympiadTests as $test)
             @php $pct = round($test->correct_count / max($test->total_questions, 1) * 100); @endphp
-            <a href="{{ route('child.test.show', [$child, $test]) }}" class="ks-cp-row" style="background:#FFF8F1;box-shadow:none;">
+            <a href="{{ route('child.test.show', [$child, $test]) }}" class="ks-cp-row" style="background:#F7F6F3;box-shadow:none;">
                 <span class="ks-cp-row-ic" style="background:#fff;">🏆</span>
                 <span class="ks-cp-row-b">
                     <span class="ks-cp-row-t">{{ $test->correct_count }} / {{ $test->total_questions }} სწორი</span>
@@ -55,7 +55,7 @@
             <div class="ks-cp-list">
             @forelse($gOlyTests as $test)
             @php $pct = round($test->correct_count / max($test->total_questions, 1) * 100); @endphp
-            <a href="{{ route('child.test.show', [$child, $test]) }}" class="ks-cp-row" style="background:#FFF8F1;box-shadow:none;">
+            <a href="{{ route('child.test.show', [$child, $test]) }}" class="ks-cp-row" style="background:#F7F6F3;box-shadow:none;">
                 <span class="ks-cp-row-ic" style="background:#fff;">🏆</span>
                 <span class="ks-cp-row-b">
                     <span class="ks-cp-row-t">{{ $test->correct_count }} / {{ $test->total_questions }} სწორი</span>

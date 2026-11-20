@@ -24,7 +24,7 @@
         @if($__rCan($__t[0]))
         @php $__on = ($active ?? '') === $__key; @endphp
         <a href="{{ route($__t[1]) }}" @if($__on) aria-current="page" @endif
-           style="min-height:66px;border-radius:18px;padding:10px 14px;text-decoration:none;display:flex;flex-direction:column;justify-content:center;gap:2px;{{ $__on ? 'background:#1D1A17;color:#fff;' : 'background:#fff;color:#1D1A17;border:1px solid #EDE3D8;' }}">
+           style="min-height:66px;border-radius:18px;padding:10px 14px;text-decoration:none;display:flex;flex-direction:column;justify-content:center;gap:2px;{{ $__on ? 'background:#C24A0A;color:#fff;' : 'background:#fff;color:#2B2622;border:1px solid #ECE9E4;' }}">
             <span style="font-size:15px;font-weight:800;">{{ $__t[2] }}</span>
             <span style="font-size:12px;opacity:.85;">{{ $__t[3] }}</span>
         </a>

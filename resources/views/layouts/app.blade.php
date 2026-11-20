@@ -61,7 +61,7 @@
         .ks-loader-symbol:nth-child(2) { color: #fdcb6e; animation-delay: 0s; }
         .ks-loader-symbol:nth-child(3) { color: #ff7675; animation-delay: 0.6s; }
         .ks-loader-symbol:nth-child(4) { color: #55efc4; animation-delay: 1.2s; }
-        .ks-loader-symbol:nth-child(5) { color: #74b9ff; animation-delay: 1.8s; }
+        .ks-loader-symbol:nth-child(5) { color: #FFC49A; animation-delay: 1.8s; }
         @keyframes ksSym {
             0%   { opacity: 0; transform: scale(0.4) rotate(-15deg); }
             12%  { opacity: 1; transform: scale(1.15) rotate(4deg); }
@@ -85,7 +85,8 @@
     // redesign-kidsmart: ბავშვის გვერდებს აქვს საერთო გარსი (მენიუ ტესტის წერისასაც ჩანს)
     $__ksChild = !$__ksAdmin && auth()->check() && auth()->user()->role === 'child'
         && request()->routeIs('dashboard', 'test.show', 'practice.topics', 'practice.show', 'games.memory', 'games.rps', 'games.wolves-hare', 'games.quoridor', 'my.tests', 'my.test.show', 'achievements', 'games.index', 'market.child', 'olympiad.index', 'videos.library');
-    $__ksParent = !$__ksAdmin && auth()->check() && auth()->user()->role === 'parent'
+    // ადმინიც მშობელია: ადმინის გვერდების გარეთ მშობლის გარსს ხედავს („ადმინ რეჟიმი“ ღილაკით გადადის)
+    $__ksParent = !$__ksAdmin && auth()->check() && in_array(auth()->user()->role, ['parent', 'admin'])
         && request()->routeIs('dashboard', 'child.hub', 'child.stats', 'child.practice-stats', 'child.olympiad-stats', 'child.achievements', 'child.test.show', 'market.index');
 @endphp
 <body class="@yield('bodyClass'){{ $__ksAdmin ? ' ks-admin' : '' }}{{ $__ksChild ? ' ks-child' : '' }}{{ $__ksParent ? ' ks-parent' : '' }}{{ !auth()->check() && request()->is('/') ? ' ks-landing' : '' }}{{ $__ksChild && request()->routeIs('games.memory', 'games.rps', 'games.wolves-hare', 'games.quoridor') ? ' ks-game' : '' }}">
@@ -99,7 +100,7 @@
             <div class="ks-loader-symbol">×</div>
             <div class="ks-loader-symbol">÷</div>
         </div>
-        <div class="loader-text">KidSmart</div>
+        <div class="loader-text"><img src="/img/logo.png" alt="KidSmart" style="height:44px;width:auto;"></div>
     </div>
 </div>
 
@@ -120,7 +121,7 @@
 @keyframes ptr-spin { to { transform: rotate(360deg); } }
 </style>
 <div id="ptr-indicator">
-    <svg id="ptr-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <svg id="ptr-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F07A2E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 5v14M5 12l7 7 7-7"/>
     </svg>
 </div>
@@ -182,7 +183,7 @@
 <style>
 .pwa-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);z-index:99999;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s ease;}
 .pwa-overlay.open{opacity:1;pointer-events:auto;}
-.pwa-card{width:100%;max-width:480px;background:#111;border:1px solid #222;border-radius:20px 20px 0 0;padding:28px 24px 40px;transform:translateY(30px);transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);}
+.pwa-card{width:100%;max-width:480px;background:#C24A0A;border:1px solid #222;border-radius:20px 20px 0 0;padding:28px 24px 40px;transform:translateY(30px);transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);}
 .pwa-overlay.open .pwa-card{transform:translateY(0);}
 .pwa-handle{width:40px;height:4px;background:#333;border-radius:2px;margin:0 auto 24px;}
 .pwa-title{font-family:'Goldman',monospace;font-size:1rem;color:#ddd;text-align:center;letter-spacing:0.06em;margin-bottom:6px;}
@@ -299,7 +300,7 @@
             </button>
             <button onclick="cookieChoice(true)" style="
                 font-family:'Goldman',monospace; font-size:0.72rem; letter-spacing:0.08em;
-                background:#111; border:none; border-radius:4px;
+                background:#C24A0A; border:none; border-radius:4px;
                 color:#fff; padding:9px 20px; cursor:pointer; transition:background 0.2s;
             " onmouseover="this.style.background='#333'"
                onmouseout="this.style.background='#111'">

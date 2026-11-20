@@ -10,7 +10,7 @@
 </div>
 @endif
 
-@php $__pBg = ['#FFFFFF', '#FFE3CC', '#EEE8FF', '#DCEBFF', '#DFF5E3']; @endphp
+@php $__pBg = ['#FFFFFF', '#FFE3CC', '#FFF3EA', '#FFF3EA', '#DFF5E3']; @endphp
 
 <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;">
     <div style="flex:3 1 420px;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;">

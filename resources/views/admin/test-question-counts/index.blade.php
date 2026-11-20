@@ -70,7 +70,7 @@
                         </form>
                     </td>
                 </tr>
-                <tr id="qe{{ $row->id }}" style="display:none;background:#FFF4EA;">
+                <tr id="qe{{ $row->id }}" style="display:none;background:#FFF3EA;">
                     <td colspan="5">
                         <form method="POST" action="{{ route('admin.question-counts.update', $row) }}" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                             @csrf @method('PUT')

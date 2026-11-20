@@ -7,7 +7,7 @@
 <div class="ks-pkids-top ks-pkids-page" role="tablist" aria-label="შვილი">
     @foreach($__swKids as $__k)
     <a href="{{ route($__swRoute, $__k) }}" role="tab" aria-selected="{{ $__k->id === $child->id ? 'true' : 'false' }}" class="ks-pkid {{ $__k->id === $child->id ? 'on' : '' }}">
-        <span class="ks-pkid-av {{ $__k->avatar }}">{{ $__k->avatar === 'boy' ? '👦' : ($__k->avatar === 'girl' ? '👧' : '🙂') }}</span>{{ $__k->name }}
+        <span class="ks-pkid-av {{ $__k->avatar }}">@include('partials.kid-av', ['k' => $__k])</span>{{ $__k->name }}
     </a>
     @endforeach
 </div>

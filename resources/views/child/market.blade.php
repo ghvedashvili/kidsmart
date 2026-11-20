@@ -5,7 +5,7 @@
         <span class="ks-cp-hero-ic" aria-hidden="true">🛍️</span>
         <span class="ks-cp-eyebrow" style="color:#FFC49A;">{{ (int) floor($coins) }} მონეტა — აირჩიე შენი ჯილდო!</span>
         <h1 class="ks-cp-title">მარკეტი</h1>
-        <span class="ks-cp-sub" style="color:#E8DCCF;">ჯილდოებს მშობელი ამატებს და ადასტურებს</span>
+        <span class="ks-cp-sub" style="color:#FFE3CC;">ჯილდოებს მშობელი ამატებს და ადასტურებს</span>
     </div>
 
     @if(session('market_ok'))
@@ -31,7 +31,7 @@
     <div class="ks-cp-item {{ $canAfford && !$pending ? 'hl' : '' }}">
         <div class="ks-cp-item-ic">{{ $item->icon }}</div>
         <div class="ks-cp-item-t">{{ $item->title }}</div>
-        <span class="ks-pill" style="font-size:14px;padding:3px 12px 3px 3px;box-shadow:none;background:#FFF8F1;">
+        <span class="ks-pill" style="font-size:14px;padding:3px 12px 3px 3px;box-shadow:none;background:#F7F6F3;">
             <svg viewBox="0 0 24 24" style="width:22px;height:22px;" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#F5B301"/><circle cx="12" cy="12" r="6.5" fill="none" stroke="#FFE08A" stroke-width="2"/></svg>
             {{ $item->coin_cost }}
         </span>

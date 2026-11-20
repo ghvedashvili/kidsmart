@@ -7,21 +7,21 @@
 @section('content')
 <style>
 :root {
-    --t-ink: #1D1A17;
+    --t-ink: #2B2622;
     --t-orange: #E2590F;
     --t-orange-s: #C24A0A;
-    --t-purple: #6D4FE0;
-    --t-blue: #2F6FD6;
+    --t-purple: #E2590F;
+    --t-blue: #E2590F;
 }
 
 body {
     font-family: 'Noto Sans Georgian', system-ui, sans-serif !important;
-    background: #FFF8F1 !important;
+    background: #F7F6F3 !important;
     background-image: none !important;
     padding-bottom: 60px !important;
     color: var(--t-ink);
 }
-html { background: #FFF8F1 !important; background-image: none !important; }
+html { background: #F7F6F3 !important; background-image: none !important; }
 
 /* Sticky to the viewport top — child pages render .child-top-bar instead of the
    fixed main nav, so nothing sits above this header once scrolled past it. */
@@ -32,16 +32,16 @@ html { background: #FFF8F1 !important; background-image: none !important; }
     position: sticky;
     top: 0;
     z-index: 50;
-    border-bottom: 1px solid #F1E3D3;
+    border-bottom: 1px solid #ECE9E4;
     overflow: visible;
 }
-body.ks-child .hdr { border: 1px solid #F1E3D3; border-radius: 20px; margin: 0 auto; max-width: 720px; width: 100%; box-sizing: border-box; top: 8px; }
+body.ks-child .hdr { border: 1px solid #ECE9E4; border-radius: 20px; margin: 0 auto; max-width: 720px; width: 100%; box-sizing: border-box; top: 8px; }
 .hdr-in { max-width: 720px; margin: 0 auto; display: flex; align-items: center; gap: 14px; }
 .hdr-lbl { font-size: 14px; font-weight: 800; white-space: nowrap; }
 .prog-bar-wrap {
     position: relative;
     flex: 1;
-    background: #F1E3D3;
+    background: #ECE9E4;
     border-radius: 99px;
     height: 12px;
     margin: 8px 0;
@@ -74,7 +74,7 @@ body.ks-child .hdr { border: 1px solid #F1E3D3; border-radius: 20px; margin: 0 a
 
 .q-card {
     background: #fff; border-radius: 28px; padding: 30px 22px 22px;
-    box-shadow: 0 2px 0 #F1E3D3;
+    box-shadow: 0 2px 0 #ECE9E4;
     border: 2px solid transparent; position: relative;
     margin-bottom: 26px; transition: border-color 0.2s;
 }
@@ -97,7 +97,7 @@ body.ks-child .hdr { border: 1px solid #F1E3D3; border-radius: 20px; margin: 0 a
 .opt-lbl input { position: absolute; opacity: 0; width: 0; height: 0; }
 .opt-btn {
     display: flex; align-items: center; justify-content: center; gap: 7px;
-    background: #FFF8F1; border: 2.5px solid #F1E3D3; border-radius: 18px;
+    background: #F7F6F3; border: 2.5px solid #ECE9E4; border-radius: 18px;
     padding: 14px 10px; font-family: inherit; font-weight: 900;
     font-size: clamp(1.1rem, 4.2vw, 1.35rem); color: var(--t-ink); text-align: center;
     transition: all 0.15s; min-height: 62px; user-select: none;
@@ -105,7 +105,7 @@ body.ks-child .hdr { border: 1px solid #F1E3D3; border-radius: 20px; margin: 0 a
 .opt-lbl:hover .opt-btn { border-color: #FFC49A; transform: translateY(-2px); }
 .opt-lbl input:focus-visible + .opt-btn { outline: 3px solid #FFC49A; outline-offset: 2px; }
 .opt-lbl input:checked + .opt-btn {
-    border-color: var(--t-ink); background: var(--t-ink); color: #fff;
+    border-color: #C24A0A; background: #C24A0A; color: #fff;
     transform: translateY(-2px);
 }
 
@@ -130,14 +130,14 @@ body.ks-child .submit-wrap { bottom: 16px; }
 .submit-btn.vis { box-shadow: 0 10px 28px rgba(29,26,23,.28); }
 .warn { background: #fff; border-radius: 14px; padding: 8px 12px; }
 .submit-btn {
-    width: 100%; background: var(--t-ink);
+    width: 100%; background: #C24A0A;
     border: none; border-radius: 30px; color: #fff;
     font-family: inherit; font-weight: 800; font-size: 1.15rem;
     height: 60px; cursor: pointer; transition: background 0.2s;
     display: none;
 }
 .submit-btn.vis { display: block; animation: popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275); }
-.submit-btn:hover { background: #000; }
+.submit-btn:hover { background: #A33E08; }
 @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
 .warn { font-size: 0.9rem; color: #B42318; font-weight: 800; text-align: center; margin-top: 10px; display: none; }
@@ -147,16 +147,16 @@ body.ks-child .submit-wrap { bottom: 16px; }
 .code-target-row { display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:8px; }
 .code-sym-box { width:50px;height:50px;border-radius:14px;background:var(--t-purple);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.35rem;flex-shrink:0; }
 .code-inp-row { display:flex;gap:8px;justify-content:center;flex-wrap:wrap; }
-.code-inp { width:50px;height:50px;border-radius:14px;border:2.5px solid #C9BBFF;background:#EEE8FF;color:#4B33B8;font-family:inherit;font-weight:900;font-size:1.15rem;text-align:center;outline:none;padding:0; }
+.code-inp { width:50px;height:50px;border-radius:14px;border:2.5px solid #FFC49A;background:#FFF3EA;color:#A33E08;font-family:inherit;font-weight:900;font-size:1.15rem;text-align:center;outline:none;padding:0; }
 .code-inp:focus, .cw-inp:focus { border-color: var(--t-purple); }
 .cw-grid { display:grid;gap:5px;align-items:center;justify-items:center;margin:0 auto 8px;max-width:max-content; }
-.cw-inp { width:100%;height:100%;border:2.5px solid #C9BBFF;border-radius:14px;background:#EEE8FF;color:#4B33B8;font-family:inherit;font-weight:900;font-size:1.15rem;text-align:center;outline:none;padding:0; }
+.cw-inp { width:100%;height:100%;border:2.5px solid #FFC49A;border-radius:14px;background:#FFF3EA;color:#A33E08;font-family:inherit;font-weight:900;font-size:1.15rem;text-align:center;outline:none;padding:0; }
 .cw-given { width:52px;height:52px;border-radius:14px;background:#DFF5E3;border:2.5px solid #9FD9B5;color:#14532D;font-family:inherit;font-size:1.15rem;display:flex;align-items:center;justify-content:center;font-weight:900; }
 .cw-op { font-family:inherit;font-weight:900;font-size:1.15rem;color:#6B625A;text-align:center; }
 .cw-eq { font-family:inherit;font-weight:900;font-size:1rem;color:#B5AAA0;text-align:center; }
-.cw-res { width:100%;height:100%;border-radius:12px;background:#F5EFE8;display:flex;align-items:center;justify-content:center;font-family:inherit;font-size:1.05rem;color:var(--t-ink);font-weight:900; }
+.cw-res { width:100%;height:100%;border-radius:12px;background:#F1EFEB;display:flex;align-items:center;justify-content:center;font-family:inherit;font-size:1.05rem;color:var(--t-ink);font-weight:900; }
 .num-ans-wrap { display:flex; justify-content:center; margin-top:20px; }
-.num-ans-inp { width:160px; height:62px; border-radius:18px; border:2.5px solid #F1E3D3; background:#FFF8F1; color:var(--t-ink); font-family:inherit; font-weight:900; font-size:1.45rem; text-align:center; outline:none; padding:0 10px; transition:border-color .15s, box-shadow .15s; }
+.num-ans-inp { width:160px; height:62px; border-radius:18px; border:2.5px solid #ECE9E4; background:#F7F6F3; color:var(--t-ink); font-family:inherit; font-weight:900; font-size:1.45rem; text-align:center; outline:none; padding:0 10px; transition:border-color .15s, box-shadow .15s; }
 .num-ans-inp:focus { border-color:var(--t-orange); box-shadow:0 0 0 4px rgba(226,89,15,.15); }
 @media (max-width: 600px) {
     .q-card { padding: 26px 16px 18px; border-radius: 24px; }
@@ -207,11 +207,11 @@ body.ks-child .submit-wrap { bottom: 16px; }
                 @if($val === null)
                 <input type="number"
                     name="pyramid_answers[{{ $q->id }}][{{ $r }},{{ $c }}]"
-                    style="width:52px;height:52px;border-radius:12px;border:2.5px solid #C9BBFF;background:#EEE8FF;color:#4B33B8;font-family:inherit;font-weight:900;font-size:1.05rem;border-radius:14px;text-align:center;outline:none;padding:0;"
+                    style="width:52px;height:52px;border-radius:12px;border:2.5px solid #FFC49A;background:#FFF3EA;color:#A33E08;font-family:inherit;font-weight:900;font-size:1.05rem;border-radius:14px;text-align:center;outline:none;padding:0;"
                     data-qid="{{ $q->id }}"
                     onchange="onPyrAnswer({{ $q->id }})">
                 @else
-                <div style="width:52px;height:52px;border-radius:12px;background:#6D4FE0;color:white;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.05rem;">{{ $val }}</div>
+                <div style="width:52px;height:52px;border-radius:12px;background:#E2590F;color:white;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.05rem;">{{ $val }}</div>
                 @endif
                 @endforeach
             </div>

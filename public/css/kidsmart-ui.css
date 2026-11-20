@@ -5,12 +5,12 @@
    ========================================================================== */
 
 :root {
-    --ks-bg: #FFF8F1;
-    --ks-bg-admin: #FAF6F1;
+    --ks-bg: #F7F6F3;
+    --ks-bg-admin: #F7F6F3;
     --ks-surface: #FFFFFF;
-    --ks-line: #EDE3D8;
-    --ks-line-soft: #F3ECE5;
-    --ks-ink: #1D1A17;
+    --ks-line: #ECE9E4;
+    --ks-line-soft: #F1EFEB;
+    --ks-ink: #2B2622;
     --ks-ink-2: #4F473F;
     --ks-muted: #6B625A;
 
@@ -18,13 +18,13 @@
     --ks-orange-strong: #C24A0A;
     --ks-orange-dark: #8A3407;
     --ks-orange-soft: #FFE3CC;
-    --ks-purple: #7B5CF0;
-    --ks-purple-strong: #6D4FE0;
-    --ks-purple-dark: #4129A8;
-    --ks-purple-soft: #EEE8FF;
-    --ks-blue: #2F6FD6;
-    --ks-blue-dark: #1F4E9C;
-    --ks-blue-soft: #DCEBFF;
+    --ks-purple: #F07A2E;
+    --ks-purple-strong: #E2590F;
+    --ks-purple-dark: #A33E08;
+    --ks-purple-soft: #FFF3EA;
+    --ks-blue: #E2590F;
+    --ks-blue-dark: #8A3407;
+    --ks-blue-soft: #FFF3EA;
     --ks-green: #1E8A4C;
     --ks-green-dark: #14612F;
     --ks-green-soft: #DFF5E3;
@@ -34,8 +34,8 @@
     --ks-red: #D93B3B;
     --ks-red-dark: #A12626;
     --ks-red-soft: #FDE2E2;
-    --ks-pink-soft: #FDE2EC;
-    --ks-pink-dark: #8C2450;
+    --ks-pink-soft: #FFF3EA;
+    --ks-pink-dark: #8A3407;
 
     --ks-r-sm: 10px;
     --ks-r: 14px;
@@ -85,11 +85,11 @@
 .ks-btn:disabled { opacity: .55; cursor: not-allowed; }
 .ks-btn-primary { background: var(--ks-orange-strong); color: #fff; }
 .ks-btn-primary:hover { background: #A63E07; color: #fff; }
-.ks-btn-dark { background: var(--ks-ink); color: #fff; }
-.ks-btn-dark:hover { background: #000; color: #fff; }
+.ks-btn-dark { background: var(--ks-orange-strong); color: #fff; }
+.ks-btn-dark:hover { background: #A33E08; color: #fff; }
 .ks-btn-ghost { background: var(--ks-surface); border-color: var(--ks-line); color: var(--ks-ink); }
-.ks-btn-ghost:hover { border-color: #D8CEC3; color: var(--ks-ink); }
-.ks-btn-soft { background: #F1E8DE; color: var(--ks-ink); }
+.ks-btn-ghost:hover { border-color: #D9D4CC; color: var(--ks-ink); }
+.ks-btn-soft { background: #F1EFEB; color: var(--ks-ink); }
 .ks-btn-soft:hover { background: #E9DDD0; color: var(--ks-ink); }
 .ks-btn-danger { background: var(--ks-surface); border-color: #F3B4B4; color: var(--ks-red-dark); }
 .ks-btn-sm { min-height: 34px; padding: 0 12px; border-radius: var(--ks-r-sm); font-size: 12px; }
@@ -111,7 +111,7 @@
 .ks-chip {
     display: inline-flex; align-items: center; gap: 6px;
     font-size: 12px; font-weight: 800; border-radius: 999px; padding: 4px 10px;
-    background: #F1E8DE; color: var(--ks-ink-2); white-space: nowrap;
+    background: #F1EFEB; color: var(--ks-ink-2); white-space: nowrap;
 }
 .ks-chip-green  { background: var(--ks-green-soft);  color: var(--ks-green-dark); }
 .ks-chip-orange { background: var(--ks-orange-soft); color: var(--ks-orange-dark); }
@@ -120,7 +120,7 @@
 .ks-chip-yellow { background: var(--ks-yellow-soft); color: var(--ks-yellow-dark); }
 .ks-chip-red    { background: var(--ks-red-soft);    color: var(--ks-red-dark); }
 .ks-chip-pink   { background: var(--ks-pink-soft);   color: var(--ks-pink-dark); }
-.ks-chip-dark   { background: var(--ks-ink);         color: #fff; }
+.ks-chip-dark   { background: var(--ks-orange-strong);         color: #fff; }
 
 /* ---------- ცხრილი ---------- */
 .ks-table-wrap { overflow-x: auto; }
@@ -166,7 +166,7 @@ body.ks-admin #mobileNav { display: none !important; }
 }
 .ks-admin-side {
     flex: 1 1 250px; max-width: 280px; position: sticky; top: 24px;
-    background: var(--ks-ink); color: #fff; border-radius: 24px; padding: 20px 12px;
+    background: var(--ks-orange-strong); color: #fff; border-radius: 24px; padding: 20px 12px;
     display: flex; flex-direction: column; gap: 18px; box-sizing: border-box;
     max-height: calc(100vh - 48px); overflow-y: auto;
 }
@@ -185,14 +185,14 @@ body.ks-admin #mobileNav { display: none !important; }
 .ks-side-link {
     min-height: 42px; border-radius: 12px; padding: 0 12px;
     display: flex; align-items: center; gap: 10px;
-    font-size: 14px; font-weight: 700; color: #E8DCCF; text-decoration: none;
+    font-size: 14px; font-weight: 700; color: #FFE3CC; text-decoration: none;
     transition: background .15s, color .15s;
 }
-.ks-side-link:hover { background: #2C2622; color: #fff; }
+.ks-side-link:hover { background: #F1EFEB; color: #fff; }
 .ks-side-link.active { background: var(--ks-orange); color: #fff; }
 .ks-side-link svg { flex-shrink: 0; }
 
-.ks-side-user { margin-top: 4px; background: #2C2622; border-radius: 16px; padding: 12px; display: flex; align-items: center; gap: 10px; }
+.ks-side-user { margin-top: 4px; background: #F1EFEB; border-radius: 16px; padding: 12px; display: flex; align-items: center; gap: 10px; }
 .ks-side-avatar { width: 36px; height: 36px; border-radius: 50%; background: #FFD9BF; color: var(--ks-orange-dark); display: flex; align-items: center; justify-content: center; font-weight: 800; flex-shrink: 0; }
 .ks-side-user form { margin: 0; }
 .ks-side-logout { background: none; border: none; color: #FFC49A; font-family: var(--ks-font); font-size: 12px; font-weight: 700; cursor: pointer; padding: 6px; }
@@ -232,28 +232,28 @@ body.ks-admin .form-ctrl:focus,
 body.ks-admin .form-control:focus,
 body.ks-admin .form-select:focus { border-color: var(--ks-orange) !important; box-shadow: 0 0 0 3px rgba(226, 89, 15, .15) !important; }
 body.ks-admin .btn-primary { background: var(--ks-orange-strong) !important; border-color: var(--ks-orange-strong) !important; border-radius: 12px !important; font-weight: 800 !important; }
-body.ks-admin .btn-dark { background: var(--ks-ink) !important; border-radius: 12px !important; font-weight: 800 !important; }
+body.ks-admin .btn-dark { background: var(--ks-orange-strong) !important; border-radius: 12px !important; font-weight: 800 !important; }
 
 /* ═════════════════════════════════════════════════════════════
    ბავშვის გარსი (body.ks-child): გვერდითი მენიუ + მობილურის ტაბები
    ═════════════════════════════════════════════════════════════ */
-body.ks-child { background: #FFF8F1 !important; font-family: 'Noto Sans Georgian', system-ui, sans-serif; color: #1D1A17; }
-html:has(body.ks-child) { background: #FFF8F1 !important; background-image: none !important; }
+body.ks-child { background: #F7F6F3 !important; font-family: 'Noto Sans Georgian', system-ui, sans-serif; color: #2B2622; }
+html:has(body.ks-child) { background: #F7F6F3 !important; background-image: none !important; }
 .ks-child-shell { display: flex; gap: 24px; padding: 24px; min-height: 100dvh; box-sizing: border-box; align-items: flex-start; }
-.ks-cside { flex: 0 0 236px; position: sticky; top: 24px; background: #fff; border-radius: 28px; padding: 22px 14px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 2px 0 #F1E3D3; max-height: calc(100dvh - 48px); overflow-y: auto; box-sizing: border-box; }
-.ks-cbrand { display: flex; align-items: center; gap: 10px; padding: 0 8px; text-decoration: none; color: #1D1A17; }
-.ks-cbrand-mark { width: 40px; height: 40px; border-radius: 12px; background: #1D1A17; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ks-cside { flex: 0 0 236px; position: sticky; top: 24px; background: #fff; border-radius: 28px; padding: 22px 14px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 2px 0 #ECE9E4; max-height: calc(100dvh - 48px); overflow-y: auto; box-sizing: border-box; }
+.ks-cbrand { display: flex; align-items: center; gap: 10px; padding: 0 8px; text-decoration: none; color: #2B2622; }
+.ks-cbrand-mark { width: 40px; height: 40px; border-radius: 12px; background: #C24A0A; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .ks-cbrand-name { font-weight: 800; font-size: 20px; }
 .ks-cnav { display: flex; flex-direction: column; gap: 4px; }
 .ks-cnav a { text-decoration: none; height: 48px; border-radius: 14px; padding: 0 14px; display: flex; align-items: center; gap: 12px; color: #4F473F; font-size: 15px; font-weight: 700; transition: background .15s; }
 .ks-cnav a i { font-size: 20px; width: 22px; text-align: center; }
-.ks-cnav a:hover { background: #FFF4EA; color: #1D1A17; }
+.ks-cnav a:hover { background: #FFF3EA; color: #2B2622; }
 .ks-cnav a.on { background: #FFE3CC; color: #8A3407; font-weight: 800; }
-.ks-clevel { background: #EEE8FF; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
-.ks-clevel-t { font-size: 13px; font-weight: 800; color: #2E2370; }
+.ks-clevel { background: #FFF3EA; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.ks-clevel-t { font-size: 13px; font-weight: 800; color: #7A3206; }
 .ks-clevel-bar { height: 8px; border-radius: 4px; background: #fff; overflow: hidden; }
-.ks-clevel-bar span { display: block; height: 8px; border-radius: 4px; background: #6D4FE0; }
-.ks-clevel-s { font-size: 12px; line-height: 1.4; color: #3F347F; }
+.ks-clevel-bar span { display: block; height: 8px; border-radius: 4px; background: #E2590F; }
+.ks-clevel-s { font-size: 12px; line-height: 1.4; color: #8A3D0B; }
 .ks-cside-foot { margin-top: auto; }
 .ks-cside-foot form { margin: 0; }
 .ks-clogout { width: 100%; height: 44px; border: none; background: none; border-radius: 14px; display: flex; align-items: center; gap: 12px; padding: 0 14px; color: #6B625A; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
@@ -261,11 +261,11 @@ html:has(body.ks-child) { background: #FFF8F1 !important; background-image: none
 .ks-cmain { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
 .ks-ctop { display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
 .ks-ctop-brand { display: none; margin-right: auto; }
-.ks-pill { display: inline-flex; align-items: center; gap: 8px; background: #fff; border-radius: 999px; padding: 6px 14px 6px 6px; box-shadow: 0 2px 0 #F1E3D3; font-weight: 900; font-size: 17px; color: #1D1A17; text-decoration: none; white-space: nowrap; }
-.ks-pill:hover { color: #1D1A17; }
+.ks-pill { display: inline-flex; align-items: center; gap: 8px; background: #fff; border-radius: 999px; padding: 6px 14px 6px 6px; box-shadow: 0 2px 0 #ECE9E4; font-weight: 900; font-size: 17px; color: #2B2622; text-decoration: none; white-space: nowrap; }
+.ks-pill:hover { color: #2B2622; }
 .ks-pill svg { width: 28px; height: 28px; flex-shrink: 0; }
-.ks-iconbtn { width: 46px; height: 46px; border-radius: 16px; border: 1px solid #F1E3D3; background: #fff; color: #1D1A17; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-size: 19px; padding: 0; }
-.ks-iconbtn:hover { background: #FFF4EA; }
+.ks-iconbtn { width: 46px; height: 46px; border-radius: 16px; border: 1px solid #ECE9E4; background: #fff; color: #2B2622; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-size: 19px; padding: 0; }
+.ks-iconbtn:hover { background: #FFF3EA; }
 .ks-iconbtn.on { color: #1E8A4C; }
 .ks-ctop form { margin: 0; }
 .ks-ctop .ks-mobile-only { display: none; }
@@ -278,7 +278,7 @@ html:has(body.ks-child) { background: #FFF8F1 !important; background-image: none
     .ks-pill { font-size: 15px; padding: 4px 12px 4px 4px; }
     .ks-pill svg { width: 24px; height: 24px; }
     .ks-iconbtn { width: 42px; height: 42px; border-radius: 14px; font-size: 17px; }
-    .ks-ctabs { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); position: fixed; left: 0; right: 0; bottom: 0; z-index: 900; background: #fff; border-top: 1px solid #F1E3D3; padding: 8px 6px calc(10px + env(safe-area-inset-bottom)); }
+    .ks-ctabs { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); position: fixed; left: 0; right: 0; bottom: 0; z-index: 900; background: #fff; border-top: 1px solid #ECE9E4; padding: 8px 6px calc(10px + env(safe-area-inset-bottom)); }
     .ks-ctabs a { text-decoration: none; color: #6B625A; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; font-weight: 700; padding: 4px 0; }
     .ks-ctabs a i { font-size: 22px; line-height: 1.1; }
     .ks-ctabs a.on { color: #B6460A; font-weight: 800; }
@@ -296,7 +296,7 @@ html:has(body.ks-child) { background: #FFF8F1 !important; background-image: none
 .ks-row > .ks-narrow { flex: 1 1 280px; min-width: 0; }
 .ks-mission { position: relative; overflow: hidden; background: #F7883E; border-radius: 32px; padding: 34px; min-height: 290px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; gap: 22px; }
 .ks-mission.done { background: #3FAE6E; }
-.ks-mission.wait { background: #8C7BE8; }
+.ks-mission.wait { background: #F07A2E; }
 .ks-mission-blob { position: absolute; right: -60px; top: -80px; width: 360px; height: 360px; border-radius: 50%; background: rgba(255,255,255,.22); pointer-events: none; }
 .ks-mission-fox { position: absolute; right: 26px; bottom: -12px; pointer-events: none; }
 .ks-mission-txt { position: relative; display: flex; flex-direction: column; gap: 10px; max-width: 440px; }
@@ -305,54 +305,54 @@ html:has(body.ks-child) { background: #FFF8F1 !important; background-image: none
 .ks-mission-title { margin: 0; font-size: 84px; line-height: .88; font-weight: 900; font-stretch: 66%; text-transform: uppercase; color: #fff; }
 .ks-mission-sub { font-size: 15px; color: #3D1A04; }
 .ks-mission-act { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
-.ks-mission-cta { height: 58px; padding: 0 28px; border-radius: 29px; background: #1D1A17; color: #fff; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 800; }
-.ks-mission-cta:hover { color: #fff; background: #000; }
+.ks-mission-cta { height: 58px; padding: 0 28px; border-radius: 29px; background: #C24A0A; color: #fff; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 800; }
+.ks-mission-cta:hover { color: #fff; background: #A33E08; }
 .ks-mission-prog { display: inline-flex; align-items: center; gap: 10px; background: rgba(255,255,255,.85); border-radius: 999px; padding: 10px 16px; }
 .ks-mission-prog-bar { width: 120px; height: 10px; border-radius: 5px; background: #FFE3CC; overflow: hidden; }
 .ks-mission-prog-bar span { display: block; height: 10px; border-radius: 5px; background: #C24A0A; }
 .ks-mission-prog b { font-size: 13px; font-weight: 800; color: #3D1A04; }
 .ks-tiles { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px; }
-.ks-tile { background: #fff; border-radius: 24px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; box-shadow: 0 2px 0 #F1E3D3; text-decoration: none; color: #1D1A17; min-height: 132px; box-sizing: border-box; }
-a.ks-tile:hover { color: #1D1A17; transform: translateY(-2px); }
+.ks-tile { background: #fff; border-radius: 24px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; box-shadow: 0 2px 0 #ECE9E4; text-decoration: none; color: #2B2622; min-height: 132px; box-sizing: border-box; }
+a.ks-tile:hover { color: #2B2622; transform: translateY(-2px); }
 .ks-tile { transition: transform .15s; }
 .ks-tile-ic { font-size: 28px; line-height: 1; }
 .ks-tile-v { font-size: 30px; font-weight: 900; line-height: 1.05; }
 .ks-tile-l { font-size: 13px; color: #6B625A; }
-.ks-tile.purple { background: #EEE8FF; box-shadow: none; }
+.ks-tile.purple { background: #FFF3EA; box-shadow: none; }
 .ks-tile.purple .ks-tile-v { font-size: 18px; }
-.ks-tile.purple .ks-tile-l { color: #3F347F; }
+.ks-tile.purple .ks-tile-l { color: #8A3D0B; }
 .ks-tile.locked { opacity: .75; }
-.ks-panel { background: #fff; border-radius: 28px; padding: 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 2px 0 #F1E3D3; box-sizing: border-box; }
+.ks-panel { background: #fff; border-radius: 28px; padding: 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 2px 0 #ECE9E4; box-sizing: border-box; }
 .ks-panel-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
-.ks-tag { font-size: 13px; font-weight: 700; background: #FFF8F1; border-radius: 999px; padding: 6px 12px; color: #1D1A17; text-decoration: none; }
+.ks-tag { font-size: 13px; font-weight: 700; background: #F7F6F3; border-radius: 999px; padding: 6px 12px; color: #2B2622; text-decoration: none; }
 a.ks-tag:hover { background: #FFE3CC; color: #8A3407; }
 .ks-topics { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
-.ks-topic { text-decoration: none; color: #1D1A17; background: #FFF8F1; border-radius: 20px; padding: 14px; display: flex; align-items: center; gap: 12px; }
-.ks-topic:hover { color: #1D1A17; background: #FFF1E4; }
+.ks-topic { text-decoration: none; color: #2B2622; background: #F7F6F3; border-radius: 20px; padding: 14px; display: flex; align-items: center; gap: 12px; }
+.ks-topic:hover { color: #2B2622; background: #FFF1E4; }
 .ks-topic-sym { width: 48px; height: 48px; border-radius: 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 900; }
 .ks-topic-body { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .ks-topic-top { display: flex; justify-content: space-between; gap: 8px; }
 .ks-topic-name { font-size: 14px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ks-topic-pct { font-size: 12px; font-weight: 700; color: #6B625A; flex-shrink: 0; }
-.ks-topic-bar { height: 8px; border-radius: 4px; background: #F1E3D3; overflow: hidden; }
+.ks-topic-bar { height: 8px; border-radius: 4px; background: #ECE9E4; overflow: hidden; }
 .ks-topic-bar span { display: block; height: 8px; border-radius: 4px; }
 .ks-games { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
-.ks-game { border-radius: 24px; padding: 16px; min-height: 150px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; position: relative; text-decoration: none; color: #1D1A17; transition: transform .15s; }
-.ks-game:hover { color: #1D1A17; transform: translateY(-2px); }
+.ks-game { border-radius: 24px; padding: 16px; min-height: 150px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; position: relative; text-decoration: none; color: #2B2622; transition: transform .15s; }
+.ks-game:hover { color: #2B2622; transform: translateY(-2px); }
 .ks-game-ic { position: absolute; left: 16px; top: 16px; width: 48px; height: 48px; border-radius: 14px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; }
 .ks-game-n { font-size: 15px; font-weight: 800; line-height: 1.25; }
 .ks-game-s { font-size: 12px; color: #4F473F; }
-.ks-medals { background: #fff; border-radius: 24px; padding: 16px; display: flex; flex-wrap: wrap; gap: 12px; box-shadow: 0 2px 0 #F1E3D3; }
-.ks-medal { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1 1 70px; text-align: center; text-decoration: none; color: #1D1A17; }
+.ks-medals { background: #fff; border-radius: 24px; padding: 16px; display: flex; flex-wrap: wrap; gap: 12px; box-shadow: 0 2px 0 #ECE9E4; }
+.ks-medal { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1 1 70px; text-align: center; text-decoration: none; color: #2B2622; }
 .ks-medal-c { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; }
 .ks-medal-n { font-size: 12px; font-weight: 700; line-height: 1.3; }
 .ks-medals-empty { font-size: 14px; color: #6B625A; padding: 8px; }
-.ks-market { text-decoration: none; color: #fff; background: #1D1A17; border-radius: 24px; padding: 18px 20px; display: flex; align-items: center; gap: 14px; }
-.ks-market:hover { color: #fff; background: #000; }
+.ks-market { text-decoration: none; color: #fff; background: #C24A0A; border-radius: 24px; padding: 18px 20px; display: flex; align-items: center; gap: 14px; }
+.ks-market:hover { color: #fff; background: #A33E08; }
 .ks-market i { font-size: 26px; color: #FFC49A; }
 .ks-market-t { flex-grow: 1; display: flex; flex-direction: column; }
 .ks-market-t b { font-size: 16px; font-weight: 800; }
-.ks-market-t span { font-size: 13px; color: #E8DCCF; }
+.ks-market-t span { font-size: 13px; color: #FFE3CC; }
 @media (max-width: 900px) {
     .ks-home { gap: 18px; }
     .ks-hello-t { font-size: 24px; }
@@ -368,9 +368,9 @@ a.ks-tag:hover { background: #FFE3CC; color: #8A3407; }
 }
 
 /* ═════ ბავშვის შიდა გვერდები (ks-cp-*) ═════ */
-.ks-cp { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 1100px; font-family: 'Noto Sans Georgian', system-ui, sans-serif; color: #1D1A17; }
-.ks-cp-hero { position: relative; overflow: hidden; border-radius: 32px; padding: 30px 32px; min-height: 180px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; background: #F7883E; }
-.ks-cp-hero.purple { background: #8C7BE8; } .ks-cp-hero.blue { background: #5B93EC; } .ks-cp-hero.green { background: #3FAE6E; } .ks-cp-hero.yellow { background: #F5B301; } .ks-cp-hero.dark { background: #1D1A17; }
+.ks-cp { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 1100px; font-family: 'Noto Sans Georgian', system-ui, sans-serif; color: #2B2622; }
+.ks-cp-hero { position: relative; overflow: hidden; border-radius: 32px; padding: 30px 32px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; background: #F7883E; }
+.ks-cp-hero.purple { background: #F07A2E; } .ks-cp-hero.blue { background: #F07A2E; } .ks-cp-hero.green { background: #3FAE6E; } .ks-cp-hero.yellow { background: #F5B301; } .ks-cp-hero.dark { background: #C24A0A; }
 .ks-cp-hero.locked { filter: grayscale(.5); opacity: .8; }
 .ks-cp-hero::before { content: ''; position: absolute; right: -50px; top: -70px; width: 300px; height: 300px; border-radius: 50%; background: rgba(255,255,255,.2); }
 .ks-cp-hero-ic { position: absolute; right: 34px; bottom: 18px; font-size: 96px; line-height: 1; filter: drop-shadow(0 6px 0 rgba(0,0,0,.08)); }
@@ -378,24 +378,24 @@ a.ks-tag:hover { background: #FFE3CC; color: #8A3407; }
 .ks-cp-title { position: relative; margin: 0; font-size: 64px; line-height: .9; font-weight: 900; font-stretch: 66%; text-transform: uppercase; color: #fff; max-width: 70%; }
 .ks-cp-sub { position: relative; font-size: 15px; font-weight: 600; color: rgba(255,255,255,.95); max-width: 70%; }
 .ks-cp-h2 { margin: 6px 0 0; font-size: 22px; font-weight: 800; }
-.ks-cp-card { background: #fff; border-radius: 24px; padding: 20px; box-shadow: 0 2px 0 #F1E3D3; box-sizing: border-box; }
+.ks-cp-card { background: #fff; border-radius: 24px; padding: 20px; box-shadow: 0 2px 0 #ECE9E4; box-sizing: border-box; }
 .ks-cp-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
-.ks-cp-stat { background: #fff; border-radius: 24px; padding: 18px 20px; box-shadow: 0 2px 0 #F1E3D3; display: flex; flex-direction: column; gap: 2px; }
+.ks-cp-stat { background: #fff; border-radius: 24px; padding: 18px 20px; box-shadow: 0 2px 0 #ECE9E4; display: flex; flex-direction: column; gap: 2px; }
 .ks-cp-stat b { font-size: 30px; font-weight: 900; line-height: 1.1; }
 .ks-cp-stat span { font-size: 13px; color: #6B625A; font-weight: 600; }
-.ks-cp-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 52px; padding: 0 26px; border-radius: 26px; background: #1D1A17; color: #fff; border: none; text-decoration: none; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer; }
-.ks-cp-btn:hover { background: #000; color: #fff; }
+.ks-cp-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 52px; padding: 0 26px; border-radius: 26px; background: #C24A0A; color: #fff; border: none; text-decoration: none; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer; }
+.ks-cp-btn:hover { background: #A33E08; color: #fff; }
 .ks-cp-btn.orange { background: #C24A0A; } .ks-cp-btn.orange:hover { background: #A53E08; }
-.ks-cp-btn:disabled, .ks-cp-btn.disabled { background: #EFE6DC; color: #8A8078; cursor: not-allowed; }
+.ks-cp-btn:disabled, .ks-cp-btn.disabled { background: #ECE9E4; color: #8A8078; cursor: not-allowed; }
 .ks-cp-flash { border-radius: 16px; padding: 12px 16px; font-size: 14px; font-weight: 700; }
 .ks-cp-flash.ok { background: #E8F7EE; color: #14532D; } .ks-cp-flash.err { background: #FDECEA; color: #B42318; }
-.ks-cp-empty { text-align: center; padding: 48px 20px; background: #fff; border-radius: 24px; box-shadow: 0 2px 0 #F1E3D3; }
+.ks-cp-empty { text-align: center; padding: 48px 20px; background: #fff; border-radius: 24px; box-shadow: 0 2px 0 #ECE9E4; }
 .ks-cp-empty-ic { font-size: 48px; margin-bottom: 8px; }
 .ks-cp-empty-t { font-size: 18px; font-weight: 800; }
 .ks-cp-empty-s { font-size: 14px; color: #6B625A; margin-top: 4px; }
-.ks-cp-row { display: flex; align-items: center; gap: 14px; background: #fff; border-radius: 20px; padding: 14px 16px; box-shadow: 0 2px 0 #F1E3D3; text-decoration: none; color: #1D1A17; transition: transform .15s; }
-a.ks-cp-row:hover { color: #1D1A17; transform: translateY(-2px); }
-.ks-cp-row-ic { width: 48px; height: 48px; border-radius: 14px; background: #FFF8F1; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+.ks-cp-row { display: flex; align-items: center; gap: 14px; background: #fff; border-radius: 20px; padding: 14px 16px; box-shadow: 0 2px 0 #ECE9E4; text-decoration: none; color: #2B2622; transition: transform .15s; }
+a.ks-cp-row:hover { color: #2B2622; transform: translateY(-2px); }
+.ks-cp-row-ic { width: 48px; height: 48px; border-radius: 14px; background: #F7F6F3; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
 .ks-cp-row-b { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .ks-cp-row-t { font-size: 16px; font-weight: 800; }
 .ks-cp-row-s { font-size: 13px; color: #6B625A; }
@@ -403,7 +403,7 @@ a.ks-cp-row:hover { color: #1D1A17; transform: translateY(-2px); }
 .ks-cp-list { display: flex; flex-direction: column; gap: 10px; }
 .ks-cp-pct { font-size: 14px; font-weight: 800; border-radius: 999px; padding: 4px 12px; flex-shrink: 0; }
 .ks-cp-pct.hi { background: #E8F7EE; color: #1E7A45; } .ks-cp-pct.mid { background: #FFF1C9; color: #8A5A00; } .ks-cp-pct.lo { background: #FDECEA; color: #B42318; }
-.ks-cp-acc { background: #fff; border-radius: 22px; box-shadow: 0 2px 0 #F1E3D3; overflow: hidden; }
+.ks-cp-acc { background: #fff; border-radius: 22px; box-shadow: 0 2px 0 #ECE9E4; overflow: hidden; }
 .ks-cp-acc-h { display: flex; align-items: center; gap: 12px; padding: 16px 18px; cursor: pointer; user-select: none; }
 .ks-cp-acc-h:hover { background: #FFFAF5; }
 .ks-cp-acc-t { flex: 1; font-size: 16px; font-weight: 800; min-width: 0; }
@@ -413,10 +413,10 @@ a.ks-cp-row:hover { color: #1D1A17; transform: translateY(-2px); }
 .ks-cp-acc.open > .ks-cp-acc-b { display: block; }
 .ks-cp-chip { font-size: 12px; font-weight: 800; border-radius: 999px; padding: 3px 10px; background: #FFE3CC; color: #8A3407; flex-shrink: 0; }
 .ks-cp-vids { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
-.ks-cp-vid iframe { width: 100%; aspect-ratio: 16/9; border-radius: 16px; border: none; display: block; background: #1D1A17; }
+.ks-cp-vid iframe { width: 100%; aspect-ratio: 16/9; border-radius: 16px; border: none; display: block; background: #C24A0A; }
 .ks-cp-vid-t { font-size: 14px; font-weight: 700; margin-top: 6px; }
 .ks-cp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; }
-.ks-cp-item { position: relative; background: #fff; border-radius: 24px; padding: 20px 14px 16px; box-shadow: 0 2px 0 #F1E3D3; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; border: 2px solid transparent; transition: transform .15s; }
+.ks-cp-item { position: relative; background: #fff; border-radius: 24px; padding: 20px 14px 16px; box-shadow: 0 2px 0 #ECE9E4; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; border: 2px solid transparent; transition: transform .15s; }
 .ks-cp-item:hover { transform: translateY(-2px); }
 .ks-cp-item.hl { border-color: #FFC49A; }
 .ks-cp-item.dim { opacity: .55; filter: grayscale(.7); }
@@ -428,10 +428,10 @@ a.ks-cp-row:hover { color: #1D1A17; transform: translateY(-2px); }
 .ks-cp-item .ks-cp-btn { height: 42px; width: 100%; font-size: 14px; padding: 0 12px; margin-top: 6px; }
 .ks-cp-progress { display: flex; flex-direction: column; gap: 8px; }
 .ks-cp-progress-top { display: flex; justify-content: space-between; font-size: 14px; font-weight: 800; }
-.ks-cp-progress-bar { height: 12px; border-radius: 6px; background: #F1E3D3; overflow: hidden; }
+.ks-cp-progress-bar { height: 12px; border-radius: 6px; background: #ECE9E4; overflow: hidden; }
 .ks-cp-progress-bar span { display: block; height: 12px; border-radius: 6px; background: #E2590F; }
 .ks-cp-req { display: flex; align-items: center; gap: 12px; }
-.ks-cp-req-ic { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; flex-shrink: 0; background: #F5EFE8; color: #B5AAA0; }
+.ks-cp-req-ic { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; flex-shrink: 0; background: #F1EFEB; color: #B5AAA0; }
 .ks-cp-req-ic.ok { background: #E8F7EE; color: #1E7A45; }
 .ks-cp-req-t { font-size: 15px; font-weight: 700; }
 .ks-cp-big { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; padding: 28px 20px; }
@@ -439,7 +439,7 @@ a.ks-cp-row:hover { color: #1D1A17; transform: translateY(-2px); }
 .ks-cp-big-t { font-size: 18px; font-weight: 800; }
 @media (max-width: 900px) {
     .ks-cp { gap: 16px; }
-    .ks-cp-hero { padding: 22px; min-height: 150px; border-radius: 28px; }
+    .ks-cp-hero { padding: 22px; border-radius: 28px; }
     .ks-cp-title { font-size: 46px; max-width: 75%; }
     .ks-cp-hero-ic { font-size: 64px; right: 20px; bottom: 14px; }
     .ks-cp-sub { max-width: 75%; font-size: 14px; }
@@ -451,18 +451,18 @@ a.ks-cp-row:hover { color: #1D1A17; transform: translateY(-2px); }
 body .child-top-bar { padding: 12px 16px; }
 body .child-top-bar .child-back-btn,
 body .child-top-bar .child-top-actions button {
-    background: #fff; border: 1px solid #F1E3D3; backdrop-filter: none; -webkit-backdrop-filter: none;
-    color: #1D1A17; font-family: 'Noto Sans Georgian', system-ui, sans-serif; font-weight: 800; font-size: .86rem;
+    background: #fff; border: 1px solid #ECE9E4; backdrop-filter: none; -webkit-backdrop-filter: none;
+    color: #2B2622; font-family: 'Noto Sans Georgian', system-ui, sans-serif; font-weight: 800; font-size: .86rem;
     border-radius: 14px; padding: 9px 14px;
 }
 body .child-top-bar .child-back-btn:hover,
-body .child-top-bar .child-top-actions button:hover { background: #FFF4EA; }
+body .child-top-bar .child-top-actions button:hover { background: #FFF3EA; }
 body .child-top-bar .child-top-actions button.on { color: #1E8A4C; border-color: #BFE6CD; }
 body .child-top-bar .child-top-actions .logout-btn { color: #B42318; border-color: #F6C9C4; }
 
 /* გარსის დაცვა გვერდის გლობალური form/button/h1 წესებისგან (მაგ. თამაშების გვერდები) */
 .ks-child-shell .ks-ctop form, .ks-child-shell .ks-cside-foot form { display: block !important; width: auto !important; margin: 0 !important; }
-.ks-child-shell .ks-iconbtn { background: #fff !important; color: #1D1A17 !important; border: 1px solid #F1E3D3 !important; padding: 0 !important; border-radius: 16px !important; font-family: 'Noto Sans Georgian', system-ui, sans-serif !important; font-size: 19px !important; }
+.ks-child-shell .ks-iconbtn { background: #fff !important; color: #2B2622 !important; border: 1px solid #ECE9E4 !important; padding: 0 !important; border-radius: 16px !important; font-family: 'Noto Sans Georgian', system-ui, sans-serif !important; font-size: 19px !important; }
 .ks-child-shell .ks-iconbtn.on { color: #1E8A4C !important; }
 .ks-child-shell .ks-clogout { background: none !important; color: #6B625A !important; border: none !important; padding: 0 14px !important; border-radius: 14px !important; font-family: 'Noto Sans Georgian', system-ui, sans-serif !important; font-size: 14px !important; }
 .ks-child-shell .ks-clogout:hover { background: #FDECEA !important; color: #B42318 !important; }
@@ -470,57 +470,57 @@ body .child-top-bar .child-top-actions .logout-btn { color: #B42318; border-colo
 
 /* ═════ თამაშების გვერდები გარსში ═════ */
 body.ks-child.ks-game { overflow: auto !important; }
-body.ks-game .wrap { font-family: 'Noto Sans Georgian', system-ui, sans-serif; color: #1D1A17; }
-body.ks-game .wrap h1 { font-family: 'Noto Sans Georgian', system-ui, sans-serif !important; font-size: 40px !important; line-height: .95 !important; font-weight: 900 !important; font-stretch: 66%; text-transform: uppercase; color: #1D1A17 !important; margin: 0 0 6px !important; text-align: left; }
+body.ks-game .wrap { font-family: 'Noto Sans Georgian', system-ui, sans-serif; color: #2B2622; }
+body.ks-game .wrap h1 { font-family: 'Noto Sans Georgian', system-ui, sans-serif !important; font-size: 40px !important; line-height: .95 !important; font-weight: 900 !important; font-stretch: 66%; text-transform: uppercase; color: #2B2622 !important; margin: 0 0 6px !important; text-align: left; }
 body.ks-child.ks-game .wrap { min-height: 0 !important; padding-top: 0 !important; padding-bottom: 24px !important; }
 body.ks-game .subtitle { font-family: inherit !important; color: #6B625A !important; font-size: 14px !important; font-weight: 600 !important; text-align: left !important; }
-body.ks-game .status-box, body.ks-game .stats-box { background: #fff !important; border: none !important; border-radius: 18px !important; box-shadow: 0 2px 0 #F1E3D3 !important; font-family: inherit !important; }
-body.ks-game .status { font-family: inherit !important; color: #1D1A17 !important; }
+body.ks-game .status-box, body.ks-game .stats-box { background: #fff !important; border: none !important; border-radius: 18px !important; box-shadow: 0 2px 0 #ECE9E4 !important; font-family: inherit !important; }
+body.ks-game .status { font-family: inherit !important; color: #2B2622 !important; }
 body.ks-game .stats-box p { color: #6B625A !important; font-family: inherit !important; }
-body.ks-game .stats-box span { color: #1D1A17 !important; }
+body.ks-game .stats-box span { color: #2B2622 !important; }
 @media (max-width: 900px) { body.ks-game .wrap h1 { font-size: 32px !important; } }
 
 /* ═════════════════════════════════════════════════════════════
    მშობლის გარსი (body.ks-parent): მუქი გვერდითი მენიუ + მობილურის ტაბები
    ═════════════════════════════════════════════════════════════ */
-body.ks-parent { background: #FFF8F1 !important; font-family: 'Noto Sans Georgian', system-ui, sans-serif; color: #1D1A17; }
-html:has(body.ks-parent) { background: #FFF8F1 !important; background-image: none !important; }
-.ks-pside { flex: 0 0 236px; position: sticky; top: 24px; background: #1D1A17; color: #fff; border-radius: 28px; padding: 22px 14px; display: flex; flex-direction: column; gap: 18px; max-height: calc(100dvh - 48px); overflow-y: auto; box-sizing: border-box; }
+body.ks-parent { background: #F7F6F3 !important; font-family: 'Noto Sans Georgian', system-ui, sans-serif; color: #2B2622; }
+html:has(body.ks-parent) { background: #F7F6F3 !important; background-image: none !important; }
+.ks-pside { flex: 0 0 236px; position: sticky; top: 24px; background: #C24A0A; color: #fff; border-radius: 28px; padding: 22px 14px; display: flex; flex-direction: column; gap: 18px; max-height: calc(100dvh - 48px); overflow-y: auto; box-sizing: border-box; }
 .ks-pside .ks-cbrand { color: #fff; }
 .ks-pside .ks-cbrand-mark { background: #fff; }
 .ks-pbrand-t { display: flex; flex-direction: column; line-height: 1.15; }
-.ks-pbrand-t small { font-size: 12px; color: #D8CEC3; font-weight: 600; }
+.ks-pbrand-t small { font-size: 12px; color: #D9D4CC; font-weight: 600; }
 .ks-pnav { display: flex; flex-direction: column; gap: 4px; }
 .ks-pnav-lbl { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #A39A91; padding: 8px 14px 2px; }
-.ks-pnav a { text-decoration: none; height: 46px; border-radius: 14px; padding: 0 14px; display: flex; align-items: center; gap: 12px; color: #E8DCCF; font-size: 15px; font-weight: 700; transition: background .15s; }
+.ks-pnav a { text-decoration: none; height: 46px; border-radius: 14px; padding: 0 14px; display: flex; align-items: center; gap: 12px; color: #FFE3CC; font-size: 15px; font-weight: 700; transition: background .15s; }
 .ks-pnav a i { font-size: 19px; width: 22px; text-align: center; }
-.ks-pnav a:hover { background: #2C2622; color: #fff; }
-.ks-pnav a.on { background: #6D4FE0; color: #fff; font-weight: 800; }
+.ks-pnav a:hover { background: #F1EFEB; color: #fff; }
+.ks-pnav a.on { background: #E2590F; color: #fff; font-weight: 800; }
 .ks-pnav-badge { margin-left: auto; background: #E2590F; color: #fff; font-size: 11px; font-weight: 900; border-radius: 999px; padding: 1px 8px; }
 .ks-pkids { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 8px 0; }
-.ks-pkid { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px 0 4px; border-radius: 999px; background: #2C2622; color: #E8DCCF; text-decoration: none; font-size: 13px; font-weight: 700; }
-.ks-pkid:hover { color: #fff; background: #3A332D; }
-.ks-pkid.on { background: #fff; color: #1D1A17; }
+.ks-pkid { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px 0 4px; border-radius: 999px; background: #F1EFEB; color: #FFE3CC; text-decoration: none; font-size: 13px; font-weight: 700; }
+.ks-pkid:hover { color: #fff; background: #E6E2DC; }
+.ks-pkid.on { background: #fff; color: #2B2622; }
 .ks-pkid-av { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; background: #FFD9BF; }
-.ks-pkid-av.boy { background: #DCEBFF; } .ks-pkid-av.girl { background: #FCE4EC; }
-.ks-pplan { background: #2C2622; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 6px; }
-.ks-pplan small { font-size: 12px; color: #D8CEC3; }
+.ks-pkid-av.boy { background: #FFF3EA; } .ks-pkid-av.girl { background: #FFF3EA; }
+.ks-pplan { background: #F1EFEB; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+.ks-pplan small { font-size: 12px; color: #D9D4CC; }
 .ks-pplan b { font-size: 17px; font-weight: 800; }
-.ks-pplan a { color: #C9BBFF; font-size: 13px; font-weight: 700; text-decoration: none; }
+.ks-pplan a { color: #FFC49A; font-size: 13px; font-weight: 700; text-decoration: none; }
 .ks-pplan a:hover { color: #fff; }
-.ks-pside .ks-clogout { color: #D8CEC3 !important; }
-.ks-pside .ks-clogout:hover { background: #2C2622 !important; color: #fff !important; }
+.ks-pside .ks-clogout { color: #D9D4CC !important; }
+.ks-pside .ks-clogout:hover { background: #F1EFEB !important; color: #fff !important; }
 .ks-ptabs { display: none; }
 @media (max-width: 900px) {
     .ks-pside { display: none; }
-    .ks-ptabs { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0,1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 900; background: #fff; border-top: 1px solid #F1E3D3; padding: 8px 6px calc(10px + env(safe-area-inset-bottom)); }
+    .ks-ptabs { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0,1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 900; background: #fff; border-top: 1px solid #ECE9E4; padding: 8px 6px calc(10px + env(safe-area-inset-bottom)); }
     .ks-ptabs a { text-decoration: none; color: #6B625A; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; font-weight: 700; padding: 4px 0; position: relative; }
     .ks-ptabs a i { font-size: 22px; line-height: 1.1; }
-    .ks-ptabs a.on { color: #5B3FD6; font-weight: 800; }
+    .ks-ptabs a.on { color: #C24A0A; font-weight: 800; }
     .ks-ptabs .ks-pnav-badge { position: absolute; top: 0; left: 55%; margin: 0; font-size: 10px; padding: 0 6px; }
 }
 .ks-pkids-top { display: none; }
-@media (max-width: 900px) { .ks-pkids-top { display: flex; gap: 6px; overflow-x: auto; width: 100%; order: 10; padding-bottom: 2px; } .ks-pkids-top .ks-pkid { background: #fff; color: #1D1A17; box-shadow: 0 2px 0 #F1E3D3; flex-shrink: 0; } .ks-pkids-top .ks-pkid.on { background: #1D1A17; color: #fff; } }
+@media (max-width: 900px) { .ks-pkids-top { display: flex; gap: 6px; overflow-x: auto; width: 100%; order: 10; padding-bottom: 2px; } .ks-pkids-top .ks-pkid { background: #fff; color: #2B2622; box-shadow: 0 2px 0 #ECE9E4; flex-shrink: 0; } .ks-pkids-top .ks-pkid.on { background: #C24A0A; color: #fff; } }
 
 /* ═════ მშობლის მთავარი (dashboard) ═════ */
 .dash-hero.ks-parent-dash { display: block; padding: 0; overflow: visible; }
@@ -530,50 +530,50 @@ body:not(.ks-parent) .dash-hero.ks-parent-dash { padding: 24px; }
 .ks-pp-head { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px; }
 .ks-pp-head > div:first-child { flex: 1 1 300px; display: flex; flex-direction: column; gap: 4px; }
 .ks-pp-hi { font-size: 15px; color: #6B625A; }
-.ks-pp-title { margin: 0; font-size: 60px; line-height: .92; font-weight: 900; font-stretch: 66%; text-transform: uppercase; color: #1D1A17; }
+.ks-pp-title { margin: 0; font-size: 60px; line-height: .92; font-weight: 900; font-stretch: 66%; text-transform: uppercase; color: #2B2622; }
 .ks-pp-act { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.ks-pp-plan { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border-radius: 22px; background: #fff; border: 1px solid #F1E3D3; font-family: inherit; font-size: 14px; font-weight: 800; color: #1D1A17; cursor: pointer; }
-.ks-pp-plan:hover { background: #FFF4EA; }
+.ks-pp-plan { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border-radius: 22px; background: #fff; border: 1px solid #ECE9E4; font-family: inherit; font-size: 14px; font-weight: 800; color: #2B2622; cursor: pointer; }
+.ks-pp-plan:hover { background: #FFF3EA; }
 .ks-pp-plan small { color: #6B625A; font-weight: 600; }
-.ks-pp-add { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px; border-radius: 22px; background: #1D1A17; color: #fff; border: none; font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer; }
-.ks-pp-add:hover { background: #000; }
+.ks-pp-add { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px; border-radius: 22px; background: #C24A0A; color: #fff; border: none; font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer; }
+.ks-pp-add:hover { background: #A33E08; }
 .ks-pp-kids { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 18px; }
-.ks-pp-card { background: #fff; border-radius: 28px; padding: 20px; box-shadow: 0 2px 0 #F1E3D3; display: flex; flex-direction: column; gap: 16px; box-sizing: border-box; }
+.ks-pp-card { background: #fff; border-radius: 28px; padding: 20px; box-shadow: 0 2px 0 #ECE9E4; display: flex; flex-direction: column; gap: 16px; box-sizing: border-box; }
 .ks-pp-card.off { opacity: .6; }
 .ks-pp-card-h { display: flex; align-items: center; gap: 12px; }
-.ks-pp-av { width: 56px; height: 56px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 0 2px #F1E3D3; background: #FFD9BF; display: flex; align-items: center; justify-content: center; font-size: 28px; cursor: pointer; flex-shrink: 0; padding: 0; }
-.ks-pp-av.boy { background: #DCEBFF; } .ks-pp-av.girl { background: #FCE4EC; }
+.ks-pp-av { width: 56px; height: 56px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 0 2px #ECE9E4; background: #FFD9BF; display: flex; align-items: center; justify-content: center; font-size: 28px; cursor: pointer; flex-shrink: 0; padding: 0; }
+.ks-pp-av.boy { background: #FFF3EA; } .ks-pp-av.girl { background: #FFF3EA; }
 .ks-pp-name { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
 .ks-pp-name b { font-size: 20px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ks-pp-code { align-self: flex-start; font-size: 12px; font-weight: 700; color: #6B625A; background: #F5EFE8; border-radius: 999px; padding: 2px 10px; cursor: pointer; }
-.ks-pp-code:hover { background: #EADFD3; }
-.ks-pp-gear { width: 42px; height: 42px; border-radius: 14px; border: 1px solid #F1E3D3; background: #fff; color: #1D1A17; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 17px; flex-shrink: 0; }
-.ks-pp-gear:hover { background: #FFF4EA; }
+.ks-pp-code { align-self: flex-start; font-size: 12px; font-weight: 700; color: #6B625A; background: #F1EFEB; border-radius: 999px; padding: 2px 10px; cursor: pointer; }
+.ks-pp-code:hover { background: #E6E2DC; }
+.ks-pp-gear { width: 42px; height: 42px; border-radius: 14px; border: 1px solid #ECE9E4; background: #fff; color: #2B2622; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 17px; flex-shrink: 0; }
+.ks-pp-gear:hover { background: #FFF3EA; }
 .ks-pp-off { display: flex; align-items: center; gap: 8px; background: #FDECEA; color: #B42318; border-radius: 14px; padding: 8px 12px; font-size: 13px; font-weight: 700; }
 .ks-pp-off button { margin-left: auto; background: #fff; border: 1px solid #F6C9C4; color: #B42318; border-radius: 999px; font-family: inherit; font-size: 12px; font-weight: 800; padding: 3px 10px; cursor: pointer; }
 .ks-pp-stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; }
-.ks-pp-stat { background: #FFF8F1; border-radius: 16px; padding: 10px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ks-pp-stat { background: #F7F6F3; border-radius: 16px; padding: 10px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .ks-pp-stat span { font-size: 11px; color: #6B625A; font-weight: 700; }
 .ks-pp-stat b { font-size: 16px; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ks-pp-stat.purple { background: #EEE8FF; } .ks-pp-stat.orange { background: #FFE3CC; } .ks-pp-stat.blue { background: #DCEBFF; } .ks-pp-stat.green { background: #DFF5E3; }
+.ks-pp-stat.purple { background: #FFF3EA; } .ks-pp-stat.orange { background: #FFE3CC; } .ks-pp-stat.blue { background: #FFF3EA; } .ks-pp-stat.green { background: #DFF5E3; }
 .ks-pp-week { display: flex; flex-direction: column; gap: 8px; }
 .ks-pp-week-h { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; font-weight: 800; }
 .ks-pp-week-h span { color: #6B625A; font-weight: 600; }
 .ks-pp-bars { display: grid; grid-template-columns: repeat(7, minmax(0,1fr)); gap: 6px; align-items: end; height: 84px; }
 .ks-pp-bar { display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
-.ks-pp-bar i { display: block; width: 100%; max-width: 30px; border-radius: 8px; background: #6D4FE0; min-height: 4px; }
-.ks-pp-bar i.zero { background: #F1E3D3; }
+.ks-pp-bar i { display: block; width: 100%; max-width: 30px; border-radius: 8px; background: #E2590F; min-height: 4px; }
+.ks-pp-bar i.zero { background: #ECE9E4; }
 .ks-pp-bar i.today { background: #E2590F; }
 .ks-pp-bar span { font-size: 10px; color: #6B625A; font-weight: 700; }
 .ks-pp-btns { display: flex; flex-wrap: wrap; gap: 8px; }
-.ks-pp-btn { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 44px; padding: 0 16px; border-radius: 22px; background: #F5EFE8; color: #1D1A17; text-decoration: none; font-family: inherit; font-size: 14px; font-weight: 800; border: none; cursor: pointer; }
-.ks-pp-btn:hover { background: #EADFD3; color: #1D1A17; }
-.ks-pp-btn.dark { background: #1D1A17; color: #fff; flex: 1 1 140px; }
-.ks-pp-btn.dark:hover { background: #000; color: #fff; }
+.ks-pp-btn { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 44px; padding: 0 16px; border-radius: 22px; background: #F1EFEB; color: #2B2622; text-decoration: none; font-family: inherit; font-size: 14px; font-weight: 800; border: none; cursor: pointer; }
+.ks-pp-btn:hover { background: #E6E2DC; color: #2B2622; }
+.ks-pp-btn.dark { background: #C24A0A; color: #fff; flex: 1 1 140px; }
+.ks-pp-btn.dark:hover { background: #A33E08; color: #fff; }
 .ks-pp-btn .ks-pnav-badge { margin-left: 4px; }
-.ks-pp-card .cc-share-panel { border-radius: 18px !important; background: #FFF8F1 !important; border: none !important; }
+.ks-pp-card .cc-share-panel { border-radius: 18px !important; background: #F7F6F3 !important; border: none !important; }
 .ks-pp-card .cc-share-btn { font-family: inherit !important; border-radius: 999px !important; font-weight: 800 !important; }
-.ks-pp-empty { background: #fff; border-radius: 28px; padding: 40px 20px; text-align: center; box-shadow: 0 2px 0 #F1E3D3; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.ks-pp-empty { background: #fff; border-radius: 28px; padding: 40px 20px; text-align: center; box-shadow: 0 2px 0 #ECE9E4; display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .ks-pp-empty b { font-size: 20px; font-weight: 800; }
 .ks-pp-empty span { color: #6B625A; font-size: 14px; }
 @media (max-width: 900px) {
@@ -586,29 +586,29 @@ body:not(.ks-parent) .dash-hero.ks-parent-dash { padding: 24px; }
 /* ═════ შესვლის ფანჯარა (სტუმარი) ═════ */
 body .auth-modal-overlay { background: rgba(29,26,23,.5) !important; backdrop-filter: blur(4px); }
 body .auth-modal-box { border-radius: 28px !important; background: #fff !important; font-family: 'Noto Sans Georgian', system-ui, sans-serif !important; box-shadow: 0 24px 60px rgba(0,0,0,.25) !important; border: none !important; }
-body .auth-modal-title { font-family: inherit !important; font-size: 1.3rem !important; font-weight: 900 !important; font-stretch: 70%; text-transform: uppercase; color: #1D1A17 !important; }
-body .auth-modal-close { background: #F5EFE8 !important; color: #1D1A17 !important; width: 34px; height: 34px; border-radius: 50% !important; font-size: 1rem !important; }
-body .auth-modal-tabs { background: #F5EFE8 !important; }
+body .auth-modal-title { font-family: inherit !important; font-size: 1.3rem !important; font-weight: 900 !important; font-stretch: 70%; text-transform: uppercase; color: #2B2622 !important; }
+body .auth-modal-close { background: #F1EFEB !important; color: #2B2622 !important; width: 34px; height: 34px; border-radius: 50% !important; font-size: 1rem !important; }
+body .auth-modal-tabs { background: #F1EFEB !important; }
 body .auth-modal-tab { font-family: inherit !important; font-weight: 800 !important; color: #6B625A !important; }
-body .auth-modal-tab.active { background: #1D1A17 !important; color: #fff !important; box-shadow: none !important; }
+body .auth-modal-tab.active { background: #C24A0A !important; color: #fff !important; box-shadow: none !important; }
 body .auth-google-btn { background: #C24A0A !important; border-radius: 26px !important; box-shadow: none !important; font-family: inherit !important; font-weight: 800 !important; }
 body .auth-google-btn:hover { background: #A53E08 !important; transform: none !important; }
-body .auth-code-input { font-family: inherit !important; border-radius: 16px !important; border: 2px solid #F1E3D3 !important; background: #FFF8F1 !important; color: #1D1A17 !important; }
+body .auth-code-input { font-family: inherit !important; border-radius: 16px !important; border: 2px solid #ECE9E4 !important; background: #F7F6F3 !important; color: #2B2622 !important; }
 body .auth-code-input:focus { border-color: #E2590F !important; }
-body .auth-code-btn { font-family: inherit !important; font-weight: 800 !important; background: #1D1A17 !important; border-radius: 26px !important; box-shadow: none !important; color: #fff !important; }
+body .auth-code-btn { font-family: inherit !important; font-weight: 800 !important; background: #C24A0A !important; border-radius: 26px !important; box-shadow: none !important; color: #fff !important; }
 
 
 /* ═════ ბავშვის მთავარი v2 (მობილური დიზაინის მიხედვით) ═════ */
 .ks-ctop-home { justify-content: flex-start; flex-wrap: nowrap; gap: 12px; }
 .kh-av { width: 52px; height: 52px; border-radius: 50%; background: #FFD9BF; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(150,80,20,.15); display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; box-sizing: border-box; }
-.kh-av.boy { background: #DCEBFF; } .kh-av.girl { background: #FCE4EC; }
+.kh-av.boy { background: #FFF3EA; } .kh-av.girl { background: #FFF3EA; }
 .kh-hello { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .kh-hello b { font-size: 20px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .kh-hello span { font-size: 13px; color: #6B625A; }
 .ks-home { gap: 16px; max-width: 760px; }
 .kh-stats { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
-.kh-stat { background: #fff; border-radius: 18px; padding: 12px 4px; display: flex; flex-direction: column; align-items: center; gap: 2px; box-shadow: 0 2px 0 #F1E3D3; text-decoration: none; color: #1D1A17; }
-a.kh-stat:hover { color: #1D1A17; background: #FFFAF5; }
+.kh-stat { background: #fff; border-radius: 18px; padding: 12px 4px; display: flex; flex-direction: column; align-items: center; gap: 2px; box-shadow: 0 2px 0 #ECE9E4; text-decoration: none; color: #2B2622; }
+a.kh-stat:hover { color: #2B2622; background: #FFFAF5; }
 .kh-stat b { font-size: 20px; font-weight: 800; line-height: 1.3; }
 .kh-stat span { font-size: 11px; color: #6B625A; }
 .kh-mission { position: relative; overflow: hidden; background: #FFE3CC; border-radius: 26px; padding: 18px; min-height: 196px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; gap: 16px; }
@@ -622,30 +622,30 @@ a.kh-stat:hover { color: #1D1A17; background: #FFFAF5; }
 .kh-mission-sub { font-size: 13px; color: #5A3A22; }
 .kh-mission.done .kh-mission-eyebrow, .kh-mission.done .kh-mission-sub { color: #14612F; }
 .kh-mission-act { position: relative; display: flex; align-items: center; gap: 12px; }
-.kh-go { width: 48px; height: 48px; border-radius: 50%; background: #1D1A17; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; text-decoration: none; }
-.kh-go:hover { background: #000; color: #fff; }
+.kh-go { width: 48px; height: 48px; border-radius: 50%; background: #C24A0A; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; text-decoration: none; }
+.kh-go:hover { background: #A33E08; color: #fff; }
 .kh-mission.done .kh-go { background: #1E8A4C; }
 .kh-bar { flex: 1; height: 10px; border-radius: 5px; background: #fff; overflow: hidden; }
 .kh-bar span { display: block; height: 10px; border-radius: 5px; background: #E2590F; }
 .kh-mission.done .kh-bar span { background: #1E8A4C; }
 .kh-bar-lbl { font-size: 12px; font-weight: 700; color: #5A3A22; white-space: nowrap; }
 .kh-quick { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; }
-.kh-quick a { text-decoration: none; color: #1D1A17; border-radius: 18px; padding: 12px 4px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
-.kh-quick a:hover { color: #1D1A17; filter: brightness(.98); }
+.kh-quick a { text-decoration: none; color: #2B2622; border-radius: 18px; padding: 12px 4px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.kh-quick a:hover { color: #2B2622; filter: brightness(.98); }
 .kh-quick-ic { width: 40px; height: 40px; border-radius: 12px; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 19px; }
 .kh-quick b { font-size: 13px; font-weight: 700; }
 .kh-quick small { font-size: 10px; color: #6B625A; }
 .kh-today { display: flex; flex-direction: column; gap: 10px; }
 .kh-h { font-size: 18px; font-weight: 800; }
-.kh-today-row { background: #fff; border-radius: 20px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 0 #F1E3D3; }
+.kh-today-row { background: #fff; border-radius: 20px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 0 #ECE9E4; }
 .kh-today-ic { width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; }
 .kh-today-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .kh-today-t b { font-size: 14px; font-weight: 700; }
 .kh-today-t small { font-size: 12px; color: #6B625A; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.kh-today-v { font-size: 15px; font-weight: 800; background: #FFF8F1; border-radius: 12px; padding: 8px 12px; white-space: nowrap; }
-.kh-oly { text-decoration: none; color: #1D1A17; background: #EEE8FF; border-radius: 24px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
-.kh-oly:hover { color: #1D1A17; filter: brightness(.98); }
-.kh-oly.open { background: #6D4FE0; color: #fff; }
+.kh-today-v { font-size: 15px; font-weight: 800; background: #F7F6F3; border-radius: 12px; padding: 8px 12px; white-space: nowrap; }
+.kh-oly { text-decoration: none; color: #2B2622; background: #FFF3EA; border-radius: 24px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+.kh-oly:hover { color: #2B2622; filter: brightness(.98); }
+.kh-oly.open { background: #E2590F; color: #fff; }
 .kh-oly.open:hover { color: #fff; }
 .kh-oly-top { display: flex; align-items: center; gap: 12px; }
 .kh-oly-ic { width: 48px; height: 48px; border-radius: 14px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; }
@@ -665,13 +665,13 @@ a.kh-stat:hover { color: #1D1A17; background: #FFFAF5; }
     justify-content: space-between; flex-wrap: nowrap;
     margin: -24px -24px 0; padding: 12px 24px;
     background: rgba(255,248,241,.94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    border-bottom: 1px solid #F1E3D3;
+    border-bottom: 1px solid #ECE9E4;
 }
 .ks-ctop-bar .ks-cbrand { display: flex; }
 .ks-ctop-bar form { margin: 0; }
-.ks-clogout-top { height: 44px; padding: 0 16px; border-radius: 22px; border: 2px solid #F1E3D3; background: #fff; color: #1D1A17; font-family: 'Noto Sans Georgian', system-ui, sans-serif; font-size: 14px; font-weight: 800; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
-.ks-clogout-top:hover { border-color: #1D1A17; }
-.ks-child-shell .ks-clogout-top { background: #fff !important; color: #1D1A17 !important; border: 2px solid #F1E3D3 !important; border-radius: 22px !important; padding: 0 16px !important; font-family: 'Noto Sans Georgian', system-ui, sans-serif !important; font-size: 14px !important; }
+.ks-clogout-top { height: 44px; padding: 0 16px; border-radius: 22px; border: 2px solid #ECE9E4; background: #fff; color: #2B2622; font-family: 'Noto Sans Georgian', system-ui, sans-serif; font-size: 14px; font-weight: 800; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.ks-clogout-top:hover { border-color: #2B2622; }
+.ks-child-shell .ks-clogout-top { background: #fff !important; color: #2B2622 !important; border: 2px solid #ECE9E4 !important; border-radius: 22px !important; padding: 0 16px !important; font-family: 'Noto Sans Georgian', system-ui, sans-serif !important; font-size: 14px !important; }
 .kh-greet { display: flex; align-items: center; gap: 12px; }
 @media (min-width: 901px) {
     /* დესკტოპზე ლოგო და გასვლა უკვე გვერდით მენიუშია */
@@ -690,8 +690,8 @@ a.kh-stat:hover { color: #1D1A17; background: #FFFAF5; }
 
 
 /* ═════ თამაშები: უკან ღილაკი + მობილურზე სიგანე არ გადავიდეს ═════ */
-body.ks-game .ks-game-back { display: inline-flex !important; align-items: center; gap: 6px; margin: 0 0 14px !important; height: 40px; padding: 0 16px !important; border-radius: 20px !important; background: #fff !important; border: 2px solid #F1E3D3 !important; box-shadow: none !important; color: #1D1A17 !important; font-family: 'Noto Sans Georgian', system-ui, sans-serif !important; font-size: 14px !important; font-weight: 800 !important; text-decoration: none; }
-body.ks-game .ks-game-back:hover { border-color: #1D1A17 !important; }
+body.ks-game .ks-game-back { display: inline-flex !important; align-items: center; gap: 6px; margin: 0 0 14px !important; height: 40px; padding: 0 16px !important; border-radius: 20px !important; background: #fff !important; border: 2px solid #ECE9E4 !important; box-shadow: none !important; color: #2B2622 !important; font-family: 'Noto Sans Georgian', system-ui, sans-serif !important; font-size: 14px !important; font-weight: 800 !important; text-decoration: none; }
+body.ks-game .ks-game-back:hover { border-color: #2B2622 !important; }
 @media (max-width: 900px) {
     body.ks-game .wrap { padding-left: 0 !important; padding-right: 0 !important; max-width: 100% !important; overflow-x: clip; }
     body.ks-game #container { width: min(420px, 100%) !important; }
@@ -702,7 +702,7 @@ body.ks-game .ks-game-back:hover { border-color: #1D1A17 !important; }
 
 /* ═════ მშობლის მთავარი v2 („ჩემი შვილები“) ═════ */
 .ks-pp-hello { flex: 1 1 260px; display: flex; align-items: center; gap: 12px; }
-.ks-pp-ini { width: 48px; height: 48px; border-radius: 50%; background: #EEE8FF; color: #5B3FD0; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; flex-shrink: 0; }
+.ks-pp-ini { width: 48px; height: 48px; border-radius: 50%; background: #FFF3EA; color: #C24A0A; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; flex-shrink: 0; }
 .ks-pp-hello-t { display: flex; flex-direction: column; gap: 2px; }
 .ks-pp-hello-t b { font-size: 19px; font-weight: 800; }
 .ks-pp-hello-t small { font-size: 13px; color: #6B625A; }
@@ -716,16 +716,16 @@ body.ks-game .ks-game-back:hover { border-color: #1D1A17 !important; }
 .ks-pp-av { width: 50px; height: 50px; }
 .ks-pp-gear { width: 38px; height: 38px; border-radius: 12px; font-size: 16px; }
 .ks-pp-mini { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
-.ks-pp-mini div { background: #FFF8F1; border-radius: 14px; padding: 8px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.ks-pp-mini div { background: #F7F6F3; border-radius: 14px; padding: 8px; display: flex; flex-direction: column; align-items: center; text-align: center; }
 .ks-pp-mini b { font-size: 17px; font-weight: 800; }
 .ks-pp-mini span { font-size: 11px; color: #6B625A; }
-.ks-pp-remind { height: 46px; border-radius: 23px; border: none; background: #1D1A17; color: #fff; font-family: inherit; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
-.ks-pp-remind:hover { background: #000; }
+.ks-pp-remind { height: 46px; border-radius: 23px; border: none; background: #C24A0A; color: #fff; font-family: inherit; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
+.ks-pp-remind:hover { background: #A33E08; }
 .ks-pp-remind.sent { background: #DFF5E3; color: #14612F; cursor: default; }
-.ks-pp-addkid { height: 56px; border-radius: 20px; border: 2px dashed #D8CEC3; background: transparent; color: #4F473F; font-family: inherit; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; width: 100%; }
-.ks-pp-addkid:hover { border-color: #1D1A17; color: #1D1A17; }
-.ks-pp-req { text-decoration: none; color: #1D1A17; background: #FFF1C2; border-radius: 20px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; }
-.ks-pp-req:hover { color: #1D1A17; filter: brightness(.98); }
+.ks-pp-addkid { height: 56px; border-radius: 20px; border: 2px dashed #D9D4CC; background: transparent; color: #4F473F; font-family: inherit; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; width: 100%; }
+.ks-pp-addkid:hover { border-color: #2B2622; color: #2B2622; }
+.ks-pp-req { text-decoration: none; color: #2B2622; background: #FFF1C2; border-radius: 20px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; }
+.ks-pp-req:hover { color: #2B2622; filter: brightness(.98); }
 .ks-pp-req-ic { width: 40px; height: 40px; border-radius: 12px; background: #fff; color: #8A6200; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 19px; }
 .ks-pp-req-t { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 .ks-pp-req-t b { font-size: 14px; font-weight: 800; }
@@ -733,9 +733,9 @@ body.ks-game .ks-game-back:hover { border-color: #1D1A17 !important; }
 /* გაზიარება */
 .ks-pp-card .ks-share { padding: 14px !important; flex-direction: column; gap: 12px; }
 .ks-pp-card .ks-share.open { display: flex !important; }
-.ks-share-tabs { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 4px; background: #F4ECE3; border-radius: 999px; padding: 4px; }
+.ks-share-tabs { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 4px; background: #F1EFEB; border-radius: 999px; padding: 4px; }
 .ks-share-tabs button { height: 36px; border: none; border-radius: 999px; background: transparent; color: #6B625A; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
-.ks-share-tabs button[aria-selected="true"] { background: #fff; color: #1D1A17; box-shadow: 0 2px 6px rgba(150,80,20,.15); }
+.ks-share-tabs button[aria-selected="true"] { background: #fff; color: #2B2622; box-shadow: 0 2px 6px rgba(150,80,20,.15); }
 .ks-share-box { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
 .ks-share-box[hidden] { display: none; }
 .ks-share-box small { font-size: 12px; color: #6B625A; }
@@ -744,34 +744,34 @@ body.ks-game .ks-game-back:hover { border-color: #1D1A17 !important; }
 .ks-share-qr { background: #fff; border-radius: 14px; padding: 12px; min-width: 180px; min-height: 180px; display: flex; align-items: center; justify-content: center; }
 .ks-share-qr img, .ks-share-qr canvas { width: 180px; height: 180px; }
 .ks-share .cc-share-actions { display: flex; gap: 8px; }
-.ks-share .cc-share-btn { flex: 1; height: 44px; border: 2px solid #F1E3D3 !important; background: #fff !important; color: #1D1A17 !important; font-size: 14px !important; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; }
-.ks-share .cc-share-btn.dark { background: #1D1A17 !important; color: #fff !important; border-color: #1D1A17 !important; }
+.ks-share .cc-share-btn { flex: 1; height: 44px; border: 2px solid #ECE9E4 !important; background: #fff !important; color: #2B2622 !important; font-size: 14px !important; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; }
+.ks-share .cc-share-btn.dark { background: #C24A0A !important; color: #fff !important; border-color: #2B2622 !important; }
 
 /* ═════ მშობლის სათაური: სურათი + მისალმება + პაკეტი ═════ */
 .ks-pp-photo { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(150,80,20,.15); }
 .ks-pp-hello .ks-pp-ini { width: 56px; height: 56px; font-size: 22px; }
 .ks-pp-hello-t { align-items: flex-start; }
-.ks-pp-pkg { display: inline-flex; align-items: center; gap: 6px; border: none; background: #fff; border-radius: 999px; padding: 3px 10px; font-family: inherit; font-size: 12px; font-weight: 700; color: #1D1A17; cursor: pointer; box-shadow: 0 1px 0 #F1E3D3; margin: 2px 0; }
-.ks-pp-pkg:hover { background: #FFF4EA; }
+.ks-pp-pkg { display: inline-flex; align-items: center; gap: 6px; border: none; background: #fff; border-radius: 999px; padding: 3px 10px; font-family: inherit; font-size: 12px; font-weight: 700; color: #2B2622; cursor: pointer; box-shadow: 0 1px 0 #ECE9E4; margin: 2px 0; }
+.ks-pp-pkg:hover { background: #FFF3EA; }
 
 /* ═════ შვილის პარამეტრების მოდალი (12. შვილის პარამეტრები) ═════ */
-.mbox.ks-set { background: #FFF8F1 !important; border-radius: 28px !important; padding: 20px !important; max-width: 440px !important; width: 100%; font-family: 'Noto Sans Georgian', system-ui, sans-serif !important; color: #1D1A17; max-height: 92dvh; overflow-y: auto; box-sizing: border-box; }
+.mbox.ks-set { background: #F7F6F3 !important; border-radius: 28px !important; padding: 20px !important; max-width: 440px !important; width: 100%; font-family: 'Noto Sans Georgian', system-ui, sans-serif !important; color: #2B2622; max-height: 92dvh; overflow-y: auto; box-sizing: border-box; }
 .ks-set form { display: flex; flex-direction: column; gap: 12px; margin: 0; }
 .ks-set-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
 .ks-set-head h2 { margin: 0; font-size: 28px; line-height: 1; font-weight: 900; font-stretch: 68%; text-transform: uppercase; }
-.ks-set-x { width: 40px; height: 40px; border-radius: 14px; background: #fff; border: 1px solid #F1E3D3; color: #1D1A17; cursor: pointer; flex-shrink: 0; }
+.ks-set-x { width: 40px; height: 40px; border-radius: 14px; background: #fff; border: 1px solid #ECE9E4; color: #2B2622; cursor: pointer; flex-shrink: 0; }
 .ks-set-avs { display: flex; gap: 12px; justify-content: center; }
 .ks-set-av { cursor: pointer; margin: 0; }
 .ks-set-av input { position: absolute; opacity: 0; width: 0; height: 0; }
-.ks-set-av span { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 38px; background: #DCEBFF; border: 4px solid transparent; transition: border-color .15s, transform .15s; }
-.ks-set-av.girl span { background: #FCE4EC; }
-.ks-set-av input:checked + span { border-color: #6D4FE0; transform: scale(1.05); }
-.ks-set-av input:focus-visible + span { outline: 3px solid #C9BBFF; outline-offset: 2px; }
-.ks-set-card { background: #fff; border-radius: 22px; padding: 4px 16px; box-shadow: 0 2px 0 #F1E3D3; display: flex; flex-direction: column; }
-.ks-set-row { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid #F4ECE3; margin: 0; }
+.ks-set-av span { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 38px; background: #FFF3EA; border: 4px solid transparent; transition: border-color .15s, transform .15s; }
+.ks-set-av.girl span { background: #FFF3EA; }
+.ks-set-av input:checked + span { border-color: #E2590F; transform: scale(1.05); }
+.ks-set-av input:focus-visible + span { outline: 3px solid #FFC49A; outline-offset: 2px; }
+.ks-set-card { background: #fff; border-radius: 22px; padding: 4px 16px; box-shadow: 0 2px 0 #ECE9E4; display: flex; flex-direction: column; }
+.ks-set-row { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid #F1EFEB; margin: 0; }
 .ks-set-row:last-child { border-bottom: none; }
 .ks-set-row > label { flex-grow: 1; font-size: 14px; font-weight: 700; margin: 0; }
-.ks-set-row input[type=text], .ks-set-row select { height: 40px; border-radius: 12px; border: 2px solid #F1E3D3; background: #FFF8F1; font-family: inherit; font-size: 14px; font-weight: 700; padding: 0 10px; color: #1D1A17; max-width: 60%; min-width: 0; outline: none; }
+.ks-set-row input[type=text], .ks-set-row select { height: 40px; border-radius: 12px; border: 2px solid #ECE9E4; background: #F7F6F3; font-family: inherit; font-size: 14px; font-weight: 700; padding: 0 10px; color: #2B2622; max-width: 60%; min-width: 0; outline: none; }
 .ks-set-row input[type=text]:focus, .ks-set-row select:focus { border-color: #E2590F; }
 .ks-set-sub { font-size: 13px; font-weight: 800; color: #6B625A; text-transform: uppercase; letter-spacing: .04em; margin: 4px 0 -4px 4px; }
 .ks-set-sw { cursor: pointer; }
@@ -779,14 +779,14 @@ body.ks-game .ks-game-back:hover { border-color: #1D1A17 !important; }
 .ks-set-sw-t b { font-size: 14px; font-weight: 700; }
 .ks-set-sw-t small { font-size: 12px; color: #6B625A; }
 .ks-set-sw input { position: absolute; opacity: 0; width: 0; height: 0; }
-.ks-set-track { width: 52px; height: 32px; border-radius: 16px; padding: 3px; box-sizing: border-box; background: #D8CEC3; display: flex; justify-content: flex-start; flex-shrink: 0; transition: background .15s; }
+.ks-set-track { width: 52px; height: 32px; border-radius: 16px; padding: 3px; box-sizing: border-box; background: #D9D4CC; display: flex; justify-content: flex-start; flex-shrink: 0; transition: background .15s; }
 .ks-set-track span { width: 26px; height: 26px; border-radius: 50%; background: #fff; display: block; }
 .ks-set-sw input:checked + .ks-set-track { background: #1E8A4C; justify-content: flex-end; }
 .ks-set-sw input:focus-visible + .ks-set-track { outline: 3px solid #9FD9B5; outline-offset: 2px; }
 .ks-set-hint { font-size: 12px; color: #6B625A; margin: -4px 4px 0; }
 .ks-set-actions { display: flex; gap: 8px; margin-top: 4px; }
-.ks-set-save { flex: 1; height: 52px; border-radius: 26px; border: none; background: #1D1A17; color: #fff; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer; }
-.ks-set-save:hover { background: #000; }
+.ks-set-save { flex: 1; height: 52px; border-radius: 26px; border: none; background: #C24A0A; color: #fff; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer; }
+.ks-set-save:hover { background: #A33E08; }
 .ks-set-del { height: 52px; padding: 0 20px; border-radius: 26px; border: 2px solid #F6C9C4; background: #fff; color: #B42318; font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer; }
 .ks-set-del:hover { background: #FDECEA; }
 
@@ -796,13 +796,13 @@ body.ks-game .ks-game-back:hover { border-color: #1D1A17 !important; }
 .ks-pp-hello .ks-pp-hello-t b { line-height: 1.2; }
 
 /* ═════ მშობლის მთავარი: ზედა ბარათი + მიმაგრებული ზედა ზოლი ═════ */
-.ks-pp-hero { position: relative; overflow: hidden; background: #8C7BE8; color: #fff; border-radius: 28px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
-.ks-pp-hero-blob { position: absolute; right: -60px; top: -70px; width: 220px; height: 220px; border-radius: 50%; background: #A595F0; pointer-events: none; }
+.ks-pp-hero { position: relative; overflow: hidden; background: #F07A2E; color: #fff; border-radius: 28px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.ks-pp-hero-blob { position: absolute; right: -60px; top: -70px; width: 220px; height: 220px; border-radius: 50%; background: #FFC49A; pointer-events: none; }
 .ks-pp-hero > * { position: relative; }
 .ks-pp-hero .ks-pp-hello { flex-direction: row !important; align-items: center !important; gap: 12px !important; }
 .ks-pp-hero .ks-pp-hello-t { flex: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
 .ks-pp-hero .ks-pp-hello-t b { font-size: 18px; color: #fff; }
-.ks-pp-hero .ks-pp-hello-t small { color: #F1ECFF; font-size: 12px; }
+.ks-pp-hero .ks-pp-hello-t small { color: #FFF3EA; font-size: 12px; }
 .ks-pp-hero .ks-pp-ini { background: #fff; }
 .ks-pp-hero .ks-pp-photo { border-color: rgba(255,255,255,.9); }
 .ks-pp-hero .ks-pp-pkg { box-shadow: none; }
@@ -810,15 +810,15 @@ body.ks-game .ks-game-back:hover { border-color: #1D1A17 !important; }
 .ks-pp-bell:hover { background: rgba(255,255,255,.32); }
 .ks-pp-bell.on { background: #fff; color: #1E8A4C; }
 .ks-pp-hero-title { margin: 0; font-size: 52px; line-height: .92; font-weight: 900; font-stretch: 66%; text-transform: uppercase; color: #fff; }
-.ks-pp-hero-sub { font-size: 13px; color: #F1ECFF; }
+.ks-pp-hero-sub { font-size: 13px; color: #FFF3EA; }
 .ks-pkids-top { margin-top: -6px; }
 @media (min-width: 901px) { .ks-pp-hero { padding: 24px 28px; } .ks-pp-hero-title { font-size: 64px; } }
 
 /* ═════ მშობლის ზედა ბარათი v2 — კომპაქტური ═════ */
-.ks-pp-hero { padding: 16px 18px !important; gap: 0 !important; border-radius: 24px; background: linear-gradient(135deg, #7B5CF0 0%, #9A85F2 100%); box-shadow: 0 8px 22px rgba(109,79,224,.22); }
+.ks-pp-hero { padding: 16px 18px !important; gap: 0 !important; border-radius: 24px; background: linear-gradient(135deg, #F07A2E 0%, #FFC49A 100%); box-shadow: 0 8px 22px rgba(226,89,15,.22); }
 .ks-pp-hero > .ks-pp-hero-blob { position: absolute !important; right: -40px; top: -60px; width: 160px; height: 160px; background: rgba(255,255,255,.14); }
 .ks-pp-hero .ks-pp-photo, .ks-pp-hero .ks-pp-ini { width: 54px; height: 54px; }
-.ks-pp-hero .ks-pp-ini { color: #5B3FD0; font-size: 22px; box-shadow: 0 0 0 3px rgba(255,255,255,.35); }
+.ks-pp-hero .ks-pp-ini { color: #C24A0A; font-size: 22px; box-shadow: 0 0 0 3px rgba(255,255,255,.35); }
 .ks-pp-hero .ks-pp-hello-t { gap: 4px; }
 .ks-pp-hero .ks-pp-hello-t b { font-size: 17px; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
 .ks-pp-hero .ks-pp-hello-t > small { font-size: 12px; color: rgba(255,255,255,.85); }
@@ -827,18 +827,273 @@ body.ks-game .ks-game-back:hover { border-color: #1D1A17 !important; }
 .ks-pp-hero .ks-pp-pkg i { font-size: 11px; }
 .ks-pp-hero .ks-pp-pkg small { font-weight: 600; opacity: .85; font-size: 11px; }
 .ks-pp-sec { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 4px 2px -4px; }
-.ks-pp-sec h1 { margin: 0; font-size: 30px; line-height: 1; font-weight: 900; font-stretch: 68%; text-transform: uppercase; color: #1D1A17; }
+.ks-pp-sec h1 { margin: 0; font-size: 30px; line-height: 1; font-weight: 900; font-stretch: 68%; text-transform: uppercase; color: #2B2622; }
 .ks-pp-sec span { font-size: 13px; font-weight: 700; color: #6B625A; }
 @media (min-width: 901px) { .ks-pp-hero { padding: 20px 24px !important; } .ks-pp-sec h1 { font-size: 40px; } }
 /* ზომა მარკეტის ზედა ბარათის მსგავსი (ძველი flex-basis:260px ბარათს ზედმეტად აგრძელებდა) */
 .ks-pp-hero .ks-pp-hello { flex: 0 0 auto !important; }
-.ks-pp-hero { min-height: 150px; justify-content: center; box-sizing: border-box; }
-@media (min-width: 901px) { .ks-pp-hero { min-height: 180px; } }
+.ks-pp-hero { min-height: 0; justify-content: center; box-sizing: border-box; }
+
 /* შვილების გადამრთველი გვერდზე (ზედა ბარათის ქვეშ) — ყველა ზომაზე */
 .ks-pkids-top.ks-pkids-page { display: flex !important; gap: 8px; overflow-x: auto; margin: 0; padding-bottom: 2px; scrollbar-width: none; }
 .ks-pkids-page::-webkit-scrollbar { display: none; }
-.ks-pkids-page .ks-pkid { height: 40px; background: #fff; color: #1D1A17; box-shadow: 0 2px 0 #F1E3D3; flex-shrink: 0; font-size: 14px; }
-.ks-pkids-page .ks-pkid:hover { color: #1D1A17; background: #FFF4EA; }
-.ks-pkids-page .ks-pkid.on { background: #6D4FE0; color: #fff; box-shadow: none; }
+.ks-pkids-page .ks-pkid { height: 40px; background: #fff; color: #2B2622; box-shadow: 0 2px 0 #ECE9E4; flex-shrink: 0; font-size: 14px; }
+.ks-pkids-page .ks-pkid:hover { color: #2B2622; background: #FFF3EA; }
+.ks-pkids-page .ks-pkid.on { background: #E2590F; color: #fff; box-shadow: none; }
 .ks-pkids-page .ks-pkid-av { width: 30px; height: 30px; }
 .ks-pkids-top.ks-pkids-page { order: 0 !important; width: auto; }
+
+/* ბარათების სათაურები — ზომიერი ზომა (Bootstrap h1-ის მსგავსად) */
+.ks-cp-title, .kh-mission-title, .ks-mission-title { font-size: calc(1.375rem + 1.5vw) !important; line-height: 1 !important; }
+@media (min-width: 1200px) { .ks-cp-title, .kh-mission-title, .ks-mission-title { font-size: 2.5rem !important; } }
+
+/* ═════════════════════════════════════════════════════════════
+   ტიპოგრაფიის სკალა (რეკომენდებული ზომები)
+   მობილური → დესკტოპი (clamp ეკრანის სიგანესთან ერთად ზრდის)
+   • დიდი სათაური (ბარათები):   28 → 40px
+   • სექციის სათაური:           20 → 24px
+   • ბარათის/სიის სათაური:      16 → 17px
+   • ძირითადი ტექსტი:           15 → 16px
+   • მეტა / წარწერა:            12 → 13px (არასოდეს 12-ზე ნაკლები)
+   • ღილაკები:                  15 → 16px
+   ═════════════════════════════════════════════════════════════ */
+:root {
+    --fs-display: clamp(28px, calc(1.375rem + 1.5vw), 40px);
+    --fs-h2:      clamp(20px, calc(1.1rem + .6vw), 24px);
+    --fs-h3:      clamp(16px, calc(.95rem + .2vw), 17px);
+    --fs-body:    clamp(15px, calc(.9rem + .15vw), 16px);
+    --fs-meta:    clamp(12px, calc(.72rem + .1vw), 13px);
+    --fs-btn:     clamp(15px, calc(.9rem + .15vw), 16px);
+}
+/* დიდი სათაურები */
+.ks-cp-title, .kh-mission-title, .ks-mission-title, .rs-title, .ks-pp-sec h1, .pa-title,
+.lp-title, .am-title, .pm-head h1, .ks-pp-title, .ks-set-head h2 { font-size: var(--fs-display) !important; line-height: 1 !important; }
+/* სექციის სათაურები */
+.ks-cp-h2, .kh-h, .lp-h, .ks-home h2, .rs-h, .pm-sec-h span, .pa-card-h span, .ks-pp-week-h,
+.ks-panel h2, .section-title { font-size: var(--fs-h2) !important; }
+/* ბარათის / სიის სათაურები */
+.ks-cp-row-t, .kh-today-t b, .lp-name, .pm-req-t b, .pm-item-t b, .ks-pp-name b, .kh-hello b,
+.ks-pp-hello-t b, .ks-cp-item-t, .ks-cp-acc-t, .ks-game-n, .ks-topic-name, .kh-mission-hi,
+.ks-market-t b, .lp-start-t b, .pa-insight-t b, .kh-oly-s, .ks-cp-big-t, .ks-set-sw-t b,
+.ks-set-row > label, .rs-score-big { font-size: var(--fs-h3) !important; }
+/* ძირითადი ტექსტი */
+.ks-cp-sub, .ks-cp-eyebrow, .kh-mission-sub, .kh-mission-eyebrow, .ks-mission-sub, .ks-hello-s,
+.ks-cp-empty-s, .pa-insight-t small, .lp-start-t span, .ks-market-t span, .rs-eyebrow,
+.q-text-r, .ksl-p { font-size: var(--fs-body) !important; }
+/* მეტა / პატარა წარწერები — მინიმუმ 12px */
+.ks-cp-row-s, .kh-today-t small, .lp-sub, .lp-pct, .pm-req-t small, .pm-item-t small, .ks-pp-name span,
+.ks-cp-item-s, .ks-game-s, .ks-topic-pct, .kh-quick small, .kh-stat span, .kh-bar-lbl,
+.pa-kpis span, .pa-bar span, .pa-days span, .pa-mini span, .ks-pp-bar span, .ks-pp-mini span,
+.ks-pp-stat span, .ks-pp-status, .am-tier, .am-name, .am-next-top, .ks-cp-chip, .ks-tile-l,
+.kh-oly-t small, .kh-oly-req span, .ks-pp-hello-t small, .ks-pp-pkg, .pm-badge, .ks-set-sw-t small,
+.ks-set-hint, .rs-score-sub, .rs-chip, .rs-tile-t small, .ks-pkid { font-size: var(--fs-meta) !important; }
+/* ღილაკები */
+.ks-cp-btn, .ks-pp-btn, .ks-pp-remind, .pm-add, .ks-set-save, .ks-mission-cta, .btn-retry,
+.ks-pp-addkid, .kh-quick b { font-size: var(--fs-btn) !important; }
+/* რიცხვები სტატისტიკაში */
+.kh-stat b, .pa-kpis b, .ks-cp-stat b, .ks-pp-mini b, .pa-mini b { font-size: clamp(18px, calc(1rem + .6vw), 24px) !important; }
+/* ქვედა მენიუს წარწერები (iOS/Android სტანდარტი ~11–12px) */
+.ks-ctabs a, .ks-ptabs a { font-size: 11px !important; }
+@media (min-width: 400px) { .ks-ctabs a, .ks-ptabs a { font-size: 12px !important; } }
+
+/* ── მშობლის მთავარი: შვილის ბარათი გამოკვეთილი ── */
+.ks-pp-card { background: #FFFFFF; border: 2px solid #FFD9BF; box-shadow: 0 6px 18px rgba(226,89,15, .10); }
+.ks-pp-card .ks-pp-week { background: #fff; border-radius: 18px; padding: 12px; }
+.ks-pp-sharebtn { height: 46px; border-radius: 23px; border: 2px solid #FFD9BF; background: #fff; color: #A33E08; font-family: inherit; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
+.ks-pp-sharebtn:hover { background: #FFF3EA; }
+.ks-pp-sharebtn .bi { font-size: 18px; }
+.ks-pp-btns .ks-pp-btn.dark, .ks-pp-btns .ks-pp-btn-remind { flex: 1 1 0; min-width: 0; }
+.ks-pp-btn-remind { background: #C24A0A; color: #fff; }
+.ks-pp-btn-remind:hover { background: #A33E08; color: #fff; }
+.ks-pp-btn-remind.sent, .ks-pp-btn-remind.sent:hover { background: #DFF5E3; color: #14612F; cursor: default; }
+
+/* ── შვილის პარამეტრების მოდალი: დესკტოპზე განიერი (2 სვეტი), მობილურზე დაბალი ── */
+@media (min-width: 901px) {
+    .mbox.ks-set { max-width: 820px !important; padding: 24px 28px !important; }
+    .ks-set form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 20px; row-gap: 12px; align-items: start;
+        grid-template-areas: "avs sub" "main notif" "main hint" "actions actions"; }
+    .ks-set-avs { grid-area: avs; justify-content: flex-start; }
+    .ks-set-main { grid-area: main; }
+    .ks-set-sub { grid-area: sub; align-self: end; margin: 0 0 0 4px; }
+    .ks-set-notif { grid-area: notif; }
+    .ks-set-hint { grid-area: hint; margin: 0 4px; }
+    .ks-set-actions { grid-area: actions; justify-content: flex-end; }
+    .ks-set-save { flex: 0 1 260px; }
+    .ks-set-notif .ks-set-row { padding: 9px 0; }
+}
+@media (max-width: 900px) {
+    .mbox.ks-set { max-height: min(80dvh, calc(100dvh - 150px)); padding: 16px !important; border-radius: 24px !important; }
+    .ks-set-head { margin-bottom: 8px; }
+    .ks-set form { gap: 10px; }
+    .ks-set-av span { width: 56px; height: 56px; font-size: 30px; border-width: 3px; }
+    .ks-set-row { padding: 8px 0; }
+    .ks-set-row input[type=text], .ks-set-row select { height: 38px; }
+    .ks-set-track { width: 46px; height: 28px; }
+    .ks-set-track span { width: 22px; height: 22px; }
+    .ks-set-save, .ks-set-del { height: 48px; }
+}
+
+/* ── შვილის დამატების მოდალი — პარამეტრების მოდალის სტილში ── */
+.mbox.ks-add { background: #F7F6F3 !important; border-radius: 28px !important; padding: 22px !important; max-width: 480px !important; width: 100%; box-sizing: border-box; max-height: 92dvh; overflow-y: auto; font-family: 'Noto Sans Georgian', system-ui, sans-serif !important; color: #2B2622; }
+.ks-add-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+.ks-add-head h2 { margin: 0; font-size: var(--fs-display); line-height: 1; font-weight: 900; font-stretch: 68%; text-transform: uppercase; }
+.ks-add-tabs { display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #F1EFEB; margin-bottom: 14px; }
+.ks-add-tab { flex: 1; height: 42px; border: none; border-radius: 999px; background: transparent; color: #6B625A; font-family: inherit; font-size: 14px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; }
+.ks-add-tab:hover { color: #2B2622; }
+.ks-add-tab.on { background: #fff; color: #2B2622; box-shadow: 0 2px 0 #E8DCCF; }
+.ks-add-tab:focus-visible { outline: 3px solid #FFC49A; outline-offset: 1px; }
+.ks-add-note { margin: 0 4px 12px; font-size: 13px; line-height: 1.45; color: #6B625A; }
+.ks-add-steps { display: flex; gap: 6px; margin: 0 0 12px; }
+.ks-add-steps i { flex: 1; height: 6px; border-radius: 3px; background: #E6E2DC; transition: background .2s; }
+.ks-add-steps i.on { background: #E2590F; }
+.ks-add-card { background: #fff; border-radius: 22px; padding: 18px !important; box-shadow: 0 2px 0 #ECE9E4; margin: 0; }
+.ks-add .wiz-step-title { font-family: inherit !important; font-size: var(--fs-h3) !important; font-weight: 800; letter-spacing: 0 !important; color: #2B2622 !important; margin-bottom: 14px !important; }
+.ks-add .mlbl { font-family: inherit !important; font-size: 13px !important; font-weight: 700; color: #4F473F !important; letter-spacing: 0 !important; text-transform: none !important; margin-bottom: 6px; }
+.ks-add .mlbl span { color: #C24A0A; }
+.ks-add .mlbl .opt { color: #6B625A; font-weight: 600; }
+.ks-add .minput { height: 48px; border-radius: 14px !important; border: 2px solid #ECE9E4 !important; background: #F7F6F3 !important; font-family: inherit !important; font-size: 16px !important; font-weight: 700; color: #2B2622; padding: 0 14px !important; margin-bottom: 14px !important; }
+.ks-add .minput:focus { border-color: #E2590F !important; background: #fff !important; box-shadow: 0 0 0 3px rgba(226,89,15,.12); }
+.ks-add .mrow { gap: 8px; margin-bottom: 14px !important; }
+.ks-add .mchip { min-height: 44px; display: inline-flex; align-items: center; gap: 6px; border-radius: 999px !important; border: 2px solid #ECE9E4 !important; background: #fff !important; color: #2B2622 !important; font-family: inherit !important; font-size: 14px !important; font-weight: 700; padding: 0 16px !important; margin: 0; }
+.ks-add .mchip:hover { border-color: #FFC49A !important; }
+.ks-add .mchip.sel { background: #E2590F !important; border-color: #E2590F !important; color: #fff !important; }
+.ks-add #genderRow .mchip { flex: 1; justify-content: center; min-height: 56px; font-size: 15px !important; }
+.ks-add .merr { font-family: inherit !important; font-size: 12px !important; font-weight: 700; color: #B42318 !important; margin: -8px 0 12px !important; }
+.ks-add .wiz-nav { margin-top: 14px !important; gap: 8px; }
+.ks-add .wiz-btn, .ks-add .msave { height: 52px; border-radius: 26px !important; font-family: inherit !important; font-size: 15px !important; font-weight: 800; letter-spacing: 0 !important; padding: 0 16px !important; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.ks-add .msave { width: 100%; margin-top: 2px !important; }
+.ks-add .wiz-btn-next, .ks-add .wiz-btn-submit, .ks-add .msave { background: #C24A0A !important; color: #fff !important; border: none !important; }
+.ks-add .wiz-btn-next:hover, .ks-add .wiz-btn-submit:hover, .ks-add .msave:hover { background: #A33E08 !important; }
+.ks-add .wiz-btn-prev { background: #fff !important; border: 2px solid #ECE9E4 !important; color: #2B2622 !important; }
+.ks-add .wiz-btn-prev:hover { border-color: #D9D4CC !important; }
+@media (max-width: 900px) {
+    .mbox.ks-add { max-height: min(80dvh, calc(100dvh - 150px)); padding: 16px !important; border-radius: 24px !important; }
+    .ks-add-card { padding: 14px !important; }
+}
+
+/* შესვლის გაზიარება — მოდალში */
+.ks-add .ks-pd-share { border: none !important; box-shadow: 0 2px 0 #ECE9E4; border-radius: 22px !important; margin: 0; }
+.ks-add .ks-share-tabs { width: 100%; }
+
+/* ── HERO ქარდები (ks-cp-hero): კომპაქტური ზომა და ფონტი ── */
+.ks-cp-hero { padding: 22px 26px !important; gap: 4px !important; }
+.ks-cp-hero .ks-cp-title { font-size: clamp(24px, calc(1rem + 1.1vw), 32px) !important; line-height: 1 !important; }
+.ks-cp-hero .ks-cp-eyebrow { font-size: 13px !important; }
+.ks-cp-hero-ic { font-size: 64px !important; right: 24px !important; bottom: 50% !important; transform: translateY(50%); }
+@media (max-width: 900px) {
+    .ks-cp-hero { padding: 18px 20px !important; border-radius: 24px !important; }
+    .ks-cp-hero-ic { font-size: 48px !important; right: 16px !important; }
+}
+
+/* ── დესკტოპი: გვერდის შიგთავსი მარჯვნივ ბოლომდე (არანაირი max-width) ── */
+@media (min-width: 901px) {
+    body:not(.ks-game) .ks-cmain > :not(.ks-ctop):not(style):not(script) { max-width: none !important; width: 100% !important; align-self: stretch !important; box-sizing: border-box; margin-left: 0 !important; margin-right: 0 !important; }
+    body:not(.ks-game) .ks-cmain .dash-inner { max-width: none !important; width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; }
+}
+
+/* ── ბავშვის პროფილის სურათები ── */
+.ks-avimg { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; background: #fff; }
+.ks-pp-av, .ks-pd-tab-av, .ks-pkid-av, .kh-av { overflow: hidden; }
+.ks-pp-av:has(.ks-avimg), .ks-pd-tab-av:has(.ks-avimg), .ks-pkid-av:has(.ks-avimg), .kh-av:has(.ks-avimg) { padding: 0 !important; background: #fff !important; }
+.ks-avp .ks-add-tab input { position: absolute; opacity: 0; width: 0; height: 0; }
+.ks-avp .ks-add-tab { position: relative; }
+.ks-avp .ks-add-tab:has(input:focus-visible) { outline: 3px solid #FFC49A; }
+.mbox.ks-avp { max-width: 560px !important; }
+.ks-avp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 10px; background: #fff; border-radius: 22px; padding: 14px; box-shadow: 0 2px 0 #ECE9E4; margin-bottom: 14px; }
+.ks-avp-grid[hidden] { display: none; }
+.ks-avp-item { position: relative; margin: 0; cursor: pointer; aspect-ratio: 1; border-radius: 50%; }
+.ks-avp-item input { position: absolute; opacity: 0; width: 0; height: 0; }
+.ks-avp-item img, .ks-avp-item span { width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; object-fit: cover; box-sizing: border-box; border: 3px solid #F1EFEB; background: #fff; transition: transform .12s, border-color .12s; }
+.ks-avp-emoji span { font-size: 34px; background: #F7F6F3; }
+.ks-avp-item:hover img, .ks-avp-item:hover span { border-color: #FFC49A; }
+.ks-avp-item input:checked + img, .ks-avp-item input:checked + span { border-color: #E2590F; box-shadow: 0 0 0 3px #FFD9BF; transform: scale(1.04); }
+.ks-avp-item input:focus-visible + img, .ks-avp-item input:focus-visible + span { outline: 3px solid #FFC49A; outline-offset: 2px; }
+@media (max-width: 900px) { .ks-avp-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; padding: 10px; } }
+
+/* ── ადმინი = მშობელი: „ადმინ რეჟიმი“ ღილაკი მშობლის გარსში ── */
+body.ks-parent { padding-top: 0 !important; }
+.ks-padmin { display: flex; align-items: center; gap: 10px; height: 46px; padding: 0 14px; border-radius: 14px; background: #F1EFEB; color: #FFC49A; text-decoration: none; font-size: 14px; font-weight: 800; border: 1px solid #DDD8D1; }
+.ks-padmin:hover { background: #E6E2DC; color: #FFD9BF; }
+.ks-padmin span { flex: 1; }
+.ks-ctop-r { display: flex; align-items: center; gap: 8px; }
+.ks-padmin-top { height: 40px; padding: 0 12px; border-radius: 20px; background: #C24A0A; color: #FFC49A; text-decoration: none; font-size: 13px; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; }
+.ks-padmin-top:hover { color: #FFD9BF; background: #A33E08; }
+.ks-side-parent { margin-top: 8px; background: #F1EFEB; color: #FFC49A !important; }
+
+/* ── ბავშვის რეჟიმი (ადმინი შვილის სახელით): დაბრუნების ღილაკები ── */
+.ks-cback { display: flex; flex-direction: column; gap: 8px; }
+.ks-cback-l { font-size: 12px; color: #6B625A; font-weight: 700; padding: 0 4px; }
+.ks-cback form { display: flex; flex-direction: column; gap: 6px; margin: 0; }
+.ks-cback-btn { height: 42px; border-radius: 14px; border: 2px solid #FFD9BF; background: #fff; color: #A33E08; font-family: inherit; font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 8px; padding: 0 12px; cursor: pointer; }
+.ks-cback-btn:hover { background: #FFF3EA; }
+.ks-cback-btn.dark, .ks-cback-top.dark { background: #C24A0A; border-color: #2B2622; color: #FFC49A; }
+.ks-cback-btn.dark:hover, .ks-cback-top.dark:hover { background: #A33E08; }
+.ks-cback-top { height: 40px; padding: 0 12px; border-radius: 20px; border: 2px solid #FFD9BF; background: #fff; color: #A33E08; font-family: inherit; font-size: 13px; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.ks-pd-kid-act form { margin: 0; display: contents; }
+
+/* შვილის პარამეტრები: სქესი სიტყვებით (ბიჭი / გოგონა) */
+.ks-set-seg { display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #F1EFEB; flex-shrink: 0; }
+.ks-set-seg label { margin: 0; cursor: pointer; position: relative; }
+.ks-set-seg input { position: absolute; opacity: 0; width: 0; height: 0; }
+.ks-set-seg span { display: inline-flex; align-items: center; height: 34px; padding: 0 14px; border-radius: 999px; font-size: 14px; font-weight: 800; color: #6B625A; }
+.ks-set-seg input:checked + span { background: #E2590F; color: #fff; }
+.ks-set-seg input:focus-visible + span { outline: 3px solid #FFC49A; }
+
+
+/* ==========================================================================
+   ფერთა სისტემა v3: სტაფილოსფერი + თეთრი + ნეიტრალური (შავი/ლურჯი/იასამნისფერი ქარდების გარეშე)
+   ========================================================================== */
+html, body { background-color: #F7F6F3; }
+body.ks-child, body.ks-parent, body.ks-admin, body.ks-landing { background: #F7F6F3 !important; }
+html:has(body.ks-child), html:has(body.ks-parent), html:has(body.ks-admin), html:has(body.ks-landing) { background: #F7F6F3 !important; background-image: none !important; }
+
+/* გვერდითი მენიუები: თეთრი, აქტიური ბმული — სტაფილოსფერი */
+.ks-pside, .ks-admin-side { background: #FFFFFF !important; color: #2B2622 !important; box-shadow: 0 2px 0 #ECE9E4; border: 1px solid #ECE9E4; }
+.ks-pside .ks-cbrand, .ks-side-brand, .ks-side-brand:hover { color: #2B2622 !important; }
+.ks-pside .ks-cbrand-mark, .ks-side-logo { background: #FFF3EA !important; }
+.ks-pbrand-t small, .ks-pplan small { color: #6B625A !important; }
+.ks-side-name small { color: #C24A0A !important; }
+.ks-pnav-lbl, .ks-side-title { color: #8A8078 !important; }
+.ks-pnav a, .ks-side-link { color: #4F473F !important; }
+.ks-pnav a:hover, .ks-side-link:hover { background: #FFF3EA !important; color: #8A3407 !important; }
+.ks-pnav a.on, .ks-side-link.active { background: #E2590F !important; color: #fff !important; }
+.ks-pplan, .ks-side-user { background: #FFF3EA !important; color: #2B2622 !important; }
+.ks-pplan a { color: #C24A0A !important; }
+.ks-pplan a:hover { color: #8A3407 !important; }
+.ks-side-user span { color: inherit; }
+.ks-side-user span span:last-child { color: #6B625A !important; }
+.ks-side-logout { color: #C24A0A !important; }
+.ks-pside .ks-clogout { color: #6B625A !important; }
+.ks-pside .ks-clogout:hover { background: #FFF3EA !important; color: #8A3407 !important; }
+.ks-padmin, .ks-side-parent { background: #FFF3EA !important; color: #8A3407 !important; border: 1px solid #FFD9BF !important; }
+.ks-padmin:hover, .ks-side-parent:hover { background: #FFE3CC !important; color: #8A3407 !important; }
+.ks-padmin-top, .ks-cback-top.dark, .ks-cback-btn.dark { background: #C24A0A !important; border-color: #C24A0A !important; color: #fff !important; }
+.ks-padmin-top:hover, .ks-cback-top.dark:hover, .ks-cback-btn.dark:hover { background: #A33E08 !important; }
+.ks-pkid { background: #F1EFEB !important; color: #4F473F !important; }
+.ks-pkid.on { background: #E2590F !important; color: #fff !important; }
+
+/* ლენდინგი: მუქი სექცია → სტაფილოსფერი, რეკომენდებული გეგმა — სტაფილოსფერი თეთრი ღილაკით */
+.ksl-dark { background: #C24A0A !important; color: #fff; }
+.ksl-dark .ksl-eyebrow { color: #FFE3CC !important; }
+.ksl-dark .ksl-p { color: #FFF3EA !important; }
+.ksl-dark .ksl-arrow { background: #fff !important; border-color: #fff !important; color: #C24A0A !important; }
+.ksl-dark .ksl-dots i { background: rgba(255,255,255,.4) !important; }
+.ksl-dark .ksl-dots i.on { background: #fff !important; }
+.ksl-plan.feat { background: #C24A0A !important; border-color: #C24A0A !important; color: #fff; }
+.ksl-plan.feat .ksl-btn { background: #fff !important; color: #C24A0A !important; }
+.ksl-plan.feat .ksl-btn:hover { background: #FFF3EA !important; }
+.ksl-plan.feat .ksl-plan-badge { background: #fff !important; color: #C24A0A !important; }
+.ksl-plan.feat .ksl-price span { color: #FFE3CC !important; }
+.ksl-brand-mark { background: #FFF3EA !important; }
+.ks-cbrand-mark { background: #FFF3EA !important; }
+.ks-pkid:hover { background: #FFF3EA !important; color: #8A3407 !important; }
+/* HERO ქარდები — ყველა ვარიანტი სტაფილოსფერში */
+.ks-cp-hero, .ks-cp-hero.purple, .ks-cp-hero.blue, .ks-cp-hero.green, .ks-cp-hero.yellow, .ks-cp-hero.dark, .ks-cp-hero.orange { background: linear-gradient(135deg, #E2590F, #C24A0A) !important; color: #fff; }
+.ks-cp-hero .ks-cp-eyebrow, .ks-cp-hero .ks-cp-sub { color: #FFF3EA !important; }
+
+/* ლოგო (public/img/logo.png) — ყველა გარსში KidSmart-ის წარწერის ნაცვლად */
+.ks-logo { height: 34px; width: auto; display: block; }
+.ks-cside .ks-logo, .ks-pside .ks-logo { height: 40px; }
+.ks-pbrand-t, .ks-side-name { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.ks-side-name .ks-logo { height: 38px; }
+.ks-ctop .ks-logo { height: 32px; }

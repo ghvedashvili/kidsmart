@@ -24,13 +24,13 @@
         overflow: hidden;
         padding: 28px 24px 60px;
         gap: 20px;
-        --primary: #6c5ce7;
-        --primary-light: #a29bfe;
-        --primary-soft: #eeebff;
+        --primary: #F07A2E;
+        --primary-light: #FFE3CC;
+        --primary-soft: #FFF3EA;
         --accent-yellow: #fdcb6e;
         --accent-pink: #ff7675;
         --accent-green: #55efc4;
-        --accent-blue: #74b9ff;
+        --accent-blue: #FFC49A;
         --radius-lg: 24px;
         --radius-md: 16px;
         --radius-sm: 12px;
@@ -96,12 +96,12 @@
     }
     .add-mini-btn:hover { background: rgba(255,255,255,0.28); }
     .add-card {
-        background: var(--primary-soft); border: 2px dashed #c9c0f7; border-radius: var(--radius-lg);
+        background: var(--primary-soft); border: 2px dashed #FFE3CC; border-radius: var(--radius-lg);
         display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
         width: 100%; min-height: 140px; padding: 20px 10px; cursor: pointer;
         font-family: inherit; color: var(--primary); transition: all 0.2s;
     }
-    .add-card:hover { border-color: var(--primary-light); background: #e2ddff; }
+    .add-card:hover { border-color: var(--primary-light); background: #FFF3EA; }
     .add-card-plus {
         width: 38px; height: 38px; border-radius: 50%; border: 2px dashed var(--primary-light);
         display: flex; align-items: center; justify-content: center;
@@ -117,7 +117,7 @@
         display: flex; flex-direction: column; gap: 14px;
         padding: 20px;
         box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.01);
-        border: 1px solid #f1f5f9;
+        border: 1px solid #F1EFEB;
         transition: box-shadow 0.2s, transform 0.2s;
     }
     .child-card:hover { box-shadow: 0 10px 28px rgba(0,0,0,0.1); transform: translateY(-2px); }
@@ -132,50 +132,50 @@
     .cc-mheader {
         display: flex; align-items: center; gap: 14px; position: relative;
         border-radius: 18px; padding: 14px 48px 14px 14px; box-sizing: border-box;
-        background: linear-gradient(135deg, var(--primary-soft), #e2ddff);
+        background: linear-gradient(135deg, var(--primary-soft), #FFF3EA);
     }
-    .cc-mheader.boy  { background: linear-gradient(135deg, #eff6ff, #dbeafe); }
-    .cc-mheader.girl { background: linear-gradient(135deg, #fdf2f8, #fce7f3); }
+    .cc-mheader.boy  { background: linear-gradient(135deg, #FFF7F0, #FFF3EA); }
+    .cc-mheader.girl { background: linear-gradient(135deg, #FFF3EA, #FFF3EA); }
     .cc-mavatar {
         width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0; position: relative;
         background: linear-gradient(135deg, var(--primary), var(--primary-light));
         padding: 2px; border: none; cursor: pointer;
     }
-    .cc-mheader.boy  .cc-mavatar { background: linear-gradient(135deg, #3b82f6, #93c5fd); }
-    .cc-mheader.girl .cc-mavatar { background: linear-gradient(135deg, #ec4899, #f9a8d4); }
+    .cc-mheader.boy  .cc-mavatar { background: linear-gradient(135deg, #E2590F, #FFC49A); }
+    .cc-mheader.girl .cc-mavatar { background: linear-gradient(135deg, #F07A2E, #FFE3CC); }
     .cc-mavatar-inner {
         width: 100%; height: 100%; border-radius: 50%; background: #fff;
         display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
     }
     .cc-mheader-info { flex: 1; min-width: 0; }
     .cc-mheader-name {
-        font-family: 'Goldman', monospace; font-size: 1.05rem; color: #1e293b;
+        font-family: 'Goldman', monospace; font-size: 1.05rem; color: #2B2622;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .cc-mheader-code {
         display: inline-flex; margin-top: 6px;
-        font-family: 'Goldman', monospace; font-size: 0.62rem; font-weight: 700; color: #4338ca;
+        font-family: 'Goldman', monospace; font-size: 0.62rem; font-weight: 700; color: #E2590F;
         background: rgba(255,255,255,0.8); border-radius: 8px; padding: 3px 9px; letter-spacing: 0.04em; cursor: pointer;
     }
     .cc-mheader-edit {
         position: absolute; top: 12px; right: 12px; z-index: 1;
         width: 30px; height: 30px; border-radius: 10px; border: none;
-        background: rgba(255,255,255,0.65); color: #4338ca;
+        background: rgba(255,255,255,0.65); color: #E2590F;
         display: flex; align-items: center; justify-content: center; font-size: 0.85rem; cursor: pointer;
     }
 
     .cc-mstat-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
     .cc-mstat {
         display: flex; align-items: center; gap: 7px; min-width: 0;
-        background: #f8fafc; border-radius: 12px; padding: 9px 11px;
+        background: #F7F6F3; border-radius: 12px; padding: 9px 11px;
     }
     .cc-mstat-icon { font-size: 0.95rem; flex-shrink: 0; }
     .cc-mstat-val {
-        font-family: 'Goldman', monospace; font-size: 0.7rem; font-weight: 700; color: #334155;
+        font-family: 'Goldman', monospace; font-size: 0.7rem; font-weight: 700; color: #4F473F;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
     }
-    .cc-mstat.purple  { background: #faf5ff; } .cc-mstat.purple  .cc-mstat-val { color: #7e22ce; }
-    .cc-mstat.blue    { background: #eff6ff; } .cc-mstat.blue    .cc-mstat-val { color: #1d4ed8; }
+    .cc-mstat.purple  { background: #FFF3EA; } .cc-mstat.purple  .cc-mstat-val { color: #E2590F; }
+    .cc-mstat.blue    { background: #FFF7F0; } .cc-mstat.blue    .cc-mstat-val { color: #E2590F; }
     .cc-mstat.amber   { background: #fffbeb; } .cc-mstat.amber   .cc-mstat-val { color: #b45309; }
     .cc-mstat.emerald { background: #ecfdf5; } .cc-mstat.emerald .cc-mstat-val { color: #047857; }
 
@@ -194,12 +194,12 @@
         display: none;
         flex-shrink: 0; width: 76px; border-radius: 18px; position: relative;
         align-items: center; justify-content: center;
-        background: linear-gradient(135deg, var(--primary-soft), #e2ddff);
+        background: linear-gradient(135deg, var(--primary-soft), #FFF3EA);
         border: none; cursor: pointer; padding: 0; transition: transform 0.15s;
     }
     .cc-photo:hover { transform: scale(1.02); }
-    .cc-photo.boy  { background: linear-gradient(135deg, #eff6ff, #dbeafe); }
-    .cc-photo.girl { background: linear-gradient(135deg, #fdf2f8, #fce7f3); }
+    .cc-photo.boy  { background: linear-gradient(135deg, #FFF7F0, #FFF3EA); }
+    .cc-photo.girl { background: linear-gradient(135deg, #FFF3EA, #FFF3EA); }
     @media (min-width: 700px) { .cc-photo { display: flex; width: 150px; } }
 
     .cc-avatar-ring {
@@ -207,8 +207,8 @@
         background: linear-gradient(135deg, var(--primary), var(--primary-light));
         padding: 2px; display: flex; align-items: center; justify-content: center;
     }
-    .cc-photo.boy  .cc-avatar-ring { background: linear-gradient(135deg, #3b82f6, #93c5fd); }
-    .cc-photo.girl .cc-avatar-ring { background: linear-gradient(135deg, #ec4899, #f9a8d4); }
+    .cc-photo.boy  .cc-avatar-ring { background: linear-gradient(135deg, #E2590F, #FFC49A); }
+    .cc-photo.girl .cc-avatar-ring { background: linear-gradient(135deg, #F07A2E, #FFE3CC); }
     @media (min-width: 700px) { .cc-avatar-ring { width: 88px; height: 88px; } }
 
     .cc-avatar-inner {
@@ -218,8 +218,8 @@
     @media (min-width: 700px) { .cc-avatar-inner { font-size: 2.6rem; } }
     .cc-avatar-picker-edit {
         position: absolute; bottom: 8px; right: 8px; width: 24px; height: 24px; border-radius: 50%;
-        background: #fff; color: #334155; font-size: 0.65rem; display: flex; align-items: center; justify-content: center;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.25); border: 1px solid #e2e8f0;
+        background: #fff; color: #4F473F; font-size: 0.65rem; display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.25); border: 1px solid #ECE9E4;
     }
 
     .cc-body { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 14px; }
@@ -234,15 +234,15 @@
         .cc-body .cc-btn-row { display: flex; }
         .cc-body .cc-full-btn-secondary { display: flex; }
     }
-    .cc-name { font-family: 'Goldman', monospace; font-size: 1.2rem; color: #1e293b; letter-spacing: 0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cc-name { font-family: 'Goldman', monospace; font-size: 1.2rem; color: #2B2622; letter-spacing: 0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     .cc-code {
         display: inline-flex; flex-shrink: 0;
-        font-family: 'Goldman', monospace; font-size: 0.64rem; font-weight: 700; color: #64748b;
-        background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 10px; padding: 5px 10px;
+        font-family: 'Goldman', monospace; font-size: 0.64rem; font-weight: 700; color: #6B625A;
+        background: #F1EFEB; border: 1px solid #ECE9E4; border-radius: 10px; padding: 5px 10px;
         letter-spacing: 0.05em; cursor: pointer; white-space: nowrap; transition: background 0.15s, color 0.15s;
     }
-    .cc-code:hover { background: #e2e8f0; color: #334155; }
+    .cc-code:hover { background: #ECE9E4; color: #4F473F; }
 
     .cc-mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     @media (min-width: 700px) { .cc-mini-grid { grid-template-columns: repeat(4, 1fr); } }
@@ -255,8 +255,8 @@
     .cc-mini-text { min-width: 0; overflow: hidden; }
     .cc-mini-label { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.56rem; text-transform: uppercase; letter-spacing: 0.05em; margin: 0; }
     .cc-mini-value { font-family: 'Goldman', monospace; font-size: 0.78rem; font-weight: 700; margin: 1px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .cc-mini.purple  { background: #faf5ff; border-color: #f3e8ff; } .cc-mini.purple  .cc-mini-icon { background: #f3e8ff; color: #9333ea; } .cc-mini.purple  .cc-mini-label { color: #c084fc; } .cc-mini.purple  .cc-mini-value { color: #581c87; }
-    .cc-mini.blue    { background: #eff6ff; border-color: #dbeafe; } .cc-mini.blue    .cc-mini-icon { background: #dbeafe; color: #2563eb; } .cc-mini.blue    .cc-mini-label { color: #60a5fa; } .cc-mini.blue    .cc-mini-value { color: #1e3a8a; }
+    .cc-mini.purple  { background: #FFF3EA; border-color: #FFF3EA; } .cc-mini.purple  .cc-mini-icon { background: #FFF3EA; color: #F07A2E; } .cc-mini.purple  .cc-mini-label { color: #FFC49A; } .cc-mini.purple  .cc-mini-value { color: #C24A0A; }
+    .cc-mini.blue    { background: #FFF7F0; border-color: #FFF3EA; } .cc-mini.blue    .cc-mini-icon { background: #FFF3EA; color: #C24A0A; } .cc-mini.blue    .cc-mini-label { color: #F07A2E; } .cc-mini.blue    .cc-mini-value { color: #C24A0A; }
     .cc-mini.amber   { background: #fffbeb; border-color: #fef3c7; } .cc-mini.amber   .cc-mini-icon { background: #fef3c7; color: #d97706; } .cc-mini.amber   .cc-mini-label { color: #f59e0b; } .cc-mini.amber   .cc-mini-value { color: #78350f; }
     .cc-mini.emerald { background: #ecfdf5; border-color: #d1fae5; } .cc-mini.emerald .cc-mini-icon { background: #d1fae5; color: #059669; } .cc-mini.emerald .cc-mini-label { color: #34d399; } .cc-mini.emerald .cc-mini-value { color: #064e3b; }
 
@@ -275,25 +275,25 @@
         border-radius: 100px; padding: 2px 7px; min-width: 16px; text-align: center;
     }
     .cc-mini-btn {
-        width: 44px; height: 44px; border-radius: 16px; flex-shrink: 0; border: 1px solid #e2e8f0;
+        width: 44px; height: 44px; border-radius: 16px; flex-shrink: 0; border: 1px solid #ECE9E4;
         display: flex; align-items: center; justify-content: center;
-        font-size: 1.05rem; background: #f1f5f9; color: #334155; cursor: pointer; transition: background 0.15s;
+        font-size: 1.05rem; background: #F1EFEB; color: #4F473F; cursor: pointer; transition: background 0.15s;
     }
-    .cc-mini-btn:hover { background: #e2e8f0; }
+    .cc-mini-btn:hover { background: #ECE9E4; }
     .cc-mini-btn:active { transform: scale(0.98); }
 
     .cc-full-btn-secondary {
         display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box;
-        background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 16px;
+        background: #F1EFEB; color: #4F473F; border: 1px solid #ECE9E4; border-radius: 16px;
         padding: 13px 14px; font-family: 'Goldman', monospace; font-size: 0.7rem; letter-spacing: 0.02em;
         cursor: pointer; transition: background 0.15s;
     }
-    .cc-full-btn-secondary:hover { background: #e2e8f0; }
+    .cc-full-btn-secondary:hover { background: #ECE9E4; }
     .cc-full-btn-secondary:active { transform: scale(0.98); }
 
     .cc-share-panel {
         display: none; flex-direction: column; gap: 8px;
-        background: #f8fafc; border-radius: 14px; padding: 12px;
+        background: #F7F6F3; border-radius: 14px; padding: 12px;
         margin-top: -8px;
     }
     .cc-share-panel.open { display: flex; }
@@ -311,7 +311,7 @@
         padding: 9px 8px; font-family: 'Goldman', monospace; font-size: 0.62rem;
         cursor: pointer; transition: background 0.15s; letter-spacing: 0.02em;
     }
-    .cc-share-btn:hover { background: #e2ddff; }
+    .cc-share-btn:hover { background: #FFF3EA; }
     .cc-share-btn.copied { background: #dcfce7; color: #15803d; }
 
 
@@ -349,11 +349,11 @@
         border-radius: 100px; padding: 5px 12px; margin-bottom: 12px; align-self: flex-start;
     }
     .mission-card.resume .mission-badge { color: #b45309; background: rgba(255,255,255,0.9); }
-    .mission-title { font-family: 'Fredoka One', cursive; font-size: 1.2rem; color: #1a1a2e; margin-bottom: 6px; line-height: 1.25; max-width: 60%; }
+    .mission-title { font-family: 'Fredoka One', cursive; font-size: 1.2rem; color: #2B2622; margin-bottom: 6px; line-height: 1.25; max-width: 60%; }
     .mission-sub { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.78rem; color: #4b4b63; margin-bottom: 14px; max-width: 58%; }
     .mission-cta {
         display: inline-flex; align-items: center; justify-content: center; gap: 8px; align-self: flex-start; width: auto; box-sizing: border-box;
-        background: #1a1a2e; color: #fff; font-family: 'Fredoka One', cursive; font-size: 1rem;
+        background: #2B2622; color: #fff; font-family: 'Fredoka One', cursive; font-size: 1rem;
         padding: 13px 22px; border-radius: 16px; text-decoration: none; box-shadow: 0 6px 16px rgba(0,0,0,0.15); transition: transform 0.15s;
     }
     .mission-cta:hover { transform: translateY(-2px); color: #fff; }
@@ -373,7 +373,7 @@
         object-fit: contain; z-index: 0; pointer-events: none;
     }
     .stat-card-4-head { display: flex; align-items: center; gap: 8px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.6rem; color: #999; text-transform: uppercase; letter-spacing: 0.02em; }
-    .stat-card-4-val { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: #1a1a2e; }
+    .stat-card-4-val { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: #2B2622; }
     .stat-card-4-link { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.58rem; color: var(--primary); }
 
 
@@ -419,10 +419,10 @@
         padding: 6px 14px; cursor: pointer; transition: all 0.15s; user-select: none;
     }
     .mchip:hover { border-color: #bbb; color: #444; }
-    .mchip.sel { background: #111; border-color: #111; color: #fff; }
+    .mchip.sel { background: #C24A0A; border-color: #111; color: #fff; }
     .mchip.sel-green { background: #e8f5e9; border-color: #81c784; color: #2e7d32; }
     .msave {
-        width: 100%; background: #111; border: none; border-radius: 8px;
+        width: 100%; background: #C24A0A; border: none; border-radius: 8px;
         font-family: 'Goldman', monospace; font-size: 0.82rem; color: #fff;
         padding: 13px; cursor: pointer; letter-spacing: 0.06em; margin-top: 6px;
         transition: background 0.2s;
@@ -450,7 +450,7 @@
     }
     .wiz-btn-prev { background: transparent; border: 1px solid #ddd; color: #888; }
     .wiz-btn-prev:hover { border-color: #aaa; color: #444; }
-    .wiz-btn-next, .wiz-btn-submit { background: #111; border: none; color: #fff; }
+    .wiz-btn-next, .wiz-btn-submit { background: #C24A0A; border: none; color: #fff; }
     .wiz-btn-next:hover, .wiz-btn-submit:hover { background: #333; }
     .caction {
         font-family: 'Goldman', monospace; font-size: 0.62rem; color: #bbb;
@@ -458,8 +458,8 @@
         text-decoration: none; letter-spacing: 0.04em; transition: all 0.2s; white-space: nowrap;
     }
     .caction:hover { color: #333; border-color: #aaa; }
-    .caction.primary { color: #4f46e5; border-color: #c7d2fe; background: #eef2ff; }
-    .caction.primary:hover { background: #e0e7ff; border-color: #a5b4fc; }
+    .caction.primary { color: #C24A0A; border-color: #FFD9BF; background: #FFF3EA; }
+    .caction.primary:hover { background: #FFE3CC; border-color: #FFC49A; }
     .caction.remind { color: #059669; border-color: #a7f3d0; background: #ecfdf5; }
     .caction.remind:hover { background: #d1fae5; border-color: #6ee7b7; }
     .remind-modal { position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(4px);z-index:1000;display:none;flex-direction:column;align-items:center;justify-content:flex-start;padding:80px 16px 48px;overflow-y:auto; }
@@ -631,10 +631,6 @@
                 </button>
             </div>
         </div>
-        <div class="ks-pp-sec">
-            <h1>ჩემი შვილები</h1>
-            <span>{{ $children->count() }} შვილი</span>
-        </div>
         @else
         <div class="ks-pp-head">
             <div>
@@ -647,133 +643,390 @@
 
         {{-- მშობლის ხედი --}}
         @if(in_array(auth()->user()->role, ['parent', 'admin']))
+        {{-- redesign-kidsmart v3: მშობლის მთავარი = დიზაინი D3 (შვილების პროგრესი) — მთავარი + ანალიტიკა ერთ გვერდზე --}}
         @php
-            $__wkDays = collect(range(6, 0))->map(fn($d) => today()->copy()->subDays($d));
-            $__wkLbl  = ['ორ', 'სამ', 'ოთხ', 'ხუთ', 'პარ', 'შაბ', 'კვი'];
+            $__kid = $children->firstWhere('id', (int) request('kid')) ?? $children->first();
             $__allPending = $children->isEmpty() ? collect() : \App\Models\MarketPurchase::with(['item', 'child'])
                 ->whereIn('child_id', $children->pluck('id'))->where('status', 'pending')->latest()->get();
+            $__pdAv = fn($k) => $k->avatar === 'boy' ? '👦' : ($k->avatar === 'girl' ? '👧' : '🙂');
         @endphp
-        <div class="ks-pp-kids">
-            @foreach($children as $child)
-            @php
-                $s = $child->childSetting;
-                $todayDone = $child->tests()->where('is_olympiad', false)->whereNotNull('completed_at')->whereDate('completed_at', today())->count();
-                $pendingMarket = $__allPending->where('child_id', $child->id)->count();
-                $__wkTests = $child->tests()->whereNotNull('completed_at')
-                    ->where('completed_at', '>=', today()->copy()->subDays(6))
-                    ->get(['completed_at', 'correct_count', 'total_questions']);
-                $__wkCounts = $__wkDays->map(fn($d) => $__wkTests->filter(fn($t) => $t->completed_at->isSameDay($d))->count());
-                $__wkMax = max(1, $__wkCounts->max());
-                $__wkC = $__wkTests->sum('correct_count'); $__wkT = $__wkTests->sum('total_questions');
-                $__wkAvg = $__wkT > 0 ? (int) round($__wkC / $__wkT * 100) : null;
-                $__av = $child->avatar === 'boy' ? '👦' : ($child->avatar === 'girl' ? '👧' : '🙂');
-                $__last = $child->tests()->whereNotNull('completed_at')->latest('completed_at')->first(['correct_count', 'total_questions']);
-                $__lastPct = $__last ? (int) round($__last->correct_count / max(1, $__last->total_questions) * 100) : null;
-                $__dates = $child->tests()->whereNotNull('completed_at')->pluck('completed_at')->map(fn($d) => $d->format('Y-m-d'))->unique();
-                $__streak = 0; $__cur = today();
-                if (!$__dates->contains($__cur->format('Y-m-d'))) { $__cur = $__cur->copy()->subDay(); }
-                while ($__dates->contains($__cur->format('Y-m-d'))) { $__streak++; $__cur = $__cur->copy()->subDay(); }
-                $__link = $child->child_code ? route('child.magic-login', $child->child_code) : null;
-            @endphp
-            <div class="ks-pp-card {{ !$child->is_active ? 'off' : '' }}">
-                @if(!$child->is_active)
-                <div class="ks-pp-off">
-                    <span>⊘ პროფილი გათიშულია</span>
-                    <button type="button" onclick="document.getElementById('plansModal').classList.add('open')">გეგმა ↑</button>
-                </div>
-                @endif
 
-                <div class="ks-pp-card-h">
-                    <button type="button" class="ks-pp-av {{ $child->avatar }}" title="პროფილის არჩევა"
-                        onclick="document.getElementById('avatarModal{{ $child->id }}').classList.add('open')">{{ $__av }}</button>
-                    <div class="ks-pp-name">
-                        <b>{{ $child->name }}</b>
-                        <span>{{ $s?->grade?->name ?? 'კლასი —' }}{{ $s ? ' · დონე ' . $s->difficulty . '/' . ($s->grade?->max_level ?? \App\Models\Grade::DEFAULT_MAX_LEVEL) : '' }}</span>
-                    </div>
-                    @if($todayDone > 0)
-                    <span class="ks-pp-status ok">დღეს აქტიურია</span>
-                    @else
-                    <span class="ks-pp-status">0/1 ტესტი</span>
-                    @endif
-                    <button type="button" class="ks-pp-gear" title="პარამეტრები"
-                        onclick="document.getElementById('editChildModal{{ $child->id }}').classList.add('open')"><i class="bi bi-gear"></i></button>
-                </div>
-
-                <div class="ks-pp-mini">
-                    <div><b>{{ min($todayDone, 1) }}/1</b><span>ტესტი დღეს</span></div>
-                    <div><b>{{ $__lastPct !== null ? $__lastPct . '%' : '—' }}</b><span>ბოლო შედეგი</span></div>
-                    <div><b>{{ $__streak }} დღე</b><span>ზედიზედ</span></div>
-                </div>
-
-                <div class="ks-pp-week">
-                    <div class="ks-pp-week-h">ბოლო 7 დღე <span>{{ $__wkTests->count() }} ტესტი{{ $__wkAvg !== null ? ' · საშ. ' . $__wkAvg . '%' : '' }}</span></div>
-                    <div class="ks-pp-bars" role="img" aria-label="ტესტები ბოლო 7 დღეში: {{ $__wkCounts->implode(', ') }}">
-                        @foreach($__wkDays as $__di => $__d)
-                        @php $__n = $__wkCounts[$__di]; @endphp
-                        <div class="ks-pp-bar" title="{{ $__d->format('d.m') }} — {{ $__n }} ტესტი">
-                            <i class="{{ $__n === 0 ? 'zero' : ($__d->isToday() ? 'today' : '') }}" style="height: {{ $__n === 0 ? 4 : max(12, round($__n / $__wkMax * 64)) }}px"></i>
-                            <span>{{ $__wkLbl[$__d->dayOfWeekIso - 1] }}</span>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
-
-                @if($todayDone === 0 && $child->is_active)
-                <button type="button" class="ks-pp-remind" onclick="openRemind({{ $child->id }}, '{{ addslashes($child->name) }}')">
-                    <i class="bi bi-bell"></i> შეხსენების გაგზავნა
+        <div class="ks-pd-head">
+            <h1>შვილების პროგრესი</h1>
+            <div class="ks-pd-tabs" role="tablist" aria-label="შვილი">
+                @foreach($children as $__k)
+                <a href="{{ route('dashboard', ['kid' => $__k->id]) }}" role="tab" aria-selected="{{ $__kid && $__k->id === $__kid->id ? 'true' : 'false' }}"
+                   class="ks-pd-tab {{ $__kid && $__k->id === $__kid->id ? 'on' : '' }}">
+                    <span class="ks-pd-tab-av {{ $__k->avatar }}">@include('partials.kid-av', ['k' => $__k])</span>{{ $__k->name }}
+                </a>
+                @endforeach
+                <button type="button" class="ks-pd-tab add"
+                    onclick="document.getElementById('{{ $atChildLimit ? 'plansModal' : 'addChildModal' }}').classList.add('open'); {{ $atChildLimit ? '' : 'wizReset();' }}"
+                    @if($atChildLimit) title="{{ $currentPkg->name }} პლანი მხოლოდ {{ $currentPkg->max_children }} ბავშვს იძლევა" @endif>
+                    <i class="bi bi-plus-lg"></i>{{ $atChildLimit ? 'გეგმის განახლება' : 'შვილის დამატება' }}
                 </button>
-                @endif
-                @if(session('reminder_sent_' . $child->id))
-                <div class="ks-pp-remind sent"><i class="bi bi-check-lg"></i> შეხსენება გაიგზავნა</div>
-                @endif
+            </div>
+        </div>
 
-                <div class="ks-pp-btns">
-                    <a href="{{ route('child.hub', $child) }}" class="ks-pp-btn dark">სრულად <i class="bi bi-arrow-right"></i></a>
-                    <a href="{{ route('child.stats', $child) }}" class="ks-pp-btn" title="ანალიტიკა"><i class="bi bi-bar-chart-line"></i></a>
-                    <a href="{{ route('market.index', $child) }}" class="ks-pp-btn" title="მარკეტი"><i class="bi bi-bag"></i>@if($pendingMarket)<span class="ks-pnav-badge">{{ $pendingMarket }}</span>@endif</a>
-                    @if($child->child_code)
-                    <button type="button" class="ks-pp-btn" title="შესვლის გაზიარება" onclick="toggleShare({{ $child->id }})"><i class="bi bi-link-45deg"></i></button>
-                    @endif
-                </div>
+        @if(!$__kid)
+        <div class="ks-pd-empty">
+            <b>ჯერ შვილი არ გყავს დამატებული</b>
+            <span>დაამატე შვილი და აქ გამოჩნდება მისი პროგრესი, ტესტები და შედეგები.</span>
+        </div>
+        @else
+        @php
+            $child = $__kid;
+            $__s      = $child->childSetting;
+            $__all    = $child->tests()->where('is_olympiad', false)->whereNotNull('completed_at')->get(['completed_at', 'correct_count', 'total_questions']);
+            $__total  = $__all->count();
+            $__mon    = today()->startOfWeek(\Carbon\Carbon::MONDAY);
+            $__thisWk = $__all->filter(fn($t) => $t->completed_at->gte($__mon));
+            $__prevWk = $__all->filter(fn($t) => $t->completed_at->gte($__mon->copy()->subWeek()) && $t->completed_at->lt($__mon));
+            $__pctOf  = fn($c) => $c->sum('total_questions') > 0 ? (int) round($c->sum('correct_count') / $c->sum('total_questions') * 100) : null;
+            $__avgAll = $__pctOf($__all);
+            $__avgWk  = $__pctOf($__thisWk);
+            $__avgPrev = $__pctOf($__prevWk);
+            $__dates  = $__all->map(fn($t) => $t->completed_at->format('Y-m-d'))->unique();
+            $__streak = 0; $__cur = today();
+            if (!$__dates->contains($__cur->format('Y-m-d'))) { $__cur = $__cur->copy()->subDay(); }
+            while ($__dates->contains($__cur->format('Y-m-d'))) { $__streak++; $__cur = $__cur->copy()->subDay(); }
+            $__max    = (int) ($__s?->grade?->max_level ?? \App\Models\Grade::DEFAULT_MAX_LEVEL);
+            $__todayDone = $__all->filter(fn($t) => $t->completed_at->isToday())->count();
+            $__coins  = (int) floor($__s?->coins ?? 0);
+            $__kidPending = $__allPending->where('child_id', $child->id);
 
+            $__days   = ['ორშ', 'სამ', 'ოთხ', 'ხუთ', 'პარ', 'შაბ', 'კვი'];
+            $__week   = collect(range(0, 6))->map(function ($i) use ($__mon, $__all) {
+                $d  = $__mon->copy()->addDays($i);
+                $ts = $__all->filter(fn($t) => $t->completed_at->isSameDay($d));
+                return $ts->count() ? (int) round($ts->sum('correct_count') / max(1, $ts->sum('total_questions')) * 100) : 0;
+            });
+
+            $__topics = \App\Models\TestAnswer::query()
+                ->join('test_questions', 'test_answers.test_question_id', '=', 'test_questions.id')
+                ->join('tests', 'test_answers.test_id', '=', 'tests.id')
+                ->join('question_templates', 'test_questions.template_id', '=', 'question_templates.id')
+                ->join('topics', 'question_templates.topic_id', '=', 'topics.id')
+                ->where('tests.child_id', $child->id)->where('tests.is_olympiad', false)
+                ->when($__s?->grade_id, fn($q) => $q->where('tests.grade_id', $__s->grade_id))
+                ->whereNotNull('tests.completed_at')
+                ->selectRaw('topics.name as name, SUM(test_answers.is_correct) as ok, COUNT(*) as n')
+                ->groupBy('topics.name')->get()
+                ->map(fn($r) => (object) ['name' => $r->name, 'pct' => $r->n > 0 ? (int) round($r->ok / $r->n * 100) : 0])
+                ->sortByDesc('pct')->values();
+            $__weak   = $__topics->filter(fn($t) => $t->pct < 70)->sortBy('pct')->first();
+            $__recent = $child->tests()->whereNotNull('completed_at')->with('theme')->latest('completed_at')->take(5)->get();
+            $__prac   = \App\Models\PracticeAnswerLog::where('child_id', $child->id)->whereDate('created_at', today())->count();
+            $__ach    = $child->achievements()->count();
+            $__oly    = $child->tests()->whereNotNull('completed_at')->where('is_olympiad', true)->count();
+            $__link   = $child->child_code ? route('child.magic-login', $child->child_code) : null;
+        @endphp
+
+        {{-- არჩეული შვილის ზოლი: სტატუსი + მოქმედებები --}}
+        <div class="ks-pd-kid {{ !$child->is_active ? 'off' : '' }}">
+            <button type="button" class="ks-pp-av {{ $child->avatar }}" title="პროფილის არჩევა"
+                onclick="document.getElementById('avatarModal{{ $child->id }}').classList.add('open')">@include('partials.kid-av', ['k' => $child])</button>
+            <div class="ks-pd-kid-t">
+                <b>{{ $child->name }}</b>
+                <span>{{ $__s?->grade?->name ?? 'კლასი —' }}{{ $__s ? ' · დონე ' . $__s->difficulty . '/' . $__max : '' }}</span>
+            </div>
+            @if(!$child->is_active)
+            <button type="button" class="ks-pd-chip off" onclick="document.getElementById('plansModal').classList.add('open')">⊘ გათიშულია · გეგმა ↑</button>
+            @elseif($__todayDone > 0)
+            <span class="ks-pd-chip ok"><i class="bi bi-check-lg"></i> დღეს დაწერა</span>
+            @else
+            <span class="ks-pd-chip wait"><i class="bi bi-clock"></i> დღეს ჯერ არა</span>
+            @endif
+            <div class="ks-pd-kid-act">
+                @if(auth()->user()->isAdmin() && $child->is_active)
+                <form method="POST" action="{{ route('child.as-child', $child) }}">
+                    @csrf
+                    <button type="submit" class="ks-pd-btn" title="{{ $child->name }}-ის თვალით ნახვა"><i class="bi bi-person-video2"></i><span>ბავშვის რეჟიმი</span></button>
+                </form>
+                @endif
                 @if($child->child_code)
-                {{-- გაზიარება: კოდი / ბმული / QR — რომელსაც აირჩევს, ის გაზიარდება --}}
-                <div class="cc-share-panel ks-share" id="sharePanel{{ $child->id }}" data-name="{{ $child->name }}" data-code="{{ $child->child_code }}" data-link="{{ $__link }}">
-                    <div class="ks-share-tabs" role="tablist" aria-label="გაზიარების ტიპი">
-                        <button type="button" role="tab" aria-selected="true" data-k="code" onclick="ksShareTab({{ $child->id }}, 'code')">კოდი</button>
-                        <button type="button" role="tab" aria-selected="false" data-k="link" onclick="ksShareTab({{ $child->id }}, 'link')">ბმული</button>
-                        <button type="button" role="tab" aria-selected="false" data-k="qr" onclick="ksShareTab({{ $child->id }}, 'qr')">QR</button>
+                <button type="button" class="ks-pd-btn" onclick="toggleShare({{ $child->id }})"><i class="bi bi-link-45deg"></i><span>შესვლის გაზიარება</span></button>
+                @endif
+                <button type="button" class="ks-pd-btn icon" title="პარამეტრები" aria-label="{{ $child->name }} — პარამეტრები"
+                    onclick="document.getElementById('editChildModal{{ $child->id }}').classList.add('open')"><i class="bi bi-gear"></i></button>
+            </div>
+        </div>
+
+        @if($child->child_code)
+        @push('modals')
+        <div id="shareModal{{ $child->id }}" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+            <div class="mbox ks-add">
+                <div class="ks-add-head">
+                    <h2>შესვლის გაზიარება</h2>
+                    <button type="button" class="ks-set-x" aria-label="დახურვა" onclick="document.getElementById('shareModal{{ $child->id }}').classList.remove('open')">✕</button>
+                </div>
+                <p class="ks-add-note">აირჩიე, როგორ შევიდეს {{ $child->name }}: კოდით, ბმულით ან QR-ით — და გაუზიარე.</p>
+            <div class="cc-share-panel ks-share ks-pd-share open" id="sharePanel{{ $child->id }}" data-name="{{ $child->name }}" data-code="{{ $child->child_code }}" data-link="{{ $__link }}">
+                <div class="ks-share-tabs" role="tablist" aria-label="გაზიარების ტიპი">
+                    <button type="button" role="tab" aria-selected="true" data-k="code" onclick="ksShareTab({{ $child->id }}, 'code')">კოდი</button>
+                    <button type="button" role="tab" aria-selected="false" data-k="link" onclick="ksShareTab({{ $child->id }}, 'link')">ბმული</button>
+                    <button type="button" role="tab" aria-selected="false" data-k="qr" onclick="ksShareTab({{ $child->id }}, 'qr')">QR</button>
+                </div>
+                <div class="ks-share-box" data-p="code"><span class="ks-share-code">{{ $child->child_code }}</span><small>შესვლის ფანჯარაში „ბავშვის“ ტაბზე ჩაწერეთ ეს კოდი</small></div>
+                <div class="ks-share-box" data-p="link" hidden><span class="cc-share-link-text" id="shareLinkText{{ $child->id }}">{{ $__link }}</span><small>ბმულზე გადასვლით ბავშვი პირდაპირ შევა</small></div>
+                <div class="ks-share-box" data-p="qr" hidden><div class="ks-share-qr" id="shareQr{{ $child->id }}"></div><small>დაასკანერეთ ტელეფონით შესასვლელად</small></div>
+                <div class="cc-share-actions">
+                    <button type="button" class="cc-share-btn" id="shareCopyBtn{{ $child->id }}" onclick="ksShareCopy({{ $child->id }})"><i class="bi bi-clipboard"></i> კოპირება</button>
+                    <button type="button" class="cc-share-btn dark" onclick="ksShareSend({{ $child->id }})"><i class="bi bi-share"></i> გაზიარება</button>
+                </div>
+            </div>
+            </div>
+        </div>
+        @endpush
+        @endif
+
+        {{-- KPI --}}
+        <div class="ks-pd-kpis">
+            <a href="{{ route('child.stats', $child) }}" class="ks-pd-kpi">
+                <span>ტესტი სულ</span><b>{{ $__total }}</b>
+                <small class="{{ $__thisWk->count() ? 'up' : '' }}">{{ $__thisWk->count() ? '+' . $__thisWk->count() . ' ამ კვირაში' : 'ამ კვირაში ჯერ არა' }}</small>
+            </a>
+            <div class="ks-pd-kpi">
+                <span>საშუალო შედეგი</span><b>{{ $__avgAll !== null ? $__avgAll . '%' : '—' }}</b>
+                @if($__avgWk !== null && $__avgPrev !== null)
+                <small class="{{ $__avgWk >= $__avgPrev ? 'up' : 'down' }}">{{ $__avgWk >= $__avgPrev ? '+' : '−' }}{{ abs($__avgWk - $__avgPrev) }}% წინა კვირასთან</small>
+                @else
+                <small>{{ $__avgWk !== null ? 'ეს კვირა: ' . $__avgWk . '%' : 'ყველა ტესტით' }}</small>
+                @endif
+            </div>
+            <div class="ks-pd-kpi">
+                <span>დონე</span><b>{{ $__s ? $__s->difficulty . '/' . $__max : '—' }}</b>
+                <small>{{ $__s?->grade?->name ?? '' }}</small>
+            </div>
+            <div class="ks-pd-kpi">
+                <span>ზედიზედ დღეები</span><b>{{ $__streak }}</b>
+                <small>{{ $__todayDone ? 'დღესაც დაწერა' : ($__streak ? 'დღეს გააგრძელოს!' : 'დღეს დაიწყოს!') }}</small>
+            </div>
+            <a href="{{ route('market.index', $child) }}" class="ks-pd-kpi">
+                <span>მონეტები</span><b>{{ $__coins }}</b>
+                <small class="{{ $__kidPending->count() ? 'warn' : '' }}">{{ $__kidPending->count() ? $__kidPending->count() . ' ჯილდო მოთხოვნილია' : 'მოთხოვნა არ არის' }}</small>
+            </a>
+        </div>
+
+        {{-- გრაფიკი + თემები / რჩევა --}}
+        <div class="ks-pd-row">
+            <div class="ks-pd-card ks-pd-wide">
+                <div class="ks-pd-card-h">
+                    <h2>ტესტის შედეგები · ეს კვირა</h2>
+                    <span class="ks-pd-legend"><span><i style="background:#E2590F"></i>85%+</span><span><i style="background:#F7B58A"></i>85%-მდე</span></span>
+                </div>
+                <div class="ks-pd-bars" role="img" aria-label="{{ $child->name }}: {{ $__week->map(fn($v, $i) => $__days[$i] . ' ' . ($v ? $v . '%' : 'არ წერდა'))->implode(', ') }}">
+                    @foreach($__week as $__i => $__v)
+                    <div class="ks-pd-bar">
+                        <span>{{ $__v ? $__v . '%' : '—' }}</span>
+                        <i style="height: {{ $__v ? max(4, round($__v * 0.8)) : 3 }}%; background: {{ $__v >= 85 ? '#E2590F' : ($__v ? '#F7B58A' : '#ECE9E4') }}"></i>
                     </div>
-                    <div class="ks-share-box" data-p="code"><span class="ks-share-code">{{ $child->child_code }}</span><small>შესვლის ფანჯარაში „ბავშვის“ ტაბზე ჩაწერეთ ეს კოდი</small></div>
-                    <div class="ks-share-box" data-p="link" hidden><span class="cc-share-link-text" id="shareLinkText{{ $child->id }}">{{ $__link }}</span><small>ბმულზე გადასვლით ბავშვი პირდაპირ შევა</small></div>
-                    <div class="ks-share-box" data-p="qr" hidden><div class="ks-share-qr" id="shareQr{{ $child->id }}"></div><small>დაასკანერეთ ტელეფონით შესასვლელად</small></div>
-                    <div class="cc-share-actions">
-                        <button type="button" class="cc-share-btn" id="shareCopyBtn{{ $child->id }}" onclick="ksShareCopy({{ $child->id }})"><i class="bi bi-clipboard"></i> კოპირება</button>
-                        <button type="button" class="cc-share-btn dark" onclick="ksShareSend({{ $child->id }})"><i class="bi bi-share"></i> გაზიარება</button>
+                    @endforeach
+                </div>
+                <div class="ks-pd-days">
+                    @foreach($__days as $__i => $__d)
+                    <span class="{{ $__mon->copy()->addDays($__i)->isToday() ? 'today' : '' }}">{{ $__d }}</span>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="ks-pd-side">
+                <div class="ks-pd-card">
+                    <h2>თემების მიხედვით</h2>
+                    @forelse($__topics->take(5) as $__t)
+                    <div class="ks-pd-topic">
+                        <div><span>{{ $__t->name }}</span><span>{{ $__t->pct }}%</span></div>
+                        <div class="ks-pd-topic-bar"><span style="width: {{ max(3, $__t->pct) }}%; background: {{ $__t->pct >= 85 ? '#1E8A4C' : ($__t->pct >= 70 ? '#E2590F' : '#D93B3B') }}"></span></div>
                     </div>
+                    @empty
+                    <p class="ks-pd-muted">ტესტები ჯერ არ დაწერილა — თემების შედეგები აქ გამოჩნდება.</p>
+                    @endforelse
+                </div>
+                <div class="ks-pd-insight">
+                    <span class="ks-pd-insight-ic"><i class="bi bi-lightbulb"></i></span>
+                    <span>
+                        @if($__todayDone === 0)
+                            <b>დღეს ჯერ არ დაუწყია</b>
+                            <small>გაუგზავნე შეხსენება — ერთი ტესტი დღეში საკმარისია.</small>
+                        @elseif($__weak)
+                            <b>{{ $__weak->name }} — უჭირს</b>
+                            <small>ამ თემაში სწორია {{ $__weak->pct }}%. ვარჯიში ამ თემაზე დაეხმარება.</small>
+                        @else
+                            <b>ყოჩაღ, {{ $child->name }}!</b>
+                            <small>{{ $__topics->isNotEmpty() ? 'ყველა თემაში 70%-ზე მეტი სწორი პასუხი აქვს.' : 'დღევანდელი ტესტი დაწერილია.' }}</small>
+                        @endif
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        {{-- ბოლო ტესტები + დღეს / მოთხოვნები --}}
+        <div class="ks-pd-row">
+            <div class="ks-pd-card ks-pd-wide" id="tests">
+                <div class="ks-pd-card-h">
+                    <h2>ბოლო ტესტები</h2>
+                    @if($__recent->count())<a href="{{ route('child.stats', $child) }}" class="ks-pd-more">ყველა →</a>@endif
+                </div>
+                @if($__recent->isEmpty())
+                <p class="ks-pd-muted">ტესტები ჯერ არ დაწერილა.</p>
+                @else
+                <div class="ks-pd-table-wrap">
+                    <table class="ks-pd-table">
+                        <thead><tr><th>თარიღი</th><th>თემატიკა</th><th>სწორი</th><th>შედეგი</th><th></th></tr></thead>
+                        <tbody>
+                        @foreach($__recent as $__rt)
+                        @php $__rp = (int) round($__rt->correct_count / max(1, $__rt->total_questions) * 100); @endphp
+                        <tr>
+                            <td>{{ $__rt->completed_at->format('d.m · H:i') }}</td>
+                            <td class="b">{{ $__rt->is_olympiad ? '🏆 ოლიმპიადა' : ($__rt->theme?->name ?? 'ტესტი') }}</td>
+                            <td>{{ $__rt->correct_count }}/{{ $__rt->total_questions }}</td>
+                            <td><span class="ks-pd-score {{ $__rp >= 85 ? 'hi' : ($__rp >= 70 ? 'mid' : 'lo') }}">{{ $__rp }}%</span></td>
+                            <td class="r"><a href="{{ route('child.test.show', [$child, $__rt]) }}">ნახვა</a></td>
+                        </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
                 </div>
                 @endif
             </div>
-            @endforeach
+
+            <div class="ks-pd-side">
+                <div class="ks-pd-card">
+                    <h2>დღეს</h2>
+                    <p class="ks-pd-today">
+                        {{ min($__todayDone, 1) }}/1 ტესტი{{ $__todayDone ? ' · დაწერილია ✓' : ' · ჯერ არ დაუწყია' }}<br>
+                        ვარჯიში: {{ $__prac }} პასუხი
+                    </p>
+                    @if(session('reminder_sent_' . $child->id))
+                    <div class="ks-pp-remind sent"><i class="bi bi-check-lg"></i> შეხსენება გაიგზავნა</div>
+                    @elseif($child->is_active)
+                    <button type="button" class="ks-pd-remind {{ $__todayDone ? 'soft' : '' }}" onclick="openRemind({{ $child->id }}, '{{ addslashes($child->name) }}')">
+                        <i class="bi bi-bell"></i> {{ $child->name }}ს შეხსენება
+                    </button>
+                    @endif
+                </div>
+
+                @if($__allPending->isNotEmpty())
+                @php $__fp = $__kidPending->first() ?? $__allPending->first(); @endphp
+                <a href="{{ route('market.index', $__fp->child_id) }}" class="ks-pp-req">
+                    <span class="ks-pp-req-ic"><i class="bi bi-bag"></i></span>
+                    <span class="ks-pp-req-t">
+                        <b>{{ $__allPending->count() }} ახალი მოთხოვნა</b>
+                        <small>{{ $__fp->child?->name }}-ს სურს: {{ $__fp->item?->title }} · {{ $__fp->coins_spent }} მონეტა</small>
+                    </span>
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+                @endif
+
+                <div class="ks-pd-links">
+                    <a href="{{ route('child.practice-stats', $child) }}"><i class="bi bi-bullseye" style="color:#C24A0A"></i>ვარჯიში</a>
+                    <a href="{{ route('child.olympiad-stats', $child) }}"><i class="bi bi-trophy" style="color:#E2590F"></i>ოლიმპიადა · {{ $__oly }}</a>
+                    <a href="{{ route('child.achievements', $child) }}"><i class="bi bi-award" style="color:#C24A0A"></i>მედლები · {{ $__ach }}</a>
+                </div>
+            </div>
         </div>
-
-        <button type="button" class="ks-pp-addkid"
-            onclick="document.getElementById('{{ $atChildLimit ? 'plansModal' : 'addChildModal' }}').classList.add('open'); {{ $atChildLimit ? '' : 'wizReset();' }}"
-            @if($atChildLimit) title="{{ $currentPkg->name }} პლანი მხოლოდ {{ $currentPkg->max_children }} ბავშვს იძლევა" @endif>
-            <i class="bi bi-plus-lg"></i> {{ $atChildLimit ? 'გეგმის განახლება — შვილის დასამატებლად' : 'შვილის დამატება' }}
-        </button>
-
-        @if($__allPending->isNotEmpty())
-        @php $__fp = $__allPending->first(); @endphp
-        <a href="{{ route('market.index', $__fp->child_id) }}" class="ks-pp-req">
-            <span class="ks-pp-req-ic"><i class="bi bi-bag"></i></span>
-            <span class="ks-pp-req-t">
-                <b>{{ $__allPending->count() }} ახალი მოთხოვნა მარკეტში</b>
-                <small>{{ $__fp->child?->name }}-ს სურს: {{ $__fp->item?->title }} · {{ $__fp->coins_spent }} მონეტა</small>
-            </span>
-            <i class="bi bi-chevron-right"></i>
-        </a>
         @endif
+<style>
+/* ── redesign-kidsmart v3: მშობლის მთავარი (D3) ── */
+.ks-parent-dash .dash-inner { max-width: 1240px; }
+.ks-pd-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px; }
+.ks-pd-head h1 { margin: 0; font-size: var(--fs-display, clamp(28px, calc(1.375rem + 1.5vw), 40px)); line-height: .95; font-weight: 900; font-stretch: 66%; text-transform: uppercase; color: #2B2622; }
+.ks-pd-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.ks-pd-tab { height: 48px; padding: 0 16px 0 5px; border-radius: 24px; background: #fff; color: #2B2622; border: 2px solid #ECE9E4; font-family: inherit; font-size: 15px; font-weight: 800; display: inline-flex; align-items: center; gap: 9px; text-decoration: none; cursor: pointer; }
+.ks-pd-tab:hover { color: #2B2622; border-color: #FFC49A; }
+.ks-pd-tab.on, .ks-pd-tab.on:hover { background: #E2590F; border-color: #E2590F; color: #fff; }
+.ks-pd-tab-av { width: 36px; height: 36px; border-radius: 50%; background: #FFD9BF; display: flex; align-items: center; justify-content: center; font-size: 19px; }
+.ks-pd-tab-av.boy { background: #FFF3EA; } .ks-pd-tab-av.girl { background: #FFF3EA; }
+.ks-pd-tab.add { border-style: dashed; border-color: #D9D4CC; background: transparent; color: #4F473F; padding: 0 16px; gap: 6px; font-weight: 700; font-size: 14px; }
+.ks-pd-empty { background: #fff; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 0 #ECE9E4; }
+.ks-pd-empty b { font-size: 18px; } .ks-pd-empty span { color: #6B625A; }
+
+.ks-pd-kid { background: #FFFFFF; border: 2px solid #FFD9BF; border-radius: 24px; padding: 12px 14px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 6px 18px rgba(226,89,15,.10); }
+.ks-pd-kid.off { opacity: .7; }
+.ks-pd-kid .ks-pp-av { flex-shrink: 0; }
+.ks-pd-kid-t { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.ks-pd-kid-t b { font-size: 18px; font-weight: 800; }
+.ks-pd-kid-t span { font-size: 13px; color: #6B625A; }
+.ks-pd-chip { border: none; font-family: inherit; font-size: 13px; font-weight: 800; border-radius: 999px; padding: 7px 12px; display: inline-flex; align-items: center; gap: 5px; }
+.ks-pd-chip.ok { background: #DFF5E3; color: #14612F; }
+.ks-pd-chip.wait { background: #FFE3CC; color: #8A3407; }
+.ks-pd-chip.off { background: #FDE2E2; color: #A12626; cursor: pointer; }
+.ks-pd-kid-act { margin-left: auto; display: flex; gap: 8px; }
+.ks-pd-btn { height: 44px; padding: 0 16px; border-radius: 22px; border: 2px solid #FFD9BF; background: #fff; color: #A33E08; font-family: inherit; font-size: 14px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; gap: 7px; cursor: pointer; }
+.ks-pd-btn:hover { background: #FFF3EA; }
+.ks-pd-btn .bi { font-size: 18px; }
+.ks-pd-btn.icon { width: 44px; padding: 0; }
+.ks-pd-share { border-radius: 20px !important; background: #fff !important; border: 2px solid #FFF3EA !important; padding: 14px !important; flex-direction: column; gap: 12px; }
+.ks-pd-share.open { display: flex !important; }
+
+.ks-pd-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; }
+.ks-pd-kpi { background: #fff; border-radius: 22px; padding: 16px 18px; display: flex; flex-direction: column; gap: 3px; box-shadow: 0 2px 0 #ECE9E4; text-decoration: none; color: #2B2622; }
+a.ks-pd-kpi:hover { color: #2B2622; box-shadow: 0 2px 0 #E2DED7, 0 0 0 2px #FFF3EA; }
+.ks-pd-kpi span { font-size: 13px; color: #6B625A; }
+.ks-pd-kpi b { font-size: 28px; line-height: 1.1; font-weight: 900; }
+.ks-pd-kpi small { font-size: 12px; font-weight: 700; color: #6B625A; }
+.ks-pd-kpi small.up { color: #14612F; } .ks-pd-kpi small.down { color: #A12626; } .ks-pd-kpi small.warn { color: #8A3407; }
+
+.ks-pd-row { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+.ks-pd-wide { flex: 2 1 460px; min-width: 0; }
+.ks-pd-side { flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+.ks-pd-card { background: #fff; border-radius: 26px; padding: 22px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 2px 0 #ECE9E4; box-sizing: border-box; }
+.ks-pd-card h2 { margin: 0; font-size: var(--fs-h3, 17px); font-weight: 800; }
+.ks-pd-card-h { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.ks-pd-legend { display: flex; gap: 14px; font-size: 12px; color: #4F473F; }
+.ks-pd-legend span { display: flex; align-items: center; gap: 6px; }
+.ks-pd-legend i { width: 12px; height: 12px; border-radius: 3px; display: block; }
+.ks-pd-bars { height: 200px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 14px; align-items: end; border-bottom: 1px solid #ECE9E4; }
+.ks-pd-bar { height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; }
+.ks-pd-bar span { font-size: 12px; font-weight: 700; color: #4F473F; }
+.ks-pd-bar i { display: block; width: 100%; max-width: 60px; border-radius: 12px 12px 4px 4px; }
+.ks-pd-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 14px; }
+.ks-pd-days span { font-size: 12px; color: #6B625A; text-align: center; }
+.ks-pd-days span.today { color: #2B2622; font-weight: 800; }
+.ks-pd-topic { display: flex; flex-direction: column; gap: 6px; }
+.ks-pd-topic > div:first-child { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; font-weight: 700; }
+.ks-pd-topic-bar { height: 10px; border-radius: 5px; background: #F1EFEB; overflow: hidden; }
+.ks-pd-topic-bar span { display: block; height: 10px; border-radius: 5px; }
+.ks-pd-muted { margin: 0; font-size: 14px; color: #6B625A; }
+.ks-pd-insight { background: #FFF3EA; border-radius: 22px; padding: 16px 18px; display: flex; gap: 12px; align-items: flex-start; }
+.ks-pd-insight-ic { width: 40px; height: 40px; border-radius: 12px; background: #fff; color: #C24A0A; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; }
+.ks-pd-insight > span:last-child { display: flex; flex-direction: column; gap: 3px; }
+.ks-pd-insight b { font-size: 15px; font-weight: 800; color: #7A3206; }
+.ks-pd-insight small { font-size: 13px; line-height: 1.45; color: #8A3D0B; }
+.ks-pd-more { font-size: 13px; font-weight: 800; color: #C24A0A; text-decoration: none; }
+.ks-pd-table-wrap { overflow-x: auto; }
+.ks-pd-table { width: 100%; min-width: 460px; border-collapse: collapse; font-size: 14px; }
+.ks-pd-table th { text-align: left; font-size: 12px; font-weight: 700; color: #6B625A; padding: 8px 10px; }
+.ks-pd-table td { padding: 12px 10px; border-top: 1px solid #F1EFEB; }
+.ks-pd-table td.b { font-weight: 700; }
+.ks-pd-table td.r { text-align: right; }
+.ks-pd-table td a { font-weight: 800; color: #C24A0A; text-decoration: none; }
+.ks-pd-score { font-weight: 800; border-radius: 999px; padding: 4px 10px; }
+.ks-pd-score.hi { background: #DFF5E3; color: #14612F; } .ks-pd-score.mid { background: #FFE3CC; color: #8A3407; } .ks-pd-score.lo { background: #FDE2E2; color: #A12626; }
+.ks-pd-today { margin: 0; font-size: 14px; line-height: 1.6; color: #4F473F; }
+.ks-pd-remind { height: 48px; border-radius: 24px; border: none; background: #C24A0A; color: #fff; font-family: inherit; font-size: 15px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
+.ks-pd-remind:hover { background: #A33E08; }
+.ks-pd-remind.soft { background: #F1EFEB; color: #2B2622; }
+.ks-pd-remind.soft:hover { background: #E6E2DC; }
+.ks-pd-links { display: flex; flex-wrap: wrap; gap: 8px; }
+.ks-pd-links a { flex: 1 1 120px; height: 46px; border-radius: 16px; background: #fff; box-shadow: 0 2px 0 #ECE9E4; color: #2B2622; text-decoration: none; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 7px; }
+.ks-pd-links a:hover { color: #2B2622; background: #FFFFFF; }
+.ks-pd-links .bi { font-size: 17px; }
+@media (max-width: 640px) {
+    .ks-pd-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .ks-pd-kpi { padding: 12px 14px; border-radius: 18px; }
+    .ks-pd-kpi b { font-size: 22px; }
+    .ks-pd-card { padding: 16px; border-radius: 22px; }
+    .ks-pd-bars, .ks-pd-bar { height: 150px; }
+    .ks-pd-bars, .ks-pd-days { gap: 6px; }
+    .ks-pd-bar i { border-radius: 8px 8px 3px 3px; }
+    .ks-pd-bar span { font-size: 10px; }
+    .ks-pd-kid-act { margin-left: 0; width: 100%; }
+    .ks-pd-kid-act .ks-pd-btn:not(.icon) { flex: 1; }
+    .ks-pd-tab { height: 44px; font-size: 14px; }
+    .ks-pd-tab-av { width: 32px; height: 32px; font-size: 17px; }
+}
+</style>
         @endif
 
 
@@ -795,8 +1048,8 @@
         ];
         @endphp
 
-        {{-- ადმინის ხედი --}}
-        @if(auth()->user()->role === 'admin')
+        {{-- ადმინის ხედი: ადმინი აქ მშობლად ხედავს გვერდს, ადმინის გვერდები — „ადმინ რეჟიმი“ ღილაკით --}}
+        @if(false)
         <div class="section-label">გვერდები · {{ count($_adminMap) + 1 }}</div>
         <div class="nav-tile-grid">
             <a href="{{ route('test.preview') }}" class="nav-tile">
@@ -837,7 +1090,7 @@
 
 
 
-        @if(auth()->user()->isAdmin())
+        @if(false)
         <a href="{{ route('admin.panel') }}" style="font-family:'Goldman',monospace;font-size:0.72rem;color:#999;letter-spacing:0.06em;text-decoration:none;">
             admin →
         </a>
@@ -874,20 +1127,19 @@
             <input type="hidden" name="difficulty" value="{{ $es?->difficulty ?? 1 }}">
             <input type="hidden" name="notify_form" value="1">
 
-            {{-- ავატარი --}}
-            <div class="ks-set-avs" role="radiogroup" aria-label="ავატარი">
-                @foreach(['boy' => '👦', 'girl' => '👧'] as $__ak => $__ae)
-                <label class="ks-set-av {{ $__ak }}">
-                    <input type="radio" name="avatar" value="{{ $__ak }}" @checked($child->avatar === $__ak)>
-                    <span>{{ $__ae }}</span>
-                </label>
-                @endforeach
-            </div>
 
-            <div class="ks-set-card">
+            <div class="ks-set-card ks-set-main">
                 <div class="ks-set-row">
                     <label for="ename{{ $child->id }}">სახელი</label>
                     <input type="text" id="ename{{ $child->id }}" name="name" value="{{ $child->name }}" maxlength="50" autocomplete="off">
+                </div>
+                <div class="ks-set-row" role="radiogroup" aria-labelledby="egl{{ $child->id }}">
+                    <label id="egl{{ $child->id }}">სქესი</label>
+                    <div class="ks-set-seg">
+                        @foreach(['boy' => 'ბიჭი', 'girl' => 'გოგონა'] as $__ak => $__al)
+                        <label><input type="radio" name="avatar" value="{{ $__ak }}" @checked($child->avatar === $__ak)><span>{{ $__al }}</span></label>
+                        @endforeach
+                    </div>
                 </div>
                 <div class="ks-set-row">
                     <label for="egid{{ $child->id }}">კლასი</label>
@@ -911,7 +1163,7 @@
             </div>
 
             <div class="ks-set-sub">შეტყობინებები მშობელს</div>
-            <div class="ks-set-card">
+            <div class="ks-set-card ks-set-notif">
                 @foreach(\App\Models\ChildSetting::PARENT_NOTIFY as $__nk => [$__nt, $__nd])
                 @php $__on = $es ? $es->wantsParentNotify($__nk) : true; @endphp
                 <label class="ks-set-row ks-set-sw">
@@ -937,18 +1189,38 @@
     </div>
 </div>
 
+@php $__avG = in_array($child->avatar, ['boy', 'girl']) ? $child->avatar : 'boy'; @endphp
 <div id="avatarModal{{ $child->id }}" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
-    <div class="mbox" style="max-width:320px;">
-        <div class="modal-title">
-            პროფილის არჩევა
-            <button type="button" class="modal-close"
+    <div class="mbox ks-add ks-avp">
+        <div class="ks-add-head">
+            <h2>პროფილის სურათი</h2>
+            <button type="button" class="ks-set-x" aria-label="დახურვა"
                 onclick="document.getElementById('avatarModal{{ $child->id }}').classList.remove('open')">✕</button>
         </div>
-        <form method="POST" action="{{ route('child.avatar.update', $child) }}"
-            style="display:flex;gap:14px;justify-content:center;padding:8px 0 4px;">
+        <form method="POST" action="{{ route('child.avatar.update', $child) }}">
             @csrf @method('PUT')
-            <button type="submit" name="avatar" value="boy" style="background:{{ $child->avatar === 'boy' ? '#eef2ff' : '#fafafa' }};border:2px solid {{ $child->avatar === 'boy' ? '#818cf8' : '#eee' }};border-radius:14px;padding:18px 20px;font-size:2.2rem;cursor:pointer;transition:all 0.15s;">👦</button>
-            <button type="submit" name="avatar" value="girl" style="background:{{ $child->avatar === 'girl' ? '#fdf2f8' : '#fafafa' }};border:2px solid {{ $child->avatar === 'girl' ? '#f9a8d4' : '#eee' }};border-radius:14px;padding:18px 20px;font-size:2.2rem;cursor:pointer;transition:all 0.15s;">👧</button>
+            @if(in_array($child->avatar, ['boy', 'girl']))
+            <input type="hidden" name="avatar" value="{{ $child->avatar }}">
+            @else
+            <div class="ks-add-tabs" role="radiogroup" aria-label="სქესი">
+                @foreach(['boy' => 'ბიჭი', 'girl' => 'გოგონა'] as $__g => $__gl)
+                <label class="ks-add-tab {{ $__avG === $__g ? 'on' : '' }}">
+                    <input type="radio" name="avatar" value="{{ $__g }}" class="ks-avp-g" @checked($__avG === $__g) onchange="ksAvGender(this)">{{ $__gl }}
+                </label>
+                @endforeach
+            </div>
+            @endif
+            @foreach(['boy', 'girl'] as $__g)
+            <div class="ks-avp-grid" data-g="{{ $__g }}" @if($__avG !== $__g) hidden @endif>
+                @foreach(\App\Models\User::avatarChoices($__g) as $__img)
+                <label class="ks-avp-item">
+                    <input type="radio" name="avatar_img" value="{{ $__img }}" @checked($child->avatarKey() === $__img)>
+                    <img src="{{ asset('avatars/' . $__img . '.webp') }}" alt="" loading="lazy">
+                </label>
+                @endforeach
+            </div>
+            @endforeach
+            <button type="submit" class="msave">შენახვა</button>
         </form>
     </div>
 </div>
@@ -981,40 +1253,27 @@
 {{-- Add Child Modal --}}
 @if(in_array(auth()->user()->role, ['parent', 'admin']))
 <div id="addChildModal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
-    <div class="mbox">
-        {{-- Tab switcher --}}
-        <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid #f0f0f0;">
-            <button type="button" id="tabNew" onclick="switchChildTab('new')"
-                style="flex:1;background:none;border:none;border-bottom:2px solid #111;margin-bottom:-2px;
-                font-family:'Goldman',monospace;font-size:0.72rem;letter-spacing:0.06em;color:#111;
-                padding:8px;cursor:pointer;">
-                + ახალი ბავშვი
-            </button>
-            <button type="button" id="tabLink" onclick="switchChildTab('link')"
-                style="flex:1;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;
-                font-family:'Goldman',monospace;font-size:0.72rem;letter-spacing:0.06em;color:#aaa;
-                padding:8px;cursor:pointer;">
-                🔗 კოდით მიბმა
-            </button>
+    <div class="mbox ks-add">
+        <div class="ks-add-head">
+            <h2>შვილის დამატება</h2>
+            <button type="button" class="ks-set-x" aria-label="დახურვა" onclick="document.getElementById('addChildModal').classList.remove('open')">✕</button>
+        </div>
+        <div class="ks-add-tabs" role="tablist" aria-label="დამატების გზა">
+            <button type="button" id="tabNew" role="tab" aria-selected="true" class="ks-add-tab on" onclick="switchChildTab('new')"><i class="bi bi-plus-lg"></i> ახალი ბავშვი</button>
+            <button type="button" id="tabLink" role="tab" aria-selected="false" class="ks-add-tab" onclick="switchChildTab('link')"><i class="bi bi-link-45deg"></i> კოდით მიბმა</button>
         </div>
 
         {{-- Tab: Link by code --}}
         <div id="panelLink" style="display:none;">
-            <div class="modal-title" style="margin-bottom:12px;">
-                კოდით მიბმა
-                <button type="button" class="modal-close" onclick="document.getElementById('addChildModal').classList.remove('open')">✕</button>
-            </div>
-            <p style="font-family:'Goldman',monospace;font-size:0.7rem;color:#888;letter-spacing:0.04em;margin:0 0 16px;">
-                შვილის კოდი ჩაწერე — ბავშვი შენს ანგარიშსაც დაემატება
-            </p>
-            <form method="POST" action="{{ route('child.link') }}">
+            <p class="ks-add-note">ჩაწერე შვილის კოდი — ბავშვი შენს ანგარიშსაც დაემატება (მაგ. მეორე მშობლისთვის).</p>
+            <form method="POST" action="{{ route('child.link') }}" class="ks-add-card">
                 @csrf
                 <div class="mlbl">ბავშვის კოდი <span>*</span></div>
                 <input type="text" name="child_code" class="minput" placeholder="მაგ: AB3K7F"
                     value="{{ old('child_code') }}" required maxlength="8" autocomplete="off"
                     style="text-transform:uppercase;letter-spacing:0.12em;">
                 @error('child_code_link')<div class="merr">{{ $message }}</div>@enderror
-                <button type="submit" class="msave">🔗 მიბმა</button>
+                <button type="submit" class="msave"><i class="bi bi-link-45deg"></i> მიბმა</button>
             </form>
         </div>
 
@@ -1022,14 +1281,10 @@
         <div id="panelNew">
         <form method="POST" action="{{ route('child.store') }}" id="addChildForm">
             @csrf
-            <div class="modal-title">
-                შვილის დამატება
-                <button type="button" class="modal-close" onclick="document.getElementById('addChildModal').classList.remove('open')">✕</button>
-            </div>
-
+            <div class="ks-add-steps" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
 
             {{-- Step 1: Name + gender --}}
-            <div class="wiz-step" data-step="1">
+            <div class="wiz-step ks-add-card" data-step="1">
                 <div class="wiz-step-title">ვინ არის შენი შვილი?</div>
 
                 <div class="mlbl">სახელი <span>*</span></div>
@@ -1041,9 +1296,9 @@
                 <div class="mlbl">სქესი <span>*</span></div>
                 <div class="mrow" id="genderRow">
                     <label class="mchip {{ old('avatar') == 'boy' ? 'sel' : '' }}"
-                        onclick="chipSingle(this,'avatar_input','boy')">👦 ბიჭი</label>
+                        onclick="chipSingle(this,'avatar_input','boy')">ბიჭი</label>
                     <label class="mchip {{ old('avatar') == 'girl' ? 'sel' : '' }}"
-                        onclick="chipSingle(this,'avatar_input','girl')">👧 გოგონა</label>
+                        onclick="chipSingle(this,'avatar_input','girl')">გოგონა</label>
                 </div>
                 <input type="hidden" name="avatar" id="avatar_input" value="{{ old('avatar') }}">
                 @error('avatar')<div class="merr">{{ $message }}</div>@enderror
@@ -1051,7 +1306,7 @@
             </div>
 
             {{-- Step 2: Grade --}}
-            <div class="wiz-step" data-step="2">
+            <div class="wiz-step ks-add-card" data-step="2">
                 <div class="wiz-step-title">რომელ კლასშია?</div>
 
                 <div class="mlbl">კლასი <span>*</span></div>
@@ -1067,7 +1322,7 @@
             </div>
 
             {{-- Step 3: Theme (optional) --}}
-            <div class="wiz-step" data-step="3">
+            <div class="wiz-step ks-add-card" data-step="3">
                 <div class="wiz-step-title">ბოლო ნაბიჯი — თემატიკა</div>
 
                 @if($themes->count())
@@ -1075,7 +1330,7 @@
                     $addThemeOld = old('theme_ids', []);
                     $addDefaultThemeId = $defaultThemeId ?? null;
                 @endphp
-                <div class="mlbl">თემატიკა <span style="color:#aaa;font-size:0.9em;">(სურვილისამებრ)</span></div>
+                <div class="mlbl">თემატიკა <span class="opt">(სურვილისამებრ)</span></div>
                 <div class="mrow" id="addThemeRow">
                     @foreach($themes as $theme)
                     @php
@@ -1123,7 +1378,7 @@
             თქვენი მიმდინარე გეგმა (<strong>{{ $currentPkg->name }}</strong>) მხოლოდ <strong>{{ $currentPkg->max_children }}</strong> ბავშვს იძლევა. მეტი ბავშვის დასამატებლად გადადით უფრო მაღალ გეგმაზე.
         </div>
         @endif
-        <div style="font-family:'Goldman',monospace;font-size:0.65rem;color:#94a3b8;letter-spacing:0.06em;margin-bottom:14px;">
+        <div style="font-family:'Goldman',monospace;font-size:0.65rem;color:#8A8078;letter-spacing:0.06em;margin-bottom:14px;">
             გეგმის შესაცვლელად მიმართეთ ადმინს
         </div>
 
@@ -1131,13 +1386,13 @@
 
         @foreach($allPkgs as $pkg)
         @php $isCurrent = $currentPkg->id && $currentPkg->id === $pkg->id; @endphp
-        <div style="border:{{ $isCurrent ? '2px solid #3b82f6' : '1px solid #e2e8f0' }};border-radius:10px;padding:16px 18px;margin-bottom:10px;position:relative;">
+        <div style="border:{{ $isCurrent ? '2px solid #E2590F' : '1px solid #ECE9E4' }};border-radius:10px;padding:16px 18px;margin-bottom:10px;position:relative;">
             @if($isCurrent)
-            <span style="position:absolute;top:10px;right:12px;background:#eff6ff;color:#3b82f6;font-size:0.58rem;padding:2px 8px;border-radius:8px;font-family:'Goldman',monospace;letter-spacing:0.06em;">მიმდინარე</span>
+            <span style="position:absolute;top:10px;right:12px;background:#FFF7F0;color:#E2590F;font-size:0.58rem;padding:2px 8px;border-radius:8px;font-family:'Goldman',monospace;letter-spacing:0.06em;">მიმდინარე</span>
             @endif
-            <div style="font-family:'Goldman',monospace;font-size:0.88rem;font-weight:700;color:#1e293b;margin-bottom:4px;">{{ $pkg->name }}</div>
+            <div style="font-family:'Goldman',monospace;font-size:0.88rem;font-weight:700;color:#2B2622;margin-bottom:4px;">{{ $pkg->name }}</div>
             @if($pkg->description)
-            <div style="font-size:0.7rem;color:#64748b;margin-bottom:10px;">{{ $pkg->description }}</div>
+            <div style="font-size:0.7rem;color:#6B625A;margin-bottom:10px;">{{ $pkg->description }}</div>
             @endif
             <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:0.7rem;color:#374151;margin-bottom:10px;">
                 @if($pkg->is_free)
@@ -1150,7 +1405,7 @@
                 <span>⭐ სირთ. {{ $pkg->max_difficulty === 5 ? 'ყველა' : '1–'.$pkg->max_difficulty }}</span>
             </div>
             @if(!$isCurrent && !$pkg->is_free)
-            <div style="font-family:'Goldman',monospace;font-size:0.62rem;color:#94a3b8;letter-spacing:0.04em;">
+            <div style="font-family:'Goldman',monospace;font-size:0.62rem;color:#8A8078;letter-spacing:0.04em;">
                 გეგმის გასააქტიურებლად დაუკავშირდით ადმინს
             </div>
             @endif
@@ -1165,14 +1420,20 @@
 // redesign-kidsmart: გვერდითი მენიუდან „გეგმის შეცვლა“ → dashboard#plans
 if (location.hash === '#plans') { document.addEventListener('DOMContentLoaded', function () { var m = document.getElementById('plansModal'); if (m) m.classList.add('open'); }); }
 
+function ksAvGender(el) {
+    var f = el.form;
+    f.querySelectorAll('.ks-avp-grid').forEach(function (g) { g.hidden = g.dataset.g !== el.value; });
+    f.querySelectorAll('.ks-add-tab').forEach(function (t) { t.classList.toggle('on', t.contains(el)); });
+}
 function switchChildTab(tab) {
     const isNew = tab === 'new';
     document.getElementById('panelNew').style.display  = isNew ? '' : 'none';
     document.getElementById('panelLink').style.display = isNew ? 'none' : '';
-    document.getElementById('tabNew').style.borderBottomColor  = isNew ? '#111' : 'transparent';
-    document.getElementById('tabNew').style.color  = isNew ? '#111' : '#aaa';
-    document.getElementById('tabLink').style.borderBottomColor = isNew ? 'transparent' : '#111';
-    document.getElementById('tabLink').style.color = isNew ? '#aaa' : '#111';
+    [['tabNew', isNew], ['tabLink', !isNew]].forEach(function (x) {
+        var b = document.getElementById(x[0]);
+        b.classList.toggle('on', x[1]);
+        b.setAttribute('aria-selected', x[1] ? 'true' : 'false');
+    });
 }
 
 function openRemind(childId, childName) {
@@ -1302,6 +1563,8 @@ function ksShareSend(id) {
 }
 
 function toggleShare(childId) {
+    var m = document.getElementById('shareModal' + childId);
+    if (m) { m.classList.add('open'); return; }
     document.getElementById('sharePanel' + childId).classList.toggle('open');
 }
 
@@ -1364,6 +1627,7 @@ function wizGoTo(n) {
     document.getElementById('wizPrevBtn').style.visibility = n === 1 ? 'hidden' : 'visible';
     document.getElementById('wizNextBtn').style.display = n === WIZ_TOTAL ? 'none' : '';
     document.getElementById('wizSubmitBtn').style.display = n === WIZ_TOTAL ? '' : 'none';
+    document.querySelectorAll('.ks-add-steps i').forEach(function (d, i) { d.classList.toggle('on', i < n); });
     wizStep = n;
 }
 

@@ -8,16 +8,16 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Noto Sans Georgian', system-ui, sans-serif; background: #FFF8F1; min-height: 100vh; color: #1D1A17; }
+body { font-family: 'Noto Sans Georgian', system-ui, sans-serif; background: #F7F6F3; min-height: 100vh; color: #2B2622; }
 
-.rs-head { position: relative; overflow: hidden; background: #F7883E; border-radius: 0 0 40px 40px; min-height: 300px; }
+.rs-head { position: relative; overflow: hidden; background: #F7883E; border-radius: 0 0 40px 40px; min-height: 230px; }
 .rs-blob { position: absolute; border-radius: 50%; background: #FFA766; }
 .rs-blob-1 { left: -60px; top: 150px; width: 260px; height: 260px; }
 .rs-blob-2 { right: -30px; top: -60px; width: 220px; height: 220px; }
 .rs-head-in { position: relative; max-width: 760px; margin: 0 auto; padding: 48px 24px 90px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .rs-head-txt { display: flex; flex-direction: column; gap: 8px; }
 .rs-eyebrow { font-size: 14px; font-weight: 700; color: #3D1A04; }
-.rs-title { margin: 0; font-size: clamp(56px, 12vw, 84px); line-height: .9; font-weight: 900; font-stretch: 66%; text-transform: uppercase; color: #fff; max-width: 440px; overflow-wrap: anywhere; }
+.rs-title { margin: 0; font-size: clamp(30px, calc(1.375rem + 3vw), 44px); line-height: .9; font-weight: 900; font-stretch: 66%; text-transform: uppercase; color: #fff; max-width: 440px; overflow-wrap: anywhere; }
 .rs-fox { flex-shrink: 0; margin-top: 20px; }
 .rs-main { max-width: 760px; margin: 0 auto; padding: 0 20px; }
 .rs-score { position: relative; margin-top: -70px; background: #fff; border-radius: 28px; padding: 20px; box-shadow: 0 10px 30px rgba(150,80,20,.15); display: flex; align-items: center; gap: 18px; }
@@ -25,14 +25,14 @@ body { font-family: 'Noto Sans Georgian', system-ui, sans-serif; background: #FF
 .rs-ring-in { width: 76px; height: 76px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; }
 .rs-ring-in span { font-size: 26px; font-weight: 900; line-height: 1; }
 .rs-score-txt { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-.rs-score-big { font-size: 20px; font-weight: 800; }
+.rs-score-big { font-size: 18px; font-weight: 800; }
 .rs-score-sub { font-size: 13px; color: #6B625A; }
 .rs-chip { align-self: flex-start; font-size: 12px; font-weight: 700; border-radius: 999px; padding: 4px 10px; }
 .rs-won { padding-top: 18px; display: flex; flex-direction: column; gap: 12px; }
-.rs-h { font-size: 17px; font-weight: 800; }
+.rs-h { font-size: clamp(20px, calc(1.1rem + .6vw), 24px); font-weight: 800; }
 .rs-won-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
-.rs-tile { border-radius: 20px; padding: 14px; display: flex; align-items: center; gap: 10px; text-decoration: none; color: #1D1A17; min-width: 0; }
-a.rs-tile:hover { color: #1D1A17; filter: brightness(.98); }
+.rs-tile { border-radius: 20px; padding: 14px; display: flex; align-items: center; gap: 10px; text-decoration: none; color: #2B2622; min-width: 0; }
+a.rs-tile:hover { color: #2B2622; filter: brightness(.98); }
 .rs-tile-t { display: flex; flex-direction: column; min-width: 0; }
 .rs-tile-t b { font-size: 20px; font-weight: 900; }
 .rs-tile-t small { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -41,8 +41,8 @@ a.rs-tile:hover { color: #1D1A17; filter: brightness(.98); }
 
 /* Review */
 .review-wrap { max-width: 760px; margin: 0 auto; padding: 8px 20px 40px; box-sizing: border-box; }
-.section-title { font-size: 1.35rem; font-weight: 800; color: #1D1A17; margin: 22px 0 12px; }
-.q-review { background: #fff; border-radius: 22px; padding: 16px 18px; margin-bottom: 12px; border-left: 6px solid #EFE6DC; box-shadow: 0 2px 0 #F1E3D3; }
+.section-title { font-size: 1.35rem; font-weight: 800; color: #2B2622; margin: 22px 0 12px; }
+.q-review { background: #fff; border-radius: 22px; padding: 16px 18px; margin-bottom: 12px; border-left: 6px solid #ECE9E4; box-shadow: 0 2px 0 #ECE9E4; }
 .q-review.correct { border-left-color: #3FAE6E; }
 .q-review.wrong   { border-left-color: #E5484D; }
 .q-review.skipped { border-left-color: #F5B301; }
@@ -51,7 +51,7 @@ a.rs-tile:hover { color: #1D1A17; filter: brightness(.98); }
 .q-badge.correct { background: #1E8A4C; }
 .q-badge.wrong   { background: #C62828; }
 .q-badge.skipped { background: #F5B301; color: #3D2A00; }
-.q-text-r { font-size: 1rem; font-weight: 700; color: #1D1A17; line-height: 1.55; margin-bottom: 8px; }
+.q-text-r { font-size: 1rem; font-weight: 700; color: #2B2622; line-height: 1.55; margin-bottom: 8px; }
 .ans-row { font-size: .9rem; font-weight: 700; }
 .ans-correct { color: #1E7A45; }
 .ans-wrong   { color: #B42318; }
@@ -59,9 +59,9 @@ a.rs-tile:hover { color: #1D1A17; filter: brightness(.98); }
 
 /* Coins + achievements banner */
 .reward-bar { max-width: 760px; margin: 0 auto; padding: 16px 16px 0; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
-.coins-pill { display: inline-flex; align-items: center; gap: 8px; background: #1D1A17; color: #fff; border-radius: 99px; padding: 10px 20px; font-size: 1rem; font-weight: 900; box-shadow: 0 2px 0 #F1E3D3; }
+.coins-pill { display: inline-flex; align-items: center; gap: 8px; background: #C24A0A; color: #fff; border-radius: 99px; padding: 10px 20px; font-size: 1rem; font-weight: 900; box-shadow: 0 2px 0 #ECE9E4; }
 .ach-unlocked { display: flex; flex-wrap: wrap; gap: 8px; }
-.ach-pill { display: inline-flex; align-items: center; gap: 6px; background: #6D4FE0; color: #fff; border-radius: 99px; padding: 8px 16px; font-size: .84rem; font-weight: 800; animation: popIn .4s cubic-bezier(0.34,1.56,0.64,1) both; }
+.ach-pill { display: inline-flex; align-items: center; gap: 6px; background: #E2590F; color: #fff; border-radius: 99px; padding: 8px 16px; font-size: .84rem; font-weight: 800; animation: popIn .4s cubic-bezier(0.34,1.56,0.64,1) both; }
 @keyframes popIn { from { transform: scale(.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 .ach-pill:nth-child(2) { animation-delay: .1s; }
 .ach-pill:nth-child(3) { animation-delay: .2s; }
@@ -70,7 +70,7 @@ a.rs-tile:hover { color: #1D1A17; filter: brightness(.98); }
 /* Bottom */
 .bottom-btns {
     position: fixed; bottom: 0; left: 0; right: 0;
-    background: linear-gradient(to top, #FFF8F1 70%, rgba(255,248,241,0));
+    background: linear-gradient(to top, #F7F6F3 70%, rgba(255,248,241,0));
     padding: 20px 20px calc(16px + env(safe-area-inset-bottom));
     display: flex; flex-direction: column; align-items: center; gap: 6px;
 }
@@ -83,12 +83,12 @@ a.rs-tile:hover { color: #1D1A17; filter: brightness(.98); }
     cursor: pointer; border: none; transition: background .15s;
     text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px;
 }
-.btn-retry { background: #6D4FE0; color: #fff; flex: 2; max-width: 420px; }
-.btn-retry:hover { background: #5A3DD0; color: #fff; }
-.btn-hist { background: #fff; color: #1D1A17; border: 2px solid #F1E3D3 !important; }
-.btn-hist:hover { background: #FFF4EA; color: #1D1A17; }
-.btn-home { background: #F5EFE8; color: #1D1A17; flex: 0 0 52px; padding: 0; }
-.btn-home:hover { background: #EADFD3; }
+.btn-retry { background: #E2590F; color: #fff; flex: 2; max-width: 420px; }
+.btn-retry:hover { background: #E2590F; color: #fff; }
+.btn-hist { background: #fff; color: #2B2622; border: 2px solid #ECE9E4 !important; }
+.btn-hist:hover { background: #FFF3EA; color: #2B2622; }
+.btn-home { background: #F1EFEB; color: #2B2622; flex: 0 0 52px; padding: 0; }
+.btn-home:hover { background: #E6E2DC; }
 
 </style>
 </head>
@@ -125,7 +125,7 @@ a.rs-tile:hover { color: #1D1A17; filter: brightness(.98); }
 
 <main class="rs-main">
     <section class="rs-score" aria-label="შედეგი">
-        <div class="rs-ring" style="background: conic-gradient({{ $__ring }} 0 {{ $pct }}%, #EFE3D6 {{ $pct }}% 100%);">
+        <div class="rs-ring" style="background: conic-gradient({{ $__ring }} 0 {{ $pct }}%, #ECE9E4 {{ $pct }}% 100%);">
             <div class="rs-ring-in"><span>{{ $pct }}%</span></div>
         </div>
         <div class="rs-score-txt">
@@ -147,18 +147,18 @@ a.rs-tile:hover { color: #1D1A17; filter: brightness(.98); }
                 <span class="rs-tile-t"><b>+{{ $achievement_result['coins'] }}</b><small style="color:#6B4A00;">მონეტა · სულ {{ $achievement_result['total_coins'] }}</small></span>
             </div>
             @if(count($__newAch))
-            <a href="{{ route('achievements') }}" class="rs-tile" style="background:#EEE8FF;">
+            <a href="{{ route('achievements') }}" class="rs-tile" style="background:#FFF3EA;">
                 @if($__newAch[0]['image'])
                 <img src="{{ $__newAch[0]['image'] }}" alt="" style="width:34px;height:34px;object-fit:contain;">
                 @else
                 <span style="font-size:28px;line-height:1;">🏅</span>
                 @endif
-                <span class="rs-tile-t"><b style="font-size:14px;line-height:1.25;">{{ count($__newAch) > 1 ? count($__newAch) . ' ახალი მედალი' : 'ახალი მედალი' }}</b><small style="color:#4A3A99;">{{ $__newAch[0]['name'] }}</small></span>
+                <span class="rs-tile-t"><b style="font-size:14px;line-height:1.25;">{{ count($__newAch) > 1 ? count($__newAch) . ' ახალი მედალი' : 'ახალი მედალი' }}</b><small style="color:#A33E08;">{{ $__newAch[0]['name'] }}</small></span>
             </a>
             @else
-            <a href="{{ route('achievements') }}" class="rs-tile" style="background:#EEE8FF;">
+            <a href="{{ route('achievements') }}" class="rs-tile" style="background:#FFF3EA;">
                 <span style="font-size:28px;line-height:1;">🏅</span>
-                <span class="rs-tile-t"><b style="font-size:14px;line-height:1.25;">ჩემი მედლები</b><small style="color:#4A3A99;">ნახე ყველა →</small></span>
+                <span class="rs-tile-t"><b style="font-size:14px;line-height:1.25;">ჩემი მედლები</b><small style="color:#A33E08;">ნახე ყველა →</small></span>
             </a>
             @endif
         </div>

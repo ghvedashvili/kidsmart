@@ -6,230 +6,323 @@
     $__plans = \App\Models\Package::where('is_active', true)->orderBy('sort_order')->orderBy('price_monthly')->get();
     $__featuredId = $__plans->first(fn($p) => !$p->is_free)?->id;
     $__money = fn($v) => rtrim(rtrim(number_format((float) $v, 2, '.', ''), '0'), '.');
+    $__av = fn($k) => asset('avatars/' . (str_starts_with($k, 'g') ? 'girls/' : 'boys/') . $k . '.webp');
 @endphp
 <style>
-    body.ks-landing { padding-top: 0 !important; background: #FFF8F1 !important; }
-    html:has(body.ks-landing) { background: #FFF8F1 !important; background-image: none !important; scroll-padding-top: 80px; }
+    /* redesign-kidsmart: ლენდინგი v2 — სამი ფერის ზოლები (ლურჯი · ყვითელი · სტაფილოსფერი) */
+    body.ks-landing { padding-top: 0 !important; background: #fff !important; }
+    html:has(body.ks-landing) { background: #fff !important; background-image: none !important; scroll-padding-top: 76px; }
     body.ks-landing > nav.fixed-top, body.ks-landing #mobileNav { display: none !important; }
-    .ksl { font-family: 'Noto Sans Georgian', system-ui, sans-serif; color: #1D1A17; overflow-x: clip; }
-    .ksl a { color: inherit; }
-    .ksl-in { max-width: 1200px; margin: 0 auto; padding: clamp(32px, 6vw, 80px) clamp(16px, 4vw, 40px); box-sizing: border-box; }
-    .ksl-head { position: sticky; top: 0; z-index: 50; background: rgba(255,248,241,.94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid #F1E3D3; }
-    .ksl-head-in { max-width: 1200px; margin: 0 auto; padding: 12px clamp(16px, 4vw, 40px); display: flex; align-items: center; gap: 12px 20px; }
-    .ksl-brand { text-decoration: none; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-    .ksl-brand-mark { width: 40px; height: 40px; border-radius: 12px; background: #1D1A17; display: flex; align-items: center; justify-content: center; }
-    .ksl-brand b { font-weight: 800; font-size: 20px; }
-    .ksl-nav { flex: 1; min-width: 0; display: flex; gap: 2px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
-    .ksl-nav::-webkit-scrollbar { display: none; }
-    .ksl-nav a { text-decoration: none; color: #4F473F; font-size: 14px; font-weight: 700; padding: 10px 12px; border-radius: 12px; }
-    .ksl-nav a:hover { background: #FFE3CC; color: #8A3407; }
-    .ksl-head-act { display: flex; gap: 8px; flex-shrink: 0; margin-left: auto; }
-    .ksl-btn { height: 44px; padding: 0 18px; border-radius: 22px; border: none; font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; white-space: nowrap; }
-    .ksl-btn.ghost { background: #fff; border: 2px solid #F1E3D3; color: #1D1A17; }
-    .ksl-btn.ghost:hover { border-color: #1D1A17; }
-    .ksl-btn.primary { background: #C24A0A; color: #fff; }
-    .ksl-btn.primary:hover { background: #A53E08; color: #fff; }
-    .ksl-btn.dark { background: #1D1A17; color: #fff; }
-    .ksl-btn.dark:hover { background: #000; color: #fff; }
-    .ksl-btn.big { height: 58px; padding: 0 28px; border-radius: 29px; font-size: 18px; }
-    .ksl-eyebrow { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #B6460A; }
-    .ksl-h1 { margin: 0; font-size: clamp(54px, 9vw, 104px); line-height: .9; font-weight: 900; font-stretch: 66%; text-transform: uppercase; }
-    .ksl-h2 { margin: 0; font-size: clamp(40px, 5.5vw, 64px); line-height: .92; font-weight: 900; font-stretch: 68%; text-transform: uppercase; }
-    .ksl-p { margin: 0; font-size: 17px; line-height: 1.55; color: #4F473F; }
-    .ksl-sec-head { display: flex; flex-direction: column; gap: 12px; max-width: 760px; margin-bottom: 28px; }
-    .ksl-hero { display: flex; flex-wrap: wrap; align-items: center; gap: 32px; }
-    .ksl-hero-txt { flex: 1 1 420px; display: flex; flex-direction: column; gap: 20px; }
-    .ksl-pill { align-self: flex-start; font-size: 13px; font-weight: 700; color: #8A3407; background: #FFE3CC; border-radius: 999px; padding: 6px 14px; }
-    .ksl-hero-art { flex: 1 1 340px; position: relative; min-height: 340px; display: flex; align-items: center; justify-content: center; }
-    .ksl-blob1 { position: absolute; width: min(420px, 90%); aspect-ratio: 1; border-radius: 48% 52% 40% 60% / 45% 40% 60% 55%; background: #FFB27A; }
-    .ksl-blob2 { position: absolute; width: min(300px, 66%); aspect-ratio: 1; border-radius: 60% 40% 55% 45% / 50% 55% 45% 50%; background: #F7883E; }
-    .ksl-hero-art svg { position: relative; width: min(280px, 70%); height: auto; }
-    .ksl-float { position: absolute; background: #fff; border-radius: 18px; padding: 10px 14px; box-shadow: 0 8px 20px rgba(150,80,20,.15); font-size: 14px; font-weight: 800; }
-    .ksl-float.a { left: 4%; top: 12%; color: #14612F; transform: rotate(-6deg); }
-    .ksl-float.b { right: 4%; bottom: 12%; transform: rotate(4deg); }
-    .ksl-band { background: #fff; border-top: 1px solid #F1E3D3; border-bottom: 1px solid #F1E3D3; }
-    .ksl-split { display: flex; flex-wrap: wrap; gap: 32px; align-items: center; }
-    .ksl-split > * { flex: 1 1 380px; min-width: 0; }
-    .ksl-try { background: #FFE3CC; border-radius: 32px; padding: clamp(18px, 3vw, 28px); display: flex; flex-direction: column; gap: 16px; }
-    .ksl-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
-    .ksl-tab { height: 42px; padding: 0 16px; border-radius: 999px; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; background: #fff; color: #1D1A17; border: 2px solid #fff; }
-    .ksl-tab[aria-selected="true"] { background: #1D1A17; color: #fff; border-color: #1D1A17; }
-    .ksl-q { margin: 0; font-size: clamp(19px, 2vw, 24px); line-height: 1.4; font-weight: 700; }
-    .ksl-opts { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; }
-    .ksl-opt { height: 68px; border-radius: 20px; font-family: inherit; font-size: 26px; font-weight: 800; cursor: pointer; background: #fff; color: #1D1A17; border: 3px solid #fff; }
-    .ksl-opt:hover { border-color: #FFC49A; }
-    .ksl-opt.ok { background: #DFF5E3; color: #14612F; border-color: #1E8A4C; }
-    .ksl-opt.bad { background: #FDE2E2; color: #A12626; border-color: #D93B3B; }
-    .ksl-fb { border-radius: 16px; padding: 12px 16px; font-size: 15px; font-weight: 800; display: none; }
-    .ksl-fb.ok { display: block; background: #fff; color: #14612F; }
-    .ksl-fb.bad { display: block; background: #fff; color: #A12626; }
-    .ksl-levels { flex: 1 1 320px; background: #fff; border-radius: 28px; padding: 24px; display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 10px; align-items: end; box-shadow: 0 2px 0 #F1E3D3; }
-    .ksl-levels div { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-    .ksl-levels i { display: block; width: 100%; border-radius: 12px; background: #EEE8FF; }
-    .ksl-levels .on i { background: #7B5CF0; }
-    .ksl-levels span { font-size: 12px; font-weight: 700; }
-    .ksl-cards2 { flex: 1 1 280px; display: flex; flex-direction: column; gap: 16px; }
-    .ksl-note { border-radius: 24px; padding: 22px; display: flex; flex-direction: column; gap: 6px; }
-    .ksl-note b { font-size: 20px; font-weight: 800; }
-    .ksl-note span { font-size: 15px; line-height: 1.5; }
-    .ksl-dark { background: #1D1A17; color: #fff; }
-    .ksl-dark .ksl-p { color: #E8DCCF; }
-    .ksl-dark .ksl-eyebrow { color: #FFC49A; }
-    .ksl-grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; }
-    .ksl-game { border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 8px; color: #1D1A17; }
-    .ksl-game-ic { width: 48px; height: 48px; border-radius: 14px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; }
-    .ksl-game b { font-size: 17px; font-weight: 800; line-height: 1.25; }
-    .ksl-game span { font-size: 13px; line-height: 1.45; color: #3A332D; }
-    .ksl-grade { border-radius: 24px; padding: 20px; display: flex; flex-direction: column; gap: 6px; }
-    .ksl-grade-n { font-size: 44px; line-height: 1; font-weight: 900; font-stretch: 68%; }
-    .ksl-grade-k { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; }
-    .ksl-grade b { font-size: 17px; font-weight: 800; }
-    .ksl-grade span:last-child { font-size: 13px; line-height: 1.5; color: #3A332D; }
-    .ksl-peach { background: #FFE3CC; }
-    .ksl-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-    .ksl-chips span { background: #fff; border-radius: 999px; padding: 8px 14px; font-size: 13px; font-weight: 700; }
-    .ksl-rewards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
-    .ksl-reward { background: #fff; border-radius: 20px; padding: 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 14px; font-weight: 700; }
-    .ksl-reward b { display: flex; align-items: center; gap: 4px; font-weight: 800; white-space: nowrap; }
-    .ksl-feats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
-    .ksl-feat { background: #fff; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 4px; box-shadow: 0 2px 0 #F1E3D3; }
-    .ksl-feat b { font-size: 16px; font-weight: 800; }
-    .ksl-feat span { font-size: 14px; line-height: 1.5; color: #4F473F; }
-    .ksl-mock { background: #fff; border-radius: 28px; padding: 22px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 12px 30px rgba(150,80,20,.12); }
-    .ksl-mock-bars { height: 130px; display: grid; grid-template-columns: repeat(7, minmax(0,1fr)); gap: 8px; align-items: end; }
-    .ksl-mock-bars i { display: block; border-radius: 8px; background: #B9A8F5; }
-    .ksl-mock-bars i.z { background: #EFE3D6; }
-    .ksl-mock-bars i.t { background: #E2590F; }
-    .ksl-mock-row { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; }
-    .ksl-mock-bar { height: 8px; border-radius: 4px; background: #F4ECE3; overflow: hidden; }
-    .ksl-mock-bar span { display: block; height: 8px; border-radius: 4px; }
-    .ksl-plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; align-items: stretch; }
-    .ksl-plan { border-radius: 28px; padding: 26px; display: flex; flex-direction: column; gap: 16px; background: #FFF8F1; border: 2px solid #F1E3D3; }
-    .ksl-plan.feat { background: #1D1A17; color: #fff; border-color: #1D1A17; }
-    .ksl-plan-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-    .ksl-plan-h b { font-size: 22px; font-weight: 800; }
-    .ksl-plan-badge { font-size: 12px; font-weight: 800; border-radius: 999px; padding: 6px 10px; background: #F7883E; color: #1D1A17; }
-    .ksl-price { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
-    .ksl-price b { font-size: 44px; font-weight: 900; font-stretch: 70%; }
-    .ksl-price span { font-size: 14px; font-weight: 700; color: #6B625A; }
-    .ksl-plan.feat .ksl-price span { color: #E8DCCF; }
-    .ksl-plan ul { margin: 0; padding: 0 0 0 18px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 1.45; }
-    .ksl-plan .ksl-btn { margin-top: auto; height: 54px; border-radius: 27px; justify-content: center; font-size: 16px; }
-    .ksl-plan.feat .ksl-btn { background: #F7883E; color: #1D1A17; }
-    .ksl-plan.feat .ksl-btn:hover { background: #FFA766; }
-    .ksl-cta { position: relative; overflow: hidden; background: #F7883E; border-radius: 36px; padding: clamp(28px, 5vw, 56px); display: flex; flex-wrap: wrap; align-items: center; gap: 24px; }
-    .ksl-cta::before { content: ''; position: absolute; right: -60px; top: -60px; width: 300px; height: 300px; border-radius: 50%; background: #FFA766; }
-    .ksl-cta > * { position: relative; }
-    .ksl-foot { border-top: 1px solid #F1E3D3; }
-    .ksl-foot-in { max-width: 1200px; margin: 0 auto; padding: 24px clamp(16px, 4vw, 40px); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 13px; color: #6B625A; }
-    .ksl-foot a { font-weight: 700; color: #B6460A; }
-    @media (max-width: 900px) {
-        .ksl-nav { display: none; }
-        .ksl-head-act .ghost { display: none; }
-        .ksl-hero-art { min-height: 260px; }
-        .ksl-opt { height: 60px; font-size: 22px; }
+    .ksv { --blue: #3A6BC0; --blue-b: #5584D2; --yel: #F5C431; --yel-b: #F9D86A; --ora: #E2590F; --ora-b: #F07A2E; --ora-s: #C24A0A;
+        font-family: 'Noto Sans Georgian', system-ui, sans-serif; color: #2B2622; overflow-x: clip; background: #fff; }
+    .ksv a { color: inherit; }
+    .ksv-blue { background: var(--blue); color: #fff; }
+    .ksv-yel { background: var(--yel); color: #2B2622; }
+    .ksv-ora { background: var(--ora); color: #fff; }
+    .ksv-in { max-width: 1200px; margin: 0 auto; padding: 72px 40px; box-sizing: border-box; }
+    .ksv-band { display: flex; flex-wrap: wrap; align-items: center; gap: 48px; }
+    .ksv-col { flex: 1 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+    .ksv-h1 { margin: 0; font-size: clamp(36px, 4.4vw, 60px); line-height: .95; font-weight: 900; font-stretch: 66%; text-transform: uppercase; }
+    .ksv-h2 { margin: 0; font-size: clamp(28px, 3.2vw, 42px); line-height: 1; font-weight: 900; font-stretch: 68%; text-transform: uppercase; }
+    .ksv-lead { margin: 0; font-size: 18px; line-height: 1.5; font-weight: 700; }
+    .ksv-yel .ksv-lead { font-weight: 600; }
+    .ksv-pill { align-self: flex-start; background: #fff; color: #2B4F8F; border-radius: 999px; padding: 7px 14px; font-size: 14px; font-weight: 800; }
+    .ksv-btn { height: 56px; padding: 0 26px; border-radius: 28px; border: none; font-family: inherit; font-size: 17px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; cursor: pointer; box-sizing: border-box; white-space: nowrap; }
+    .ksv-btn.yel { background: var(--yel); color: #2B2622; }
+    .ksv-btn.yel:hover { background: #FFD24D; color: #2B2622; }
+    .ksv-btn.line { border: 3px solid #fff; background: transparent; color: #fff; }
+    .ksv-btn.line:hover { background: rgba(255,255,255,.12); color: #fff; }
+    .ksv-btn.ora { background: var(--ora-s); color: #fff; }
+    .ksv-btn.ora:hover { background: #A33E08; color: #fff; }
+    .ksv-note { font-size: 14px; font-weight: 700; }
+
+    /* ზედა მენიუ */
+    .ksv-head { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,.96); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid #ECE9E4; }
+    .ksv-head-in { max-width: 1200px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; gap: 16px; }
+    .ksv-brand { text-decoration: none; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .ksv-brand-mark { width: 42px; height: 42px; border-radius: 13px; background: #FFF3EA; display: flex; align-items: center; justify-content: center; }
+    .ksv-brand b { font-size: 20px; font-weight: 800; }
+    .ksv-nav { flex: 1; display: flex; justify-content: center; gap: 2px; }
+    .ksv-nav a { text-decoration: none; color: #4F473F; font-size: 14px; font-weight: 700; padding: 8px 10px; border-radius: 12px; white-space: nowrap; }
+    .ksv-nav a:hover { background: #FFF3EA; color: #8A3407; }
+    .ksv-head .ksv-btn { margin-left: auto; height: 46px; padding: 0 20px; font-size: 15px; }
+
+    /* ილუსტრაცია: ლაქა + ბავშვების სახეები + დუდლები */
+    .ksv-art { flex: 1 1 340px; position: relative; min-height: 340px; display: flex; align-items: center; justify-content: center; }
+    .ksv-blob { position: absolute; width: min(400px, 88%); aspect-ratio: 1.15; border-radius: 52% 48% 44% 56% / 48% 42% 58% 52%; }
+    .ksv-stage { position: relative; width: 340px; height: 310px; }
+    .ksv-av { position: absolute; border-radius: 50%; object-fit: cover; border: 5px solid #fff; box-shadow: 0 8px 20px rgba(43,38,34,.18); background: #fff; }
+    .ksv-chip { position: absolute; background: #fff; color: #2B2622; border-radius: 16px; padding: 9px 13px; font-size: 14px; font-weight: 800; box-shadow: 0 8px 18px rgba(43,38,34,.15); white-space: nowrap; }
+    .ksv-doodle { position: absolute; }
+
+    /* სცადე ამოცანა */
+    .ksv-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+    .ksv-tab { height: 44px; padding: 0 16px; border-radius: 999px; font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer; background: #fff; color: #2B2622; border: 2px solid #fff; }
+    .ksv-tab[aria-selected="true"] { background: var(--ora-s); border-color: var(--ora-s); color: #fff; }
+    .ksv-quiz { background: #fff; border-radius: 26px; padding: 20px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 10px 24px rgba(43,38,34,.12); }
+    .ksv-quiz-top { display: flex; justify-content: space-between; align-items: center; }
+    .ksv-qnum { font-size: 12px; font-weight: 800; color: var(--ora-s); text-transform: uppercase; letter-spacing: .5px; }
+    .ksv-arrows { display: flex; gap: 8px; }
+    .ksv-arrow { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #ECE9E4; background: #fff; color: #2B2622; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 17px; }
+    .ksv-arrow.go { border: none; background: var(--ora-s); color: #fff; }
+    .ksv-arrow:disabled { opacity: .35; cursor: default; }
+    .ksv-q { margin: 0; font-size: 20px; line-height: 1.4; font-weight: 700; }
+    .ksv-opts { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; }
+    .ksv-opt { height: 64px; border-radius: 20px; font-family: inherit; font-size: 24px; font-weight: 800; cursor: pointer; background: #F7F6F3; color: #2B2622; border: 3px solid #F7F6F3; }
+    .ksv-opt:hover { border-color: #FFC49A; }
+    .ksv-opt.ok { background: #DFF5E3; color: #14612F; border-color: #1E8A4C; }
+    .ksv-opt.bad { background: #FDE2E2; color: #A12626; border-color: #D93B3B; }
+    .ksv-fb { display: none; border-radius: 14px; padding: 10px 14px; font-size: 15px; font-weight: 800; }
+    .ksv-fb.ok { display: block; background: #DFF5E3; color: #14612F; }
+    .ksv-fb.bad { display: block; background: #FDE2E2; color: #A12626; }
+    .ksv-dots { display: flex; justify-content: center; gap: 6px; }
+    .ksv-dots i { height: 8px; width: 8px; border-radius: 4px; background: #FFC49A; transition: width .2s, background .2s; }
+    .ksv-dots i.on { width: 22px; background: var(--ora-s); }
+
+    /* დონეები */
+    .ksv-levels { flex: 1 1 360px; background: #fff; color: #2B2622; border-radius: 30px; padding: 26px; display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 12px; align-items: end; box-sizing: border-box; }
+    .ksv-levels > div { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .ksv-levels i { display: block; width: 100%; border-radius: 14px; background: #FFE3CC; }
+    .ksv-levels .on i { background: var(--ora); }
+    .ksv-levels span { font-size: 12px; font-weight: 700; }
+    .ksv-levels .on span { color: var(--ora-s); font-weight: 800; }
+    .ksv-levels img { width: 54px; height: 54px; border-radius: 50%; border: 4px solid #fff; box-shadow: 0 6px 14px rgba(43,38,34,.18); margin-bottom: -4px; object-fit: cover; background: #fff; }
+    .ksv-tags { display: flex; flex-wrap: wrap; gap: 10px; }
+    .ksv-tags span { background: #fff; border-radius: 16px; padding: 12px 14px; font-size: 14px; font-weight: 800; }
+
+    /* კარუსელი (თამაშები) */
+    .ksv-car-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px; }
+    .ksv-track { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; padding: 2px 2px 6px; }
+    .ksv-track::-webkit-scrollbar { display: none; }
+    .ksv-track > * { scroll-snap-align: start; flex-shrink: 0; }
+    .ksv-game { width: 270px; background: #fff; color: #2B2622; border-radius: 26px; padding: 20px; display: flex; flex-direction: column; gap: 10px; box-sizing: border-box; }
+    .ksv-game-ic { width: 52px; height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+    .ksv-game b { font-size: 18px; font-weight: 800; }
+    .ksv-game span:last-child { font-size: 14px; line-height: 1.5; color: #4F473F; }
+    .ksv-blue .ksv-arrow { border: none; background: #fff; color: var(--blue); width: 48px; height: 48px; }
+    .ksv-blue .ksv-arrow.go { background: var(--yel); color: #2B2622; }
+
+    /* ჯილდოები */
+    .ksv-rewards { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+    .ksv-reward { background: #fff; border-radius: 18px; padding: 13px 14px; display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; }
+    .ksv-reward b { display: flex; align-items: center; gap: 4px; font-weight: 800; white-space: nowrap; }
+
+    /* მშობელი */
+    .ksv-mock { flex: 1 1 380px; background: #fff; color: #2B2622; border-radius: 30px; padding: 20px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 12px 28px rgba(43,38,34,.18); box-sizing: border-box; }
+    .ksv-mock-h { display: flex; align-items: center; gap: 12px; }
+    .ksv-mock-h img { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 3px solid #FFF3EA; }
+    .ksv-mock-h span { flex: 1; display: flex; flex-direction: column; }
+    .ksv-mock-h small { font-size: 13px; color: #6B625A; }
+    .ksv-mock-ok { background: #DFF5E3; color: #14612F; border-radius: 999px; padding: 6px 10px; font-size: 12px; font-weight: 800; flex: none !important; }
+    .ksv-mock-bars { background: #F7F6F3; border-radius: 20px; padding: 14px; height: 140px; box-sizing: border-box; display: grid; grid-template-columns: repeat(7, minmax(0,1fr)); gap: 8px; align-items: end; }
+    .ksv-mock-bars i { display: block; border-radius: 8px; background: #FFC49A; }
+    .ksv-mock-bars i.hi { background: var(--ora); } .ksv-mock-bars i.z { background: #ECE9E4; }
+    .ksv-feats { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+    .ksv-feats span { background: rgba(255,255,255,.16); border-radius: 16px; padding: 12px 14px; font-size: 14px; font-weight: 700; line-height: 1.35; }
+
+    /* ფასები */
+    .ksv-plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; color: #2B2622; }
+    .ksv-plan { background: #fff; border-radius: 28px; padding: 24px; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box; }
+    .ksv-plan.feat { background: var(--yel); }
+    .ksv-plan-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .ksv-plan-h b { font-size: 22px; font-weight: 800; }
+    .ksv-plan-badge { background: #fff; color: #2B2622; border-radius: 999px; padding: 5px 10px; font-size: 12px; font-weight: 800; }
+    .ksv-price { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+    .ksv-price b { font-size: 36px; font-weight: 900; font-stretch: 70%; }
+    .ksv-price span { font-size: 14px; font-weight: 700; color: #6B625A; }
+    .ksv-plan.feat .ksv-price span { color: #4F473F; }
+    .ksv-plan ul { margin: 0; padding: 0 0 0 18px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; line-height: 1.45; }
+    .ksv-plan .ksv-btn { margin-top: auto; height: 52px; font-size: 16px; }
+    .ksv-plan .ksv-btn.ghost { background: #fff; border: 2px solid #ECE9E4; color: #2B2622; }
+    .ksv-plan .ksv-btn.ghost:hover { border-color: #2B2622; }
+
+    /* CTA + ფუტერი */
+    .ksv-cta-avs { display: flex; align-items: center; }
+    .ksv-cta-avs img { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 5px solid #fff; box-shadow: 0 8px 20px rgba(43,38,34,.18); background: #fff; }
+    .ksv-cta-avs img + img { margin-left: -18px; }
+    .ksv-foot-in { max-width: 1200px; margin: 0 auto; padding: 20px 24px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; font-size: 13px; color: #6B625A; }
+    .ksv-foot-in a { font-weight: 700; color: var(--ora-s); }
+
+    @media (max-width: 1023px) { .ksv-nav { display: none; } }
+    /* მობილური: თითო თემა — ერთ ეკრანზე */
+    @media (max-width: 640px) {
+        .ksv-in { padding: 30px 18px; }
+        .ksv-band { gap: 18px; }
+        .ksv-col { flex-basis: 100%; gap: 12px; }
+        .ksv-art { min-height: 220px; flex-basis: 100%; }
+        .ksv-stage { transform: scale(.68); margin: -50px 0; }
+        .ksv-hide-sm { display: none !important; }
+        .ksv-lead { font-size: 16px; }
+        .ksv-btn { height: 50px; padding: 0 20px; font-size: 15px; }
+        .ksv-quiz { padding: 16px; gap: 12px; }
+        .ksv-q { font-size: 17px; }
+        .ksv-opt { height: 54px; font-size: 20px; }
+        .ksv-levels { padding: 16px; gap: 8px; flex-basis: 100%; }
+        .ksv-game { width: 78vw; }
+        .ksv-feats { grid-template-columns: 1fr 1fr; gap: 8px; }
+        .ksv-feats span { padding: 10px 12px; font-size: 13px; }
+        .ksv-mock-bars { height: 110px; }
+        /* ფასები მობილურზე: კარუსელის გარეშე, კომპაქტურად ერთმანეთის ქვეშ */
+        .ksv-plans { gap: 10px; }
+        .ksv-plan { padding: 16px 18px; gap: 8px; border-radius: 22px; }
+        .ksv-plan-h b { font-size: 18px; }
+        .ksv-price b { font-size: 28px; }
+        .ksv-plan ul { display: none; }
+        .ksv-plan .ksv-btn { height: 46px; }
+        .ksv-cta-avs { display: none; }
     }
+
+    /* ── შესვლის მოდალი — საიტის დიზაინში ── */
+    body .auth-modal-box { background: #F7F6F3 !important; max-width: 420px !important; padding: 22px !important; box-sizing: border-box; }
+    body .auth-modal-head { padding: 0 !important; gap: 10px; }
+    body .auth-modal-title { font-size: clamp(24px, calc(1rem + 1.2vw), 30px) !important; line-height: 1 !important; font-stretch: 68% !important; }
+    body .auth-modal-close { width: 40px !important; height: 40px !important; border-radius: 14px !important; background: #fff !important; border: 1px solid #ECE9E4 !important; flex-shrink: 0; }
+    body .auth-modal-tabs { margin: 16px 0 12px !important; background: #F1EFEB !important; gap: 4px !important; }
+    body .auth-modal-tab { height: 42px; font-size: 14px !important; padding: 0 10px !important; }
+    body .auth-modal-tab.active { background: #fff !important; color: #2B2622 !important; box-shadow: 0 2px 0 #ECE9E4 !important; }
+    body .auth-modal-panel { background: #fff; border-radius: 22px; padding: 18px !important; box-shadow: 0 2px 0 #ECE9E4; }
+    .auth-modal-note { margin: 0 0 14px; font-size: 14px; line-height: 1.5; color: #4F473F; }
+    body .auth-google-btn, body .auth-code-btn { height: 52px; padding: 0 16px !important; border-radius: 26px !important; background: #C24A0A !important; box-shadow: none !important; font-family: inherit !important; font-size: 15px !important; font-weight: 800; color: #fff !important; transform: none !important; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    body .auth-google-btn:hover, body .auth-code-btn:hover { background: #A33E08 !important; }
+    body .auth-code-input { height: 56px; border-radius: 16px !important; border: 2px solid #ECE9E4 !important; background: #F7F6F3 !important; font-family: inherit !important; font-size: 22px !important; font-weight: 800; letter-spacing: .25em !important; margin-bottom: 12px !important; }
+    body .auth-code-input:focus { border-color: #E2590F !important; background: #fff !important; box-shadow: 0 0 0 3px rgba(226,89,15,.12); }
+    .auth-modal-small { display: block; margin-top: 10px; font-size: 12px; color: #6B625A; text-align: center; }
     @media (prefers-reduced-motion: no-preference) { html:has(body.ks-landing) { scroll-behavior: smooth; } }
 </style>
 
-<div class="ksl" id="top">
-    <header class="ksl-head">
-        <div class="ksl-head-in">
-            <a href="#top" class="ksl-brand">
-                <span class="ksl-brand-mark">@include('partials.ks-fox', ['size' => 26])</span>
-                <b>KidSmart</b>
+@php
+    $__star  = fn($s, $c, $st) => '<svg class="ksv-doodle" width="'.$s.'" height="'.$s.'" viewBox="0 0 24 24" fill="none" stroke="'.$c.'" stroke-width="2" stroke-linejoin="round" aria-hidden="true" style="'.$st.'"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.5 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg>';
+    $__heart = fn($s, $c, $st) => '<svg class="ksv-doodle" width="'.$s.'" height="'.$s.'" viewBox="0 0 24 24" fill="'.$c.'" aria-hidden="true" style="'.$st.'"><path d="M12 21s-7.5-4.6-9.3-9.2C1.4 8.4 3.6 5 7 5c2 0 3.5 1.1 5 3 1.5-1.9 3-3 5-3 3.4 0 5.6 3.4 4.3 6.8C19.5 16.4 12 21 12 21z"/></svg>';
+    $__spark = fn($s, $c, $st) => '<svg class="ksv-doodle" width="'.$s.'" height="'.$s.'" viewBox="0 0 24 24" fill="none" stroke="'.$c.'" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" style="'.$st.'"><path d="M12 2v5M12 17v5M2 12h5M17 12h5M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3"/></svg>';
+    $__img   = fn($k, $s, $st) => '<img class="ksv-av" src="'.e($__av($k)).'" alt="" style="width:'.$s.'px;height:'.$s.'px;'.$st.'">';
+@endphp
+
+<div class="ksv" id="top">
+    <header class="ksv-head">
+        <div class="ksv-head-in">
+            <a href="#top" class="ksv-brand">
+                <img src="{{ asset('img/logo.png') }}" alt="KidSmart" style="height:42px;width:auto;display:block;">
             </a>
-            <nav class="ksl-nav" aria-label="გვერდის ნავიგაცია">
+            <nav class="ksv-nav" aria-label="გვერდის ნავიგაცია">
                 <a href="#try">ამოცანები</a>
-                <a href="#adaptive">სწავლება</a>
+                <a href="#levels">სწავლება</a>
                 <a href="#games">თამაშები</a>
-                <a href="#audience">აუდიტორია</a>
                 <a href="#rewards">ჯილდოები</a>
                 <a href="#parent">მშობელი</a>
                 <a href="#pricing">ფასები</a>
             </nav>
-            <div class="ksl-head-act">
-                <button type="button" class="ksl-btn ghost" onclick="toggleLoginModal(event); lmSwitch('child')">ბავშვის შესვლა</button>
-                <button type="button" class="ksl-btn primary" onclick="toggleLoginModal(event)">დაიწყე</button>
-            </div>
+            <button type="button" class="ksv-btn ora" onclick="toggleLoginModal(event)">დაიწყე</button>
         </div>
     </header>
 
-    {{-- ── Hero ── --}}
-    <section class="ksl-in ksl-hero">
-        <div class="ksl-hero-txt">
-            <span class="ksl-pill">II–V კლასის მოსწავლეებისთვის</span>
-            <h1 class="ksl-h1">მათემატიკა ბავშვის ენაზე</h1>
-            <p class="ksl-p" style="font-size:clamp(16px,1.6vw,19px);max-width:520px;">ბავშვი სწავლობს იმ ენაზე, რომელიც მას უყვარს — ამოცანები ფეხბურთიდან, კოსმოსიდან და სუპერგმირების სამყაროდან.</p>
-            <div style="display:flex;flex-wrap:wrap;gap:12px;">
-                <button type="button" class="ksl-btn big" style="background:#E2590F;color:#fff;" onclick="toggleLoginModal(event)">დაიწყე უფასოდ <i class="bi bi-arrow-right"></i></button>
-                <a href="#try" class="ksl-btn big ghost" style="font-size:16px;">სცადე ამოცანა <i class="bi bi-arrow-down"></i></a>
+    {{-- ── Hero (ლურჯი) ── --}}
+    <section class="ksv-blue">
+        <div class="ksv-in ksv-band">
+            <div class="ksv-col">
+                <span class="ksv-pill">II–V კლასის მოსწავლეებისთვის</span>
+                <h1 class="ksv-h1">მათემატიკა ბავშვის ენაზე</h1>
+                <p class="ksv-lead" style="max-width:500px;">ამოცანები ფეხბურთიდან, კოსმოსიდან და სუპერგმირების სამყაროდან — დონე თავად ერგება ბავშვს.</p>
+                <div style="display:flex;flex-wrap:wrap;gap:10px;">
+                    <button type="button" class="ksv-btn yel" onclick="toggleLoginModal(event)">დაიწყე უფასოდ <i class="bi bi-arrow-right"></i></button>
+                    <a href="#try" class="ksv-btn line">სცადე ამოცანა</a>
+                </div>
+                <span class="ksv-note">Google-ით შესვლა · ბარათი არ სჭირდება</span>
             </div>
-            <span style="font-size:13px;color:#6B625A;">Google-ით შესვლა · ბარათი არ სჭირდება</span>
-        </div>
-        <div class="ksl-hero-art" aria-hidden="true">
-            <div class="ksl-blob1"></div>
-            <div class="ksl-blob2"></div>
-            @include('partials.ks-fox', ['size' => 280, 'color' => '#E2590F', 'smile' => true])
-            <span class="ksl-float a">✓ 5 სწორი ზედიზედ!</span>
-            <span class="ksl-float b">🪙 +30 მონეტა</span>
-        </div>
-    </section>
-
-    {{-- ── სცადე ამოცანა ── --}}
-    <section id="try" class="ksl-band">
-        <div class="ksl-in ksl-split">
-            <div style="display:flex;flex-direction:column;gap:14px;">
-                <span class="ksl-eyebrow">სცადე ამოცანა</span>
-                <h2 class="ksl-h2">ფეხბურთი, კოსმოსი თუ სუპერგმირები?</h2>
-                <p class="ksl-p">როცა ამოცანები ბავშვის სამყაროდანაა, სწავლა თავგადასავალია. აირჩიე თემა და უპასუხე.</p>
-            </div>
-            <div class="ksl-try">
-                <div class="ksl-tabs" role="tablist" aria-label="თემატიკა" id="kslTabs"></div>
-                <p class="ksl-q" id="kslQ"></p>
-                <div class="ksl-opts" role="radiogroup" aria-label="პასუხები" id="kslOpts"></div>
-                <div class="ksl-fb" id="kslFb" aria-live="polite"></div>
+            <div class="ksv-art" aria-hidden="true">
+                <div class="ksv-blob" style="background:var(--blue-b);"></div>
+                <div class="ksv-stage">
+                    {!! $__img('g07', 150, 'left:10px;top:10px;') !!}
+                    {!! $__img('b05', 130, 'right:10px;top:40px;') !!}
+                    {!! $__img('b12', 120, 'left:70px;bottom:0;') !!}
+                    {!! $__img('g02', 110, 'right:40px;bottom:10px;') !!}
+                    <span class="ksv-chip" style="left:-20px;bottom:120px;color:#14612F;transform:rotate(-6deg);">✓ 5 სწორი ზედიზედ!</span>
+                    <span class="ksv-chip" style="right:-20px;top:0;background:var(--yel);transform:rotate(5deg);">+30 მონეტა</span>
+                    {!! $__star(32, '#fff', 'left:-40px;top:-10px;') !!}
+                    {!! $__heart(24, '#fff', 'right:0;bottom:-10px;') !!}
+                    {!! $__spark(28, '#fff', 'right:-40px;top:150px;') !!}
+                </div>
             </div>
         </div>
     </section>
 
-    {{-- ── ადაპტირებული სწავლება ── --}}
-    <section id="adaptive" class="ksl-in">
-        <div class="ksl-sec-head">
-            <span class="ksl-eyebrow" style="color:#5B3FD0;">ადაპტირებული სწავლება</span>
-            <h2 class="ksl-h2">სისტემა, რომელიც ბავშვთან ერთად იზრდება</h2>
-            <p class="ksl-p">არანაირი გადაწვა ან მოწყენილობა. დონე ავტომატურად ერგება ბავშვის შედეგებს.</p>
+    {{-- ── სცადე ამოცანა (ყვითელი) ── --}}
+    <section id="try" class="ksv-yel">
+        <div class="ksv-in ksv-band">
+            <div class="ksv-art ksv-hide-sm" aria-hidden="true" style="min-height:320px;">
+                <div class="ksv-blob" style="background:var(--yel-b);"></div>
+                <div class="ksv-stage">
+                    {!! $__img('b01', 140, 'left:20px;top:20px;') !!}
+                    {!! $__img('g10', 150, 'right:10px;bottom:0;') !!}
+                    <span class="ksv-chip" style="left:30px;bottom:30px;width:90px;height:90px;padding:0;border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;color:#C24A0A;transform:rotate(-8deg);">7+5</span>
+                    {!! $__star(30, '#2B2622', 'right:0;top:0;') !!}
+                    {!! $__heart(24, '#E2590F', 'left:-20px;top:130px;') !!}
+                </div>
+            </div>
+            <div class="ksv-col">
+                <h2 class="ksv-h2">სცადე ამოცანა</h2>
+                <p class="ksv-lead">აირჩიე თემა და უპასუხე — KidSmart-ში ასეთ პასუხებზე ბავშვი მონეტებს აგროვებს.</p>
+                <div class="ksv-tabs" role="tablist" aria-label="თემატიკა" id="ksvTabs"></div>
+                <div class="ksv-quiz">
+                    <div class="ksv-quiz-top">
+                        <span class="ksv-qnum" id="ksvNum"></span>
+                        <span class="ksv-arrows">
+                            <button type="button" class="ksv-arrow" id="ksvPrev" aria-label="წინა ამოცანა"><i class="bi bi-chevron-left"></i></button>
+                            <button type="button" class="ksv-arrow go" id="ksvNext" aria-label="შემდეგი ამოცანა"><i class="bi bi-chevron-right"></i></button>
+                        </span>
+                    </div>
+                    <p class="ksv-q" id="ksvQ"></p>
+                    <div class="ksv-opts" role="radiogroup" aria-label="პასუხები" id="ksvOpts"></div>
+                    <div class="ksv-fb" id="ksvFb" aria-live="polite"></div>
+                    <div class="ksv-dots" id="ksvDots" aria-hidden="true"></div>
+                </div>
+            </div>
         </div>
-        <div style="display:flex;flex-wrap:wrap;gap:20px;">
-            <div class="ksl-levels" role="img" aria-label="სირთულის 5 დონე">
+    </section>
+
+    {{-- ── ადაპტირებული სწავლება (სტაფილოსფერი) ── --}}
+    <section id="levels" class="ksv-ora">
+        <div class="ksv-in ksv-band">
+            <div class="ksv-col">
+                <h2 class="ksv-h2">სწავლა, რომელიც ბავშვთან ერთად იზრდება</h2>
+                <p class="ksv-lead">კარგად წერს? დონე იწევა. უჭირს? ვთავაზობთ შესაბამის ამოცანებს და ვავითარებთ ნაბიჯ-ნაბიჯ.</p>
+                <div class="ksv-tags">
+                    <span style="color:#14612F;">კარგად წერს → დონე ↑</span>
+                    <span style="color:#8A3407;">უჭირს → ნაბიჯ-ნაბიჯ</span>
+                </div>
+            </div>
+            <div class="ksv-levels" role="img" aria-label="სირთულის 5 დონე, ბავშვი მესამე დონეზეა">
                 @foreach([50, 80, 110, 140, 170] as $__i => $__h)
-                <div class="{{ $__i === 2 ? 'on' : '' }}"><i style="height:{{ $__h }}px"></i><span>დონე {{ $__i + 1 }}</span></div>
+                <div class="{{ $__i === 2 ? 'on' : '' }}">
+                    @if($__i === 2)<img src="{{ $__av('g04') }}" alt="">@endif
+                    <i style="height:{{ $__h }}px"></i><span>დონე {{ $__i + 1 }}</span>
+                </div>
                 @endforeach
             </div>
-            <div class="ksl-cards2">
-                <div class="ksl-note" style="background:#DFF5E3;"><b style="color:#14612F;">კარგად წერს ტესტებს?</b><span style="color:#14612F;">დონე ავტომატურად იწევა, რომ ბავშვს არ მოსწყინდეს.</span></div>
-                <div class="ksl-note" style="background:#FFF1C2;"><b style="color:#6B4A00;">ხშირად უშვებს შეცდომებს?</b><span style="color:#6B4A00;">ვთავაზობთ შესაბამისი დონის ამოცანებს და ვავითარებთ ნაბიჯ-ნაბიჯ.</span></div>
-            </div>
         </div>
     </section>
 
-    {{-- ── თამაშები ── --}}
-    <section id="games" class="ksl-dark">
-        <div class="ksl-in">
-            <div class="ksl-sec-head">
-                <span class="ksl-eyebrow">KidSmart თამაშები</span>
-                <h2 class="ksl-h2">ისწავლე თამაშით — არა მხოლოდ ტესტებით</h2>
-                <p class="ksl-p">ტესტებს შორის ბავშვი შესვენებას თამაშით იღებს და KidSmart-ს ეჯიბრება.</p>
+    {{-- ── თამაშები (ლურჯი) ── --}}
+    <section id="games" class="ksv-blue">
+        <div class="ksv-in" style="display:flex;flex-direction:column;gap:22px;">
+            <div class="ksv-car-head">
+                <div style="display:flex;flex-direction:column;gap:10px;max-width:640px;">
+                    <h2 class="ksv-h2">ისწავლე თამაშით</h2>
+                    <p class="ksv-lead">ტესტებს შორის შესვენება — ბავშვი KidSmart-ს ეჯიბრება.</p>
+                </div>
+                <div class="ksv-arrows">
+                    <button type="button" class="ksv-arrow" id="ksvGPrev" aria-label="წინა თამაში"><i class="bi bi-chevron-left"></i></button>
+                    <button type="button" class="ksv-arrow go" id="ksvGNext" aria-label="შემდეგი თამაში"><i class="bi bi-chevron-right"></i></button>
+                </div>
             </div>
-            <div class="ksl-grid4">
+            <div class="ksv-track" id="ksvGames" aria-label="თამაშები" tabindex="0">
                 @foreach([
-                    ['✊', 'ქვა-ქაღალდი-მაკრატელი', 'კლასიკური თამაში KidSmart-ის წინააღმდეგ — პირადი რეკორდით.', '#FFE3CC'],
-                    ['🐰', 'ბაჭია და მგლები', 'ლოგიკური სამაგიდო თამაში: მართე მგლები და დაიჭირე ბაჭია.', '#DCEBFF'],
-                    ['🧠', 'მეხსიერება', 'იპოვე წყვილები რაც შეიძლება სწრაფად და მოხვდი ტაბლოზე.', '#EEE8FF'],
-                    ['🧱', 'კვორიდორი', 'ააშენე კედლები და პირველმა მიაღწიე მეორე მხარეს.', '#DFF5E3'],
+                    ['✊', 'ქვა-ქაღალდი-მაკრატელი', 'კლასიკა KidSmart-ის წინააღმდეგ — პირადი რეკორდით.', '#FFF3EA'],
+                    ['🐰', 'ბაჭია და მგლები', 'ლოგიკური თამაში: მართე მგლები და დაიჭირე ბაჭია.', '#E3ECFA'],
+                    ['🧠', 'მეხსიერება', 'იპოვე წყვილები რაც შეიძლება სწრაფად და მოხვდი ტაბლოზე.', '#FFF1C2'],
+                    ['🧱', 'კვორიდორი', 'ააშენე კედლები და პირველმა მიაღწიე მეორე მხარეს.', '#E3ECFA'],
                 ] as [$__gi, $__gn, $__gt, $__gb])
-                <div class="ksl-game" style="background:{{ $__gb }}">
-                    <span class="ksl-game-ic" aria-hidden="true">{{ $__gi }}</span>
+                <div class="ksv-game">
+                    <span class="ksv-game-ic" style="background:{{ $__gb }}" aria-hidden="true">{{ $__gi }}</span>
                     <b>{{ $__gn }}</b>
                     <span>{{ $__gt }}</span>
                 </div>
@@ -238,87 +331,71 @@
         </div>
     </section>
 
-    {{-- ── აუდიტორია ── --}}
-    <section id="audience" class="ksl-in">
-        <div class="ksl-sec-head">
-            <span class="ksl-eyebrow" style="color:#1F4E9C;">სამიზნე აუდიტორია</span>
-            <h2 class="ksl-h2">იმ ასაკისთვის, როცა ლოგიკა იბადება</h2>
-        </div>
-        <div class="ksl-grid4">
-            @foreach([
-                ['II', 'პირველი ნაბიჯები', 'საბაზისო არითმეტიკა, სივრცითი აღქმა და მარტივი ლოგიკა.', '#FFE3CC'],
-                ['III', 'ლოგიკის გამყარება', 'შაბლონები, კრებები და მცირე დეტექტიური ამოცანები.', '#EEE8FF'],
-                ['IV', 'ნამდვილი გამოწვევები', 'საიდუმლო კოდები, პირამიდები და ლოგიკური ჯაჭვები.', '#DCEBFF'],
-                ['V', 'ელიტური დეტექტივი', 'მრავალეტაპიანი ამოცანები და სტრატეგიული აზროვნება.', '#DFF5E3'],
-            ] as [$__n, $__t, $__x, $__b])
-            <div class="ksl-grade" style="background:{{ $__b }}">
-                <span class="ksl-grade-n">{{ $__n }}</span>
-                <span class="ksl-grade-k">კლასი</span>
-                <b>{{ $__t }}</b>
-                <span>{{ $__x }}</span>
-            </div>
-            @endforeach
-        </div>
-    </section>
-
-    {{-- ── ჯილდოები ── --}}
-    <section id="rewards" class="ksl-peach">
-        <div class="ksl-in ksl-split">
-            <div style="display:flex;flex-direction:column;gap:14px;">
-                <span class="ksl-eyebrow" style="color:#8A3407;">ჯილდოების სისტემა</span>
-                <h2 class="ksl-h2">მშობელი ადგენს მიზანს, ბავშვი ირჩევს გზას</h2>
-                <p class="ksl-p" style="color:#4A2A12;">შექმენით ოჯახის მარკეტი და თავად დააწესეთ ჯილდოები. სწორი პასუხებით ბავშვი მონეტებს აგროვებს და ჯილდოს თავად ირჩევს.</p>
-                <div class="ksl-chips">
-                    <span>მედლები და დონეები</span><span>მონეტები</span><span>ზედიზედ დღეები</span><span>ოლიმპიადა</span>
+    {{-- ── ჯილდოები (ყვითელი) ── --}}
+    <section id="rewards" class="ksv-yel">
+        <div class="ksv-in ksv-band">
+            <div class="ksv-col">
+                <h2 class="ksv-h2">მონეტები, მედლები, ჯილდოები</h2>
+                <p class="ksv-lead">სწორ პასუხებზე ბავშვი მონეტებს აგროვებს და ოჯახის მარკეტში ცვლის — ჯილდოებს მშობელი ამატებს და ადასტურებს.</p>
+                <div class="ksv-rewards">
+                    @foreach([['🍦', 'ნაყინი', 5], ['🍕', 'პიცა სახლში', 10], ['🎮', 'თამაში (2 სთ)', 15], ['🎬', 'კინოში წასვლა', 20]] as [$__ri, $__rn, $__rp])
+                    <div class="ksv-reward">
+                        <span>{{ $__ri }} {{ $__rn }}</span>
+                        <b><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#F5B301"/><circle cx="12" cy="12" r="6.5" fill="none" stroke="#FFE08A" stroke-width="2"/></svg>{{ $__rp }}</b>
+                    </div>
+                    @endforeach
                 </div>
             </div>
-            <div class="ksl-rewards">
-                @foreach([['🍕', 'პიცა სახლში', 10], ['🎬', 'კინოში წასვლა', 20], ['🎁', 'სიურპრიზი', 50], ['🎮', 'თამაში (2 სთ)', 15], ['🍦', 'ნაყინი', 5], ['📚', 'წიგნი საჩუქრად', 25]] as [$__ri, $__rn, $__rp])
-                <div class="ksl-reward">
-                    <span>{{ $__ri }} {{ $__rn }}</span>
-                    <b><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#F5B301"/><circle cx="12" cy="12" r="6.5" fill="none" stroke="#FFE08A" stroke-width="2"/></svg>{{ $__rp }}</b>
+            <div class="ksv-art" aria-hidden="true">
+                <div class="ksv-blob" style="background:var(--yel-b);"></div>
+                <div class="ksv-stage">
+                    {!! $__img('g14', 150, 'right:20px;top:0;') !!}
+                    {!! $__img('b08', 130, 'left:10px;bottom:10px;') !!}
+                    <span class="ksv-chip" style="left:40px;top:30px;width:80px;height:80px;padding:0;border-radius:50%;border:6px solid #E2590F;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;color:#C24A0A;">★</span>
+                    <span class="ksv-chip" style="right:10px;bottom:30px;transform:rotate(4deg);">🏅 ახალი მედალი!</span>
+                    {!! $__spark(30, '#2B2622', 'left:-30px;bottom:60px;') !!}
+                    {!! $__heart(24, '#E2590F', 'right:-20px;top:150px;') !!}
                 </div>
-                @endforeach
             </div>
         </div>
     </section>
 
-    {{-- ── მშობლის პანელი ── --}}
-    <section id="parent" class="ksl-in ksl-split">
-        <div style="display:flex;flex-direction:column;gap:18px;">
-            <span class="ksl-eyebrow" style="color:#5B3FD0;">მშობლის პანელი</span>
-            <h2 class="ksl-h2">შენ აწესებ წესებს, ჩვენ ვაკეთებთ ანალიზს</h2>
-            <div class="ksl-feats">
-                <div class="ksl-feat"><b>მოქნილი გრაფიკი</b><span>შენ განსაზღვრავ, დღეში რამდენი ტესტი უნდა დაწეროს.</span></div>
-                <div class="ksl-feat"><b>სრული კონტროლი</b><span>ნახე ყველა ტესტი, სად შეცდა და რა იყო სწორი პასუხი.</span></div>
-                <div class="ksl-feat"><b>ზრდის დინამიკა</b><span>შედეგები თემებისა და დონეების მიხედვით.</span></div>
-                <div class="ksl-feat"><b>შეტყობინებები</b><span>გაუგზავნე შეხსენება შვილს ერთი ღილაკით.</span></div>
+    {{-- ── მშობელი (სტაფილოსფერი) ── --}}
+    <section id="parent" class="ksv-ora">
+        <div class="ksv-in ksv-band">
+            <div class="ksv-col">
+                <h2 class="ksv-h2">მშობლისთვის — ყველაფერი ერთ ეკრანზე</h2>
+                <p class="ksv-lead">დღეს დაწერა თუ არა, კვირის შედეგები, რომელი თემა უჭირს — და ერთი ღილაკით შეხსენება.</p>
+                <div class="ksv-feats">
+                    <span>შენ ადგენ, დღეში რამდენი ტესტი</span>
+                    <span>ყველა შეცდომა და სწორი პასუხი</span>
+                    <span>შედეგები თემების მიხედვით</span>
+                    <span>შეხსენება ერთი ღილაკით</span>
+                </div>
             </div>
-        </div>
-        <div class="ksl-mock" aria-hidden="true">
-            <div style="display:flex;align-items:center;gap:10px;"><span style="width:40px;height:40px;border-radius:50%;background:#DCEBFF;display:flex;align-items:center;justify-content:center;font-size:20px;">👦</span><b style="font-size:16px;">ნიკა · ბოლო 7 დღე</b></div>
-            <div class="ksl-mock-bars">
-                <i style="height:66px"></i><i style="height:78px"></i><i class="z" style="height:6px"></i><i style="height:52px"></i><i style="height:96px"></i><i style="height:40px"></i><i class="t" style="height:84px"></i>
+            <div class="ksv-mock" aria-hidden="true">
+                <div class="ksv-mock-h">
+                    <img src="{{ $__av('b15') }}" alt="">
+                    <span><b>ნიკა</b><small>3 კლასი · დონე 3/5</small></span>
+                    <span class="ksv-mock-ok">✓ დღეს დაწერა</span>
+                </div>
+                <div class="ksv-mock-bars">
+                    <i style="height:60%"></i><i class="hi" style="height:80%"></i><i class="z" style="height:6%"></i><i class="hi" style="height:90%"></i><i style="height:70%"></i><i class="hi" style="height:85%"></i><i class="z" style="height:6%"></i>
+                </div>
             </div>
-            <div class="ksl-mock-row"><span>შეკრება</span><span>92%</span></div><div class="ksl-mock-bar"><span style="width:92%;background:#1E8A4C;"></span></div>
-            <div class="ksl-mock-row"><span>ლოგიკა</span><span>58%</span></div><div class="ksl-mock-bar"><span style="width:58%;background:#F5B301;"></span></div>
         </div>
     </section>
 
-    {{-- ── ფასები ── --}}
-    <section id="pricing" class="ksl-band">
-        <div class="ksl-in">
-            <div class="ksl-sec-head">
-                <span class="ksl-eyebrow">ტარიფები</span>
-                <h2 class="ksl-h2">აირჩიე შენზე მორგებული პაკეტი</h2>
-                <p class="ksl-p">დაიწყე უფასოდ, გადადი უფრო დიდ პაკეტზე, როცა მზად იქნები.</p>
-            </div>
-            <div class="ksl-plans">
+    {{-- ── ფასები (ლურჯი) ── --}}
+    <section id="pricing" class="ksv-blue">
+        <div class="ksv-in" style="display:flex;flex-direction:column;gap:22px;">
+            <h2 class="ksv-h2" style="text-align:center;">აირჩიე პაკეტი</h2>
+            <div class="ksv-plans">
                 @foreach($__plans as $__pl)
                 @php $__feat = $__pl->id === $__featuredId; @endphp
-                <div class="ksl-plan {{ $__feat ? 'feat' : '' }}">
-                    <div class="ksl-plan-h"><b>{{ $__pl->name }}</b>@if($__feat)<span class="ksl-plan-badge">ყველაზე პოპულარული</span>@endif</div>
-                    <div class="ksl-price">
+                <div class="ksv-plan {{ $__feat ? 'feat' : '' }}">
+                    <div class="ksv-plan-h"><b>{{ $__pl->name }}</b>@if($__feat)<span class="ksv-plan-badge">პოპულარული</span>@endif</div>
+                    <div class="ksv-price">
                         @if($__pl->is_free)
                             <b>0 ₾</b><span>მუდამ უფასო</span>
                         @elseif($__pl->price_monthly > 0)
@@ -335,29 +412,29 @@
                             @if(trim($__line) !== '')<li>{{ trim($__line) }}</li>@endif
                         @endforeach
                     </ul>
-                    <button type="button" class="ksl-btn {{ $__feat ? '' : 'dark' }}" onclick="toggleLoginModal(event)">{{ $__pl->is_free ? 'დაიწყე უფასოდ' : 'აირჩიე ' . $__pl->name }}</button>
+                    <button type="button" class="ksv-btn {{ $__feat || !$__pl->is_free ? 'ora' : 'ghost' }}" onclick="toggleLoginModal(event)">{{ $__pl->is_free ? 'დაიწყე უფასოდ' : 'აირჩიე ' . $__pl->name }}</button>
                 </div>
                 @endforeach
             </div>
         </div>
     </section>
 
-    {{-- ── CTA ── --}}
-    <section class="ksl-in">
-        <div class="ksl-cta">
-            <div style="flex:1 1 360px;display:flex;flex-direction:column;gap:10px;">
-                <h2 class="ksl-h1" style="font-size:clamp(44px,6vw,76px);color:#fff;">დაიწყე დღეს</h2>
-                <span style="font-size:18px;font-weight:700;color:#3D1A04;">პირველი ამოცანა — 2 წუთში.</span>
+    {{-- ── CTA (ყვითელი) ── --}}
+    <section class="ksv-yel">
+        <div class="ksv-in ksv-band" style="justify-content:space-between;">
+            <div style="display:flex;flex-direction:column;gap:10px;flex:1 1 380px;">
+                <h2 class="ksv-h2">დაიწყე დღეს</h2>
+                <p class="ksv-lead">პირველი ტესტი 2 წუთში — უფასოდ.</p>
             </div>
-            <div style="display:flex;flex-direction:column;gap:8px;">
-                <button type="button" class="ksl-btn big dark" onclick="toggleLoginModal(event)">შექმენი პროფილი — უფასოდ</button>
-                <span style="font-size:13px;font-weight:700;color:#3D1A04;text-align:center;">Google-ით შესვლა · ბარათი არ სჭირდება</span>
+            <div class="ksv-cta-avs" aria-hidden="true">
+                @foreach(['g07', 'b01', 'g10', 'b05'] as $__k)<img src="{{ $__av($__k) }}" alt="">@endforeach
             </div>
+            <button type="button" class="ksv-btn ora" onclick="toggleLoginModal(event)">შექმენი პროფილი</button>
         </div>
     </section>
 
-    <footer class="ksl-foot">
-        <div class="ksl-foot-in">
+    <footer>
+        <div class="ksv-foot-in">
             <span>© {{ date('Y') }} KidSmart · საქართველო · Developed by Ghvedashvili</span>
             <a href="#top">ზემოთ დაბრუნება ↑</a>
         </div>
@@ -366,45 +443,85 @@
 
 <script>
 (function () {
+    // ── სცადე ამოცანა: თითო თემატიკაში 4 ამოცანა ──
     var Q = {
-        football: { label: '⚽ ფეხბურთი', q: 'ორმა გუნდმა ჯამში 9 გოლი გაიტანა. ერთმა — 6. მეორემ რამდენი?', opts: ['2', '3', '4'], a: '3' },
-        hero:     { label: '🦸 სუპერგმირები', q: 'გმირს 4 კოსტიუმი აქვს, თითოეულს — 3 ნიღაბი. სულ რამდენი ნიღაბია?', opts: ['7', '12', '14'], a: '12' },
-        space:    { label: '🚀 კოსმოსი', q: 'რაკეტა 5 წუთში 600 კმ-ს გადის. 1 წუთში რამდენ კმ-ს გაივლის?', opts: ['100', '120', '150'], a: '120' }
+        football: { label: '⚽ ფეხბურთი', items: [
+            { q: 'ორმა გუნდმა ჯამში 9 გოლი გაიტანა. ერთმა — 6. მეორემ რამდენი?', opts: ['2', '3', '4'], a: '3' },
+            { q: 'სტადიონზე 8 რიგია, თითოეულში — 10 სკამი. სულ რამდენი სკამია?', opts: ['18', '80', '88'], a: '80' },
+            { q: 'მატჩი 90 წუთს გრძელდება და 2 ტაიმისგან შედგება. ერთი ტაიმი რამდენი წუთია?', opts: ['40', '45', '50'], a: '45' },
+            { q: 'ნიკამ 3 მატჩში 2-2 გოლი გაიტანა. სულ რამდენი გოლი გაიტანა?', opts: ['5', '6', '8'], a: '6' }
+        ] },
+        hero: { label: '🦸 სუპერგმირები', items: [
+            { q: 'გმირს 4 კოსტიუმი აქვს, თითოეულს — 3 ნიღაბი. სულ რამდენი ნიღაბია?', opts: ['7', '12', '14'], a: '12' },
+            { q: 'ქალაქში 20 შენობაა. გმირმა 7 უკვე დაიცვა. კიდევ რამდენი დარჩა?', opts: ['12', '13', '27'], a: '13' },
+            { q: '3 გმირს თითოეულს 5 სუპერძალა აქვს. სულ რამდენი სუპერძალაა?', opts: ['8', '15', '35'], a: '15' },
+            { q: 'გმირი 24 საფეხურს 4 თანაბარ ნახტომში ავიდა. ერთ ნახტომში რამდენი საფეხურია?', opts: ['4', '6', '8'], a: '6' }
+        ] },
+        space: { label: '🚀 კოსმოსი', items: [
+            { q: 'რაკეტა 5 წუთში 600 კმ-ს გადის. 1 წუთში რამდენ კმ-ს გაივლის?', opts: ['100', '120', '150'], a: '120' },
+            { q: 'მთვარეზე 6 ასტრონავტი გაფრინდა, 4 დედამიწაზე დაბრუნდა. რამდენი დარჩა მთვარეზე?', opts: ['1', '2', '10'], a: '2' },
+            { q: 'რაკეტას 3 ძრავა აქვს, თითოეულს — 4 საქშენი. სულ რამდენი საქშენია?', opts: ['7', '12', '16'], a: '12' },
+            { q: 'ტელესკოპით 35 ვარსკვლავი დავთვალეთ, მერე — კიდევ 25. სულ რამდენი?', opts: ['50', '60', '70'], a: '60' }
+        ] }
     };
-    var cur = 'football';
-    var tabs = document.getElementById('kslTabs'), qEl = document.getElementById('kslQ'),
-        opts = document.getElementById('kslOpts'), fb = document.getElementById('kslFb');
-    if (!tabs) return;
-    function render() {
-        tabs.innerHTML = '';
-        Object.keys(Q).forEach(function (id) {
-            var b = document.createElement('button');
-            b.type = 'button'; b.className = 'ksl-tab'; b.setAttribute('role', 'tab');
-            b.setAttribute('aria-selected', id === cur ? 'true' : 'false');
-            b.textContent = Q[id].label;
-            b.onclick = function () { cur = id; render(); };
-            tabs.appendChild(b);
-        });
-        var item = Q[cur];
-        qEl.textContent = item.q;
-        opts.innerHTML = ''; fb.className = 'ksl-fb'; fb.textContent = '';
-        item.opts.forEach(function (v) {
-            var o = document.createElement('button');
-            o.type = 'button'; o.className = 'ksl-opt'; o.setAttribute('role', 'radio'); o.setAttribute('aria-checked', 'false');
-            o.textContent = v;
-            o.onclick = function () {
-                Array.prototype.forEach.call(opts.children, function (c) {
-                    c.classList.remove('ok', 'bad'); c.setAttribute('aria-checked', 'false');
-                    if (c.textContent === item.a) c.classList.add('ok');
-                });
-                o.setAttribute('aria-checked', 'true');
-                if (v === item.a) { fb.className = 'ksl-fb ok'; fb.textContent = '✓ სწორია! KidSmart-ში ასეთ პასუხებზე მონეტებს მოიგებ.'; }
-                else { o.classList.add('bad'); fb.className = 'ksl-fb bad'; fb.textContent = '✗ თითქმის! სწორი პასუხია ' + item.a + '.'; }
-            };
-            opts.appendChild(o);
-        });
+    var theme = 'football', idx = 0;
+    var tabs = document.getElementById('ksvTabs'), num = document.getElementById('ksvNum'), qEl = document.getElementById('ksvQ'),
+        opts = document.getElementById('ksvOpts'), fb = document.getElementById('ksvFb'), dots = document.getElementById('ksvDots');
+    if (tabs) {
+        function renderTabs() {
+            tabs.innerHTML = '';
+            Object.keys(Q).forEach(function (id) {
+                var b = document.createElement('button');
+                b.type = 'button'; b.className = 'ksv-tab'; b.setAttribute('role', 'tab');
+                b.setAttribute('aria-selected', id === theme ? 'true' : 'false');
+                b.textContent = Q[id].label;
+                b.onclick = function () { theme = id; idx = 0; renderTabs(); renderQ(); };
+                tabs.appendChild(b);
+            });
+        }
+        function renderQ() {
+            var items = Q[theme].items, item = items[idx];
+            num.textContent = 'ამოცანა ' + (idx + 1) + ' / ' + items.length;
+            qEl.textContent = item.q;
+            fb.className = 'ksv-fb'; fb.textContent = '';
+            opts.innerHTML = '';
+            item.opts.forEach(function (v) {
+                var o = document.createElement('button');
+                o.type = 'button'; o.className = 'ksv-opt'; o.setAttribute('role', 'radio'); o.setAttribute('aria-checked', 'false');
+                o.textContent = v;
+                o.onclick = function () {
+                    Array.prototype.forEach.call(opts.children, function (x) {
+                        x.classList.remove('ok', 'bad'); x.setAttribute('aria-checked', 'false');
+                        if (x.textContent === item.a) x.classList.add('ok');
+                    });
+                    o.setAttribute('aria-checked', 'true');
+                    if (v === item.a) { fb.className = 'ksv-fb ok'; fb.textContent = '✓ სწორია! KidSmart-ში ასეთ პასუხებზე მონეტებს მოიგებ.'; }
+                    else { o.classList.add('bad'); fb.className = 'ksv-fb bad'; fb.textContent = '✗ თითქმის! სწორი პასუხია ' + item.a + '.'; }
+                };
+                opts.appendChild(o);
+            });
+            dots.innerHTML = '';
+            items.forEach(function (_, i) { var d = document.createElement('i'); if (i === idx) d.className = 'on'; dots.appendChild(d); });
+        }
+        document.getElementById('ksvPrev').onclick = function () { var n = Q[theme].items.length; idx = (idx + n - 1) % n; renderQ(); };
+        document.getElementById('ksvNext').onclick = function () { idx = (idx + 1) % Q[theme].items.length; renderQ(); };
+        renderTabs(); renderQ();
     }
-    render();
+
+    // ── თამაშების კარუსელი ──
+    var track = document.getElementById('ksvGames'), gp = document.getElementById('ksvGPrev'), gn = document.getElementById('ksvGNext');
+    if (track) {
+        function step() { var c = track.children[0]; return c ? c.getBoundingClientRect().width + 16 : track.clientWidth; }
+        function upd() {
+            var max = track.scrollWidth - track.clientWidth - 2;
+            gp.disabled = track.scrollLeft <= 2; gn.disabled = track.scrollLeft >= max;
+        }
+        gp.onclick = function () { track.scrollBy({ left: -step(), behavior: 'smooth' }); };
+        gn.onclick = function () { track.scrollBy({ left: step(), behavior: 'smooth' }); };
+        track.addEventListener('scroll', function () { window.requestAnimationFrame(upd); }, { passive: true });
+        window.addEventListener('resize', upd);
+        upd();
+    }
 })();
 </script>
 @endsection

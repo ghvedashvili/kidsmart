@@ -26,6 +26,10 @@ class ChildSettingsController extends Controller
     {
         $this->authorizeChild($child);
 
+        // redesign-kidsmart v3: ანალიტიკა გაერთიანდა მშობლის მთავარ გვერდზე (D3)
+        session()->reflash();
+        return redirect()->route('dashboard', ['kid' => $child->id]);
+
         $s = $child->childSetting;
 
         $pendingMarket        = MarketPurchase::where('child_id', $child->id)->where('status', 'pending')->count();
@@ -202,12 +206,18 @@ class ChildSettingsController extends Controller
         $this->authorizeChild($child);
 
         $data = $request->validate([
-            'avatar' => 'required|in:boy,girl',
+            'avatar'     => 'required|in:boy,girl',
+            'avatar_img' => 'nullable|string|max:40',
         ]);
 
-        $child->update(['avatar' => $data['avatar']]);
+        $img = $data['avatar_img'] ?? null;
+        if ($img && ! in_array($img, User::avatarChoices($data['avatar']), true)) {
+            $img = null;
+        }
 
-        return redirect()->route('dashboard');
+        $child->update(['avatar' => $data['avatar'], 'avatar_img' => $img]);
+
+        return redirect()->route('dashboard', ['kid' => $child->id]);
     }
 
     public function destroy(User $child)
@@ -243,7 +253,9 @@ class ChildSettingsController extends Controller
         ]);
 
         if (!empty($data['avatar'])) {
-            $child->update(['avatar' => $data['avatar']]);
+            // სქესი შეიცვალა → სხვა სქესის სურათი აღარ ერგება
+            $keepImg = $child->avatar_img && in_array($child->avatar_img, User::avatarChoices($data['avatar']), true);
+            $child->update(['avatar' => $data['avatar'], 'avatar_img' => $keepImg ? $child->avatar_img : null]);
         }
 
         if (!empty($data['name'])) {
