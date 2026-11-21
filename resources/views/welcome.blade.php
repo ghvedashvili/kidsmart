@@ -13,7 +13,7 @@
     body.ks-landing { padding-top: 0 !important; background: #fff !important; }
     html:has(body.ks-landing) { background: #fff !important; background-image: none !important; scroll-padding-top: 76px; }
     body.ks-landing > nav.fixed-top, body.ks-landing #mobileNav { display: none !important; }
-    .ksv { --blue: #3A6BC0; --blue-b: #5584D2; --yel: #F5C431; --yel-b: #F9D86A; --ora: #E2590F; --ora-b: #F07A2E; --ora-s: #C24A0A;
+    .ksv { --blue: #1F5A6B; --blue-b: #2B7387; --yel: #F5C431; --yel-b: #F9D86A; --ora: #E2590F; --ora-b: #F07A2E; --ora-s: #C24A0A;
         font-family: 'Noto Sans Georgian', system-ui, sans-serif; color: #2B2622; overflow-x: clip; background: #fff; }
     .ksv a { color: inherit; }
     .ksv-blue { background: var(--blue); color: #fff; }
@@ -26,7 +26,7 @@
     .ksv-h2 { margin: 0; font-size: clamp(28px, 3.2vw, 42px); line-height: 1; font-weight: 900; font-stretch: 68%; text-transform: uppercase; }
     .ksv-lead { margin: 0; font-size: 18px; line-height: 1.5; font-weight: 700; }
     .ksv-yel .ksv-lead { font-weight: 600; }
-    .ksv-pill { align-self: flex-start; background: #fff; color: #2B4F8F; border-radius: 999px; padding: 7px 14px; font-size: 14px; font-weight: 800; }
+    .ksv-pill { align-self: flex-start; background: #fff; color: #1F5A6B; border-radius: 999px; padding: 7px 14px; font-size: 14px; font-weight: 800; }
     .ksv-btn { height: 56px; padding: 0 26px; border-radius: 28px; border: none; font-family: inherit; font-size: 17px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; cursor: pointer; box-sizing: border-box; white-space: nowrap; }
     .ksv-btn.yel { background: var(--yel); color: #2B2622; }
     .ksv-btn.yel:hover { background: #FFD24D; color: #2B2622; }
@@ -45,7 +45,7 @@
     .ksv-nav { flex: 1; display: flex; justify-content: center; gap: 2px; }
     .ksv-nav a { text-decoration: none; color: #4F473F; font-size: 14px; font-weight: 700; padding: 8px 10px; border-radius: 12px; white-space: nowrap; }
     .ksv-nav a:hover { background: #FFF3EA; color: #8A3407; }
-    .ksv-head .ksv-btn { margin-left: auto; height: 46px; padding: 0 20px; font-size: 15px; }
+    .ksv-head .ksv-btn { margin-left: auto; height: 40px; padding: 0 14px; border-radius: 20px; font-size: 13px; gap: 6px; }
 
     /* ილუსტრაცია: ლაქა + ბავშვების სახეები + დუდლები */
     .ksv-art { flex: 1 1 340px; position: relative; min-height: 340px; display: flex; align-items: center; justify-content: center; }
@@ -76,6 +76,15 @@
     .ksv-fb.ok { display: block; background: #DFF5E3; color: #14612F; }
     .ksv-fb.bad { display: block; background: #FDE2E2; color: #A12626; }
     .ksv-dots { display: flex; justify-content: center; gap: 6px; }
+    .ksv-qtrack { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; overscroll-behavior-x: contain; padding: 4px 2px 10px; }
+    .ksv-qtrack::-webkit-scrollbar { display: none; }
+    .ksv-qtrack > .ksv-quiz { flex: 0 0 100%; box-sizing: border-box; scroll-snap-align: center; }
+    .ksv-qnav { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .ksv-qnav .ksv-arrow { border: none; background: #fff; color: #2B2622; }
+    .ksv-qnav .ksv-arrow.go { background: #2B2622; color: #fff; }
+    .ksv-ora .ksv-dots i { background: rgba(255,255,255,.45); }
+    .ksv-ora .ksv-dots i.on { background: #fff; }
+    @media (max-width: 640px) { .ksv-qtrack > .ksv-quiz { flex-basis: 88%; } }
     .ksv-dots i { height: 8px; width: 8px; border-radius: 4px; background: #FFC49A; transition: width .2s, background .2s; }
     .ksv-dots i.on { width: 22px; background: var(--ora-s); }
 
@@ -99,8 +108,21 @@
     .ksv-game-ic { width: 52px; height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 26px; }
     .ksv-game b { font-size: 18px; font-weight: 800; }
     .ksv-game span:last-child { font-size: 14px; line-height: 1.5; color: #4F473F; }
-    .ksv-blue .ksv-arrow { border: none; background: #fff; color: var(--blue); width: 48px; height: 48px; }
-    .ksv-blue .ksv-arrow.go { background: var(--yel); color: #2B2622; }
+    .ksv-car-head .ksv-arrow { border: none; background: #fff; color: #2B2622; width: 48px; height: 48px; }
+    .ksv-car-head .ksv-arrow.go { background: var(--ora-s); color: #fff; }
+    /* თეთრ ბარათებზე ტექსტი ყოველთვის მუქია, რა ფერის ზოლშიც არ უნდა იყოს */
+    .ksv-quiz, .ksv-reward, .ksv-levels, .ksv-mock, .ksv-game, .ksv-chip, .ksv-tags span, .ksv-plan { color: #2B2622; }
+    .ksv-yel .ksv-plan.feat { color: #fff; }
+    /* ფერის მიხედვით: ყვითელზე — მუქი ელემენტები, სტაფილოსფერზე — თეთრი */
+    .ksv-yel .ksv-pill { color: #8A3407; }
+    .ksv-yel .ksv-btn.line { border-color: #2B2622; color: #2B2622; }
+    .ksv-yel .ksv-btn.line:hover { background: rgba(43,38,34,.08); color: #2B2622; }
+    .ksv-ora .ksv-tab { background: rgba(255,255,255,.2); border-color: transparent; color: #fff; }
+    .ksv-ora .ksv-tab[aria-selected="true"] { background: #fff; border-color: #fff; color: var(--ora-s); }
+    .ksv-ora .ksv-btn.ora { background: #fff; color: var(--ora-s); }
+    .ksv-ora .ksv-btn.ora:hover { background: #FFF3EA; color: #A33E08; }
+    .ksv-yel .ksv-plan.feat { background: var(--blue); color: #fff; }
+    .ksv-yel .ksv-plan.feat .ksv-price span { color: #E1F0F2; }
 
     /* ჯილდოები */
     .ksv-rewards { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
@@ -163,7 +185,7 @@
         .ksv-feats span { padding: 10px 12px; font-size: 13px; }
         .ksv-mock-bars { height: 110px; }
         /* ფასები მობილურზე: კარუსელის გარეშე, კომპაქტურად ერთმანეთის ქვეშ */
-        .ksv-plans { gap: 10px; }
+        .ksv-plans { grid-template-columns: 1fr; gap: 10px; }
         .ksv-plan { padding: 16px 18px; gap: 8px; border-radius: 22px; }
         .ksv-plan-h b { font-size: 18px; }
         .ksv-price b { font-size: 28px; }
@@ -201,7 +223,7 @@
     <header class="ksv-head">
         <div class="ksv-head-in">
             <a href="#top" class="ksv-brand">
-                <img src="{{ asset('img/logo.png') }}" alt="KidSmart" style="height:42px;width:auto;display:block;">
+                <img src="{{ asset('img/logo.png') }}" alt="KidSmart" style="height:32px;width:auto;display:block;">
             </a>
             <nav class="ksv-nav" aria-label="გვერდის ნავიგაცია">
                 <a href="#try">ამოცანები</a>
@@ -215,72 +237,65 @@
         </div>
     </header>
 
-    {{-- ── Hero (ლურჯი) ── --}}
-    <section class="ksv-blue">
+    {{-- ── Hero (ყვითელი) ── --}}
+    <section class="ksv-yel">
         <div class="ksv-in ksv-band">
             <div class="ksv-col">
                 <span class="ksv-pill">II–V კლასის მოსწავლეებისთვის</span>
                 <h1 class="ksv-h1">მათემატიკა ბავშვის ენაზე</h1>
                 <p class="ksv-lead" style="max-width:500px;">ამოცანები ფეხბურთიდან, კოსმოსიდან და სუპერგმირების სამყაროდან — დონე თავად ერგება ბავშვს.</p>
                 <div style="display:flex;flex-wrap:wrap;gap:10px;">
-                    <button type="button" class="ksv-btn yel" onclick="toggleLoginModal(event)">დაიწყე უფასოდ <i class="bi bi-arrow-right"></i></button>
+                    <button type="button" class="ksv-btn ora" onclick="toggleLoginModal(event)">დაიწყე უფასოდ <i class="bi bi-arrow-right"></i></button>
                     <a href="#try" class="ksv-btn line">სცადე ამოცანა</a>
                 </div>
                 <span class="ksv-note">Google-ით შესვლა · ბარათი არ სჭირდება</span>
             </div>
             <div class="ksv-art" aria-hidden="true">
-                <div class="ksv-blob" style="background:var(--blue-b);"></div>
+                <div class="ksv-blob" style="background:var(--yel-b);"></div>
                 <div class="ksv-stage">
                     {!! $__img('g07', 150, 'left:10px;top:10px;') !!}
                     {!! $__img('b05', 130, 'right:10px;top:40px;') !!}
                     {!! $__img('b12', 120, 'left:70px;bottom:0;') !!}
                     {!! $__img('g02', 110, 'right:40px;bottom:10px;') !!}
                     <span class="ksv-chip" style="left:-20px;bottom:120px;color:#14612F;transform:rotate(-6deg);">✓ 5 სწორი ზედიზედ!</span>
-                    <span class="ksv-chip" style="right:-20px;top:0;background:var(--yel);transform:rotate(5deg);">+30 მონეტა</span>
-                    {!! $__star(32, '#fff', 'left:-40px;top:-10px;') !!}
-                    {!! $__heart(24, '#fff', 'right:0;bottom:-10px;') !!}
-                    {!! $__spark(28, '#fff', 'right:-40px;top:150px;') !!}
+                    <span class="ksv-chip" style="right:-20px;top:0;background:var(--ora-s);color:#fff;transform:rotate(5deg);">+30 მონეტა</span>
+                    {!! $__star(32, '#2B2622', 'left:-40px;top:-10px;') !!}
+                    {!! $__heart(24, '#E2590F', 'right:0;bottom:-10px;') !!}
+                    {!! $__spark(28, '#2B2622', 'right:-40px;top:150px;') !!}
                 </div>
             </div>
         </div>
     </section>
 
-    {{-- ── სცადე ამოცანა (ყვითელი) ── --}}
-    <section id="try" class="ksv-yel">
+    {{-- ── სცადე ამოცანა (სტაფილოსფერი) ── --}}
+    <section id="try" class="ksv-ora">
         <div class="ksv-in ksv-band">
             <div class="ksv-art ksv-hide-sm" aria-hidden="true" style="min-height:320px;">
-                <div class="ksv-blob" style="background:var(--yel-b);"></div>
+                <div class="ksv-blob" style="background:var(--ora-b);"></div>
                 <div class="ksv-stage">
                     {!! $__img('b01', 140, 'left:20px;top:20px;') !!}
                     {!! $__img('g10', 150, 'right:10px;bottom:0;') !!}
                     <span class="ksv-chip" style="left:30px;bottom:30px;width:90px;height:90px;padding:0;border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;color:#C24A0A;transform:rotate(-8deg);">7+5</span>
-                    {!! $__star(30, '#2B2622', 'right:0;top:0;') !!}
-                    {!! $__heart(24, '#E2590F', 'left:-20px;top:130px;') !!}
+                    {!! $__star(30, '#fff', 'right:0;top:0;') !!}
+                    {!! $__heart(24, '#fff', 'left:-20px;top:130px;') !!}
                 </div>
             </div>
             <div class="ksv-col">
                 <h2 class="ksv-h2">სცადე ამოცანა</h2>
                 <p class="ksv-lead">აირჩიე თემა და უპასუხე — KidSmart-ში ასეთ პასუხებზე ბავშვი მონეტებს აგროვებს.</p>
                 <div class="ksv-tabs" role="tablist" aria-label="თემატიკა" id="ksvTabs"></div>
-                <div class="ksv-quiz">
-                    <div class="ksv-quiz-top">
-                        <span class="ksv-qnum" id="ksvNum"></span>
-                        <span class="ksv-arrows">
-                            <button type="button" class="ksv-arrow" id="ksvPrev" aria-label="წინა ამოცანა"><i class="bi bi-chevron-left"></i></button>
-                            <button type="button" class="ksv-arrow go" id="ksvNext" aria-label="შემდეგი ამოცანა"><i class="bi bi-chevron-right"></i></button>
-                        </span>
-                    </div>
-                    <p class="ksv-q" id="ksvQ"></p>
-                    <div class="ksv-opts" role="radiogroup" aria-label="პასუხები" id="ksvOpts"></div>
-                    <div class="ksv-fb" id="ksvFb" aria-live="polite"></div>
+                <div class="ksv-qtrack" id="ksvTrack" aria-label="ამოცანები" tabindex="0"></div>
+                <div class="ksv-qnav">
+                    <button type="button" class="ksv-arrow" id="ksvPrev" aria-label="წინა ამოცანა"><i class="bi bi-chevron-left"></i></button>
                     <div class="ksv-dots" id="ksvDots" aria-hidden="true"></div>
+                    <button type="button" class="ksv-arrow go" id="ksvNext" aria-label="შემდეგი ამოცანა"><i class="bi bi-chevron-right"></i></button>
                 </div>
             </div>
         </div>
     </section>
 
-    {{-- ── ადაპტირებული სწავლება (სტაფილოსფერი) ── --}}
-    <section id="levels" class="ksv-ora">
+    {{-- ── ადაპტირებული სწავლება (ზღვის ტალღა) ── --}}
+    <section id="levels" class="ksv-blue">
         <div class="ksv-in ksv-band">
             <div class="ksv-col">
                 <h2 class="ksv-h2">სწავლა, რომელიც ბავშვთან ერთად იზრდება</h2>
@@ -301,8 +316,8 @@
         </div>
     </section>
 
-    {{-- ── თამაშები (ლურჯი) ── --}}
-    <section id="games" class="ksv-blue">
+    {{-- ── თამაშები (ყვითელი) ── --}}
+    <section id="games" class="ksv-yel">
         <div class="ksv-in" style="display:flex;flex-direction:column;gap:22px;">
             <div class="ksv-car-head">
                 <div style="display:flex;flex-direction:column;gap:10px;max-width:640px;">
@@ -317,9 +332,9 @@
             <div class="ksv-track" id="ksvGames" aria-label="თამაშები" tabindex="0">
                 @foreach([
                     ['✊', 'ქვა-ქაღალდი-მაკრატელი', 'კლასიკა KidSmart-ის წინააღმდეგ — პირადი რეკორდით.', '#FFF3EA'],
-                    ['🐰', 'ბაჭია და მგლები', 'ლოგიკური თამაში: მართე მგლები და დაიჭირე ბაჭია.', '#E3ECFA'],
+                    ['🐰', 'ბაჭია და მგლები', 'ლოგიკური თამაში: მართე მგლები და დაიჭირე ბაჭია.', '#E1F0F2'],
                     ['🧠', 'მეხსიერება', 'იპოვე წყვილები რაც შეიძლება სწრაფად და მოხვდი ტაბლოზე.', '#FFF1C2'],
-                    ['🧱', 'კვორიდორი', 'ააშენე კედლები და პირველმა მიაღწიე მეორე მხარეს.', '#E3ECFA'],
+                    ['🧱', 'კვორიდორი', 'ააშენე კედლები და პირველმა მიაღწიე მეორე მხარეს.', '#E1F0F2'],
                 ] as [$__gi, $__gn, $__gt, $__gb])
                 <div class="ksv-game">
                     <span class="ksv-game-ic" style="background:{{ $__gb }}" aria-hidden="true">{{ $__gi }}</span>
@@ -331,8 +346,8 @@
         </div>
     </section>
 
-    {{-- ── ჯილდოები (ყვითელი) ── --}}
-    <section id="rewards" class="ksv-yel">
+    {{-- ── ჯილდოები (სტაფილოსფერი) ── --}}
+    <section id="rewards" class="ksv-ora">
         <div class="ksv-in ksv-band">
             <div class="ksv-col">
                 <h2 class="ksv-h2">მონეტები, მედლები, ჯილდოები</h2>
@@ -347,21 +362,21 @@
                 </div>
             </div>
             <div class="ksv-art" aria-hidden="true">
-                <div class="ksv-blob" style="background:var(--yel-b);"></div>
+                <div class="ksv-blob" style="background:var(--ora-b);"></div>
                 <div class="ksv-stage">
                     {!! $__img('g14', 150, 'right:20px;top:0;') !!}
                     {!! $__img('b08', 130, 'left:10px;bottom:10px;') !!}
                     <span class="ksv-chip" style="left:40px;top:30px;width:80px;height:80px;padding:0;border-radius:50%;border:6px solid #E2590F;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;color:#C24A0A;">★</span>
                     <span class="ksv-chip" style="right:10px;bottom:30px;transform:rotate(4deg);">🏅 ახალი მედალი!</span>
-                    {!! $__spark(30, '#2B2622', 'left:-30px;bottom:60px;') !!}
-                    {!! $__heart(24, '#E2590F', 'right:-20px;top:150px;') !!}
+                    {!! $__spark(30, '#fff', 'left:-30px;bottom:60px;') !!}
+                    {!! $__heart(24, '#fff', 'right:-20px;top:150px;') !!}
                 </div>
             </div>
         </div>
     </section>
 
-    {{-- ── მშობელი (სტაფილოსფერი) ── --}}
-    <section id="parent" class="ksv-ora">
+    {{-- ── მშობელი (ზღვის ტალღა) ── --}}
+    <section id="parent" class="ksv-blue">
         <div class="ksv-in ksv-band">
             <div class="ksv-col">
                 <h2 class="ksv-h2">მშობლისთვის — ყველაფერი ერთ ეკრანზე</h2>
@@ -386,8 +401,8 @@
         </div>
     </section>
 
-    {{-- ── ფასები (ლურჯი) ── --}}
-    <section id="pricing" class="ksv-blue">
+    {{-- ── ფასები (ყვითელი) ── --}}
+    <section id="pricing" class="ksv-yel">
         <div class="ksv-in" style="display:flex;flex-direction:column;gap:22px;">
             <h2 class="ksv-h2" style="text-align:center;">აირჩიე პაკეტი</h2>
             <div class="ksv-plans">
@@ -419,8 +434,8 @@
         </div>
     </section>
 
-    {{-- ── CTA (ყვითელი) ── --}}
-    <section class="ksv-yel">
+    {{-- ── CTA (სტაფილოსფერი) ── --}}
+    <section class="ksv-ora">
         <div class="ksv-in ksv-band" style="justify-content:space-between;">
             <div style="display:flex;flex-direction:column;gap:10px;flex:1 1 380px;">
                 <h2 class="ksv-h2">დაიწყე დღეს</h2>
@@ -464,27 +479,17 @@
             { q: 'ტელესკოპით 35 ვარსკვლავი დავთვალეთ, მერე — კიდევ 25. სულ რამდენი?', opts: ['50', '60', '70'], a: '60' }
         ] }
     };
-    var theme = 'football', idx = 0;
-    var tabs = document.getElementById('ksvTabs'), num = document.getElementById('ksvNum'), qEl = document.getElementById('ksvQ'),
-        opts = document.getElementById('ksvOpts'), fb = document.getElementById('ksvFb'), dots = document.getElementById('ksvDots');
-    if (tabs) {
-        function renderTabs() {
-            tabs.innerHTML = '';
-            Object.keys(Q).forEach(function (id) {
-                var b = document.createElement('button');
-                b.type = 'button'; b.className = 'ksv-tab'; b.setAttribute('role', 'tab');
-                b.setAttribute('aria-selected', id === theme ? 'true' : 'false');
-                b.textContent = Q[id].label;
-                b.onclick = function () { theme = id; idx = 0; renderTabs(); renderQ(); };
-                tabs.appendChild(b);
-            });
-        }
-        function renderQ() {
-            var items = Q[theme].items, item = items[idx];
-            num.textContent = 'ამოცანა ' + (idx + 1) + ' / ' + items.length;
-            qEl.textContent = item.q;
-            fb.className = 'ksv-fb'; fb.textContent = '';
-            opts.innerHTML = '';
+    var theme = 'football';
+    var tabs = document.getElementById('ksvTabs'), track = document.getElementById('ksvTrack'), dots = document.getElementById('ksvDots'),
+        prev = document.getElementById('ksvPrev'), next = document.getElementById('ksvNext');
+    if (tabs && track) {
+        function card(item, n, total) {
+            var c = document.createElement('div'); c.className = 'ksv-quiz';
+            c.setAttribute('role', 'group'); c.setAttribute('aria-label', 'ამოცანა ' + n + ' / ' + total);
+            var num = document.createElement('span'); num.className = 'ksv-qnum'; num.textContent = 'ამოცანა ' + n + ' / ' + total;
+            var q = document.createElement('p'); q.className = 'ksv-q'; q.textContent = item.q;
+            var opts = document.createElement('div'); opts.className = 'ksv-opts'; opts.setAttribute('role', 'radiogroup'); opts.setAttribute('aria-label', 'პასუხები');
+            var fb = document.createElement('div'); fb.className = 'ksv-fb'; fb.setAttribute('aria-live', 'polite');
             item.opts.forEach(function (v) {
                 var o = document.createElement('button');
                 o.type = 'button'; o.className = 'ksv-opt'; o.setAttribute('role', 'radio'); o.setAttribute('aria-checked', 'false');
@@ -500,27 +505,53 @@
                 };
                 opts.appendChild(o);
             });
-            dots.innerHTML = '';
-            items.forEach(function (_, i) { var d = document.createElement('i'); if (i === idx) d.className = 'on'; dots.appendChild(d); });
+            c.appendChild(num); c.appendChild(q); c.appendChild(opts); c.appendChild(fb);
+            return c;
         }
-        document.getElementById('ksvPrev').onclick = function () { var n = Q[theme].items.length; idx = (idx + n - 1) % n; renderQ(); };
-        document.getElementById('ksvNext').onclick = function () { idx = (idx + 1) % Q[theme].items.length; renderQ(); };
-        renderTabs(); renderQ();
+        // ბარათები გვერდიგვერდ დგას — თითით გასრიალებისას ერთი გადის და მეორე შემოდის
+        function step() { var c = track.children[0]; return c ? c.getBoundingClientRect().width + 14 : track.clientWidth; }
+        function cur() { return Math.round(track.scrollLeft / Math.max(1, step())); }
+        function upd() {
+            var n = track.children.length, i = Math.min(n - 1, cur());
+            prev.disabled = i <= 0; next.disabled = i >= n - 1;
+            Array.prototype.forEach.call(dots.children, function (d, k) { d.classList.toggle('on', k === i); });
+        }
+        prev.onclick = function () { track.scrollBy({ left: -step(), behavior: 'smooth' }); };
+        next.onclick = function () { track.scrollBy({ left: step(), behavior: 'smooth' }); };
+        track.addEventListener('scroll', function () { window.requestAnimationFrame(upd); }, { passive: true });
+        window.addEventListener('resize', upd);
+        function render() {
+            tabs.innerHTML = '';
+            Object.keys(Q).forEach(function (id) {
+                var b = document.createElement('button');
+                b.type = 'button'; b.className = 'ksv-tab'; b.setAttribute('role', 'tab');
+                b.setAttribute('aria-selected', id === theme ? 'true' : 'false');
+                b.textContent = Q[id].label;
+                b.onclick = function () { theme = id; render(); };
+                tabs.appendChild(b);
+            });
+            var items = Q[theme].items;
+            track.innerHTML = ''; dots.innerHTML = '';
+            items.forEach(function (it, i) { track.appendChild(card(it, i + 1, items.length)); dots.appendChild(document.createElement('i')); });
+            track.style.scrollBehavior = 'auto'; track.scrollLeft = 0; track.style.scrollBehavior = '';
+            upd();
+        }
+        render();
     }
 
     // ── თამაშების კარუსელი ──
-    var track = document.getElementById('ksvGames'), gp = document.getElementById('ksvGPrev'), gn = document.getElementById('ksvGNext');
-    if (track) {
-        function step() { var c = track.children[0]; return c ? c.getBoundingClientRect().width + 16 : track.clientWidth; }
-        function upd() {
-            var max = track.scrollWidth - track.clientWidth - 2;
-            gp.disabled = track.scrollLeft <= 2; gn.disabled = track.scrollLeft >= max;
+    var gTrack = document.getElementById('ksvGames'), gp = document.getElementById('ksvGPrev'), gn = document.getElementById('ksvGNext');
+    if (gTrack) {
+        function gStep() { var c = gTrack.children[0]; return c ? c.getBoundingClientRect().width + 16 : gTrack.clientWidth; }
+        function gUpd() {
+            var max = gTrack.scrollWidth - gTrack.clientWidth - 2;
+            gp.disabled = gTrack.scrollLeft <= 2; gn.disabled = gTrack.scrollLeft >= max;
         }
-        gp.onclick = function () { track.scrollBy({ left: -step(), behavior: 'smooth' }); };
-        gn.onclick = function () { track.scrollBy({ left: step(), behavior: 'smooth' }); };
-        track.addEventListener('scroll', function () { window.requestAnimationFrame(upd); }, { passive: true });
-        window.addEventListener('resize', upd);
-        upd();
+        gp.onclick = function () { gTrack.scrollBy({ left: -gStep(), behavior: 'smooth' }); };
+        gn.onclick = function () { gTrack.scrollBy({ left: gStep(), behavior: 'smooth' }); };
+        gTrack.addEventListener('scroll', function () { window.requestAnimationFrame(gUpd); }, { passive: true });
+        window.addEventListener('resize', gUpd);
+        gUpd();
     }
 })();
 </script>
