@@ -144,6 +144,12 @@
 
     /* ფასები */
     .ksv-plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; color: #2B2622; }
+    /* დესკტოპზე პაკეტები გვერდზე სქროლდება (კარუსელი); მობილურზე — ერთმანეთის ქვეშ */
+    @media (min-width: 641px) {
+        .ksv-plans { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; padding: 2px 2px 6px; }
+        .ksv-plans::-webkit-scrollbar { display: none; }
+        .ksv-plans > .ksv-plan { flex: 0 0 340px; scroll-snap-align: start; }
+    }
     .ksv-plan { background: #fff; border-radius: 28px; padding: 24px; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box; }
     .ksv-plan.feat { background: var(--yel); }
     .ksv-plan-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
@@ -192,6 +198,7 @@
         .ksv-plan ul { display: none; }
         .ksv-plan .ksv-btn { height: 46px; }
         .ksv-cta-avs { display: none; }
+        .ksv-plans-nav { display: none; }
     }
 
     /* ── შესვლის მოდალი — საიტის დიზაინში ── */
@@ -404,8 +411,14 @@
     {{-- ── ფასები (ყვითელი) ── --}}
     <section id="pricing" class="ksv-yel">
         <div class="ksv-in" style="display:flex;flex-direction:column;gap:22px;">
-            <h2 class="ksv-h2" style="text-align:center;">აირჩიე პაკეტი</h2>
-            <div class="ksv-plans">
+            <div class="ksv-car-head">
+                <h2 class="ksv-h2">აირჩიე პაკეტი</h2>
+                <div class="ksv-arrows ksv-plans-nav">
+                    <button type="button" class="ksv-arrow" id="ksvPPrev" aria-label="წინა პაკეტი"><i class="bi bi-chevron-left"></i></button>
+                    <button type="button" class="ksv-arrow go" id="ksvPNext" aria-label="შემდეგი პაკეტი"><i class="bi bi-chevron-right"></i></button>
+                </div>
+            </div>
+            <div class="ksv-plans" id="ksvPlans" aria-label="პაკეტები" tabindex="0">
                 @foreach($__plans as $__pl)
                 @php $__feat = $__pl->id === $__featuredId; @endphp
                 <div class="ksv-plan {{ $__feat ? 'feat' : '' }}">
@@ -537,6 +550,21 @@
             upd();
         }
         render();
+    }
+
+    // ── პაკეტების კარუსელი (დესკტოპი) ──
+    var pTrack = document.getElementById('ksvPlans'), pp = document.getElementById('ksvPPrev'), pn = document.getElementById('ksvPNext');
+    if (pTrack && pp && pn) {
+        function pStep() { var c = pTrack.children[0]; return c ? c.getBoundingClientRect().width + 16 : pTrack.clientWidth; }
+        function pUpd() {
+            var max = pTrack.scrollWidth - pTrack.clientWidth - 2;
+            pp.disabled = pTrack.scrollLeft <= 2; pn.disabled = pTrack.scrollLeft >= max;
+        }
+        pp.onclick = function () { pTrack.scrollBy({ left: -pStep(), behavior: 'smooth' }); };
+        pn.onclick = function () { pTrack.scrollBy({ left: pStep(), behavior: 'smooth' }); };
+        pTrack.addEventListener('scroll', function () { window.requestAnimationFrame(pUpd); }, { passive: true });
+        window.addEventListener('resize', pUpd);
+        pUpd();
     }
 
     // ── თამაშების კარუსელი ──

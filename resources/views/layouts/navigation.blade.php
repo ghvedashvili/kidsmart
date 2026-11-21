@@ -442,8 +442,8 @@
         </div>
 
         <div class="auth-modal-tabs">
-            <button type="button" id="lmTabParent" class="auth-modal-tab active" onclick="lmSwitch('parent')">👨‍👩‍👧 მშობელი</button>
-            <button type="button" id="lmTabChild" class="auth-modal-tab" onclick="lmSwitch('child')">🧒 ბავშვი</button>
+            <button type="button" id="lmTabParent" class="auth-modal-tab active" onclick="lmSwitch('parent')">მშობელი</button>
+            <button type="button" id="lmTabChild" class="auth-modal-tab" onclick="lmSwitch('child')">ბავშვი</button>
         </div>
 
         {{-- Parent panel --}}

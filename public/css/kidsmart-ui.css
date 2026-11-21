@@ -1097,3 +1097,27 @@ html:has(body.ks-child), html:has(body.ks-parent), html:has(body.ks-admin), html
 .ks-pbrand-t, .ks-side-name { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
 .ks-side-name .ks-logo { height: 38px; }
 .ks-ctop .ks-logo { height: 32px; }
+
+/* ── ადმინი მობილურზე: მარცხნიდან გამოსაშლელი მენიუ ── */
+.ks-atop, .ks-aside-ov, .ks-aside-x { display: none; }
+@media (max-width: 900px) {
+    .ks-atop { display: flex; align-items: center; gap: 12px; flex-basis: 100%; position: sticky; top: 0; z-index: 60;
+        margin: -12px -12px 0; padding: 10px 12px; background: rgba(247,246,243,.95); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid #ECE9E4; }
+    .ks-atop-btn { width: 44px; height: 44px; border-radius: 14px; border: 2px solid #ECE9E4; background: #fff; color: #2B2622; font-size: 22px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+    .ks-atop-btn:hover { border-color: #2B2622; }
+    .ks-atop-logo { display: flex; }
+    .ks-atop .ks-logo { height: 32px; }
+    .ks-admin-side { position: fixed !important; top: 0; left: 0; bottom: 0; z-index: 1000; width: 290px; max-width: 86vw !important; flex-basis: auto !important;
+        max-height: none !important; border-radius: 0 24px 24px 0 !important; padding: 18px 12px !important; gap: 16px !important; overflow-y: auto;
+        transform: translateX(-105%); transition: transform .25s ease; box-shadow: 0 0 40px rgba(43,38,34,.18); }
+    body.ks-aside-open .ks-admin-side { transform: none; }
+    .ks-admin-side .ks-side-nav { flex-direction: column; overflow-x: visible; gap: 14px; }
+    .ks-admin-side .ks-side-group { flex-direction: column; gap: 2px; }
+    .ks-admin-side .ks-side-title { display: block; }
+    .ks-admin-side .ks-side-user { display: flex; }
+    .ks-aside-ov { display: block; position: fixed; inset: 0; z-index: 999; background: rgba(43,38,34,.4); opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+    body.ks-aside-open .ks-aside-ov { opacity: 1; pointer-events: auto; }
+    body.ks-aside-open { overflow: hidden; }
+    .ks-aside-x { display: inline-flex; position: absolute; top: 14px; right: 12px; width: 40px; height: 40px; border-radius: 12px; border: 1px solid #ECE9E4; background: #fff; color: #2B2622; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; }
+}
+@media (max-width: 900px) and (prefers-reduced-motion: reduce) { .ks-admin-side, .ks-aside-ov { transition: none; } }

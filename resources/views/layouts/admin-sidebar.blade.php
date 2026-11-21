@@ -50,7 +50,14 @@
         ],
     ];
 @endphp
-<aside class="ks-admin-side" aria-label="ადმინის მენიუ">
+{{-- მობილური: ზედა ზოლი ჰამბურგერით + მარცხნიდან გამოსაშლელი მენიუ --}}
+<header class="ks-atop">
+    <button type="button" class="ks-atop-btn" id="ksAdminMenuBtn" aria-label="მენიუს გახსნა" aria-controls="ksAdminSide" aria-expanded="false" onclick="ksAdminMenu(true)"><i class="bi bi-list"></i></button>
+    <a href="{{ route('admin.panel') }}" class="ks-atop-logo"><img src="{{ asset('img/logo.png') }}" alt="KidSmart" class="ks-logo"></a>
+</header>
+<div class="ks-aside-ov" onclick="ksAdminMenu(false)" aria-hidden="true"></div>
+<aside class="ks-admin-side" id="ksAdminSide" aria-label="ადმინის მენიუ">
+    <button type="button" class="ks-aside-x" aria-label="მენიუს დახურვა" onclick="ksAdminMenu(false)"><i class="bi bi-x-lg"></i></button>
     <a href="{{ route('admin.panel') }}" class="ks-side-brand">
         <span class="ks-side-name"><img src="{{ asset('img/logo.png') }}" alt="KidSmart" class="ks-logo"><small>ადმინ პანელი</small></span>
     </a>
@@ -93,3 +100,11 @@
         </form>
     </div>
 </aside>
+<script>
+function ksAdminMenu(open) {
+    document.body.classList.toggle('ks-aside-open', open);
+    var b = document.getElementById('ksAdminMenuBtn');
+    if (b) b.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && document.body.classList.contains('ks-aside-open')) ksAdminMenu(false); });
+</script>
