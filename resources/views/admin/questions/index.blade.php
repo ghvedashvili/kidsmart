@@ -142,12 +142,24 @@
             <h1 class="ks-page-title">{{ $showTrashed ? 'წაშლილი კითხვები' : 'კითხვები' }}</h1>
         </div>
         @unless($showTrashed)
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <a href="{{ route('admin.questions.import.index') }}" class="btn btn-primary-ks" style="background:#fff !important;color:#C24A0A !important;border:2px solid #FFD9BF !important;"><i class="bi bi-stars"></i> AI იმპორტი</a>
         <a href="{{ route('admin.questions.create') }}" class="btn btn-primary-ks">+ ახალი შაბლონი</a>
+        </div>
         @endunless
     </div>
 
     @if(session('success'))
     <div class="msg">{{ session('success') }}</div>
+    @endif
+
+    @php $__rvPending = auth()->user()->isAdmin() ? \App\Models\QuestionTemplate::where('review_status', 'pending')->count() : 0; @endphp
+    @if($__rvPending && ! $showTrashed)
+    <a href="{{ route('admin.questions.review.index') }}" style="display:flex;align-items:center;gap:10px;background:#FFF3EA;border:2px solid #FFD9BF;color:#C24A0A;border-radius:16px;padding:12px 16px;font-weight:800;text-decoration:none;margin-bottom:12px;">
+        <i class="bi bi-person-badge" style="font-size:18px;"></i>
+        <span style="flex:1;">მასწავლებლების {{ $__rvPending }} კითხვა ელოდება განხილვას</span>
+        <span>ნახვა →</span>
+    </a>
     @endif
 
     <div class="q-toolbar">

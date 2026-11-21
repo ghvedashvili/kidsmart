@@ -150,9 +150,9 @@
     // Child AND parent pages replace the shared top/bottom nav with one compact bar
     // (logo + notification + logout) — navigation between sections happens via
     // each page's own "back" link and the dashboard's cards instead.
-    $__hideChildChrome = auth()->check() && (in_array(auth()->user()->role, ['child', 'parent']) || !empty($__ksParent));
+    $__hideChildChrome = auth()->check() && (in_array(auth()->user()->role, ['child', 'parent']) || !empty($__ksParent) || !empty($__ksTeacher));
 @endphp
-@if($__hideChildChrome && empty($__ksChild) && empty($__ksParent))
+@if($__hideChildChrome && empty($__ksChild) && empty($__ksParent) && empty($__ksTeacher))
 <style>
     .child-top-bar {
         display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;

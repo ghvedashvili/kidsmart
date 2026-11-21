@@ -88,8 +88,11 @@
     // ადმინიც მშობელია: ადმინის გვერდების გარეთ მშობლის გარსს ხედავს („ადმინ რეჟიმი“ ღილაკით გადადის)
     $__ksParent = !$__ksAdmin && auth()->check() && in_array(auth()->user()->role, ['parent', 'admin'])
         && request()->routeIs('dashboard', 'child.hub', 'child.stats', 'child.practice-stats', 'child.olympiad-stats', 'child.achievements', 'child.test.show', 'market.index');
+    // მასწავლებლის გარსი (მშობლის სტილით) — teacher.* გვერდებზე
+    $__ksTeacher = !$__ksAdmin && auth()->check() && request()->routeIs('teacher.*');
+    if ($__ksTeacher) $__ksParent = false;
 @endphp
-<body class="@yield('bodyClass'){{ $__ksAdmin ? ' ks-admin' : '' }}{{ $__ksChild ? ' ks-child' : '' }}{{ $__ksParent ? ' ks-parent' : '' }}{{ !auth()->check() && request()->is('/') ? ' ks-landing' : '' }}{{ $__ksChild && request()->routeIs('games.memory', 'games.rps', 'games.wolves-hare', 'games.quoridor') ? ' ks-game' : '' }}">
+<body class="@yield('bodyClass'){{ $__ksAdmin ? ' ks-admin' : '' }}{{ $__ksChild ? ' ks-child' : '' }}{{ $__ksParent || $__ksTeacher ? ' ks-parent' : '' }}{{ $__ksTeacher ? ' ks-teacher' : '' }}{{ !auth()->check() && request()->is('/') ? ' ks-landing' : '' }}{{ $__ksChild && request()->routeIs('games.memory', 'games.rps', 'games.wolves-hare', 'games.quoridor') ? ' ks-game' : '' }}">
 
 <div id="page-loader">
     <div class="ks-loader">
@@ -248,6 +251,8 @@
     </div>
     @elseif($__ksChild)
     @include('layouts.child-shell')
+    @elseif($__ksTeacher)
+    @include('layouts.teacher-shell')
     @elseif($__ksParent)
     @include('layouts.parent-shell')
     @else

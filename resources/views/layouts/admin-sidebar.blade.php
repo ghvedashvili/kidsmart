@@ -5,7 +5,9 @@
     $__su       = auth()->user();
     $__sIsAdmin = $__su->isAdmin();
     $__sAp      = $__sIsAdmin ? null : (\App\Models\RolePermission::allowedPages($__su->role) ?? []);
-    $__sCan     = fn($key) => $__sIsAdmin || in_array($key, (array) $__sAp);
+    $__sCan     = fn($key) => $__sIsAdmin || ($key !== '__admin' && in_array($key, (array) $__sAp));
+    // მასწავლებლების განსახილველი კითხვები (ბეჯი)
+    $__sReview  = $__sIsAdmin ? \App\Models\QuestionTemplate::where('review_status', 'pending')->count() : 0;
 
     $__ico = [
         'panel'     => 'M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z',
@@ -22,6 +24,7 @@
         'users'     => 'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21a7 7 0 0 1 14 0M17 4a4 4 0 0 1 0 7.5M22 21a7 7 0 0 0-4-6.3',
         'packages'  => 'M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8',
         'perms'     => 'M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4',
+        'review'    => 'M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9',
     ];
 
     // [ნებართვის გასაღები, სახელი, route, აქტიურობის pattern, აიკონი]
@@ -32,6 +35,7 @@
         ],
         'კონტენტი' => [
             ['admin.questions', 'კითხვები', 'admin.questions.index', 'admin.questions.*', 'questions'],
+            ['__admin', 'განსახილველი', 'admin.questions.review.index', 'admin.questions.review.*', 'review'],
             ['admin.topics', 'თემები', 'admin.topics.index', 'admin.topics.*', 'topics'],
             ['admin.themes', 'თემატიკა და ცვლადები', 'admin.themes.index', 'admin.themes.*', 'themes'],
             ['admin.grades', 'კლასები', 'admin.grades.index', 'admin.grades.*', 'grades'],
@@ -70,10 +74,12 @@
                 <span class="ks-side-title">{{ $__gTitle }}</span>
                 @foreach($__visible as $__it)
                     @if(\Illuminate\Support\Facades\Route::has($__it[2]))
-                    <a href="{{ route($__it[2]) }}" class="ks-side-link{{ request()->routeIs($__it[3]) ? ' active' : '' }}"
-                       @if(request()->routeIs($__it[3])) aria-current="page" @endif>
+                    @php $__on = request()->routeIs($__it[3]) && ! ($__it[2] === 'admin.questions.index' && request()->routeIs('admin.questions.review.*')); @endphp
+                    <a href="{{ route($__it[2]) }}" class="ks-side-link{{ $__on ? ' active' : '' }}"
+                       @if($__on) aria-current="page" @endif>
                         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ $__ico[$__it[4]] }}"/></svg>
                         <span>{{ $__it[1] }}</span>
+                        @if($__it[2] === 'admin.questions.review.index' && $__sReview)<span class="ks-pnav-badge" style="margin-left:auto;">{{ $__sReview }}</span>@endif
                     </a>
                     @endif
                 @endforeach
@@ -82,6 +88,12 @@
         @endforeach
     </nav>
 
+    @if($__su->role === 'teacher')
+    <a href="{{ route('teacher.questions.index') }}" class="ks-side-link ks-side-parent">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 9L12 4 2 9l10 5 10-5zM6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/></svg>
+        <span>მასწავლებლის გვერდი</span>
+    </a>
+    @endif
     @if(in_array($__su->role, ['admin', 'parent']))
     <a href="{{ route('dashboard') }}" class="ks-side-link ks-side-parent">
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21a7 7 0 0 1 14 0M17 4a4 4 0 0 1 0 7.5M22 21a7 7 0 0 0-4-6.3"/></svg>

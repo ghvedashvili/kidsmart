@@ -2542,16 +2542,20 @@ let ncIdSeq = 1;
 // Georgian labels for the "operator" variable type's underlying math symbol —
 // mirrors QuestionTemplate::OPERATOR_LABELS exactly.
 const OPERATOR_LABELS = { '+': 'ით მეტი', '-': 'ით ნაკლები', '*': 'ჯერ მეტი', '/': 'ჯერ ნაკლები' };
-const NC_MODE_CYCLE = ['random', 'derived', 'operator', 'conditional'];
+const NC_MODE_CYCLE = ['random', 'list', 'derived', 'operator', 'conditional'];
+// "list" mode: the value is picked from an explicit list, e.g. coins 1,2,5,10,20,50.
+function ncParseList(str) {
+    return String(str || '').split(/[,;\s]+/).map(x => parseInt(x, 10)).filter(n => Number.isFinite(n));
+}
 
-function addNcRow(name = '', min = 1, max = 9, step = 1, mode = 'random', derived = '', opOptions = [], conditional = '') {
+function addNcRow(name = '', min = 1, max = 9, step = 1, mode = 'random', derived = '', opOptions = [], conditional = '', values = '') {
     if (!name) {
         const used = new Set(ncRows.map(r => r.name));
         let i = 1;
         while (used.has('N' + i)) i++;
         name = 'N' + i;
     }
-    ncRows.push({ id: ncIdSeq++, name, min, max, step, mode, derived, opOptions: opOptions.slice(), conditional });
+    ncRows.push({ id: ncIdSeq++, name, min, max, step, mode, derived, opOptions: opOptions.slice(), conditional, values: Array.isArray(values) ? values.join(', ') : String(values || '') });
     renderNcRows();
 }
 function removeNcRow(id) {
@@ -2592,7 +2596,16 @@ function renderNcRows() {
         }
         const div = document.createElement('div');
         div.className = 'nc-row';
-        if (row.mode === 'derived') {
+        if (row.mode === 'list') {
+            div.innerHTML = `
+            <input class="nc-inp nc-name" maxlength="6" placeholder="C1" value="${row.name}"
+                data-nc="${row.id}" data-nc-f="name">
+            <input class="nc-inp" style="grid-column: 2 / 5;" placeholder="სია: 1, 2, 5, 10, 20, 50" value="${row.values || ''}"
+                title="მნიშვნელობა შემთხვევით აირჩევა ამ სიიდან" data-nc="${row.id}" data-nc-f="values">
+            <button type="button" class="nc-toggle on" title="გამოთვლილ ცვლადზე გადართვა" onclick="toggleNcMode(${row.id})">[ ]</button>
+            <button type="button" class="nc-del" onclick="removeNcRow(${row.id})">✕</button>
+            `;
+        } else if (row.mode === 'derived') {
             div.innerHTML = `
             <input class="nc-inp nc-name" maxlength="6" placeholder="N1" value="${row.name}"
                 data-nc="${row.id}" data-nc-f="name">
@@ -2639,7 +2652,7 @@ function renderNcRows() {
                 data-nc="${row.id}" data-nc-f="max">
             <input type="number" class="nc-inp" min="1" placeholder="1" value="${row.step}"
                 title="ნაბიჯი: 1=ნებ, 2=ლუწი, 5=მრ5" data-nc="${row.id}" data-nc-f="step">
-            <button type="button" class="nc-toggle" title="გამოთვლილ ცვლადზე გადართვა (ƒ → ოპერატორი → პირობითი)" onclick="toggleNcMode(${row.id})">ƒ</button>
+            <button type="button" class="nc-toggle" title="სიიდან არჩევაზე გადართვა ([ ] → ƒ → ოპერატორი → პირობითი)" onclick="toggleNcMode(${row.id})">ƒ</button>
             <button type="button" class="nc-del" onclick="removeNcRow(${row.id})">✕</button>
             `;
         }
@@ -2750,7 +2763,10 @@ function syncAll() {
     const ncObj = {};
     ncRows.forEach(r => {
         if (!r.name) return;
-        if (r.mode === 'derived') {
+        if (r.mode === 'list') {
+            const vals = ncParseList(r.values);
+            ncObj[r.name] = vals.length ? { values: vals } : { min: 1, max: 9, step: 1 };
+        } else if (r.mode === 'derived') {
             ncObj[r.name] = { derived: r.derived || '0' };
         } else if (r.mode === 'operator') {
             ncObj[r.name] = { operator: true, options: (r.opOptions && r.opOptions.length) ? r.opOptions : ['+'] };
@@ -2832,7 +2848,15 @@ function syncAll() {
 // evaluator in genPreviewNumeric()) will call -- mirrors PHP's MATH_FNS
 // constant exactly, so the admin's preview and the real backend generation
 // accept identical formula syntax.
-const MATH_FNS = ['round', 'floor', 'ceil', 'abs', 'min', 'max', 'pow', 'sqrt'];
+const MATH_FNS = ['round', 'floor', 'ceil', 'abs', 'min', 'max', 'pow', 'sqrt', 'topsum', 'botsum', 'kmax', 'kmin', 'median'];
+// Sort/aggregate helpers — mirror app/Support/ks_math.php exactly.
+const KS_SORT = (xs, desc) => xs.map(Number).sort((a, b) => desc ? b - a : a - b);
+const topsum = (k, ...xs) => KS_SORT(xs, true).slice(0, Math.max(0, Math.trunc(k))).reduce((a, b) => a + b, 0);
+const botsum = (k, ...xs) => KS_SORT(xs, false).slice(0, Math.max(0, Math.trunc(k))).reduce((a, b) => a + b, 0);
+const kmax   = (k, ...xs) => KS_SORT(xs, true)[Math.max(0, Math.trunc(k) - 1)] ?? 0;
+const kmin   = (k, ...xs) => KS_SORT(xs, false)[Math.max(0, Math.trunc(k) - 1)] ?? 0;
+const median = (...xs) => { if (!xs.length) return 0; const a = KS_SORT(xs, false), n = a.length;
+    return n % 2 ? a[(n - 1) / 2] : Math.floor((a[n / 2 - 1] + a[n / 2]) / 2); };
 
 // ── Condition evaluator (supports expressions like N2+N3, and the whitelisted
 // math functions above, e.g. round(N1/2))
@@ -2847,8 +2871,8 @@ function evalExpr(expr, numVars) {
     const round = Math.round, floor = Math.floor, ceil = Math.ceil, abs = Math.abs,
           min = Math.min, max = Math.max, pow = Math.pow, sqrt = Math.sqrt;
     try {
-        const r = Function('round','floor','ceil','abs','min','max','pow','sqrt',
-            'return (' + e + ')')(round, floor, ceil, abs, min, max, pow, sqrt);
+        const r = Function('round','floor','ceil','abs','min','max','pow','sqrt','topsum','botsum','kmax','kmin','median',
+            'return (' + e + ')')(round, floor, ceil, abs, min, max, pow, sqrt, topsum, botsum, kmax, kmin, median);
         return Number.isFinite(r) ? Math.floor(r) : 0;
     } catch(_) { return 0; }
 }
@@ -2965,6 +2989,11 @@ function pickNumVars(extraCheck) {
         for (let attempt = 0; attempt < innerAttempts; attempt++) {
             numVars = { ...opVars };
             randomRows.forEach(r => {
+                if (r.mode === 'list') {
+                    const vals = ncParseList(r.values);
+                    numVars[r.name] = vals.length ? vals[Math.floor(Math.random() * vals.length)] : 1;
+                    return;
+                }
                 const step = Math.max(1, r.step || 1);
                 const steps = Math.floor((r.max - r.min) / step);
                 numVars[r.name] = r.min + Math.floor(Math.random() * (steps + 1)) * step;
@@ -3693,8 +3722,8 @@ function genPreviewNumeric(tmpl) {
         try {
             const round = Math.round, floor = Math.floor, ceil = Math.ceil, abs = Math.abs,
                   min = Math.min, max = Math.max, pow = Math.pow, sqrt = Math.sqrt;
-            const raw = Function('round','floor','ceil','abs','min','max','pow','sqrt',
-                'return (' + f + ')')(round, floor, ceil, abs, min, max, pow, sqrt);
+            const raw = Function('round','floor','ceil','abs','min','max','pow','sqrt','topsum','botsum','kmax','kmin','median',
+                'return (' + f + ')')(round, floor, ceil, abs, min, max, pow, sqrt, topsum, botsum, kmax, kmin, median);
             if (Number.isFinite(raw) && raw > 0 && Math.floor(raw) === raw) {
                 correct = raw; substituted = f; return true;
             }
@@ -3780,7 +3809,7 @@ document.getElementById('ncRows').addEventListener('input', function(e) {
     if (!id || !field) return;
     let val;
     if (field === 'name') val = (el.value = el.value.toUpperCase().replace(/[^A-Z0-9]/g, ''));
-    else if (field === 'derived' || field === 'conditional') val = el.value;
+    else if (field === 'derived' || field === 'conditional' || field === 'values') val = el.value;
     else val = +el.value;
     updNc(id, field, val);
 });
@@ -3996,6 +4025,8 @@ function loadIntoForm(data) {
                 addNcRow(name, 1, 9, 1, 'derived', conf.derived ?? '');
             } else if ('conditional' in conf) {
                 addNcRow(name, 1, 9, 1, 'conditional', '', [], conf.conditional ?? '');
+            } else if (Array.isArray(conf.values) && conf.values.length) {
+                addNcRow(name, 1, 9, 1, 'list', '', [], '', conf.values);
             } else {
                 addNcRow(name, conf.min ?? 1, conf.max ?? 9, conf.step ?? 1);
             }
@@ -4146,6 +4177,8 @@ function array_key_exists_js(key, obj) { return obj && Object.prototype.hasOwnPr
                 addNcRow(name, 1, 9, 1, 'derived', conf.derived ?? '');
             } else if ('conditional' in conf) {
                 addNcRow(name, 1, 9, 1, 'conditional', '', [], conf.conditional ?? '');
+            } else if (Array.isArray(conf.values) && conf.values.length) {
+                addNcRow(name, 1, 9, 1, 'list', '', [], '', conf.values);
             } else {
                 addNcRow(name, conf.min ?? 1, conf.max ?? 9, conf.step ?? 1);
             }

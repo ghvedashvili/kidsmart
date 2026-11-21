@@ -134,6 +134,8 @@ Route::middleware(['auth'])->post('/as-child/leave', function (Request $request)
 
 Route::middleware(['auth', 'role.permission'])->group(function () {
     Route::get('/dashboard', function () {
+        // მასწავლებლის მთავარი — მისი კითხვები
+        if (auth()->user()->role === 'teacher') return redirect()->route('teacher.questions.index');
         return view('dashboard', [
             'grades'         => Grade::where('is_active', true)->orderBy('number')->get(),
             'themes'         => Theme::all(),
@@ -219,6 +221,19 @@ Route::middleware(['auth', 'role.permission'])->group(function () {
     Route::post('/olympiad/start', [OlympiadController::class, 'start'])->name('olympiad.start');
 });
 
+// მასწავლებლის კითხვები (შექმნა → ადმინის განხილვა) — წვდომას კონტროლერი ამოწმებს (teacher/admin)
+Route::middleware(['auth'])->prefix('teacher')->name('teacher.')->group(function () {
+    Route::get('/', fn () => redirect()->route('teacher.questions.index'))->name('home');
+    Route::get('/questions',                    [\App\Http\Controllers\TeacherQuestionController::class, 'index'])->name('questions.index');
+    Route::get('/questions/create',             [\App\Http\Controllers\TeacherQuestionController::class, 'create'])->name('questions.create');
+    Route::post('/questions/preview',           [\App\Http\Controllers\TeacherQuestionController::class, 'preview'])->name('questions.preview');
+    Route::post('/questions',                   [\App\Http\Controllers\TeacherQuestionController::class, 'store'])->name('questions.store');
+    Route::get('/questions/{question}',         [\App\Http\Controllers\TeacherQuestionController::class, 'show'])->name('questions.show');
+    Route::get('/questions/{question}/edit',    [\App\Http\Controllers\TeacherQuestionController::class, 'edit'])->name('questions.edit');
+    Route::put('/questions/{question}',         [\App\Http\Controllers\TeacherQuestionController::class, 'update'])->name('questions.update');
+    Route::delete('/questions/{question}',      [\App\Http\Controllers\TeacherQuestionController::class, 'destroy'])->name('questions.destroy');
+});
+
 // /admin entry-point — ნებისმიერი admin-permissioned user შედის (per-page check არ არის)
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.panel');
@@ -281,6 +296,17 @@ Route::middleware(['auth', 'admin', 'role.permission'])->group(function () {
     Route::patch('/admin/topics/{topic}/toggle-active', [TopicController::class, 'toggleActive'])->name('admin.topics.toggle-active');
 
     // კითხვების შაბლონები
+    // კითხვების JSON იმპორტი (AI-ით შედგენილი შაბლონები)
+    Route::get('/admin/questions/import',              [\App\Http\Controllers\Admin\QuestionImportController::class, 'index'])->name('admin.questions.import.index');
+    Route::post('/admin/questions/import/check',       [\App\Http\Controllers\Admin\QuestionImportController::class, 'check'])->name('admin.questions.import.check');
+    Route::post('/admin/questions/import/formula',     [\App\Http\Controllers\Admin\QuestionImportController::class, 'formula'])->name('admin.questions.import.formula');
+    Route::post('/admin/questions/import/draft',       [\App\Http\Controllers\Admin\QuestionImportController::class, 'draft'])->name('admin.questions.import.draft');
+    Route::post('/admin/questions/import/save',        [\App\Http\Controllers\Admin\QuestionImportController::class, 'save'])->name('admin.questions.import.save');
+    Route::get('/admin/questions/import/clear',        [\App\Http\Controllers\Admin\QuestionImportController::class, 'clear'])->name('admin.questions.import.clear');
+    // მასწავლებლების კითხვების განხილვა (მხოლოდ ადმინი — კონტროლერი ამოწმებს)
+    Route::get('/admin/questions/review',              [\App\Http\Controllers\Admin\QuestionReviewController::class, 'index'])->name('admin.questions.review.index');
+    Route::post('/admin/questions/{question}/approve', [\App\Http\Controllers\Admin\QuestionReviewController::class, 'approve'])->name('admin.questions.review.approve');
+    Route::post('/admin/questions/{question}/reject',  [\App\Http\Controllers\Admin\QuestionReviewController::class, 'reject'])->name('admin.questions.review.reject');
     Route::get('/admin/questions',                     [QuestionTemplateController::class, 'index'])->name('admin.questions.index');
     Route::get('/admin/questions/create',              [QuestionTemplateController::class, 'create'])->name('admin.questions.create');
     Route::get('/admin/questions/{question}/data',     [QuestionTemplateController::class, 'data'])->name('admin.questions.data');

@@ -6,13 +6,57 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+// topsum / botsum / kmax / kmin / median — ფორმულებისთვის (იხ. MATH_FNS)
+require_once __DIR__ . '/../Support/ks_math.php';
+
 class QuestionTemplate extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['topic_id', 'theme_id', 'question_group_id', 'difficulty', 'is_olympiad', 'is_active', 'sequence', 'answer_type', 'question_type', 'title', 'template_text', 'hint_text', 'correct_formula', 'num_config', 'distractors', 'conditions'];
+    protected $fillable = ['topic_id', 'theme_id', 'question_group_id', 'difficulty', 'is_olympiad', 'is_active', 'sequence', 'answer_type', 'question_type', 'title', 'template_text', 'hint_text', 'correct_formula', 'num_config', 'distractors', 'conditions',
+        'created_by', 'review_status', 'review_comment', 'reviewed_by', 'reviewed_at', 'submitted_at', 'teacher_data'];
 
-    protected $casts = ['num_config' => 'array', 'distractors' => 'array', 'conditions' => 'array', 'is_olympiad' => 'boolean', 'is_active' => 'boolean', 'sequence' => 'integer'];
+    protected $casts = ['num_config' => 'array', 'distractors' => 'array', 'conditions' => 'array', 'is_olympiad' => 'boolean', 'is_active' => 'boolean', 'sequence' => 'integer',
+        'teacher_data' => 'array', 'reviewed_at' => 'datetime', 'submitted_at' => 'datetime'];
+
+    // მასწავლებლის კითხვის განხილვის სტატუსები (null — ადმინის/ძველი კითხვა)
+    public const REVIEW_PENDING  = 'pending';
+    public const REVIEW_REJECTED = 'rejected';
+    public const REVIEW_APPROVED = 'approved';
+
+    protected static function booted(): void
+    {
+        static::saving(function (self $t) {
+            $user = auth()->user();
+            // მასწავლებლის შექმნილი კითხვა ბავშვებთან მხოლოდ ადმინის დადასტურების შემდეგ ხვდება —
+            // ადმინის ფორმიდან შენახვისასაც (თუ მასწავლებელს იქ წვდომა აქვს)
+            if ($user && $user->role === 'teacher') {
+                if (! $t->exists) {
+                    $t->created_by ??= $user->id;
+                    $t->review_status = self::REVIEW_PENDING;
+                    $t->submitted_at ??= now();
+                }
+                if ($t->review_status !== self::REVIEW_APPROVED) $t->is_active = false;
+                return;
+            }
+            // ადმინმა განსახილველი კითხვა პირდაპირ ჩართო → დადასტურებულად ჩაითვალოს
+            if ($t->isDirty('is_active') && $t->is_active && in_array($t->review_status, [self::REVIEW_PENDING, self::REVIEW_REJECTED], true)) {
+                $t->review_status = self::REVIEW_APPROVED;
+                $t->reviewed_by ??= $user?->id;
+                $t->reviewed_at = now();
+            }
+        });
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function reviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
+    }
 
     private function evalExpr(string $expr, array $vars): int
     {
@@ -451,7 +495,8 @@ class QuestionTemplate extends Model
                 }
                 continue;
             }
-            $val = str_contains($varName, '{{') ? $resolvePattern($varName) : ($vars[$varName] ?? '?');
+            // ცვლადის სახელი არ არის → ტექსტი თვითონაა არასწორი პასუხი (მასწავლებლის ფიქსირებული ვარიანტი)
+            $val = str_contains($varName, '{{') ? $resolvePattern($varName) : ($vars[$varName] ?? $varName);
             // A candidate that happens to resolve to the same text as the
             // correct answer this round would be a second "correct" option in
             // disguise, not a wrong one — drop it rather than show a
@@ -538,9 +583,7 @@ class QuestionTemplate extends Model
             for ($attempt = 0; $attempt < $innerAttempts; $attempt++) {
                 $numVars = $opVars;
                 foreach ($randomConf as $key => $conf) {
-                    $step  = max(1, (int) ($conf['step'] ?? 1));
-                    $steps = (int) (($conf['max'] - $conf['min']) / $step);
-                    $numVars[$key] = $conf['min'] + rand(0, $steps) * $step;
+                    $numVars[$key] = self::rollVar($conf);
                 }
                 foreach ($derivedConf as $key => $conf) {
                     $numVars[$key] = $this->evalExpr((string) ($conf['derived'] ?? '0'), $numVars);
@@ -687,7 +730,22 @@ class QuestionTemplate extends Model
     // over after variable substitution is stripped before eval() ever sees
     // it, so a typo or a foreign identifier can never reach real PHP code
     // instead of just failing to resolve. Mirrored in form.blade.php's JS.
-    private const MATH_FNS = ['round', 'floor', 'ceil', 'abs', 'min', 'max', 'pow', 'sqrt'];
+    private const MATH_FNS = ['round', 'floor', 'ceil', 'abs', 'min', 'max', 'pow', 'sqrt', 'topsum', 'botsum', 'kmax', 'kmin', 'median'];
+
+    /**
+     * შემთხვევითი ცვლადის მნიშვნელობა: ან min..max (step-ით), ან — თუ "values"
+     * სია აქვს — ერთ-ერთი ამ სიიდან (მაგ. მონეტები [1, 2, 5, 10, 20, 50]).
+     */
+    private static function rollVar(array $conf): int
+    {
+        $list = array_values(array_filter((array) ($conf['values'] ?? []), 'is_numeric'));
+        if ($list) return (int) $list[array_rand($list)];
+        $min  = (int) ($conf['min'] ?? 1);
+        $max  = (int) ($conf['max'] ?? $min);
+        $step = max(1, (int) ($conf['step'] ?? 1));
+        $steps = max(0, intdiv($max - $min, $step));
+        return $min + rand(0, $steps) * $step;
+    }
 
     private function generateNumeric(Theme $theme): array
     {
@@ -754,9 +812,7 @@ class QuestionTemplate extends Model
             for ($attempt = 0; $attempt < $innerAttempts; $attempt++) {
                 $numVars = $opVars;
                 foreach ($randomConf as $key => $conf) {
-                    $step = max(1, (int) ($conf['step'] ?? 1));
-                    $steps = (int) (($conf['max'] - $conf['min']) / $step);
-                    $numVars[$key] = $conf['min'] + rand(0, $steps) * $step;
+                    $numVars[$key] = self::rollVar($conf);
                 }
                 foreach ($derivedConf as $key => $conf) {
                     $numVars[$key] = $this->evalExpr((string) ($conf['derived'] ?? '0'), $numVars);
