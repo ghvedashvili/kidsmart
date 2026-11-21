@@ -5,7 +5,6 @@
     $__tCounts = \App\Models\QuestionTemplate::where('created_by', $__tu->id)
         ->selectRaw('review_status, count(*) c')->groupBy('review_status')->pluck('c', 'review_status');
     $__tTab = request()->routeIs('teacher.questions.index') ? (request('tab') ?: (($__tCounts['rejected'] ?? 0) ? 'rejected' : 'pending')) : null;
-    $__tCanAdmin = $__tu->isAdmin() || \App\Models\RolePermission::hasAnyAdminPage($__tu->role);
     $__tLinks = [
         ['rejected', 'bi-arrow-return-left', 'შესასწორებელი', 'warn'],
         ['pending',  'bi-hourglass-split',   'განხილვაზე',     ''],
@@ -27,9 +26,6 @@
             </a>
             @endforeach
         </div>
-        @if($__tCanAdmin && \Illuminate\Support\Facades\Route::has('admin.panel'))
-        <a href="{{ route('admin.panel') }}" class="ks-padmin"><i class="bi bi-shield-lock"></i><span>ადმინ რეჟიმი</span><i class="bi bi-arrow-right"></i></a>
-        @endif
         <div class="ks-cside-foot">
             <form method="POST" action="{{ route('logout') }}">
                 @csrf

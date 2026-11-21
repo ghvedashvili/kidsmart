@@ -88,12 +88,6 @@
         @endforeach
     </nav>
 
-    @if($__su->role === 'teacher')
-    <a href="{{ route('teacher.questions.index') }}" class="ks-side-link ks-side-parent">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 9L12 4 2 9l10 5 10-5zM6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/></svg>
-        <span>მასწავლებლის გვერდი</span>
-    </a>
-    @endif
     @if(in_array($__su->role, ['admin', 'parent']))
     <a href="{{ route('dashboard') }}" class="ks-side-link ks-side-parent">
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21a7 7 0 0 1 14 0M17 4a4 4 0 0 1 0 7.5M22 21a7 7 0 0 0-4-6.3"/></svg>
@@ -120,3 +114,8 @@ function ksAdminMenu(open) {
 }
 document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && document.body.classList.contains('ks-aside-open')) ksAdminMenu(false); });
 </script>
+
+{{-- ადმინის პირადი ჩანაწერები --}}
+@if($__sIsAdmin)
+    @include('admin.partials.notes')
+@endif

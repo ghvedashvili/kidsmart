@@ -137,6 +137,7 @@ class TeacherQuestionController extends Controller
             'hint'        => 'nullable|string|max:500',
             'is_olympiad' => 'nullable|boolean',
             'formula'     => 'nullable|string|max:300',
+            'teacher_comment' => 'nullable|string|max:1000',
             'ranges'      => 'nullable|array|max:20',
             'ranges.*.min'=> 'nullable|integer|min:0|max:100000',
             'ranges.*.max'=> 'nullable|integer|min:0|max:100000',
@@ -158,13 +159,20 @@ class TeacherQuestionController extends Controller
             'is_olympiad' => $request->boolean('is_olympiad'),
             'formula'     => $request->boolean('auto') ? ($data['formula'] ?? null) : null,
             'ranges'      => $request->boolean('auto') ? (array) ($data['ranges'] ?? []) : [],
+            'comment'     => trim((string) ($data['teacher_comment'] ?? '')),
         ];
         return [$input, $builder->build($input)];
     }
 
     private function teacherData(array $input, array $built, ?QuestionTemplate $old = null): array
     {
+        // მიმოწერის ისტორია: მასწავლებლის კომენტარები გაგზავნისას + ადმინის კომენტარები (QuestionReviewController)
+        $history = (array) ($old?->teacher_data['history'] ?? []);
+        $history[] = ['by' => 'teacher', 'name' => auth()->user()->name, 'at' => now()->toDateTimeString(),
+            'event' => $old ? 'resubmitted' : 'submitted', 'text' => $input['comment'] ?: null];
         return [
+            'teacher_comment' => $input['comment'] ?: null,
+            'history'   => array_slice($history, -30),
             'text'      => $input['text'],
             'answer'    => $input['answer'],
             'wrong'     => array_values(array_filter($input['wrong'], fn ($w) => trim((string) $w) !== '')),

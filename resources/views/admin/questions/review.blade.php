@@ -55,7 +55,15 @@
             <span class="tq-pill {{ !empty($__td['auto_used']) ? 'g' : '' }}">{{ !empty($__td['auto_used']) ? 'რიცხვები იცვლება' : 'ფიქსირებული' }}</span>
         </div>
 
-        @if(!empty($__td['previous_comment']))
+        @if(!empty($__td['teacher_comment']))
+        <div class="tq-flash" style="background:#FFF3EA;color:#7A3306;font-weight:600;"><i class="bi bi-chat-left-quote"></i> <b>მასწავლებლის კომენტარი:</b> {{ $__td['teacher_comment'] }}</div>
+        @endif
+        @if(count((array) ($__td['history'] ?? [])) > 1)
+        <details>
+            <summary style="cursor:pointer;font-size:13px;font-weight:800;color:#6B625A;">მიმოწერის ისტორია ({{ count($__td['history']) }})</summary>
+            <div style="margin-top:8px;">@include('teacher.partials.history', ['history' => $__td['history']])</div>
+        </details>
+        @elseif(!empty($__td['previous_comment']))
         <div class="tq-flash" style="background:#F1EFEB;color:#4F473F;font-weight:600;"><b>წინა დაბრუნების კომენტარი:</b> {{ $__td['previous_comment'] }}</div>
         @endif
         @if($status === 'rejected' && $__q->review_comment)

@@ -44,6 +44,10 @@
                 <dt>რიცხვები</dt><dd>{{ !empty($__td['auto_used']) ? 'ყოველ ჯერზე იცვლება' : 'ფიქსირებული' }}</dd>
                 @if(!empty($__td['hint']))<dt>მინიშნება</dt><dd>{{ $__td['hint'] }}</dd>@endif
             </dl>
+            @if(!empty($__td['history']))
+            <h3 style="font-size:15px;font-weight:900;margin:6px 0 0;">მიმოწერა ადმინთან</h3>
+            @include('teacher.partials.history', ['history' => $__td['history']])
+            @endif
         </section>
         <section class="tq-kid">
             <span class="tq-kid-lbl">ასე ნახავს ბავშვი</span>

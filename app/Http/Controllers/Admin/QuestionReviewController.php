@@ -36,9 +36,11 @@ class QuestionReviewController extends Controller
     public function approve(Request $request, QuestionTemplate $question)
     {
         $this->onlyAdmin();
+        $comment = $request->filled('comment') ? trim((string) $request->input('comment')) : null;
         $question->fill([
             'review_status'  => QuestionTemplate::REVIEW_APPROVED,
-            'review_comment' => $request->filled('comment') ? trim((string) $request->input('comment')) : null,
+            'review_comment' => $comment,
+            'teacher_data'   => $this->withHistory($question, 'approved', $comment),
             'reviewed_by'    => auth()->id(),
             'reviewed_at'    => now(),
             'is_active'      => true,
@@ -53,11 +55,22 @@ class QuestionReviewController extends Controller
         $question->fill([
             'review_status'  => QuestionTemplate::REVIEW_REJECTED,
             'review_comment' => trim($data['comment']),
+            'teacher_data'   => $this->withHistory($question, 'rejected', trim($data['comment'])),
             'reviewed_by'    => auth()->id(),
             'reviewed_at'    => now(),
             'is_active'      => false,
         ])->save();
         return back()->with('success', 'კითხვა დაუბრუნდა მასწავლებელს კომენტარით.');
+    }
+
+    /** teacher_data.history-ში ადმინის გადაწყვეტილების ჩამატება */
+    private function withHistory(QuestionTemplate $q, string $event, ?string $text): array
+    {
+        $td = (array) ($q->teacher_data ?? []);
+        $td['history'] = array_slice(array_merge((array) ($td['history'] ?? []), [[
+            'by' => 'admin', 'name' => auth()->user()->name, 'at' => now()->toDateTimeString(), 'event' => $event, 'text' => $text,
+        ]]), -30);
+        return $td;
     }
 
     private function onlyAdmin(): void

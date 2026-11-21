@@ -303,6 +303,10 @@ Route::middleware(['auth', 'admin', 'role.permission'])->group(function () {
     Route::post('/admin/questions/import/draft',       [\App\Http\Controllers\Admin\QuestionImportController::class, 'draft'])->name('admin.questions.import.draft');
     Route::post('/admin/questions/import/save',        [\App\Http\Controllers\Admin\QuestionImportController::class, 'save'])->name('admin.questions.import.save');
     Route::get('/admin/questions/import/clear',        [\App\Http\Controllers\Admin\QuestionImportController::class, 'clear'])->name('admin.questions.import.clear');
+    // ადმინის პირადი ჩანაწერები (მხოლოდ ადმინი — კონტროლერი ამოწმებს)
+    Route::post('/admin/notes',        [\App\Http\Controllers\Admin\AdminNoteController::class, 'save'])->name('admin.notes.save');
+    Route::post('/admin/notes/toggle', [\App\Http\Controllers\Admin\AdminNoteController::class, 'toggle'])->name('admin.notes.toggle');
+
     // მასწავლებლების კითხვების განხილვა (მხოლოდ ადმინი — კონტროლერი ამოწმებს)
     Route::get('/admin/questions/review',              [\App\Http\Controllers\Admin\QuestionReviewController::class, 'index'])->name('admin.questions.review.index');
     Route::post('/admin/questions/{question}/approve', [\App\Http\Controllers\Admin\QuestionReviewController::class, 'approve'])->name('admin.questions.review.approve');

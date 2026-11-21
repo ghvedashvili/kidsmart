@@ -19,8 +19,12 @@ class AdminMiddleware
             abort(403);
         }
         $user = auth()->user();
-        if ($user->isAdmin() || in_array($user->role, ['teacher', 'staff'])) {
+        if ($user->isAdmin() || $user->role === 'staff') {
             return $next($request);
+        }
+        // მასწავლებელს ადმინ რეჟიმი არ აქვს — მისი გვერდი კითხვების გვერდია
+        if ($user->role === 'teacher') {
+            return redirect()->route('teacher.questions.index');
         }
         abort(403);
     }
