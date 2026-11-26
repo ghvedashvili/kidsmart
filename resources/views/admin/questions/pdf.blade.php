@@ -13,7 +13,8 @@
     .q-header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 2mm; }
     .q-num { font-size: 10pt; font-weight: 700; color: #94a3b8; min-width: 22px; flex-shrink: 0; }
     .q-text { font-size: 12pt; font-weight: 600; color: #111; line-height: 1.5; }
-    .q-tags { display: flex; gap: 6px; margin-left: 30px; margin-bottom: 2mm; }
+    .q-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-left: 30px; margin-bottom: 2mm; }
+    .q-tag b { color: #64748b; font-weight: 600; }
     .q-tag { font-size: 8pt; color: #94a3b8; border: 0.5px solid #e2e8f0; border-radius: 2px; padding: 1px 5px; }
     .q-answer-row { display: flex; align-items: center; gap: 8px; margin-left: 30px; }
     .q-answer-label { font-size: 9pt; color: #94a3b8; }
@@ -49,9 +50,10 @@
         <span class="q-num">{{ $q['num'] }}.</span>
     </div>
     <div class="q-tags">
-        <span class="q-tag">{{ $q['grade'] }}</span>
-        <span class="q-tag">{{ $q['topic'] }}</span>
-        <span class="q-tag">დონე {{ $q['difficulty'] }}</span>
+        <span class="q-tag">{!! str_contains((string) $q['grade'], 'კლას') ? '' : '<b>კლასი:</b> ' !!}{{ $q['grade'] }}</span>
+        <span class="q-tag"><b>თემა:</b> {{ $q['topic'] }}</span>
+        <span class="q-tag"><b>თემატიკა:</b> {{ $q['theme'] ?? 'უნივერსალური' }}</span>
+        <span class="q-tag"><b>დონე:</b> {{ !empty($q['is_olympiad']) ? 'ოლიმპიადა' : $q['difficulty'] }}</span>
     </div>
 
     @if($q['broken'])

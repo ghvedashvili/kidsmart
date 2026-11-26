@@ -55,7 +55,7 @@
             <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c1 4 5.5 5.5 5.5 11a5.5 5.5 0 0 1-11 0c0-3 2-4.5 2-7.5 1.5 1 2.6 2.2 3 3.4.6-2.2.5-4.6.5-6.9z" fill="{{ $streak > 0 ? '#F26B1D' : '#D9D4CC' }}"/></svg>
             <b>{{ $streak }}</b><span>დღე ზედიზედ</span>
         </div>
-        <a href="{{ route('market.child') }}" class="kh-stat">
+        <a href="{{ route('market.child') }}" class="kh-stat" data-guide="kid-coins">
             <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#F5B301"/><circle cx="12" cy="12" r="6.5" fill="none" stroke="#FFE08A" stroke-width="2"/></svg>
             <b>{{ (int) floor($coins) }}</b><span>მონეტა</span>
         </a>
@@ -66,7 +66,7 @@
     </div>
 
     {{-- დღევანდელი მისია: დღეში 1 ტესტი --}}
-    <div class="kh-mission {{ $__done ? 'done' : '' }}">
+    <div class="kh-mission {{ $__done ? 'done' : '' }}" data-guide="kid-mission">
         <div class="kh-mission-blob" aria-hidden="true"></div>
         <div class="kh-mission-fox" aria-hidden="true">@include('partials.ks-fox', ['size' => 130, 'color' => '#E2590F', 'smile' => true])</div>
         <div class="kh-mission-txt">
@@ -108,11 +108,11 @@
 
     {{-- 4 სწრაფი ბმული --}}
     <div class="kh-quick">
-        <a href="{{ route('practice.topics') }}" style="background:#FFE9DA;">
+        <a href="{{ route('practice.topics') }}" style="background:#FFE9DA;" data-guide="kid-practice">
             <span class="kh-quick-ic" style="background:#E2590F;"><i class="bi bi-bullseye"></i></span>
             <b>ვარჯიში</b><small>{{ $practiceTopicsCount }} თემა</small>
         </a>
-        <a href="{{ route('games.index') }}" style="background:#FFF3EA;">
+        <a href="{{ route('games.index') }}" style="background:#FFF3EA;" data-guide="kid-games">
             <span class="kh-quick-ic" style="background:#E2590F;"><i class="bi bi-controller"></i></span>
             <b>თამაშები</b><small>4 თამაში</small>
         </a>
@@ -120,7 +120,7 @@
             <span class="kh-quick-ic" style="background:#C98A00;"><i class="bi bi-play-fill"></i></span>
             <b>ვიდეოები</b><small>გაკვეთილები</small>
         </a>
-        <a href="{{ route('market.child') }}" style="background:#FFF3EA;">
+        <a href="{{ route('market.child') }}" style="background:#FFF3EA;" data-guide="kid-market">
             <span class="kh-quick-ic" style="background:#F07A2E;"><i class="bi bi-bag"></i></span>
             <b>მარკეტი</b><small>ჯილდოები</small>
         </a>

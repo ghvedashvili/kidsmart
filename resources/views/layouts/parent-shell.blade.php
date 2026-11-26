@@ -38,7 +38,7 @@
         <div class="ks-pnav">
             <div class="ks-pnav-lbl">{{ $__pKid->name }}</div>
             @foreach($__pKidLinks as [$__r, $__p, $__i, $__l])
-            <a href="{{ route($__r, $__pKid) }}" class="{{ $__pOn($__p) ? 'on' : '' }}" @if($__pOn($__p)) aria-current="page" @endif>
+            <a href="{{ route($__r, $__pKid) }}" class="{{ $__pOn($__p) ? 'on' : '' }}" @if($__pOn($__p)) aria-current="page" @endif @if($__r === 'market.index') data-guide="nav-market" @endif>
                 <i class="bi {{ $__i }}"></i>{{ $__l }}
                 @if($__r === 'market.index' && $__pPending)<span class="ks-pnav-badge">{{ $__pPending }}</span>@endif
             </a>
@@ -85,7 +85,7 @@
         <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'on' : '' }}"><i class="bi bi-grid-1x2"></i>მთავარი</a>
         @if($__pKid)
         <a href="{{ route('child.stats', $__pKid) }}" class="{{ request()->routeIs('child.stats', 'child.test.show', 'child.practice-stats', 'child.olympiad-stats', 'child.achievements') ? 'on' : '' }}"><i class="bi bi-bar-chart-line"></i>ანალიტიკა</a>
-        <a href="{{ route('market.index', $__pKid) }}" class="{{ request()->routeIs('market.index') ? 'on' : '' }}"><i class="bi bi-bag"></i>მარკეტი @if($__pPending)<span class="ks-pnav-badge">{{ $__pPending }}</span>@endif</a>
+        <a href="{{ route('market.index', $__pKid) }}" data-guide="nav-market" class="{{ request()->routeIs('market.index') ? 'on' : '' }}"><i class="bi bi-bag"></i>მარკეტი @if($__pPending)<span class="ks-pnav-badge">{{ $__pPending }}</span>@endif</a>
         @endif
     </div>
 </div>

@@ -660,13 +660,15 @@
                     <span class="ks-pd-tab-av {{ $__k->avatar }}">@include('partials.kid-av', ['k' => $__k])</span>{{ $__k->name }}
                 </a>
                 @endforeach
-                <button type="button" class="ks-pd-tab add"
+                <button type="button" class="ks-pd-tab add" data-guide="add-child"
                     onclick="document.getElementById('{{ $atChildLimit ? 'plansModal' : 'addChildModal' }}').classList.add('open'); {{ $atChildLimit ? '' : 'wizReset();' }}"
                     @if($atChildLimit) title="{{ $currentPkg->name }} პლანი მხოლოდ {{ $currentPkg->max_children }} ბავშვს იძლევა" @endif>
                     <i class="bi bi-plus-lg"></i>{{ $atChildLimit ? 'გეგმის განახლება' : 'შვილის დამატება' }}
                 </button>
             </div>
         </div>
+
+        @include('partials.guide-checklist', ['children' => $children])
 
         @if(!$__kid)
         <div class="ks-pd-empty">
@@ -723,7 +725,7 @@
         @endphp
 
         {{-- არჩეული შვილის ზოლი: სტატუსი + მოქმედებები --}}
-        <div class="ks-pd-kid {{ !$child->is_active ? 'off' : '' }}">
+        <div class="ks-pd-kid {{ !$child->is_active ? 'off' : '' }}" data-guide="kid">
             <button type="button" class="ks-pp-av {{ $child->avatar }}" title="პროფილის არჩევა"
                 onclick="document.getElementById('avatarModal{{ $child->id }}').classList.add('open')">@include('partials.kid-av', ['k' => $child])</button>
             <div class="ks-pd-kid-t">
@@ -745,9 +747,9 @@
                 </form>
                 @endif
                 @if($child->child_code)
-                <button type="button" class="ks-pd-btn" onclick="toggleShare({{ $child->id }})"><i class="bi bi-link-45deg"></i><span>შესვლის გაზიარება</span></button>
+                <button type="button" class="ks-pd-btn" data-guide="share" onclick="toggleShare({{ $child->id }})"><i class="bi bi-link-45deg"></i><span>შესვლის გაზიარება</span></button>
                 @endif
-                <button type="button" class="ks-pd-btn icon" title="პარამეტრები" aria-label="{{ $child->name }} — პარამეტრები"
+                <button type="button" class="ks-pd-btn icon" data-guide="settings" title="პარამეტრები" aria-label="{{ $child->name }} — პარამეტრები"
                     onclick="document.getElementById('editChildModal{{ $child->id }}').classList.add('open')"><i class="bi bi-gear"></i></button>
             </div>
         </div>
@@ -781,7 +783,7 @@
         @endif
 
         {{-- KPI --}}
-        <div class="ks-pd-kpis">
+        <div class="ks-pd-kpis" data-guide="kpis">
             <a href="{{ route('child.stats', $child) }}" class="ks-pd-kpi">
                 <span>ტესტი სულ</span><b>{{ $__total }}</b>
                 <small class="{{ $__thisWk->count() ? 'up' : '' }}">{{ $__thisWk->count() ? '+' . $__thisWk->count() . ' ამ კვირაში' : 'ამ კვირაში ჯერ არა' }}</small>
@@ -810,7 +812,7 @@
 
         {{-- გრაფიკი + თემები / რჩევა --}}
         <div class="ks-pd-row">
-            <div class="ks-pd-card ks-pd-wide">
+            <div class="ks-pd-card ks-pd-wide" data-guide="week">
                 <div class="ks-pd-card-h">
                     <h2>ტესტის შედეგები · ეს კვირა</h2>
                     <span class="ks-pd-legend"><span><i style="background:#E2590F"></i>85%+</span><span><i style="background:#F7B58A"></i>85%-მდე</span></span>
@@ -831,7 +833,7 @@
             </div>
 
             <div class="ks-pd-side">
-                <div class="ks-pd-card">
+                <div class="ks-pd-card" data-guide="topics">
                     <h2>თემების მიხედვით</h2>
                     @forelse($__topics->take(5) as $__t)
                     <div class="ks-pd-topic">
@@ -862,7 +864,7 @@
 
         {{-- ბოლო ტესტები + დღეს / მოთხოვნები --}}
         <div class="ks-pd-row">
-            <div class="ks-pd-card ks-pd-wide" id="tests">
+            <div class="ks-pd-card ks-pd-wide" id="tests" data-guide="tests">
                 <div class="ks-pd-card-h">
                     <h2>ბოლო ტესტები</h2>
                     @if($__recent->count())<a href="{{ route('child.stats', $child) }}" class="ks-pd-more">ყველა →</a>@endif
@@ -891,7 +893,7 @@
             </div>
 
             <div class="ks-pd-side">
-                <div class="ks-pd-card">
+                <div class="ks-pd-card" data-guide="today">
                     <h2>დღეს</h2>
                     <p class="ks-pd-today">
                         {{ min($__todayDone, 1) }}/1 ტესტი{{ $__todayDone ? ' · დაწერილია ✓' : ' · ჯერ არ დაუწყია' }}<br>

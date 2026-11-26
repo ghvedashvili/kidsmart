@@ -4,12 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\GameGlobalStat;
 use App\Models\GameSession;
+use App\Models\GameSetting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class GameController extends Controller
 {
-    private const GAMES = [
+    public const GAMES = [
         'rock_paper_scissors' => [
             'name'  => 'ქვა-ქაღალდი-მაკრატელი',
             'icon'  => '✊',
@@ -34,7 +35,40 @@ class GameController extends Controller
             'route' => 'games.quoridor',
             'type'  => 'versus',
         ],
+        // მათემატიკური თავსატეხები (ერთი გვერდი, სამი რეჟიმი) — 5 რაუნდი, 3 სიცოცხლე
+        'math_numbers' => [
+            'name'  => 'იპოვე რიცხვები',
+            'icon'  => '🧩',
+            'route' => 'games.math-numbers',
+            'type'  => 'puzzle',
+            'mode'  => 'numbers',
+            'desc'  => 'ჩასვი რიცხვები ისე, რომ სამიზნე გამოვიდეს.',
+        ],
+        'math_signs' => [
+            'name'  => 'დასვი ნიშანი',
+            'icon'  => '➕',
+            'route' => 'games.math-signs',
+            'type'  => 'puzzle',
+            'mode'  => 'signs',
+            'desc'  => 'რიცხვებს შორის სწორი ნიშნები დასვი.',
+        ],
+        'math_chain' => [
+            'name'  => 'რიცხვების ჯაჭვი',
+            'icon'  => '🔗',
+            'route' => 'games.math-chain',
+            'type'  => 'puzzle',
+            'mode'  => 'chain',
+            'desc'  => 'ნაბიჯ-ნაბიჯ მიიყვანე რიცხვი სამიზნემდე.',
+        ],
     ];
+
+    /** ადმინმა თამაში გათიშა ან ამ კლასს არ უჩანს → თამაშების გვერდზე */
+    private function hiddenRedirect(string $slug)
+    {
+        $child = auth()->user();
+        if (GameSetting::isVisible($slug, $child->childSetting?->grade_id)) return null;
+        return redirect()->route('games.index')->with('error', 'ეს თამაში ახლა მიუწვდომელია.');
+    }
 
     // ── Games hub ────────────────────────────────────────────────────────────
     public function index()
@@ -42,7 +76,10 @@ class GameController extends Controller
         $child = auth()->user();
         abort_if($child->role !== 'child', 403);
 
-        $games = collect(self::GAMES)->map(function ($info, $slug) use ($child) {
+        // ადმინის პარამეტრები: გათიშული / სხვა კლასის თამაშები არ ჩანს
+        $map = GameSetting::map();
+        $gradeId = $child->childSetting?->grade_id;
+        $games = collect(self::GAMES)->filter(fn ($info, $slug) => GameSetting::isVisible($slug, $gradeId, $map))->map(function ($info, $slug) use ($child) {
             $session = GameSession::forChild($child->id, $slug);
             return array_merge($info, [
                 'slug'       => $slug,
@@ -60,6 +97,7 @@ class GameController extends Controller
     {
         $child = auth()->user();
         abort_if($child->role !== 'child', 403);
+        if ($r = $this->hiddenRedirect('rock_paper_scissors')) return $r;
 
         $session = GameSession::forChild($child->id, 'rock_paper_scissors');
         $global  = GameGlobalStat::forGame('rock_paper_scissors');
@@ -135,6 +173,7 @@ class GameController extends Controller
     {
         $child = auth()->user();
         abort_if($child->role !== 'child', 403);
+        if ($r = $this->hiddenRedirect('wolves_and_hare')) return $r;
 
         $session = GameSession::forChild($child->id, 'wolves_and_hare');
         $global  = GameGlobalStat::forGame('wolves_and_hare');
@@ -202,6 +241,7 @@ class GameController extends Controller
     {
         $child = auth()->user();
         abort_if($child->role !== 'child', 403);
+        if ($r = $this->hiddenRedirect('memory')) return $r;
 
         $session = GameSession::forChild($child->id, 'memory');
 
@@ -269,11 +309,66 @@ class GameController extends Controller
         return response()->json(['leaderboard' => $top]);
     }
 
+    // ── მათემატიკური თავსატეხები: იპოვე რიცხვები / დასვი ნიშანი / რიცხვების ჯაჭვი ──
+    public function mathNumbers() { return $this->mathGame('math_numbers'); }
+    public function mathSigns()   { return $this->mathGame('math_signs'); }
+    public function mathChain()   { return $this->mathGame('math_chain'); }
+
+    private function mathGame(string $slug)
+    {
+        $child = auth()->user();
+        abort_if($child->role !== 'child', 403);
+        if ($r = $this->hiddenRedirect($slug)) return $r;
+
+        $session = GameSession::forChild($child->id, $slug);
+        // სირთულე ბავშვის კლასზეა მორგებული (II–V)
+        $grade = (int) ($child->childSetting?->grade?->number ?? 2);
+
+        return view('child.games.math-puzzle', [
+            'slug'    => $slug,
+            'game'    => self::GAMES[$slug],
+            'session' => $session,
+            'grade'   => max(1, min(6, $grade)),
+            'others'  => collect(self::GAMES)->filter(fn ($g) => ($g['type'] ?? '') === 'puzzle')->map(fn ($g, $s) => ['name' => $g['name'], 'icon' => $g['icon'], 'route' => $g['route'], 'slug' => $s]),
+        ]);
+    }
+
+    public function mathFinish(Request $request): JsonResponse
+    {
+        $child = auth()->user();
+        abort_if($child->role !== 'child', 403);
+
+        $data = $request->validate([
+            'game'  => 'required|in:math_numbers,math_signs,math_chain',
+            'score' => 'required|integer|min:0|max:10000',
+            'time'  => 'nullable|integer|min:0|max:86400',
+        ]);
+
+        // თამაში სიცოცხლის ამოწურვამდე გრძელდება: player_score — რეკორდი (ამოხსნილი თავსატეხები)
+        $session = GameSession::forChild($child->id, $data['game']);
+        $state   = (array) ($session->state ?? []);
+        $isBest  = $data['score'] > $session->player_score;
+        if ($isBest) $session->player_score = $data['score'];
+        $state['games'] = ($state['games'] ?? 0) + 1;
+        $state['total'] = ($state['total'] ?? 0) + $data['score'];
+        $session->state = $state;
+        $session->save();
+
+        $newAchievements = (new \App\Services\AchievementService())->handleGameFinish($child, $data['game']);
+
+        return response()->json([
+            'best_score'       => $session->player_score,
+            'is_best'          => $isBest,
+            'new_achievements' => $newAchievements,
+        ]);
+    }
+
     // ── ქუორიდორი 5×5 (Quoridor) ────────────────────────────────────────────
     public function quoridor()
     {
         $child = auth()->user();
         abort_if($child->role !== 'child', 403);
+        if ($r = $this->hiddenRedirect('quoridor')) return $r;
 
         $session = GameSession::forChild($child->id, 'quoridor');
         $global  = GameGlobalStat::forGame('quoridor');

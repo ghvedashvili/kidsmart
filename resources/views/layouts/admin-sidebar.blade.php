@@ -20,6 +20,7 @@
         'level'     => 'M4 20V14M10 20V9M16 20V4M2 20h20',
         'olympiad'  => 'M8 4h8v5a4 4 0 0 1-8 0zM16 5h3v2a3 3 0 0 1-3 3M8 5H5v2a3 3 0 0 0 3 3M12 13v4M8 20h8',
         'size'      => 'M4 6h16M4 12h10M4 18h6',
+        'games'     => 'M6 11h4M8 9v4M15 12h.01M18 10h.01M17.3 5H6.7a4 4 0 0 0-3.95 3.4L2 14a3 3 0 0 0 5.3 2.3L9 14h6l1.7 2.3A3 3 0 0 0 22 14l-.75-5.6A4 4 0 0 0 17.3 5z',
         'ach'       => 'M12 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12zM8.5 14L7 22l5-3 5 3-1.5-8',
         'users'     => 'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21a7 7 0 0 1 14 0M17 4a4 4 0 0 1 0 7.5M22 21a7 7 0 0 0-4-6.3',
         'packages'  => 'M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8',
@@ -46,6 +47,7 @@
             ['admin.olympiadrules', 'ოლიმპიადა', 'admin.olympiad-rules.index', 'admin.olympiad-rules.*', 'olympiad'],
             ['admin.qcounts', 'ტესტის ზომა', 'admin.question-counts.index', 'admin.question-counts.*', 'size'],
             ['admin.achievements', 'მიღწევები', 'admin.achievements.index', 'admin.achievements.*', 'ach'],
+            ['admin.games', 'თამაშები', 'admin.games.index', 'admin.games.*', 'games'],
         ],
         'მომხმარებლები' => [
             ['admin.users', 'მომხმარებლები', 'admin.users.index', 'admin.users.*', 'users'],
@@ -92,6 +94,12 @@
     <a href="{{ route('dashboard') }}" class="ks-side-link ks-side-parent">
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21a7 7 0 0 1 14 0M17 4a4 4 0 0 1 0 7.5M22 21a7 7 0 0 0-4-6.3"/></svg>
         <span>მშობლის რეჟიმი</span>
+    </a>
+    @endif
+    @if($__sIsAdmin)
+    <a href="{{ route('teacher.questions.index') }}" class="ks-side-link ks-side-parent">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 9L12 4 2 9l10 5 10-5zM6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/></svg>
+        <span>მასწავლებლის რეჟიმი</span>
     </a>
     @endif
     <div class="ks-side-user">

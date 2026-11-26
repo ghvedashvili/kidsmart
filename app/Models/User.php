@@ -31,6 +31,7 @@ class User extends Authenticatable
         'avatar_img',
         'photo_url',
         'first_login_at',
+        'guide_state',
     ];
 
     public function isAdmin(): bool
@@ -137,6 +138,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'is_active'         => 'boolean',
         'first_login_at'    => 'datetime',
+        'guide_state'       => 'array',
     ];
 
     /** ბავშვის პროფილის სურათების სია სქესის მიხედვით: ['boys/b01', ...] */

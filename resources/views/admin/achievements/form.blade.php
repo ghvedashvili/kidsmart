@@ -68,7 +68,7 @@
             </div>
             <div class="ks-field" id="achGameField" style="display:none;">
                 <label class="ks-label" for="achGame">თამაში <span class="ks-muted" style="font-weight:500;">(ცარიელი = ყველა)</span></label>
-                <input type="text" name="game" id="achGame" class="ks-input ks-mono" value="{{ old('game', $achievement?->game) }}" placeholder="memory, quoridor, rock_paper_scissors, wolves_and_hare">
+                <input type="text" name="game" id="achGame" class="ks-input ks-mono" value="{{ old('game', $achievement?->game) }}" placeholder="memory, quoridor, rock_paper_scissors, wolves_and_hare, math_numbers, math_signs, math_chain">
                 @error('game')<span class="ks-chip ks-chip-red">{{ $message }}</span>@enderror
             </div>
         </div>

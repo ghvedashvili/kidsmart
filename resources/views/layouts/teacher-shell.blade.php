@@ -26,6 +26,11 @@
             </a>
             @endforeach
         </div>
+        @if($__tu->isAdmin())
+        {{-- მხოლოდ ადმინს აქვს რეჟიმებს შორის გადართვა --}}
+        <a href="{{ route('admin.panel') }}" class="ks-padmin"><i class="bi bi-shield-lock"></i><span>ადმინ რეჟიმი</span><i class="bi bi-arrow-right"></i></a>
+        <a href="{{ route('dashboard') }}" class="ks-padmin"><i class="bi bi-people"></i><span>მშობლის რეჟიმი</span><i class="bi bi-arrow-right"></i></a>
+        @endif
         <div class="ks-cside-foot">
             <form method="POST" action="{{ route('logout') }}">
                 @csrf

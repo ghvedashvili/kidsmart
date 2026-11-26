@@ -266,6 +266,11 @@
      modal's own z-index is set. --}}
 @stack('modals')
 
+{{-- გიდი „მელა“ (მშობელი / ბავშვი) --}}
+@if(!empty($__ksParent) || !empty($__ksChild))
+    @include('partials.guide')
+@endif
+
 <div id="app-loader" class="app-loader hidden">
     <div class="ks-loader">
         <div class="ks-loader-stage">

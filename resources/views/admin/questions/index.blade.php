@@ -81,6 +81,9 @@
     .pdf-btn:hover { background: #FFE9DA; }
     .pdf-btn:disabled { opacity: .4; cursor: not-allowed; }
     .pdf-btn:disabled:hover { background: #fff; }
+    .pdf-all { background: none; border: 1.5px solid rgba(255,255,255,.55); border-radius: 999px; color: #fff; font-family: inherit; font-size: .8rem; font-weight: 700; padding: 7px 14px; cursor: pointer; }
+    .pdf-all:hover { background: rgba(255,255,255,.14); }
+    .pdf-bar.all-mode .pdf-count { color: #fff; }
     .pdf-clear { background: none; border: none; color: #B5AAA0; font-size: .95rem; cursor: pointer; padding: 0 6px; }
     .pdf-clear:hover { color: #fff; }
 
@@ -337,6 +340,7 @@
 {{-- Floating PDF bar --}}
 <div class="pdf-bar" id="pdfBar">
     <span class="pdf-count" id="pdfCount">0 მონიშნული</span>
+    <button type="button" class="pdf-all" id="pdfAllBtn" style="display:none;" onclick="selectAllFiltered()"></button>
     <form method="POST" action="{{ route('admin.questions.pdf') }}" target="_blank" id="pdfForm">
         @csrf
         <div id="pdfInputs"></div>
@@ -926,14 +930,53 @@ function hasDuplicateDifficulties(checked) {
     return new Set(diffs).size !== diffs.length;
 }
 
+// "Select every filtered question" — spans all pages, not only the rows
+// rendered here. Sent as all=1 + the list's current filters; the server
+// re-runs the same filter query, so nothing depends on what's on this page.
+const PDF_TOTAL   = {{ (int) $templates->total() }};
+const PDF_MAX     = {{ \App\Http\Controllers\Admin\QuestionTemplateController::PDF_MAX }};
+const PDF_FILTERS = @json($filters ?? []);
+let pdfAllMode = false;
+
+function escAttr(v) {
+    return String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
+
+function selectAllFiltered() {
+    pdfAllMode = true;
+    document.querySelectorAll('.q-item').forEach(c => { c.checked = true; });
+    if (checkAll) checkAll.checked = true;
+    updateBar();
+}
+
 function updateBar() {
-    const checked = [...document.querySelectorAll('.q-item:checked')];
-    bar.classList.toggle('show', checked.length > 0);
-    countEl.textContent = checked.length + ' მონიშნული';
-    inputs.innerHTML = checked.map(c => `<input type="hidden" name="ids[]" value="${c.value}">`).join('');
+    const items   = [...document.querySelectorAll('.q-item')];
+    const checked = items.filter(c => c.checked);
+    // Unchecking any row drops back to "just what's checked on this page".
+    if (pdfAllMode && checked.length < items.length) pdfAllMode = false;
+
+    bar.classList.toggle('show', checked.length > 0 || pdfAllMode);
+    bar.classList.toggle('all-mode', pdfAllMode);
+
+    const allBtn = document.getElementById('pdfAllBtn');
+    const pageAllChecked = items.length > 0 && checked.length === items.length;
+    allBtn.style.display = (!pdfAllMode && pageAllChecked && PDF_TOTAL > items.length) ? 'inline-block' : 'none';
+    allBtn.textContent = 'მონიშნე ფილტრის ყველა ' + PDF_TOTAL;
+
+    if (pdfAllMode) {
+        const n = Math.min(PDF_TOTAL, PDF_MAX);
+        countEl.textContent = 'მონიშნულია ყველა ' + n + (PDF_TOTAL > PDF_MAX ? ' (მაქს. ' + PDF_MAX + ' / ' + PDF_TOTAL + ')' : '');
+        inputs.innerHTML = '<input type="hidden" name="all" value="1">' +
+            Object.entries(PDF_FILTERS)
+                .filter(([, v]) => v !== null && v !== '')
+                .map(([k, v]) => `<input type="hidden" name="${escAttr(k)}" value="${escAttr(v)}">`).join('');
+    } else {
+        countEl.textContent = checked.length + ' მონიშნული';
+        inputs.innerHTML = checked.map(c => `<input type="hidden" name="ids[]" value="${c.value}">`).join('');
+    }
 
     const mergeBtn = document.getElementById('mergeBtn');
-    mergeBtn.style.display = checked.length >= 2 ? 'inline-block' : 'none';
+    mergeBtn.style.display = (!pdfAllMode && checked.length >= 2) ? 'inline-block' : 'none';
     const dup = checked.length >= 2 && hasDuplicateDifficulties(checked);
     mergeBtn.disabled = dup;
     mergeBtn.title = dup ? 'შერჩეულებს შორის ერთი და იგივე დონე მეორდება — გაერთიანება შეუძლებელია' : '';
@@ -1025,12 +1068,14 @@ function ungroupTemplate(id) {
 }
 
 function clearAll() {
+    pdfAllMode = false;
     document.querySelectorAll('.q-item').forEach(c => c.checked = false);
-    checkAll.checked = false;
+    if (checkAll) checkAll.checked = false;
     updateBar();
 }
 
-checkAll.addEventListener('change', function () {
+if (checkAll) checkAll.addEventListener('change', function () {
+    if (!this.checked) pdfAllMode = false;
     document.querySelectorAll('.q-item').forEach(c => { c.checked = this.checked; });
     updateBar();
 });

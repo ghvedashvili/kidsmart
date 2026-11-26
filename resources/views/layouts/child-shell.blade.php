@@ -30,7 +30,7 @@
         <div class="ks-cnav">
             @foreach($__cLinks as [$__r, $__p, $__i, $__l, $__m])
             @if(Route::has($__r))
-            <a href="{{ route($__r) }}" class="{{ $__cOn($__p) ? 'on' : '' }}" @if($__cOn($__p)) aria-current="page" @endif><i class="bi {{ $__i }}"></i>{{ $__l }}</a>
+            <a href="{{ route($__r) }}" data-guide="nav-{{ str_replace('.', '-', $__r) }}" class="{{ $__cOn($__p) ? 'on' : '' }}" @if($__cOn($__p)) aria-current="page" @endif><i class="bi {{ $__i }}"></i>{{ $__l }}</a>
             @endif
             @endforeach
         </div>
@@ -84,7 +84,7 @@
     <div class="ks-ctabs" role="navigation" aria-label="მთავარი მენიუ">
         @foreach($__cLinks as [$__r, $__p, $__i, $__l, $__m])
         @if($__m && Route::has($__r))
-        <a href="{{ route($__r) }}" class="{{ $__cOn($__p) ? 'on' : '' }}"><i class="bi {{ $__i }}"></i>{{ $__l }}</a>
+        <a href="{{ route($__r) }}" data-guide="nav-{{ str_replace('.', '-', $__r) }}" class="{{ $__cOn($__p) ? 'on' : '' }}"><i class="bi {{ $__i }}"></i>{{ $__l }}</a>
         @endif
         @endforeach
     </div>

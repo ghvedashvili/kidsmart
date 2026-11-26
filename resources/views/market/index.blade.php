@@ -165,7 +165,7 @@
     @endif
 
     {{-- მოთხოვნები --}}
-    <section class="pm-sec">
+    <section class="pm-sec" data-guide="market-requests">
         <div class="pm-sec-h"><span>მოთხოვნები</span>@if($pending->count())<small>{{ $pending->count() }} ელოდება</small>@endif</div>
         @forelse($pending as $p)
         <div class="pm-req">
@@ -225,7 +225,7 @@
     </section>
 
     <div class="pm-add-wrap">
-        <button type="button" class="pm-add" onclick="openAddItemModal()"><i class="bi bi-plus-lg"></i> ახალი ჯილდოს დამატება</button>
+        <button type="button" class="pm-add" data-guide="market-add" onclick="openAddItemModal()"><i class="bi bi-plus-lg"></i> ახალი ჯილდოს დამატება</button>
     </div>
 </div>
 
@@ -238,23 +238,23 @@
             <button type="button" class="m-cancel" style="padding:4px 10px;" onclick="closeAddItemModal()">✕</button>
         </div>
 
-        <div class="tab-switch">
+        <div class="tab-switch" data-guide="reward-tabs">
             <button type="button" class="tab-btn active" id="aiTabManual" onclick="switchItemTab('manual')">✎ ხელით</button>
-            <button type="button" class="tab-btn" id="aiTabTpl" onclick="switchItemTab('templates')">📋 შაბლონები</button>
+            <button type="button" class="tab-btn" id="aiTabTpl" data-guide="reward-tpl" onclick="switchItemTab('templates')">📋 შაბლონები</button>
         </div>
 
         <div id="aiPanelManual">
             <form method="POST" action="{{ route('market.store', $child) }}" id="customForm">
                 @csrf
                 <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-                    <button type="button" class="emoji-btn" id="emojiBtn" onclick="openEmojiModal()" title="სმაილის არჩევა">
+                    <button type="button" class="emoji-btn" id="emojiBtn" data-guide="reward-icon" onclick="openEmojiModal()" title="სმაილის არჩევა">
                         <span id="emojiDisplay">🎁</span>
                     </button>
                     <input type="hidden" name="icon" id="iconInput" value="🎁">
-                    <input type="text" name="title" class="fc" placeholder="პროდუქტის სახელი" required style="flex:1;min-width:140px;">
-                    <input type="number" name="coin_cost" class="fc" placeholder="💰 მონეტა" min="1" max="9999" required style="width:110px;">
+                    <input type="text" name="title" class="fc" data-guide="reward-title" placeholder="პროდუქტის სახელი" required style="flex:1;min-width:140px;">
+                    <input type="number" name="coin_cost" class="fc" data-guide="reward-cost" placeholder="💰 მონეტა" min="1" max="9999" required style="width:110px;">
                 </div>
-                <button type="submit" class="m-save" style="width:100%;margin-top:14px;">+ მარკეტში დამატება</button>
+                <button type="submit" class="m-save" data-guide="reward-save" style="width:100%;margin-top:14px;">+ მარკეტში დამატება</button>
             </form>
         </div>
 

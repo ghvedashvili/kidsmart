@@ -14,13 +14,50 @@ use Illuminate\Http\Request;
 
 class QuestionTemplateController extends Controller
 {
+    /** Upper bound for one "export all filtered" PDF — generating is per-row work. */
+    public const PDF_MAX = 1000;
+
     public function index(Request $request)
     {
         $showTrashed = $request->boolean('trashed');
 
-        $query = $showTrashed
-            ? QuestionTemplate::onlyTrashed()->with('topic.grade', 'theme', 'group')
-            : QuestionTemplate::with('topic.grade', 'theme', 'group');
+        $query = $this->filteredQuery($request, $showTrashed)->with('topic.grade', 'theme', 'group');
+
+        // Grouped by topic (grade, then the topic's admin-assigned `sequence`,
+        // then name) so the view can render collapsible topic sections instead
+        // of one long flat list — makes browsing/scanning for a specific
+        // question far easier than the old `latest()` order, which scattered
+        // every topic's questions randomly throughout the pages.
+        $query->join('topics', 'topics.id', '=', 'question_templates.topic_id')
+            ->orderBy('topics.grade_id')
+            ->orderByRaw('topics.sequence IS NULL, topics.sequence')
+            ->orderBy('topics.name')
+            ->orderBy('question_templates.id', 'desc')
+            ->select('question_templates.*');
+
+        return view('admin.questions.index', [
+            'templates'   => $query->paginate(40),
+            'grades'      => Grade::orderBy('number')->get(),
+            'topics'      => Topic::with('grade')->orderBy('grade_id')->get(),
+            'themes'      => Theme::orderBy('name')->get(),
+            'filters'     => $request->only('grade_id', 'topic_id', 'theme_id', 'difficulty', 'search'),
+            'themeVarMap' => $this->themeVarMap(),
+            'showTrashed' => $showTrashed,
+            // "ძველი სია" — bypasses group-card clustering entirely, every
+            // template (grouped or not) renders as its own row like before
+            // groups existed, for admins who'd rather filter the old way.
+            'flatView'    => $request->boolean('flat'),
+        ]);
+    }
+
+    /**
+     * The admin list's filters (grade / topic / theme / level / search), shared
+     * by index() and the "export every filtered question" PDF path so both
+     * always agree on what "the filtered set" means.
+     */
+    private function filteredQuery(Request $request, bool $trashed = false)
+    {
+        $query = $trashed ? QuestionTemplate::onlyTrashed() : QuestionTemplate::query();
 
         if ($request->filled('grade_id')) {
             $query->whereHas('topic', fn($q) => $q->where('grade_id', $request->grade_id));
@@ -48,31 +85,8 @@ class QuestionTemplateController extends Controller
             });
         }
 
-        // Grouped by topic (grade, then the topic's admin-assigned `sequence`,
-        // then name) so the view can render collapsible topic sections instead
-        // of one long flat list — makes browsing/scanning for a specific
-        // question far easier than the old `latest()` order, which scattered
-        // every topic's questions randomly throughout the pages.
-        $query->join('topics', 'topics.id', '=', 'question_templates.topic_id')
-            ->orderBy('topics.grade_id')
-            ->orderByRaw('topics.sequence IS NULL, topics.sequence')
-            ->orderBy('topics.name')
-            ->orderBy('question_templates.id', 'desc')
-            ->select('question_templates.*');
 
-        return view('admin.questions.index', [
-            'templates'   => $query->paginate(40),
-            'grades'      => Grade::orderBy('number')->get(),
-            'topics'      => Topic::with('grade')->orderBy('grade_id')->get(),
-            'themes'      => Theme::orderBy('name')->get(),
-            'filters'     => $request->only('grade_id', 'topic_id', 'theme_id', 'difficulty', 'search'),
-            'themeVarMap' => $this->themeVarMap(),
-            'showTrashed' => $showTrashed,
-            // "ძველი სია" — bypasses group-card clustering entirely, every
-            // template (grouped or not) renders as its own row like before
-            // groups existed, for admins who'd rather filter the old way.
-            'flatView'    => $request->boolean('flat'),
-        ]);
+        return $query;
     }
 
     public function create(Request $request)
@@ -220,12 +234,30 @@ class QuestionTemplateController extends Controller
 
     public function exportPdf(Request $request)
     {
-        $ids = $request->validate(['ids' => 'required|array', 'ids.*' => 'integer|exists:question_templates,id'])['ids'];
+        // Either an explicit set of ids (checked boxes on the current page), or
+        // all=1 + the list's filters — "select every filtered question", which
+        // spans every page, not just the 40 rows currently rendered.
+        if ($request->boolean('all')) {
+            $templates = $this->filteredQuery($request)
+                ->with('topic.grade', 'theme')
+                ->join('topics', 'topics.id', '=', 'question_templates.topic_id')
+                ->orderBy('topics.grade_id')
+                ->orderByRaw('topics.sequence IS NULL, topics.sequence')
+                ->orderBy('topics.name')
+                ->orderBy('question_templates.is_olympiad')
+                ->orderBy('question_templates.difficulty')
+                ->orderBy('question_templates.id')
+                ->select('question_templates.*')
+                ->limit(self::PDF_MAX)
+                ->get();
+        } else {
+            $ids = $request->validate(['ids' => 'required|array', 'ids.*' => 'integer|exists:question_templates,id'])['ids'];
 
-        $templates = QuestionTemplate::with('topic.grade')
-            ->whereIn('id', $ids)
-            ->orderBy('topic_id')->orderBy('difficulty')
-            ->get();
+            $templates = QuestionTemplate::with('topic.grade', 'theme')
+                ->whereIn('id', $ids)
+                ->orderBy('topic_id')->orderBy('difficulty')
+                ->get();
+        }
 
         // Build a universal theme from all ThemeVariables so every placeholder gets a value
         $theme = new \App\Models\Theme();
@@ -262,6 +294,8 @@ class QuestionTemplateController extends Controller
                 'grade'         => $tpl->topic->grade->name,
                 'topic'         => $tpl->topic->name,
                 'difficulty'    => $tpl->difficulty,
+                'is_olympiad'   => (bool) $tpl->is_olympiad,
+                'theme'         => $tpl->theme?->name,
             ];
         });
 

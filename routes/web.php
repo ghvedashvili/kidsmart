@@ -191,6 +191,12 @@ Route::middleware(['auth', 'role.permission'])->group(function () {
     Route::post('/games/memory/finish', [GameController::class, 'memoryFinish'])->name('games.memory.finish');
     Route::get('/games/memory/leaderboard', [GameController::class, 'memoryLeaderboard'])->name('games.memory.leaderboard');
 
+    // მათემატიკური თავსატეხები
+    Route::get('/games/numbers', [GameController::class, 'mathNumbers'])->name('games.math-numbers');
+    Route::get('/games/signs',   [GameController::class, 'mathSigns'])->name('games.math-signs');
+    Route::get('/games/chain',   [GameController::class, 'mathChain'])->name('games.math-chain');
+    Route::post('/games/math/finish', [GameController::class, 'mathFinish'])->name('games.math.finish');
+
     Route::get('/games/quoridor', [GameController::class, 'quoridor'])->name('games.quoridor');
     Route::post('/games/quoridor/state', [GameController::class, 'quoridorState'])->name('games.quoridor.state');
     Route::post('/games/quoridor/finish', [GameController::class, 'quoridorFinish'])->name('games.quoridor.finish');
@@ -220,6 +226,9 @@ Route::middleware(['auth', 'role.permission'])->group(function () {
     Route::get('/olympiad',        [OlympiadController::class, 'index'])->name('olympiad.index');
     Route::post('/olympiad/start', [OlympiadController::class, 'start'])->name('olympiad.start');
 });
+
+// გიდი (მელა): მშობლისა და ბავშვის ტურის პროგრესი
+Route::middleware(['auth'])->post('/guide', [\App\Http\Controllers\GuideController::class, 'save'])->name('guide.save');
 
 // მასწავლებლის კითხვები (შექმნა → ადმინის განხილვა) — წვდომას კონტროლერი ამოწმებს (teacher/admin)
 Route::middleware(['auth'])->prefix('teacher')->name('teacher.')->group(function () {
@@ -263,6 +272,8 @@ Route::middleware(['auth', 'admin', 'role.permission'])->group(function () {
     Route::get('/admin/users/{user}/subscriptions', [SubscriptionController::class, 'history'])->name('admin.subscriptions.history');
 
     // კლასები
+    Route::get('/admin/games',                     [\App\Http\Controllers\Admin\GameSettingController::class, 'index'])->name('admin.games.index');
+    Route::put('/admin/games/{slug}',              [\App\Http\Controllers\Admin\GameSettingController::class, 'update'])->name('admin.games.update');
     Route::get('/admin/grades',                    [GradeController::class, 'index'])->name('admin.grades.index');
     Route::post('/admin/grades',                   [GradeController::class, 'store'])->name('admin.grades.store');
     Route::put('/admin/grades/{grade}',             [GradeController::class, 'update'])->name('admin.grades.update');
