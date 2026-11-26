@@ -59,6 +59,8 @@
     .rel-search-item:last-child { border-bottom: none; }
     .rel-search-item:hover { background: #F7F6F3; }
     .msg { font-weight: 700; }
+    .sub-btn.sub-del { color: #A12626; border-color: #F5C2C2; background: #FFF7F7; }
+    .sub-btn.sub-del:hover { background: #FDE2E2; color: #7A1C1C; border-color: #E99A9A; }
 </style>
 
 @php $__roleNames = ['parent' => 'მშობელი', 'child' => 'ბავშვი', 'teacher' => 'მასწავლებელი', 'staff' => 'სტაფი', 'admin' => 'ადმინი']; @endphp
@@ -188,6 +190,12 @@
                         შვილები ({{ $user->children_count }})
                     </a>
                     @endif
+                    @endif
+                    @if(auth()->user()->isAdmin() && $user->id !== auth()->id())
+                    <button type="button" class="sub-btn sub-del"
+                        onclick="confirmDeleteUser({{ $user->id }}, @js($user->name), @js($user->email), '{{ $user->role }}', {{ (int) $user->children_count }})">
+                        <i class="bi bi-trash3"></i> წაშლა
+                    </button>
                     @endif
                     </div>
                 </td>
@@ -497,6 +505,46 @@ async function saveChildSettings() {
         errEl.style.display = 'block';
     }
 }
+// ── რეგისტრაციის გაუქმება (მომხმარებლის წაშლა) ──
+function escH(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function confirmDeleteUser(id, name, email, role, kids) {
+    const isParent = role === 'parent' && kids > 0;
+    let html = '<div style="text-align:left;font-size:0.92rem;color:#4F473F;line-height:1.55;">'
+        + '<b>' + escH(name) + '</b>' + (email ? ' <span style="color:#6B625A;">(' + escH(email) + ')</span>' : '') + '<br><br>'
+        + (role === 'child'
+            ? 'წაიშლება ბავშვის ანგარიში: ტესტები, ვარჯიში, მიღწევები, მონეტები და მარკეტი.'
+            : 'წაიშლება ანგარიში და პაკეტის ისტორია. მომხმარებელი სისტემიდან გამოვა.')
+        + '<br><b style="color:#A12626;">ამის დაბრუნება შეუძლებელია.</b>';
+    if (isParent) {
+        html += '<label style="display:flex;gap:8px;align-items:flex-start;margin-top:14px;padding:10px 12px;background:#FFF3EA;border-radius:12px;cursor:pointer;">'
+            + '<input type="checkbox" id="delWithKids" checked style="margin-top:4px;">'
+            + '<span>წაიშალოს მისი შვილებიც (' + kids + '), რომლებსაც სხვა მშობელი არ ჰყავთ</span></label>';
+    }
+    html += '</div>';
+    Swal.fire({
+        title: 'რეგისტრაციის გაუქმება?',
+        html: html,
+        icon: 'warning',
+        showCancelButton: true,
+        focusCancel: true,
+        confirmButtonColor: '#C62828',
+        cancelButtonColor: '#aaa',
+        confirmButtonText: 'დიახ, წაიშალოს',
+        cancelButtonText: 'გაუქმება',
+        preConfirm: () => ({ with_children: isParent ? document.getElementById('delWithKids').checked : false }),
+    }).then(async result => {
+        if (!result.isConfirmed) return;
+        const res = await fetch(`/admin/users/${id}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+            body: JSON.stringify(result.value),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.ok) { location.reload(); return; }
+        Swal.fire({ icon: 'error', title: 'ვერ წაიშალა', text: data.error || data.message || 'სცადე თავიდან.' });
+    });
+}
+
 function confirmResetProgress() {
     Swal.fire({
         title: 'პროგრესის განულება?',

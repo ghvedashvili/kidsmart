@@ -89,6 +89,7 @@ class PracticeController extends Controller
     {
         $queueKey = "practice_queue_{$child->id}";
         $queue    = cache()->get($queueKey);
+        if ($queue) $queue = $this->skipDisabled($queue, $queueKey);
 
         if (! $queue || ! isset($queue['items'][$queue['cursor']])) {
             $result = (new TestGeneratorService())->generatePracticeBatch($child);
@@ -96,6 +97,7 @@ class PracticeController extends Controller
                 return response()->json(['error' => $result['error'] ?? 'კითხვები ვერ მოიძებნა'], 404);
             }
             $items = array_map(fn ($it) => [
+                'template_id'   => $it['template']->id,
                 'question_type' => $it['template']->question_type ?? 'multiple_choice',
                 'topic_id'      => $it['template']->topic_id,
                 'topic_name'    => $it['template']->topic?->name ?? '',
@@ -107,6 +109,26 @@ class PracticeController extends Controller
 
         $item = $queue['items'][$queue['cursor']];
         return response()->json($this->buildQuestionResponse($child->id, $item, $queueKey));
+    }
+
+    /**
+     * წინასწარ აწყობილ რიგში შეიძლება იყოს კითხვა, რომელიც მერე გამოირთო (მაგ. მასწავლებელმა
+     * შეცდომა შეატყობინა) — ასეთებს გამოვტოვებთ, რომ ბავშვს აღარ შეხვდეს.
+     */
+    private function skipDisabled(array $queue, string $queueKey): array
+    {
+        $rest = array_slice($queue['items'], $queue['cursor']);
+        $ids  = array_values(array_unique(array_filter(array_column($rest, 'template_id'))));
+        if (! $ids) return $queue;
+        $active = QuestionTemplate::whereIn('id', $ids)->where('is_active', true)->pluck('id')->flip();
+        $start  = $queue['cursor'];
+        while (isset($queue['items'][$queue['cursor']])) {
+            $tid = $queue['items'][$queue['cursor']]['template_id'] ?? null;
+            if (! $tid || isset($active[$tid])) break;
+            $queue['cursor']++;
+        }
+        if ($queue['cursor'] !== $start) cache()->put($queueKey, $queue, now()->addHours(self::QUEUE_TTL_HOURS));
+        return $queue;
     }
 
     /**

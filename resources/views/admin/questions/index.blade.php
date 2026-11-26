@@ -156,11 +156,18 @@
     <div class="msg">{{ session('success') }}</div>
     @endif
 
-    @php $__rvPending = auth()->user()->isAdmin() ? \App\Models\QuestionTemplate::where('review_status', 'pending')->count() : 0; @endphp
+    @php $__rvPending = auth()->user()->isAdmin() ? \App\Models\QuestionTemplate::where('review_status', 'pending')->count() : 0; $__rvFlag = auth()->user()->isAdmin() ? \App\Models\QuestionTemplate::where('review_status', 'flagged')->count() : 0; @endphp
     @if($__rvPending && ! $showTrashed)
     <a href="{{ route('admin.questions.review.index') }}" style="display:flex;align-items:center;gap:10px;background:#FFF3EA;border:2px solid #FFD9BF;color:#C24A0A;border-radius:16px;padding:12px 16px;font-weight:800;text-decoration:none;margin-bottom:12px;">
         <i class="bi bi-person-badge" style="font-size:18px;"></i>
         <span style="flex:1;">მასწავლებლების {{ $__rvPending }} კითხვა ელოდება განხილვას</span>
+        <span>ნახვა →</span>
+    </a>
+    @endif
+    @if($__rvFlag && ! $showTrashed)
+    <a href="{{ route('admin.questions.review.index', ['status' => 'flagged']) }}" style="display:flex;align-items:center;gap:10px;background:#FDE2E2;border:2px solid #F5C2C2;color:#A12626;border-radius:16px;padding:12px 16px;font-weight:800;text-decoration:none;margin-bottom:12px;">
+        <i class="bi bi-flag-fill"></i>
+        <span style="flex:1;">მასწავლებლებმა {{ $__rvFlag }} კითხვაზე შეცდომა შეატყობინეს — გამორთულია გასწორებამდე</span>
         <span>ნახვა →</span>
     </a>
     @endif

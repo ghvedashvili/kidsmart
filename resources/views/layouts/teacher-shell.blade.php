@@ -10,6 +10,8 @@
         ['pending',  'bi-hourglass-split',   'განხილვაზე',     ''],
         ['approved', 'bi-check2-circle',     'დადასტურებული',   ''],
     ];
+    $__bView = request()->routeIs('teacher.bank.index') ? (request('view') ?: 'all') : (request()->routeIs('teacher.bank.show') ? 'all' : null);
+    $__bMine = \App\Models\QuestionTemplate::where('flagged_by', $__tu->id)->where('review_status', \App\Models\QuestionTemplate::REVIEW_FLAGGED)->count();
 @endphp
 <div class="ks-child-shell">
     <aside class="ks-pside" role="navigation" aria-label="მასწავლებლის მენიუ">
@@ -25,6 +27,13 @@
                 @if(($__tCounts[$__k] ?? 0) > 0)<span class="ks-pnav-badge{{ $__cls === 'warn' ? '' : ' tq-badge-soft' }}">{{ $__tCounts[$__k] }}</span>@endif
             </a>
             @endforeach
+            <div class="ks-pnav-lbl" style="margin-top:12px;">კითხვების ბანკი</div>
+            <a href="{{ route('teacher.bank.index') }}" class="{{ $__bView === 'all' ? 'on' : '' }}" @if($__bView === 'all') aria-current="page" @endif><i class="bi bi-collection"></i>ყველა კითხვა</a>
+            <a href="{{ route('teacher.bank.index', ['view' => 'mine']) }}" class="{{ $__bView === 'mine' ? 'on' : '' }}" @if($__bView === 'mine') aria-current="page" @endif>
+                <i class="bi bi-flag"></i>ჩემი შეტყობინებები
+                @if($__bMine)<span class="ks-pnav-badge tq-badge-soft">{{ $__bMine }}</span>@endif
+            </a>
+            <a href="{{ route('teacher.bank.index', ['view' => 'flagged']) }}" class="{{ $__bView === 'flagged' ? 'on' : '' }}" @if($__bView === 'flagged') aria-current="page" @endif><i class="bi bi-slash-circle"></i>გამორთული</a>
         </div>
         @if($__tu->isAdmin())
         {{-- მხოლოდ ადმინს აქვს რეჟიმებს შორის გადართვა --}}
@@ -59,5 +68,6 @@
         <a href="{{ route('teacher.questions.index', ['tab' => 'rejected']) }}" class="{{ $__tTab === 'rejected' ? 'on' : '' }}"><i class="bi bi-arrow-return-left"></i>შესასწორებელი @if($__tCounts['rejected'] ?? 0)<span class="ks-pnav-badge">{{ $__tCounts['rejected'] }}</span>@endif</a>
         <a href="{{ route('teacher.questions.index', ['tab' => 'pending']) }}" class="{{ $__tTab === 'pending' ? 'on' : '' }}"><i class="bi bi-hourglass-split"></i>განხილვაზე</a>
         <a href="{{ route('teacher.questions.index', ['tab' => 'approved']) }}" class="{{ $__tTab === 'approved' ? 'on' : '' }}"><i class="bi bi-check2-circle"></i>დადასტურებული</a>
+        <a href="{{ route('teacher.bank.index') }}" class="{{ $__bView ? 'on' : '' }}"><i class="bi bi-collection"></i>ბანკი</a>
     </div>
 </div>

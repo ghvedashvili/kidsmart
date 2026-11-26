@@ -10,6 +10,7 @@ use App\Models\RolePermission;
 use App\Models\Theme;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -134,6 +135,45 @@ class UserController extends Controller
         }
 
         return response()->json(['ok' => true]);
+    }
+
+    /**
+     * რეგისტრაციის გაუქმება — მომხმარებლის სრული წაშლა (მხოლოდ ადმინი).
+     * ბავშვის ტესტები, ვარჯიში, თამაშები, მარკეტი, პარამეტრები და გამოწერები FK-ით (cascade) იშლება;
+     * child_parent კავშირებს FK არ აქვს, ამიტომ აქ ვხსნით. მშობლის წაშლისას სურვილისამებრ იშლება
+     * მისი შვილებიც, რომლებსაც სხვა მშობელი არ ჰყავთ (თორემ უპატრონო ანგარიშები დარჩებოდა).
+     */
+    public function destroy(Request $request, User $user)
+    {
+        $me = $request->user();
+        abort_unless($me->isAdmin(), 403, 'მომხმარებლის წაშლა მხოლოდ ადმინს შეუძლია.');
+        if ($user->id === $me->id) {
+            return response()->json(['error' => 'საკუთარ ანგარიშს ვერ წაშლი.'], 422);
+        }
+        if ($user->role === 'admin' && User::where('role', 'admin')->where('id', '!=', $user->id)->doesntExist()) {
+            return response()->json(['error' => 'ეს ერთადერთი ადმინია — ჯერ სხვას მიეცი ადმინის როლი.'], 422);
+        }
+
+        $ids = [$user->id];
+        if ($user->role === 'parent' && $request->boolean('with_children')) {
+            $childIds = DB::table('child_parent')->where('parent_id', $user->id)->pluck('child_id');
+            // მხოლოდ ის შვილები, ვისაც სხვა მშობელი არ ჰყავს
+            $shared = DB::table('child_parent')->whereIn('child_id', $childIds)->where('parent_id', '!=', $user->id)->pluck('child_id');
+            $ids = array_merge($ids, $childIds->diff($shared)->values()->all());
+        }
+
+        $names = User::whereIn('id', $ids)->pluck('name')->all();
+        DB::transaction(function () use ($ids) {
+            DB::table('child_parent')->whereIn('child_id', $ids)->orWhereIn('parent_id', $ids)->delete();
+            DB::table('sessions')->whereIn('user_id', $ids)->delete();   // სისტემიდან გამოგდება
+            User::whereIn('id', $ids)->get()->each->delete();
+        });
+
+        $msg = count($ids) > 1
+            ? '„' . $user->name . '“ და მისი ' . (count($ids) - 1) . ' შვილი წაიშალა.'
+            : '„' . $user->name . '“ წაიშალა.';
+        session()->flash('success', $msg);
+        return response()->json(['ok' => true, 'deleted' => $names]);
     }
 
     /**

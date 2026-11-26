@@ -1,76 +1,79 @@
 @extends('layouts.app')
 @section('content')
 <style>
-    body { background: transparent !important; }
-    .aw { max-width: 700px; margin: 0 auto; padding: 32px 16px 64px; font-family: 'Goldman', monospace; }
-    .card-filter { background: #fff; border: 1px solid #ECE9E4; border-radius: 8px; padding: 16px 18px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-    .card-dark   { background: #fff; border: 1px solid #ECE9E4; border-radius: 8px; padding: 20px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    /* redesign-kidsmart: ტესტის გადახედვა — ადმინის სტილი (ბარათები 20px, ნარინჯისფერი აქცენტი, ქართული შრიფტი) */
+    .aw { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+    .card-filter, .card-dark { background: #fff; border: 1px solid #ECE9E4; border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+    .tp-sec-h { display: flex; align-items: center; gap: 10px; }
+    .tp-sec-h .tp-ic { width: 38px; height: 38px; border-radius: 12px; background: #FFF3EA; color: #C24A0A; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .tp-sec-h b { font-size: 16px; font-weight: 900; color: #2B2622; display: block; }
+    .tp-sec-h small { font-size: 13px; color: #6B625A; display: block; line-height: 1.4; }
 
     /* pill button groups */
-    .filter-group { margin-bottom: 10px; }
-    .filter-lbl { font-size: 0.6rem; color: #8A8078; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 5px; }
-    .pill-row { display: flex; flex-wrap: wrap; gap: 5px; }
-    .pill-btn { position: relative; }
+    .filter-group { display: flex; flex-direction: column; gap: 6px; }
+    .filter-lbl { font-size: 12px; font-weight: 800; color: #6B625A; }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .pill-btn { position: relative; margin: 0; }
     .pill-btn input[type=radio] { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
-    .pill-btn span {
-        display: block;
-        font-family: 'Goldman', monospace;
-        font-size: 0.72rem;
-        padding: 4px 12px;
-        border: 1px solid #ECE9E4;
-        border-radius: 20px;
-        color: #6B625A;
-        background: #F7F6F3;
-        cursor: pointer;
-        transition: all 0.14s;
-        user-select: none;
-        white-space: nowrap;
-    }
-    .pill-btn:has(input:checked) span { background: #2B2622; border-color: #2B2622; color: #fff; }
-    .pill-btn span:hover { border-color: #8A8078; color: #2B2622; }
+    .pill-btn span { display: inline-flex; align-items: center; min-height: 36px; padding: 6px 14px; border-radius: 999px; border: 1.5px solid #E6E2DC; background: #fff; font-size: 14px; font-weight: 800; color: #4F473F; cursor: pointer; transition: all .14s; user-select: none; white-space: nowrap; }
+    .pill-btn span:hover { border-color: #FFC49A; color: #C24A0A; }
+    .pill-btn:has(input:checked) span { border-color: #E2590F; background: #FFF3EA; color: #C24A0A; }
+    .pill-btn:has(input:focus-visible) span { outline: 2px solid #FFC49A; outline-offset: 2px; }
 
     /* dropdowns + generate row */
-    .dd-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
-    .fc-sm { background: #F7F6F3; border: 1px solid #ECE9E4; border-radius: 4px; color: #374151; font-family: 'Goldman', monospace; font-size: 0.74rem; padding: 5px 10px; outline: none; cursor: pointer; }
-    .fc-sm:focus { border-color: #8A8078; }
-    .btn-gen { background: #F7F6F3; border: 1px solid #ECE9E4; color: #6B625A; font-family: 'Goldman', monospace; font-size: 0.74rem; padding: 5px 18px; border-radius: 4px; cursor: pointer; transition: all 0.15s; white-space: nowrap; margin-left: auto; }
-    .btn-gen:hover { border-color: #8A8078; color: #2B2622; }
+    .dd-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .dd-row > select { flex: 1; min-width: 180px; }
+    .fc-sm { background: #fff; border: 2px solid #ECE9E4; border-radius: 12px; color: #2B2622; font-family: inherit; font-size: 14px; padding: 9px 12px; outline: none; cursor: pointer; min-height: 42px; }
+    .fc-sm:focus { border-color: #E2590F; box-shadow: 0 0 0 4px rgba(226, 89, 15, .12); }
+    .btn-gen { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: #E2590F; border: none; color: #fff; font-family: inherit; font-size: 14px; font-weight: 800; padding: 10px 18px; min-height: 42px; border-radius: 12px; cursor: pointer; transition: background .15s; white-space: nowrap; text-decoration: none; }
+    .btn-gen:hover { background: #C24A0A; color: #fff; }
+    .btn-gen:focus-visible { outline: 3px solid rgba(226, 89, 15, .35); outline-offset: 2px; }
+    .btn-gen.soft { background: #FFF3EA; color: #C24A0A; }
+    .btn-gen.soft:hover { background: #FFE3CC; color: #C24A0A; }
 
     /* question cards */
-    .q-card { background: #fafcff; border: 1px solid #F1EFEB; border-radius: 7px; padding: 16px 18px; margin-bottom: 12px; }
-    .q-num { font-size: 0.62rem; color: #8A8078; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px; }
-    .q-topic { display: inline-block; font-size: 0.6rem; color: #6B625A; border: 1px solid #ECE9E4; border-radius: 2px; padding: 1px 6px; margin-left: 6px; }
-    .q-text { font-size: 0.86rem; color: #2B2622; line-height: 1.5; margin-bottom: 12px; }
-    .opts { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 8px; }
-    .opt { font-size: 0.78rem; padding: 6px 14px; border-radius: 4px; border: 1px solid #ECE9E4; color: #374151; background: #fff; }
-    .opt.correct { background: #ecfdf5; border-color: #6ee7b7; color: #065f46; font-weight: 600; }
-    .hint { font-size: 0.7rem; color: #6B625A; border-left: 2px solid #ECE9E4; padding-left: 9px; margin-top: 2px; }
-    .err { font-size: 0.76rem; color: #ef4444; padding: 10px 0; }
-    .result-meta { font-family:'Goldman',monospace; font-size:0.66rem; color:#8A8078; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:12px; }
-    .theme-tag { color:#374151; }
+    .q-card { background: #fff; border: 1px solid #ECE9E4; border-radius: 20px; padding: 18px; }
+    .q-num { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 13px; font-weight: 900; color: #C24A0A; margin-bottom: 10px; }
+    .q-num::before { content: ''; }
+    .q-topic { display: inline-flex; font-size: 12px; font-weight: 800; color: #6B625A; background: #F1EFEB; border-radius: 999px; padding: 3px 10px; margin-left: 0; }
+    .q-text { font-size: 17px; font-weight: 700; color: #2B2622; line-height: 1.6; margin-bottom: 12px; }
+    .opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 8px; }
+    .opt { display: flex; align-items: center; justify-content: center; text-align: center; min-height: 46px; font-size: 16px; font-weight: 800; padding: 8px 12px; border-radius: 14px; border: 2px solid #ECE9E4; color: #2B2622; background: #F7F6F3; }
+    .opt.correct { background: #E5F6EC; border-color: #1E8A4C; color: #14612F; }
+    .hint { font-size: 13px; color: #6B625A; border-left: 3px solid #FFE3CC; padding-left: 10px; margin-top: 4px; line-height: 1.5; }
+    .err { font-size: 14px; font-weight: 700; color: #A12626; background: #FDE2E2; border-radius: 14px; padding: 12px 14px; }
+    .result-meta { font-size: 14px; font-weight: 800; color: #6B625A; }
+    .theme-tag { color: #2B2622; }
 
     /* child search dropdown */
     .child-search-wrap { position: relative; flex: 1; min-width: 220px; }
-    .child-search-results { display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 200; background: #fff; border: 1px solid #ECE9E4; border-radius: 6px; box-shadow: 0 6px 20px rgba(0,0,0,0.1); max-height: 260px; overflow-y: auto; margin-top: 2px; }
-    .child-search-item { padding: 8px 12px; font-size: 0.74rem; color: #374151; cursor: pointer; border-bottom: 1px solid #F1EFEB; }
+    .child-search-results { display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 200; background: #fff; border: 1px solid #ECE9E4; border-radius: 14px; box-shadow: 0 12px 32px rgba(43, 38, 34, .14); max-height: 260px; overflow-y: auto; margin-top: 4px; }
+    .child-search-item { padding: 10px 14px; font-size: 14px; color: #2B2622; cursor: pointer; border-bottom: 1px solid #F1EFEB; }
     .child-search-item:last-child { border-bottom: none; }
     .child-search-item:hover { background: #FFF3EA; }
-    .child-search-empty { padding: 10px 12px; font-size: 0.72rem; color: #8A8078; }
-    .child-selected-badge { display: none; font-size: 0.68rem; color: #C24A0A; background: #FFF3EA; border: 1px solid #FFD9BF; border-radius: 4px; padding: 4px 10px; margin-top: 6px; }
+    .child-search-empty { padding: 10px 14px; font-size: 13px; color: #6B625A; }
+    .child-selected-badge { display: none; font-size: 13px; font-weight: 700; color: #C24A0A; background: #FFF3EA; border-radius: 10px; padding: 6px 12px; }
+    .tp-note { font-size: 13px; color: #6B625A; line-height: 1.5; }
 
     @media (max-width: 640px) {
-        .aw { padding: 14px 10px 48px; }
-        .card-filter { padding: 12px 14px; }
-        .card-dark { padding: 14px; }
-        .btn-gen { margin-left: 0; }
+        .card-filter, .card-dark, .q-card { padding: 14px; border-radius: 18px; }
+        .btn-gen { width: 100%; }
+        .q-text { font-size: 16px; }
     }
 </style>
 
 <div class="aw">
-    <a href="javascript:history.back()" style="font-family:'Goldman',monospace;font-size:0.72rem;color:#999;letter-spacing:0.06em;text-decoration:none;display:inline-block;margin-bottom:20px;">← back</a>
+    <header class="ks-page-head">
+        <div class="ks-page-title">
+            <span class="ks-eyebrow">კითხვები</span>
+            <h1 class="ks-display ks-h1">ტესტის გადახედვა</h1>
+        </div>
+    </header>
+    <p class="ks-muted" style="margin:0;font-size:14px;">ნახე, როგორი ტესტი გენერირდება კლასის, თემისა და დონის მიხედვით, ან კონკრეტული ბავშვისთვის. აქედან არაფერი ინახება.</p>
 
     <div class="card-filter">
-        <form method="GET" action="{{ route('test.preview') }}">
+        <div class="tp-sec-h"><span class="tp-ic"><i class="bi bi-sliders"></i></span><div><b>ტესტის გენერაცია</b><small>აირჩიე კლასი, თემა, თემატიკა და დონე</small></div></div>
+        <form method="GET" action="{{ route('test.preview') }}" style="display:flex;flex-direction:column;gap:12px;margin:0;">
             <div class="filter-group">
                 <div class="filter-lbl">კლასი</div>
                 <div class="pill-row">
@@ -84,11 +87,11 @@
                     @endforeach
                 </div>
             </div>
-            <div class="dd-row" style="margin-bottom:8px;">
-                <select name="topic_id" id="sel_topic" class="fc-sm" onchange="onTopicChange(this.value)">
+            <div class="dd-row">
+                <select name="topic_id" id="sel_topic" class="fc-sm" aria-label="თემა" onchange="onTopicChange(this.value)">
                     <option value="">— თემა —</option>
                 </select>
-                <select name="theme_id" id="sel_theme" class="fc-sm" onchange="onThemeChange(this.value)">
+                <select name="theme_id" id="sel_theme" class="fc-sm" aria-label="თემატიკა" onchange="onThemeChange(this.value)">
                     <option value="">— თემატიკა —</option>
                 </select>
             </div>
@@ -104,20 +107,21 @@
                 </div>
             </div>
             <div class="dd-row">
-                <button type="submit" class="btn-gen" style="margin-left:0;">გენერაცია →</button>
+                <button type="submit" class="btn-gen"><i class="bi bi-shuffle"></i> გენერაცია</button>
             </div>
         </form>
     </div>
 
     <div class="card-filter">
-        <form method="GET" action="{{ route('test.preview') }}" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <div class="tp-sec-h"><span class="tp-ic"><i class="bi bi-person"></i></span><div><b>კონკრეტული ბავშვის ტესტი</b><small>ზუსტად ის, რასაც ეს ბავშვი ახლა ტესტის დაწყებისას მიიღებდა</small></div></div>
+        <form method="GET" action="{{ route('test.preview') }}" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0;">
             <div class="child-search-wrap">
                 <input type="text" id="childSearchInput" class="fc-sm" style="width:100%;box-sizing:border-box;" autocomplete="off"
-                    placeholder="🔍 ძებნა სახელით, კოდით, კლასით..." oninput="onChildSearchInput()"
+                    placeholder="ძებნა სახელით, კოდით, კლასით…" aria-label="ბავშვის ძებნა" oninput="onChildSearchInput()"
                     onfocus="onChildSearchInput()" onblur="setTimeout(hideChildSearchResults, 150)">
                 <div id="childSearchResults" class="child-search-results"></div>
             </div>
-            <select name="child_id" id="childSelect" class="fc-sm" style="flex:1;min-width:160px;">
+            <select name="child_id" id="childSelect" class="fc-sm" style="flex:1;min-width:160px;" aria-label="ბავშვი">
                 <option value="">— ბავშვი —</option>
                 @foreach($children as $c)
                 @php
@@ -134,17 +138,17 @@
                 </option>
                 @endforeach
             </select>
-            <button type="submit" class="btn-gen" style="margin-left:0;">👶 ბავშვის ტესტის ნახვა →</button>
+            <button type="submit" class="btn-gen"><i class="bi bi-eye"></i> ტესტის ნახვა</button>
         </form>
         <div id="childSelectedBadge" class="child-selected-badge"></div>
-        <div style="font-size:0.6rem;color:#8A8078;margin-top:6px;">აჩვენებს ზუსტად იმას, რასაც ეს ბავშვი ახლა ტესტის დაწყებისას მიიღებდა — არაფერი არ ინახება, ბავშვის ისტორია/rotation არ ეცვლება.</div>
+        <div class="tp-note">არაფერი ინახება — ბავშვის ისტორია და კითხვების მონაცვლეობა არ იცვლება.</div>
     </div>
 
-    <div class="card-filter" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
-        <div style="font-size:0.72rem;color:#6B625A;">შეამოწმე ყველა აქტიური შაბლონი — თუ რომელიმეს ფორმულა ვერ გამოითვლება, აქ გამოჩნდება</div>
-        <form method="GET" action="{{ route('test.preview') }}">
+    <div class="card-filter" style="flex-direction:row;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div class="tp-sec-h" style="flex:1;min-width:240px;"><span class="tp-ic"><i class="bi bi-shield-check"></i></span><div><b>შაბლონების შემოწმება</b><small>თუ რომელიმე აქტიური შაბლონის ფორმულა ვერ გამოითვლება, აქ გამოჩნდება</small></div></div>
+        <form method="GET" action="{{ route('test.preview') }}" style="margin:0;">
             <input type="hidden" name="check_templates" value="1">
-            <button type="submit" class="btn-gen" style="margin-left:0;">🔍 ყველა შაბლონის შემოწმება</button>
+            <button type="submit" class="btn-gen soft"><i class="bi bi-search"></i> ყველას შემოწმება</button>
         </form>
     </div>
 
@@ -154,16 +158,16 @@
 
     @if($brokenTemplates !== null)
     <div class="card-dark">
-        <div class="result-meta">🔍 შემოწმებულია ყველა აქტიური შაბლონი — {{ count($brokenTemplates) }} გატყდომილი</div>
+        <div class="result-meta">🔍 შემოწმებულია ყველა აქტიური შაბლონი — {{ count($brokenTemplates) }} გატეხილი</div>
         @forelse($brokenTemplates as $b)
-        <div class="q-card" style="border-color:#fecaca;background:#fff5f5;">
+        <div class="q-card" style="border-color:#F5C2C2;background:#FFFAFA;">
             <div class="q-num">#{{ $b['template']->id }} <span class="q-topic">{{ $b['template']->topic->grade->name ?? '' }} / {{ $b['template']->topic->name ?? '' }}</span></div>
             <div class="q-text">{{ $b['template']->template_text ?: '(' . $b['template']->question_type . ')' }}</div>
-            <div style="font-size:0.72rem;color:#ef4444;margin-bottom:8px;">⚠ {{ $b['error'] }}</div>
-            <a href="{{ route('admin.questions.edit', $b['template']) }}" class="btn-gen" style="display:inline-block;text-decoration:none;">✎ გასწორება</a>
+            <div class="err" style="margin-bottom:10px;">⚠ {{ $b['error'] }}</div>
+            <a href="{{ route('admin.questions.edit', $b['template']) }}" class="btn-gen soft"><i class="bi bi-pencil"></i> გასწორება</a>
         </div>
         @empty
-        <div style="color:#16a34a;font-size:0.82rem;">✅ ყველა აქტიური შაბლონი წესრიგშია</div>
+        <div style="color:#14612F;background:#DFF5E3;border-radius:14px;padding:12px 14px;font-size:14px;font-weight:700;"><i class="bi bi-check2-circle"></i> ყველა აქტიური შაბლონი წესრიგშია</div>
         @endforelse
     </div>
     @endif
@@ -186,7 +190,7 @@
         }
     @endphp
     <div class="q-card">
-        <div class="q-num">{{ $i + 1 }}<span class="q-topic">{{ $q['topic_name'] }}</span></div>
+        <div class="q-num">კითხვა {{ $i + 1 }}<span class="q-topic">{{ $q['topic_name'] }}</span></div>
         @if($qType === 'pyramid')
         @php
             $pyrRows  = json_decode($q['question_text'], true) ?? [];

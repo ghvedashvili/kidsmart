@@ -1366,55 +1366,116 @@ a.ks-pd-kpi:hover { color: #2B2622; box-shadow: 0 2px 0 #E2DED7, 0 0 0 2px #FFF3
 @endpush
 
 @push('modals')
-{{-- Plans Modal --}}
+{{-- Plans Modal — redesign-kidsmart: იგივე ენა, რაც ლენდინგის „აირჩიე პაკეტი“ და მშობლის პანელი --}}
 @if(in_array(auth()->user()->role, ['parent', 'admin']))
-<div id="plansModal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
-    <div class="mbox" style="max-width:520px;">
-        <div class="modal-title">
-            სატარიფო გეგმები
-            <button type="button" class="modal-close" onclick="document.getElementById('plansModal').classList.remove('open')">✕</button>
+@php
+    $atChildLimit = isset($currentPkg) && $currentPkg->max_children > 0 && isset($children) && $children->count() >= $currentPkg->max_children;
+    $allPkgs = App\Models\Package::where('is_active', true)->orderBy('sort_order')->get();
+    $__ksMoney = fn ($v) => rtrim(rtrim(number_format((float) $v, 2, '.', ''), '0'), '.');
+@endphp
+<div id="plansModal" class="modal-overlay ksp-ov" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="ksp" role="dialog" aria-modal="true" aria-labelledby="kspTitle">
+        <div class="ksp-head">
+            <span class="ksp-ico" aria-hidden="true"><i class="bi bi-gem"></i></span>
+            <div class="ksp-head-t">
+                <h2 id="kspTitle">სატარიფო გეგმები</h2>
+                <p>გეგმის შესაცვლელად დაუკავშირდი ადმინს</p>
+            </div>
+            <button type="button" class="ksp-x" aria-label="დახურვა" onclick="document.getElementById('plansModal').classList.remove('open')"><i class="bi bi-x-lg"></i></button>
         </div>
-        @php $atChildLimit = isset($currentPkg) && $currentPkg->max_children > 0 && isset($children) && $children->count() >= $currentPkg->max_children; @endphp
+
         @if($atChildLimit)
-        <div style="background:#fef3c7;border:1px solid #fbbf24;border-radius:6px;padding:10px 14px;margin-bottom:14px;font-size:0.72rem;color:#92400e;">
-            თქვენი მიმდინარე გეგმა (<strong>{{ $currentPkg->name }}</strong>) მხოლოდ <strong>{{ $currentPkg->max_children }}</strong> ბავშვს იძლევა. მეტი ბავშვის დასამატებლად გადადით უფრო მაღალ გეგმაზე.
+        <div class="ksp-warn" role="status">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            <span>შენი მიმდინარე გეგმა (<b>{{ $currentPkg->name }}</b>) მხოლოდ <b>{{ $currentPkg->max_children }}</b> ბავშვს იძლევა. მეტი ბავშვის დასამატებლად გადადი უფრო მაღალ გეგმაზე.</span>
         </div>
         @endif
-        <div style="font-family:'Goldman',monospace;font-size:0.65rem;color:#8A8078;letter-spacing:0.06em;margin-bottom:14px;">
-            გეგმის შესაცვლელად მიმართეთ ადმინს
-        </div>
 
-        @php $allPkgs = App\Models\Package::where('is_active', true)->orderBy('sort_order')->get(); @endphp
-
-        @foreach($allPkgs as $pkg)
-        @php $isCurrent = $currentPkg->id && $currentPkg->id === $pkg->id; @endphp
-        <div style="border:{{ $isCurrent ? '2px solid #E2590F' : '1px solid #ECE9E4' }};border-radius:10px;padding:16px 18px;margin-bottom:10px;position:relative;">
-            @if($isCurrent)
-            <span style="position:absolute;top:10px;right:12px;background:#FFF7F0;color:#E2590F;font-size:0.58rem;padding:2px 8px;border-radius:8px;font-family:'Goldman',monospace;letter-spacing:0.06em;">მიმდინარე</span>
-            @endif
-            <div style="font-family:'Goldman',monospace;font-size:0.88rem;font-weight:700;color:#2B2622;margin-bottom:4px;">{{ $pkg->name }}</div>
-            @if($pkg->description)
-            <div style="font-size:0.7rem;color:#6B625A;margin-bottom:10px;">{{ $pkg->description }}</div>
-            @endif
-            <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:0.7rem;color:#374151;margin-bottom:10px;">
-                @if($pkg->is_free)
-                    <span>✓ უფასო</span>
-                @else
-                    @if($pkg->price_monthly > 0)<span>{{ number_format($pkg->price_monthly, 2) }}₾ / თვე</span>@endif
-                    @if($pkg->price_yearly > 0)<span>{{ number_format($pkg->price_yearly, 2) }}₾ / წელი</span>@endif
+        <div class="ksp-grid">
+            @foreach($allPkgs as $pkg)
+            @php
+                $isCurrent = $currentPkg->id && $currentPkg->id === $pkg->id;
+                $__lines = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', (string) $pkg->description)), 'strlen'));
+                $__sub = array_shift($__lines);
+            @endphp
+            <article class="ksp-card {{ $isCurrent ? 'cur' : '' }}">
+                <div class="ksp-card-h">
+                    <b>{{ $pkg->name }}</b>
+                    @if($isCurrent)<span class="ksp-badge">მიმდინარე</span>@endif
+                </div>
+                @if($__sub)<div class="ksp-sub">{{ $__sub }}</div>@endif
+                <div class="ksp-price">
+                    @if($pkg->is_free)
+                        <b>0 ₾</b><span>მუდამ უფასო</span>
+                    @elseif($pkg->price_monthly > 0)
+                        <b>{{ $__ksMoney($pkg->price_monthly) }} ₾</b><span>/ თვეში</span>
+                    @elseif($pkg->price_yearly > 0)
+                        <b>{{ $__ksMoney($pkg->price_yearly) }} ₾</b><span>/ წელიწადში</span>
+                    @endif
+                </div>
+                @if(!$pkg->is_free && $pkg->price_monthly > 0 && $pkg->price_yearly > 0)
+                <div class="ksp-year">ან <b>{{ $__ksMoney($pkg->price_yearly) }} ₾</b> წელიწადში</div>
                 @endif
-                <span>👶 {{ $pkg->max_children === 0 ? 'შეუზღ.' : $pkg->max_children }} ბავშვი</span>
-                <span>⭐ სირთ. {{ $pkg->max_difficulty === 5 ? 'ყველა' : '1–'.$pkg->max_difficulty }}</span>
-            </div>
-            @if(!$isCurrent && !$pkg->is_free)
-            <div style="font-family:'Goldman',monospace;font-size:0.62rem;color:#8A8078;letter-spacing:0.04em;">
-                გეგმის გასააქტიურებლად დაუკავშირდით ადმინს
-            </div>
-            @endif
+                <ul class="ksp-feat">
+                    <li><i class="bi bi-check-lg" aria-hidden="true"></i>{{ $pkg->max_children === 0 ? 'შეუზღუდავი რაოდენობის შვილი' : $pkg->max_children . ' შვილის პროფილი' }}</li>
+                    <li><i class="bi bi-check-lg" aria-hidden="true"></i>{{ (int) $pkg->max_difficulty >= 5 ? 'სირთულის ყველა დონე' : 'სირთულის 1–' . (int) $pkg->max_difficulty . ' დონე' }}</li>
+                    @foreach($__lines as $__l)
+                    <li><i class="bi bi-check-lg" aria-hidden="true"></i>{{ $__l }}</li>
+                    @endforeach
+                </ul>
+                <div class="ksp-foot">
+                    @if($isCurrent)
+                        <span class="ksp-state cur"><i class="bi bi-check2-circle"></i> შენი გეგმა</span>
+                    @elseif(!$pkg->is_free)
+                        <span class="ksp-state"><i class="bi bi-chat-dots"></i> გასააქტიურებლად დაუკავშირდი ადმინს</span>
+                    @else
+                        <span class="ksp-state muted">საბაზო გეგმა</span>
+                    @endif
+                </div>
+            </article>
+            @endforeach
         </div>
-        @endforeach
     </div>
 </div>
+<style>
+    .ksp-ov { padding: 56px 16px 40px; }
+    .ksp { width: 100%; max-width: 880px; flex-shrink: 0; background: #F7F6F3; border-radius: 28px; padding: 22px; box-shadow: 0 24px 64px rgba(43, 38, 34, .28); font-family: 'Noto Sans Georgian', sans-serif; color: #2B2622; animation: modalIn .25s cubic-bezier(.175, .885, .32, 1.275); display: flex; flex-direction: column; gap: 16px; }
+    .ksp-head { display: flex; align-items: center; gap: 14px; }
+    .ksp-ico { width: 48px; height: 48px; border-radius: 16px; background: #E2590F; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+    .ksp-head-t { flex: 1; min-width: 0; }
+    .ksp-head-t h2 { margin: 0; font-size: 22px; font-weight: 900; color: #2B2622; }
+    .ksp-head-t p { margin: 2px 0 0; font-size: 14px; color: #6B625A; }
+    .ksp-x { width: 42px; height: 42px; border-radius: 50%; border: 1.5px solid #ECE9E4; background: #fff; color: #4F473F; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; font-size: 16px; }
+    .ksp-x:hover { border-color: #FFC49A; color: #C24A0A; }
+    .ksp-x:focus-visible { outline: 3px solid rgba(226, 89, 15, .35); outline-offset: 2px; }
+    .ksp-warn { display: flex; gap: 10px; align-items: flex-start; background: #FFF1C2; color: #5A3E00; border-radius: 16px; padding: 12px 14px; font-size: 14px; line-height: 1.5; }
+    .ksp-warn i { font-size: 18px; margin-top: 1px; }
+    .ksp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+    .ksp-card { background: #fff; border: 1.5px solid #ECE9E4; border-radius: 22px; padding: 20px 18px 18px; display: flex; flex-direction: column; gap: 10px; }
+    .ksp-card.cur { border: 2.5px solid #E2590F; background: linear-gradient(180deg, #FFF3EA 0, #fff 120px); }
+    .ksp-card-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .ksp-card-h b { font-size: 19px; font-weight: 900; }
+    .ksp-badge { background: #E2590F; color: #fff; font-size: 12px; font-weight: 800; border-radius: 999px; padding: 4px 10px; }
+    .ksp-sub { font-size: 13px; color: #6B625A; margin-top: -4px; }
+    .ksp-price { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+    .ksp-price b { font-size: 30px; font-weight: 900; color: #2B2622; letter-spacing: -.01em; }
+    .ksp-price span { font-size: 14px; color: #6B625A; font-weight: 700; }
+    .ksp-year { font-size: 13px; color: #6B625A; margin-top: -6px; }
+    .ksp-year b { color: #C24A0A; }
+    .ksp-feat { list-style: none; margin: 4px 0 0; padding: 12px 0 0; border-top: 1px solid #ECE9E4; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+    .ksp-feat li { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; line-height: 1.45; }
+    .ksp-feat i { width: 20px; height: 20px; border-radius: 50%; background: #DFF5E3; color: #14612F; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; margin-top: 1px; }
+    .ksp-foot { margin-top: 4px; }
+    .ksp-state { display: flex; align-items: center; justify-content: center; gap: 6px; text-align: center; border-radius: 14px; padding: 11px 12px; font-size: 13px; font-weight: 800; background: #FFF3EA; color: #C24A0A; }
+    .ksp-state.cur { background: #E2590F; color: #fff; }
+    .ksp-state.muted { background: #F1EFEB; color: #6B625A; }
+    @media (max-width: 600px) {
+        .ksp-ov { padding: 16px 10px 90px; }
+        .ksp { padding: 16px; border-radius: 22px; }
+        .ksp-head-t h2 { font-size: 19px; }
+        .ksp-price b { font-size: 26px; }
+    }
+</style>
 @endif
 @endpush
 

@@ -2,7 +2,11 @@
 {{-- მასწავლებლების კითხვების განხილვა: დადასტურება ან დაბრუნება კომენტარით --}}
 @section('content')
 @include('teacher.partials.styles')
-@php $__types = ['numeric' => 'ასარჩევი (რიცხვი)', 'text' => 'ასარჩევი (ტექსტი)', 'numeric_input' => 'ჩასაწერი']; @endphp
+@php
+    $__types = ['numeric' => 'ასარჩევი (რიცხვი)', 'text' => 'ასარჩევი (ტექსტი)', 'numeric_input' => 'ჩასაწერი'];
+    $__special = ['pyramid' => 'პირამიდა', 'code' => 'კოდი', 'crossword' => 'კროსვორდი', 'scale' => 'სასწორი', 'data_table' => 'ცხრილი'];
+    $__isFlag = $status === 'flagged';
+@endphp
 <style>
     .rv-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
     .rv-item { display: flex; flex-direction: column; gap: 14px; }
@@ -40,25 +44,42 @@
     <div class="rv-tabs">
         <a href="{{ route('admin.questions.review.index') }}" class="tq-btn {{ $status === 'pending' ? 'tq-btn-main' : 'tq-btn-ghost' }} tq-btn-sm">განხილვაზე · {{ $counts['pending'] }}</a>
         <a href="{{ route('admin.questions.review.index', ['status' => 'rejected']) }}" class="tq-btn {{ $status === 'rejected' ? 'tq-btn-main' : 'tq-btn-ghost' }} tq-btn-sm">დაბრუნებული (მასწავლებელთან) · {{ $counts['rejected'] }}</a>
+        <a href="{{ route('admin.questions.review.index', ['status' => 'flagged']) }}" class="tq-btn {{ $__isFlag ? 'tq-btn-main' : 'tq-btn-ghost' }} tq-btn-sm"><i class="bi bi-flag"></i> შეცდომის შეტყობინებები · {{ $counts['flagged'] }}</a>
     </div>
 
     @forelse($questions as $__q)
     @php $__td = (array) ($__q->teacher_data ?? []); @endphp
     <article class="tq-card rv-item" id="rv-{{ $__q->id }}">
         <div class="rv-top">
+            @if($__isFlag)
+            <span class="rv-who"><i class="bi bi-flag-fill" style="color:#A12626;"></i> {{ $__q->flagger?->name ?? ($__td['flag']['name'] ?? 'მასწავლებელი') }}</span>
+            <span class="tq-pill">{{ optional($__q->flagged_at)->format('d.m.Y H:i') }}</span>
+            <span class="tq-pill r">გამორთულია ბავშვებთან</span>
+            <span class="tq-pill">#{{ $__q->id }}{{ $__q->title ? ' · ' . $__q->title : '' }}</span>
+            @else
             <span class="rv-who"><i class="bi bi-person-badge"></i> {{ $__q->creator?->name ?? 'უცნობი' }}</span>
             <span class="tq-pill">{{ optional($__q->submitted_at)->format('d.m.Y H:i') }}</span>
+            @endif
             <span class="tq-pill o">{{ $__q->topic?->grade?->name }} · {{ $__q->topic?->name }}</span>
             <span class="tq-pill">დონე {{ $__q->difficulty }}</span>
             <span class="tq-pill">{{ $__types[$__q->answer_type] ?? $__q->answer_type }}</span>
             @if($__q->is_olympiad)<span class="tq-pill y">ოლიმპიადა</span>@endif
-            <span class="tq-pill {{ !empty($__td['auto_used']) ? 'g' : '' }}">{{ !empty($__td['auto_used']) ? 'რიცხვები იცვლება' : 'ფიქსირებული' }}</span>
+            @unless($__isFlag)<span class="tq-pill {{ !empty($__td['auto_used']) ? 'g' : '' }}">{{ !empty($__td['auto_used']) ? 'რიცხვები იცვლება' : 'ფიქსირებული' }}</span>@endunless
         </div>
 
-        @if(!empty($__td['teacher_comment']))
+        @if($__isFlag)
+        <div class="tq-flash" style="background:#FDE2E2;color:#7A1C1C;font-weight:600;"><i class="bi bi-flag"></i> <b>რა არის შესასწორებელი:</b> {{ $__td['flag']['comment'] ?? '—' }}</div>
+        @php $__more = array_values(array_filter((array) ($__td['history'] ?? []), fn ($h) => is_array($h) && ($h['event'] ?? '') === 'comment')); @endphp
+        @if($__more)
+        <div>@include('teacher.partials.history', ['history' => $__more])</div>
+        @endif
+        @endif
+
+        @if(!$__isFlag && !empty($__td['teacher_comment']))
         <div class="tq-flash" style="background:#FFF3EA;color:#7A3306;font-weight:600;"><i class="bi bi-chat-left-quote"></i> <b>მასწავლებლის კომენტარი:</b> {{ $__td['teacher_comment'] }}</div>
         @endif
-        @if(count((array) ($__td['history'] ?? [])) > 1)
+        @if($__isFlag)
+        @elseif(count((array) ($__td['history'] ?? [])) > 1)
         <details>
             <summary style="cursor:pointer;font-size:13px;font-weight:800;color:#6B625A;">მიმოწერის ისტორია ({{ count($__td['history']) }})</summary>
             <div style="margin-top:8px;">@include('teacher.partials.history', ['history' => $__td['history']])</div>
@@ -72,7 +93,7 @@
 
         <div class="rv-grid">
             <div class="rv-orig">
-                <b style="font-size:13px;color:#6B625A;">მასწავლებლის კითხვა</b>
+                <b style="font-size:13px;color:#6B625A;">{{ $__isFlag ? 'კითხვის შაბლონი' : 'მასწავლებლის კითხვა' }}</b>
                 <div class="t">{{ $__td['text'] ?? $__q->template_text }}</div>
                 <div>სწორი: <b>{{ $__td['answer'] ?? '—' }}</b>@if(!empty($__td['wrong'])) · არასწორი: {{ implode(' · ', $__td['wrong']) }}@endif</div>
                 @if(!empty($__td['hint']))<div>მინიშნება: {{ $__td['hint'] }}</div>@endif
@@ -85,7 +106,11 @@
                 <span class="tq-kid-lbl">ასე ნახავს ბავშვი</span>
                 <div class="rv-kids">
                     @forelse($samples[$__q->id] ?? [] as $__s)
+                        @if(isset($__special[$__q->question_type ?? '']))
+                        @include('teacher.partials.interactive-card', ['q' => $__s])
+                        @else
                         @include('teacher.partials.kid-card', ['s' => $__s, 'showAnswer' => true])
+                        @endif
                     @empty
                         <div class="tq-kcard" style="color:#A12626;font-weight:700;">⚠ კითხვა ვერ გენერირდა — გახსენი რედაქტორში.</div>
                     @endforelse
@@ -111,11 +136,26 @@
             </div>
         </div>
         @endif
+
+        @if($__isFlag)
+        <div class="rv-act">
+            <form method="POST" action="{{ route('admin.questions.review.resolve', $__q) }}" id="rvRes{{ $__q->id }}" style="margin:0;">
+                @csrf
+                <label for="rvR{{ $__q->id }}" style="font-size:13px;font-weight:800;color:#4F473F;display:block;margin-bottom:6px;">პასუხი მასწავლებელს <span style="font-weight:600;color:#6B625A;">(არასავალდებულო)</span></label>
+                <textarea id="rvR{{ $__q->id }}" name="comment" maxlength="1000" placeholder="მაგ.: გასწორდა — პასუხის ფორმულა შეცვლილია. მადლობა!"></textarea>
+            </form>
+            <div class="rv-btns">
+                <a href="{{ route('admin.questions.edit', $__q) }}" class="tq-btn tq-btn-soft" style="width:100%;"><i class="bi bi-pencil"></i> რედაქტორში გასწორება</a>
+                <button type="submit" form="rvRes{{ $__q->id }}" class="tq-btn tq-btn-main" style="width:100%;"><i class="bi bi-check2-circle"></i> გასწორდა — ჩართე</button>
+                <span style="font-size:12px;color:#6B625A;text-align:center;">ჯერ გაასწორე, მერე ჩართე. სანამ არ ჩართავ, ბავშვებს არ უჩანთ.</span>
+            </div>
+        </div>
+        @endif
     </article>
     @empty
     <div class="tq-card" style="text-align:center;padding:40px 16px;color:#6B625A;">
         <i class="bi bi-inbox" style="font-size:38px;color:#FFC49A;"></i>
-        <p style="margin:8px 0 0;font-weight:700;">{{ $status === 'pending' ? 'განსახილველი კითხვა არ არის.' : 'დაბრუნებული კითხვა არ არის.' }}</p>
+        <p style="margin:8px 0 0;font-weight:700;">{{ $status === 'pending' ? 'განსახილველი კითხვა არ არის.' : ($__isFlag ? 'შეცდომის შეტყობინება არ არის.' : 'დაბრუნებული კითხვა არ არის.') }}</p>
     </div>
     @endforelse
 

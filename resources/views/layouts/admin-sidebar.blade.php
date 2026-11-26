@@ -7,7 +7,7 @@
     $__sAp      = $__sIsAdmin ? null : (\App\Models\RolePermission::allowedPages($__su->role) ?? []);
     $__sCan     = fn($key) => $__sIsAdmin || ($key !== '__admin' && in_array($key, (array) $__sAp));
     // მასწავლებლების განსახილველი კითხვები (ბეჯი)
-    $__sReview  = $__sIsAdmin ? \App\Models\QuestionTemplate::where('review_status', 'pending')->count() : 0;
+    $__sReview  = $__sIsAdmin ? \App\Models\QuestionTemplate::whereIn('review_status', ['pending', 'flagged'])->count() : 0;
 
     $__ico = [
         'panel'     => 'M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z',

@@ -241,6 +241,11 @@ Route::middleware(['auth'])->prefix('teacher')->name('teacher.')->group(function
     Route::get('/questions/{question}/edit',    [\App\Http\Controllers\TeacherQuestionController::class, 'edit'])->name('questions.edit');
     Route::put('/questions/{question}',         [\App\Http\Controllers\TeacherQuestionController::class, 'update'])->name('questions.update');
     Route::delete('/questions/{question}',      [\App\Http\Controllers\TeacherQuestionController::class, 'destroy'])->name('questions.destroy');
+    // კითხვების ბანკი: ყველა კითხვის ნახვა ბავშვის თვალით + შეცდომის შეტყობინება (კითხვა ითიშება ადმინის გასწორებამდე)
+    Route::get('/bank',                         [\App\Http\Controllers\TeacherBankController::class, 'index'])->name('bank.index');
+    Route::get('/bank/{question}',              [\App\Http\Controllers\TeacherBankController::class, 'show'])->name('bank.show');
+    Route::post('/bank/{question}/flag',        [\App\Http\Controllers\TeacherBankController::class, 'flag'])->name('bank.flag');
+    Route::post('/bank/{question}/comment',     [\App\Http\Controllers\TeacherBankController::class, 'comment'])->name('bank.comment');
 });
 
 // /admin entry-point — ნებისმიერი admin-permissioned user შედის (per-page check არ არის)
@@ -258,6 +263,7 @@ Route::middleware(['auth', 'admin', 'role.permission'])->group(function () {
     Route::patch('/admin/users/{child}/child-settings', [UserController::class, 'updateChildSettings'])->name('admin.users.child-settings');
     Route::post('/admin/users/{child}/reset-progress',  [UserController::class, 'resetChildProgress'])->name('admin.users.reset-progress');
     Route::post('/admin/users/{user}/relations',  [UserController::class, 'manageRelation'])->name('admin.users.relations');
+    Route::delete('/admin/users/{user}',          [UserController::class, 'destroy'])->name('admin.users.destroy');
     Route::get('/admin/permissions',              [RolePermissionController::class, 'index'])->name('admin.permissions.index');
     Route::post('/admin/permissions',             [RolePermissionController::class, 'update'])->name('admin.permissions.update');
 
@@ -322,6 +328,7 @@ Route::middleware(['auth', 'admin', 'role.permission'])->group(function () {
     Route::get('/admin/questions/review',              [\App\Http\Controllers\Admin\QuestionReviewController::class, 'index'])->name('admin.questions.review.index');
     Route::post('/admin/questions/{question}/approve', [\App\Http\Controllers\Admin\QuestionReviewController::class, 'approve'])->name('admin.questions.review.approve');
     Route::post('/admin/questions/{question}/reject',  [\App\Http\Controllers\Admin\QuestionReviewController::class, 'reject'])->name('admin.questions.review.reject');
+    Route::post('/admin/questions/{question}/resolve', [\App\Http\Controllers\Admin\QuestionReviewController::class, 'resolve'])->name('admin.questions.review.resolve');
     Route::get('/admin/questions',                     [QuestionTemplateController::class, 'index'])->name('admin.questions.index');
     Route::get('/admin/questions/create',              [QuestionTemplateController::class, 'create'])->name('admin.questions.create');
     Route::get('/admin/questions/{question}/data',     [QuestionTemplateController::class, 'data'])->name('admin.questions.data');

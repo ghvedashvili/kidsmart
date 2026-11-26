@@ -91,6 +91,9 @@
     // მასწავლებლის გარსი (მშობლის სტილით) — teacher.* გვერდებზე
     $__ksTeacher = !$__ksAdmin && auth()->check() && request()->routeIs('teacher.*');
     if ($__ksTeacher) $__ksParent = false;
+    // iPhone: „დაამატე მთავარ ეკრანზე“ თავისით შევთავაზოთ მშობელს, როცა შვილმა უკვე დაასრულა ტესტი (შეტყობინებას აზრი აქვს)
+    $__ksIosOffer = $__ksParent && request()->routeIs('dashboard')
+        && \App\Models\Test::whereIn('child_id', auth()->user()->children()->pluck('users.id'))->whereNotNull('completed_at')->exists();
 @endphp
 <body class="@yield('bodyClass'){{ $__ksAdmin ? ' ks-admin' : '' }}{{ $__ksChild ? ' ks-child' : '' }}{{ $__ksParent || $__ksTeacher ? ' ks-parent' : '' }}{{ $__ksTeacher ? ' ks-teacher' : '' }}{{ !auth()->check() && request()->is('/') ? ' ks-landing' : '' }}{{ $__ksChild && request()->routeIs('games.memory', 'games.rps', 'games.wolves-hare', 'games.quoridor') ? ' ks-game' : '' }}">
 
@@ -266,6 +269,11 @@
      modal's own z-index is set. --}}
 @stack('modals')
 
+{{-- iPhone/iPad: მთავარ ეკრანზე დამატება + შეტყობინებების ჩართვა --}}
+@if(auth()->check() && ! $__ksAdmin)
+    @include('partials.ios-install', ['iosOffer' => $__ksIosOffer])
+@endif
+
 {{-- გიდი „მელა“ (მშობელი / ბავშვი) --}}
 @if(!empty($__ksParent) || !empty($__ksChild))
     @include('partials.guide')
@@ -371,6 +379,8 @@ window.addEventListener('beforeinstallprompt', (e) => {
 });
 function openPwaModal() {
     const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    // iPhone/iPad — ახალი ნაბიჯ-ნაბიჯ ინსტრუქცია მელათი (partials/ios-install)
+    if (window.KsIos) { window.KsIos.open('steps'); return; }
     switchTab(isIos ? 'ios' : 'android');
     document.getElementById('pwaOverlay').classList.add('open');
 }
@@ -482,9 +492,11 @@ if ('serviceWorker' in navigator) {
         window.toggleNotifications = function() {
             console.log('[KS] toggleNotifications called. notifSupported=', notifSupported, 'permission=', typeof Notification !== 'undefined' ? Notification.permission : 'N/A', '_swReg=', window._swReg);
             if (!notifSupported) {
-                const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
-                const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
-                if (isIos && !isStandalone && typeof openPwaModal === 'function') openPwaModal();
+                // iPhone: საიტი მთავარ ეკრანზე უნდა დაემატოს (ან iOS განახლდეს) — მელა აჩვენებს როგორ
+                if (window.KsIos) { window.KsIos.explain(); return; }
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({ icon: 'info', title: 'შეტყობინებები ვერ ჩაირთო', text: 'ეს ბრაუზერი შეტყობინებებს არ უჭერს მხარს. სცადე Chrome, Edge ან Safari-ს ახალი ვერსია.', confirmButtonText: 'გასაგებია' });
+                }
                 return;
             }
             if (Notification.permission === 'granted') {

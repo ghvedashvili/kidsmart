@@ -16,19 +16,26 @@ class QuestionReviewController extends Controller
     public function index(Request $request, TeacherQuestionBuilder $builder)
     {
         $this->onlyAdmin();
-        $status = $request->query('status') === 'rejected' ? QuestionTemplate::REVIEW_REJECTED : QuestionTemplate::REVIEW_PENDING;
+        $status = match ($request->query('status')) {
+            'rejected' => QuestionTemplate::REVIEW_REJECTED,
+            'flagged'  => QuestionTemplate::REVIEW_FLAGGED,
+            default    => QuestionTemplate::REVIEW_PENDING,
+        };
         $questions = QuestionTemplate::where('review_status', $status)
-            ->with(['topic.grade', 'theme', 'creator:id,name,email'])
-            ->orderBy('submitted_at')
+            ->with(['topic.grade', 'theme', 'creator:id,name,email', 'flagger:id,name'])
+            ->orderBy($status === QuestionTemplate::REVIEW_FLAGGED ? 'flagged_at' : 'submitted_at')
             ->paginate(15)->withQueryString();
 
         $samples = [];
         foreach ($questions as $q) {
-            $samples[$q->id] = $builder->samples($q->only($q->getFillable()), $q->theme);
+            $samples[$q->id] = isset(TeacherQuestionBuilder::INTERACTIVE[$q->question_type ?? ''])
+                ? $builder->interactiveSamples($q, 2)
+                : $builder->samples($q->only($q->getFillable()), $q->theme);
         }
         $counts = [
             'pending'  => QuestionTemplate::where('review_status', QuestionTemplate::REVIEW_PENDING)->count(),
             'rejected' => QuestionTemplate::where('review_status', QuestionTemplate::REVIEW_REJECTED)->count(),
+            'flagged'  => QuestionTemplate::where('review_status', QuestionTemplate::REVIEW_FLAGGED)->count(),
         ];
         return view('admin.questions.review', compact('questions', 'samples', 'status', 'counts'));
     }
@@ -61,6 +68,30 @@ class QuestionReviewController extends Controller
             'is_active'      => false,
         ])->save();
         return back()->with('success', 'კითხვა დაუბრუნდა მასწავლებელს კომენტარით.');
+    }
+
+    /**
+     * მასწავლებლის შენიშვნიანი კითხვა: ადმინმა გაასწორა (ან შეცდომა არ აღმოჩნდა) → ისევ ჩაირთოს ბავშვებთან,
+     * წინა სტატუსით. მასწავლებელი შედეგს „ჩემს შენიშვნებში“ ნახავს.
+     */
+    public function resolve(Request $request, QuestionTemplate $question)
+    {
+        $this->onlyAdmin();
+        abort_unless($question->review_status === QuestionTemplate::REVIEW_FLAGGED, 422, 'ეს კითხვა შენიშვნიანი აღარ არის.');
+        $comment = $request->filled('comment') ? trim((string) $request->input('comment')) : null;
+        $td = (array) ($question->teacher_data ?? []);
+        $prev = $td['flag']['prev_status'] ?? null;
+        $td['flag'] = array_merge((array) ($td['flag'] ?? []), ['resolved_at' => now()->toDateTimeString(), 'resolved_by' => auth()->user()->name]);
+        $question->teacher_data = $td;
+        $question->fill([
+            'review_status' => $prev,   // ჯერ სტატუსი — რომ მოდელმა is_active-ის ჩართვისას „approved“ არ დაუწეროს
+            'teacher_data'  => $this->withHistory($question, 'resolved', $comment),
+            'reviewed_by'   => auth()->id(),
+            'reviewed_at'   => now(),
+        ]);
+        $question->is_active = true;
+        $question->save();
+        return back()->with('success', '„' . ($question->title ?: 'კითხვა') . '“ ისევ ჩაირთო ბავშვებთან.');
     }
 
     /** teacher_data.history-ში ადმინის გადაწყვეტილების ჩამატება */

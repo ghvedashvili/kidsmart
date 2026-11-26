@@ -14,15 +14,17 @@ class QuestionTemplate extends Model
     use SoftDeletes;
 
     protected $fillable = ['topic_id', 'theme_id', 'question_group_id', 'difficulty', 'is_olympiad', 'is_active', 'sequence', 'answer_type', 'question_type', 'title', 'template_text', 'hint_text', 'correct_formula', 'num_config', 'distractors', 'conditions',
-        'created_by', 'review_status', 'review_comment', 'reviewed_by', 'reviewed_at', 'submitted_at', 'teacher_data'];
+        'created_by', 'review_status', 'review_comment', 'reviewed_by', 'reviewed_at', 'submitted_at', 'teacher_data', 'flagged_by', 'flagged_at'];
 
     protected $casts = ['num_config' => 'array', 'distractors' => 'array', 'conditions' => 'array', 'is_olympiad' => 'boolean', 'is_active' => 'boolean', 'sequence' => 'integer',
-        'teacher_data' => 'array', 'reviewed_at' => 'datetime', 'submitted_at' => 'datetime'];
+        'teacher_data' => 'array', 'reviewed_at' => 'datetime', 'submitted_at' => 'datetime', 'flagged_at' => 'datetime'];
 
     // მასწავლებლის კითხვის განხილვის სტატუსები (null — ადმინის/ძველი კითხვა)
     public const REVIEW_PENDING  = 'pending';
     public const REVIEW_REJECTED = 'rejected';
     public const REVIEW_APPROVED = 'approved';
+    // მასწავლებელმა არსებულ (ბავშვებთან ჩართულ) კითხვაზე შეცდომა აღმოაჩინა → გამოირთო და ადმინთან გაიგზავნა
+    public const REVIEW_FLAGGED  = 'flagged';
 
     protected static function booted(): void
     {
@@ -40,8 +42,11 @@ class QuestionTemplate extends Model
                 return;
             }
             // ადმინმა განსახილველი კითხვა პირდაპირ ჩართო → დადასტურებულად ჩაითვალოს
-            if ($t->isDirty('is_active') && $t->is_active && in_array($t->review_status, [self::REVIEW_PENDING, self::REVIEW_REJECTED], true)) {
-                $t->review_status = self::REVIEW_APPROVED;
+            if ($t->isDirty('is_active') && $t->is_active && in_array($t->review_status, [self::REVIEW_PENDING, self::REVIEW_REJECTED, self::REVIEW_FLAGGED], true)) {
+                // შენიშვნიანი კითხვა თავის წინა სტატუსს უბრუნდება (ადმინის კითხვა — null)
+                $t->review_status = $t->review_status === self::REVIEW_FLAGGED
+                    ? (((array) ($t->teacher_data ?? []))['flag']['prev_status'] ?? null)
+                    : self::REVIEW_APPROVED;
                 $t->reviewed_by ??= $user?->id;
                 $t->reviewed_at = now();
             }
@@ -56,6 +61,34 @@ class QuestionTemplate extends Model
     public function reviewer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+    public function flagger(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'flagged_by');
+    }
+
+    /**
+     * კითხვის ამოღება ყველგან, სადაც ბავშვი შეიძლება შეხვდეს: ახალ ტესტებს, ვარჯიშს და ოლიმპიადას
+     * is_active=false უკვე გამორიცხავს; აქ — უკვე შექმნილი, ჯერ დაუსრულებელი ტესტებიდან ამოღება.
+     * ბრუნდება შეცვლილი ტესტების რაოდენობა.
+     */
+    public function withdrawFromOpenTests(): int
+    {
+        $rows = TestQuestion::where('template_id', $this->id)
+            ->whereHas('test', fn ($q) => $q->whereNull('completed_at'))
+            ->get(['id', 'test_id']);
+        if ($rows->isEmpty()) return 0;
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($rows) {
+            foreach ($rows->groupBy('test_id') as $testId => $qs) {
+                TestQuestion::whereIn('id', $qs->pluck('id'))->delete();
+                $left = TestQuestion::where('test_id', $testId)->count();
+                // ცარიელი ტესტი TestController::show()-ში თავისით წაიშლება
+                Test::whereKey($testId)->update(['total_questions' => $left]);
+            }
+        });
+        return $rows->pluck('test_id')->unique()->count();
     }
 
     private function evalExpr(string $expr, array $vars): int

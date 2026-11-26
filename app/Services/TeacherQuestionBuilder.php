@@ -185,6 +185,31 @@ class TeacherQuestionBuilder
         return $out;
     }
 
+    /** ინტერაქტიული ტიპები (პირამიდა, კოდი, კროსვორდი, სასწორი, ცხრილი) — ბავშვი მათ მარტივ ბარათად არ ხედავს */
+    public const INTERACTIVE = ['pyramid' => 'პირამიდა', 'code' => 'კოდი', 'crossword' => 'კროსვორდი', 'scale' => 'სასწორი', 'data_table' => 'ცხრილი'];
+
+    /**
+     * ინტერაქტიული კითხვის n ვარიანტი — generate()-ის სრული შედეგი question_type-ით,
+     * teacher/partials/interactive-card-ისთვის (იგივე რენდერი, რაც ადმინის ტესტის გადახედვაში).
+     */
+    public function interactiveSamples(QuestionTemplate $q, int $n = 3): array
+    {
+        $out = [];
+        $seen = [];
+        for ($i = 0; $i < $n * 4 && count($out) < $n; $i++) {
+            try {
+                $g = $q->generate($q->theme ?? Theme::first());
+            } catch (\Throwable $e) {
+                continue;
+            }
+            $key = ($g['question_text'] ?? '') . '|' . json_encode($g['correct_answer'] ?? '');
+            if (isset($seen[$key]) && $i < $n * 3) continue;
+            $seen[$key] = true;
+            $out[] = array_merge($g, ['question_type' => $q->question_type ?? 'multiple_choice']);
+        }
+        return $out;
+    }
+
     private function fail(string $msg): array
     {
         return ['attrs' => [], 'samples' => [], 'auto_used' => false, 'notes' => [], 'error' => $msg, 'formula' => null, 'variables' => [], 'wizard' => null];
