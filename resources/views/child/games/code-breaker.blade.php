@@ -177,6 +177,27 @@
 .cb-coin { position: fixed; left: 50%; top: 84px; transform: translate(-50%, -12px); opacity: 0; z-index: 1300; background: #FFC93C; color: #2B2622; border: 2.5px solid #2B2622; border-radius: 16px; padding: 10px 18px; font-family: 'Noto Sans Georgian', sans-serif; font-size: 16px; font-weight: 900; box-shadow: 0 8px 24px rgba(0,0,0,.2); transition: opacity .3s, transform .3s; }
 .cb-coin.show { opacity: 1; transform: translate(-50%, 0); }
 @media (max-height: 720px) { .cb-win { height: 40px; font-size: 24px; } .cb-arr { height: 22px; } .cb-btn { height: 46px; } .cb-clue { padding: 7px 10px; font-size: 14px; } }
+/* დიდი კარი: სცენის თითქმის მთელ ზომაზე, საკეტი — დიდი ციფრებით */
+.cbx .cb-scene { padding: 14px 16px 22px; }
+.cbx .cb-scene .cb-frame { width: 94%; height: 100%; max-height: none; max-width: none; aspect-ratio: auto; box-sizing: border-box; }
+.cbx .cb-plate { width: min(420px, 90%); gap: 8px; padding: 8px; border-radius: 16px; }
+.cbx .cb-slot { gap: 5px; }
+.cbx .cb-win { height: clamp(52px, 9vh, 74px); font-size: clamp(30px, 5vh, 42px); border-radius: 12px; }
+.cbx .cb-arr { height: clamp(32px, 5vh, 40px); font-size: 15px; border-radius: 10px; }
+@media (max-height: 720px) { .cbx .cb-win { height: 48px; font-size: 30px; } .cbx .cb-arr { height: 30px; } }
+/* საკეტი მარცხნივ, კარი მარჯვნივ; კარის გაღებისას საკეტი ქრება და კარი მთელ სცენაზე იშლება */
+.cbx .cb-scene { justify-content: space-between; align-items: flex-end; gap: 14px; }
+.cbx .cb-scene > .cb-plate { flex: 1 1 auto; width: auto; max-width: 440px; align-self: center; margin: 0 auto; }
+.cbx .cb-scene .cb-frame { flex: 0 0 36%; width: 36%; }
+.cbx .cb-scene.open > .cb-plate { display: none; }
+.cbx .cb-scene.open .cb-frame { flex-basis: 94%; width: 94%; margin: 0 auto; }
+@media (max-width: 520px) {
+    .cbx .cb-scene { gap: 8px; padding: 12px 10px 22px; }
+    .cbx .cb-scene .cb-frame { flex-basis: 34%; width: 34%; }
+    .cbx .cb-scene > .cb-plate { gap: 5px; padding: 6px; }
+    .cbx .cb-win { font-size: 28px; border-width: 2px; }
+    .cbx .cb-arr { height: 32px; }
+}
 @media (prefers-reduced-motion: reduce) { .cb-leaf, .cb-way > * { transition: none; } .cb-scene.shake .cb-leaf { animation: none; } }
 </style>
 
@@ -567,8 +588,8 @@ var CB = (function () {
             + '<p class="cb-tip">' + (a ? 'შესრულებული პირობა თავისით მოინიშნება ✓' : 'დააჭირე პირობას, როცა გამოიყენებ — მოინიშნება ✓') + '</p>'
             + '</section>'
             + '<section class="cb-right">'
-            + '<div class="cb-scene sh-' + th.shape + ' tx-' + th.tex + (th.dark ? ' dark' : '') + (view.won ? ' open' : '') + '" id="cbScene" style="' + themeVars(th) + '">' + deco(th)
-            + '<div class="cb-frame"><div class="cb-way">' + win + '</div><div class="cb-leaf">' + leafExtra(th) + lock + knob(th) + '</div></div></div>'
+            + '<div class="cb-scene sh-' + th.shape + ' tx-' + th.tex + (th.dark ? ' dark' : '') + (view.won ? ' open' : '') + '" id="cbScene" style="' + themeVars(th) + '">' + deco(th) + lock
+            + '<div class="cb-frame"><div class="cb-way">' + win + '</div><div class="cb-leaf">' + leafExtra(th) + knob(th) + '</div></div></div>'
             + '<div class="cb-panel">' + (view.won
                 ? '<div class="cb-acts"><button type="button" class="cb-btn main" id="cbNext">' + (nextRef() ? (boss ? 'შემდეგი სახლი →' : 'შემდეგი კარი →') : 'ყველა სახლი დასრულდა!') + '</button><button type="button" class="cb-btn soft" id="cbAgain">თავიდან</button></div>'
                 : '<p class="cb-msg" role="status">' + esc(view.msg || '') + '</p><div class="cb-acts"><button type="button" class="cb-btn main" id="cbOpen">გააღე</button><button type="button" class="cb-btn soft" id="cbHint">მინიშნება</button></div>')
