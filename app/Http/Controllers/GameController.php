@@ -89,8 +89,8 @@ class GameController extends Controller
         if (! GameSetting::isVisible($slug, $child->childSetting?->grade_id)) {
             return redirect()->route('games.index')->with('error', 'ეს თამაში ახლა მიუწვდომელია.');
         }
-        // თამაშები იხსნება მხოლოდ დღის ტესტის დაწერის შემდეგ
-        if (! self::dailyTestDone($child)) {
+        // ადმინის პარამეტრით: თამაში იხსნება მხოლოდ დღის ტესტის დაწერის შემდეგ
+        if (GameSetting::needsTest($slug) && ! self::dailyTestDone($child)) {
             return redirect()->route('games.index')->with('error', 'ჯერ დღის ტესტი დაწერე — მერე ითამაშებ!');
         }
         return null;
@@ -118,7 +118,8 @@ class GameController extends Controller
         // ადმინის პარამეტრები: გათიშული / სხვა კლასის თამაშები არ ჩანს
         $map = GameSetting::map();
         $gradeId = $child->childSetting?->grade_id;
-        $games = collect(self::GAMES)->filter(fn ($info, $slug) => GameSetting::isVisible($slug, $gradeId, $map))->map(function ($info, $slug) use ($child) {
+        $testDone = self::dailyTestDone($child);
+        $games = collect(self::GAMES)->filter(fn ($info, $slug) => GameSetting::isVisible($slug, $gradeId, $map))->map(function ($info, $slug) use ($child, $map, $testDone) {
             $session = GameSession::forChild($child->id, $slug);
             return array_merge($info, [
                 'slug'       => $slug,
@@ -128,10 +129,16 @@ class GameController extends Controller
                 'best_score' => (int) (($session->state['best'] ?? 0) ?: $session->player_score),
                 'stars'      => (int) ($session->state['stars'] ?? 0),
                 'house'      => (int) ($session->state['house'] ?? 0),
+                'locked'     => ! $testDone && GameSetting::needsTest($slug, $map),
             ]);
         });
 
-        return view('child.games.index', ['games' => $games, 'locked' => ! self::dailyTestDone($child)]);
+        $lockedCount = $games->where('locked', true)->count();
+        return view('child.games.index', [
+            'games'       => $games,
+            'locked'      => $lockedCount > 0,
+            'allLocked'   => $lockedCount > 0 && $lockedCount === $games->count(),
+        ]);
     }
 
     // ── Rock-Paper-Scissors ─────────────────────────────────────────────────

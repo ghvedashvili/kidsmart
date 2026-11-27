@@ -9,6 +9,8 @@
 .ks-cp .ks-games .ks-game-ic { position: static; flex: 0 0 auto; margin: 0; }
 .ks-cp .ks-games .ks-game-n { margin-top: 14px; display: block; }
 .ks-cp .ks-games .ks-game-s { display: block; font-size: 13px !important; line-height: 1.45; font-weight: 600; color: #4A423B; overflow-wrap: anywhere; }
+.ks-cp .ks-games .ks-game.is-locked { opacity: .55; filter: grayscale(.4); }
+.ks-cp .ks-games .ks-game-lock { position: absolute; top: 12px; right: 12px; font-size: 18px; line-height: 1; }
 @media (max-width: 520px) {
     .ks-cp .ks-games { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
     .ks-cp .ks-games .ks-game { min-height: 0; padding: 14px; border-radius: 20px; }
@@ -29,14 +31,15 @@
     @if(!empty($locked))
     <div role="status" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#FFF3EA;border:2px solid #FFC49A;border-radius:20px;padding:14px 16px;">
         <span aria-hidden="true" style="font-size:30px;line-height:1;">🔒</span>
-        <span style="flex:1;min-width:200px;"><b style="display:block;font-size:16px;font-weight:900;color:#2B2622;">ჯერ დღის ტესტი დაწერე</b><span style="font-size:14px;color:#6B625A;">თამაშები გაიხსნება, როგორც კი დღევანდელ ტესტს დაასრულებ.</span></span>
+        <span style="flex:1;min-width:200px;"><b style="display:block;font-size:16px;font-weight:900;color:#2B2622;">ჯერ დღის ტესტი დაწერე</b><span style="font-size:14px;color:#6B625A;">{{ !empty($allLocked) ? 'თამაშები გაიხსნება, როგორც კი დღევანდელ ტესტს დაასრულებ.' : 'ჩაკეტილი თამაშები გაიხსნება, როგორც კი დღევანდელ ტესტს დაასრულებ. დანარჩენის თამაში ახლავე შეგიძლია.' }}</span></span>
         <a href="{{ route('test.start') }}" style="display:inline-flex;align-items:center;gap:6px;height:46px;padding:0 18px;border-radius:16px;background:#E2590F;color:#fff;font-weight:900;text-decoration:none;">დღის ტესტი <i class="bi bi-arrow-right"></i></a>
     </div>
     @endif
-    <div class="ks-games"@if(!empty($locked)) style="opacity:.55;filter:grayscale(.4);"@endif>
+    <div class="ks-games">
         @foreach($games as $game)
-        <a href="{{ !empty($locked) ? route('test.start') : route($game['route']) }}" class="ks-game" style="background: {{ $__gameBg[$loop->index % count($__gameBg)] }};"@if(!empty($locked)) aria-label="{{ $game['name'] }} — ჯერ დღის ტესტი დაწერე"@endif>
+        <a href="{{ !empty($game['locked']) ? route('test.start') : route($game['route']) }}" class="ks-game{{ !empty($game['locked']) ? ' is-locked' : '' }}" style="background: {{ $__gameBg[$loop->index % count($__gameBg)] }};"@if(!empty($game['locked'])) aria-label="{{ $game['name'] }} — ჯერ დღის ტესტი დაწერე"@endif>
             <span class="ks-game-ic" aria-hidden="true">{{ $game['icon'] }}</span>
+            @if(!empty($game['locked']))<span class="ks-game-lock" aria-hidden="true">🔒</span>@endif
             <span class="ks-game-n">{{ $game['name'] }}</span>
             <span class="ks-game-s">
                 @if(($game['type'] ?? 'versus') === 'puzzle')

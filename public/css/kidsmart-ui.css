@@ -1102,7 +1102,7 @@ html:has(body.ks-child), html:has(body.ks-parent), html:has(body.ks-admin), html
 .ks-atop, .ks-aside-ov, .ks-aside-x { display: none; }
 @media (max-width: 900px) {
     .ks-atop { display: flex; align-items: center; gap: 12px; flex-basis: 100%; position: sticky; top: 0; z-index: 60;
-        margin: -12px -12px 0; padding: 10px 12px; background: rgba(247,246,243,.95); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid #ECE9E4; }
+        flex: 0 0 calc(100% + 24px); width: calc(100% + 24px); max-width: none; box-sizing: border-box; margin: -12px -12px 0; padding: 10px 12px; background: rgba(247,246,243,.95); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid #ECE9E4; }
     .ks-atop-btn { width: 44px; height: 44px; border-radius: 14px; border: 2px solid #ECE9E4; background: #fff; color: #2B2622; font-size: 22px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
     .ks-atop-btn:hover { border-color: #2B2622; }
     .ks-atop-logo { display: flex; }

@@ -288,6 +288,7 @@ Route::middleware(['auth', 'admin', 'role.permission'])->group(function () {
 
     // კლასები
     Route::get('/admin/games',                     [\App\Http\Controllers\Admin\GameSettingController::class, 'index'])->name('admin.games.index');
+    Route::put('/admin/games-gate',                [\App\Http\Controllers\Admin\GameSettingController::class, 'gate'])->name('admin.games.gate');
     Route::put('/admin/games/{slug}',              [\App\Http\Controllers\Admin\GameSettingController::class, 'update'])->name('admin.games.update');
     Route::get('/admin/grades',                    [GradeController::class, 'index'])->name('admin.grades.index');
     Route::post('/admin/grades',                   [GradeController::class, 'store'])->name('admin.grades.store');

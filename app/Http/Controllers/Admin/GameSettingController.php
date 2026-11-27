@@ -21,11 +21,13 @@ class GameSettingController extends Controller
             'slug'      => $slug,
             'is_active' => $settings[$slug]->is_active ?? true,
             'grade_ids' => array_map('intval', (array) ($settings[$slug]->grade_ids ?? [])),
+            'needs_test' => ! isset($settings[$slug]) || $settings[$slug]->needs_test === null || (bool) $settings[$slug]->needs_test,
             'players'   => (int) ($plays[$slug] ?? 0),
         ]);
         return view('admin.games.index', [
             'games'  => $games,
             'grades' => Grade::orderBy('number')->get(),
+            'gateOn' => GameSetting::testGateOn($settings),
         ]);
     }
 
@@ -34,14 +36,27 @@ class GameSettingController extends Controller
         abort_unless(array_key_exists($slug, GameController::GAMES), 404);
         $data = $request->validate([
             'is_active'   => 'nullable|boolean',
+            'needs_test'  => 'nullable|boolean',
             'grade_ids'   => 'nullable|array',
             'grade_ids.*' => ['integer', Rule::exists('grades', 'id')],
         ]);
         $ids = array_values(array_unique(array_map('intval', (array) ($data['grade_ids'] ?? []))));
-        GameSetting::updateOrCreate(['slug' => $slug], [
-            'is_active' => $request->boolean('is_active'),
-            'grade_ids' => $ids ?: null,
-        ]);
+        $vals = ['is_active' => $request->boolean('is_active'), 'grade_ids' => $ids ?: null];
+        // სვეტი ემატება მიგრაციით — მანამდე უბრალოდ არ ვინახავთ
+        if (\Illuminate\Support\Facades\Schema::hasColumn('game_settings', 'needs_test')) {
+            $vals['needs_test'] = $request->boolean('needs_test');
+        }
+        GameSetting::updateOrCreate(['slug' => $slug], $vals);
         return back()->with('success', '„' . GameController::GAMES[$slug]['name'] . '“ — შენახულია.');
+    }
+
+    /** ზოგადი ჩამრთველი: თამაშები იხსნება მხოლოდ დღის ტესტის შემდეგ */
+    public function gate(Request $request)
+    {
+        $on = $request->boolean('gate');
+        GameSetting::updateOrCreate(['slug' => GameSetting::TEST_GATE], ['is_active' => $on, 'grade_ids' => null]);
+        return back()->with('success', $on
+            ? 'ჩართულია: მონიშნული თამაშები იხსნება დღის ტესტის დაწერის შემდეგ.'
+            : 'გამორთულია: ყველა თამაში ხელმისაწვდომია დღის ტესტის გარეშეც.');
     }
 }
