@@ -3,6 +3,19 @@
 @php
     $__gameBg = ['#FFE3CC', '#FFF3EA', '#FFF3EA', '#DFF5E3', '#FFF3EA', '#FFF1C9'];
 @endphp
+<style>
+.ks-cp .ks-games { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+.ks-cp .ks-games .ks-game { justify-content: flex-start !important; gap: 6px; min-height: 0; padding: 16px; }
+.ks-cp .ks-games .ks-game-ic { position: static; flex: 0 0 auto; margin: 0; }
+.ks-cp .ks-games .ks-game-n { margin-top: 14px; display: block; }
+.ks-cp .ks-games .ks-game-s { display: block; font-size: 13px !important; line-height: 1.45; font-weight: 600; color: #4A423B; overflow-wrap: anywhere; }
+@media (max-width: 520px) {
+    .ks-cp .ks-games { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .ks-cp .ks-games .ks-game { min-height: 0; padding: 14px; border-radius: 20px; }
+    .ks-cp .ks-games .ks-game-ic { width: 44px; height: 44px; font-size: 22px; }
+    .ks-cp .ks-games .ks-game-n { margin-top: 10px; }
+}
+</style>
 <div class="ks-cp">
     <div class="ks-cp-hero green">
         <span class="ks-cp-hero-ic" aria-hidden="true">🎮</span>
@@ -22,7 +35,7 @@
     @endif
     <div class="ks-games"@if(!empty($locked)) style="opacity:.55;filter:grayscale(.4);"@endif>
         @foreach($games as $game)
-        <a href="{{ !empty($locked) ? route('test.start') : route($game['route']) }}" class="ks-game" style="background: {{ $__gameBg[$loop->index % count($__gameBg)] }}; min-height: 170px;"@if(!empty($locked)) aria-label="{{ $game['name'] }} — ჯერ დღის ტესტი დაწერე"@endif>
+        <a href="{{ !empty($locked) ? route('test.start') : route($game['route']) }}" class="ks-game" style="background: {{ $__gameBg[$loop->index % count($__gameBg)] }};"@if(!empty($locked)) aria-label="{{ $game['name'] }} — ჯერ დღის ტესტი დაწერე"@endif>
             <span class="ks-game-ic" aria-hidden="true">{{ $game['icon'] }}</span>
             <span class="ks-game-n">{{ $game['name'] }}</span>
             <span class="ks-game-s">
