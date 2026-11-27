@@ -45,7 +45,7 @@ class GameController extends Controller
             'desc'  => 'ჩასვი რიცხვები ისე, რომ სწორი ტოლობა გამოვიდეს.',
         ],
         'math_signs' => [
-            'name'  => 'ჩსვი მოქმედებები',
+            'name'  => 'ჩასვი მოქმედებები',
             'icon'  => '➕',
             'route' => 'games.math-signs',
             'type'  => 'puzzle',

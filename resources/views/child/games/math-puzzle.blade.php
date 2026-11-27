@@ -50,6 +50,11 @@
     .mp-slot.next { border-color: var(--o); background: var(--t1); }
     .mp-op { font-size: 26px; font-weight: 900; color: #B3A99F; min-width: 18px; text-align: center; }
     .mp-eqsign { font-size: 26px; font-weight: 900; color: #B3A99F; }
+    /* ტოლობა ყოველთვის ერთ ხაზზე — ვიწრო ეკრანზე --k ამცირებს ზომას */
+    .mp-eq { --k: 1; flex-wrap: nowrap; gap: calc(8px * var(--k)); }
+    .mp-eq .mp-slot { flex: 0 0 auto; width: calc(60px * var(--k)); height: calc(60px * var(--k)); font-size: calc(26px * var(--k)); border-radius: calc(16px * var(--k)); border-width: 2px; }
+    .mp-eq .mp-slot.op { width: calc(48px * var(--k)); height: calc(48px * var(--k)); font-size: calc(24px * var(--k)); border-radius: calc(14px * var(--k)); }
+    .mp-eq .mp-eqsign, .mp-eq .mp-op { flex: 0 0 auto; font-size: calc(26px * var(--k)); min-width: 0; }
     .mp-chain { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
     .mp-cur { font-size: 40px; font-weight: 900; color: var(--o2); background: var(--t1); border-radius: 20px; padding: 6px 22px; min-width: 96px; text-align: center; }
     .mp-trail { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; font-size: 14px; font-weight: 800; color: var(--mut); min-height: 22px; }
@@ -315,6 +320,7 @@
             tools.innerHTML = '';
         }
         board.innerHTML = '<div class="mp-eq">' + h + '<span class="mp-eqsign">=</span><span class="mp-slot fixed" style="color:#C24A0A;">' + E.res + '</span></div>';
+        fitEq();
         markNext();
     }
     function markNext() {
@@ -448,6 +454,19 @@
         else if (b.hasAttribute('data-op')) fillSlot(b.getAttribute('data-op'));
         else if (b.hasAttribute('data-b') && !b.classList.contains('used')) fillSlot(P.pool[+b.getAttribute('data-b')], +b.getAttribute('data-b'));
     });
+    function fitEq() {
+        var eq = board.querySelector('.mp-eq');
+        if (!eq) return;
+        eq.style.setProperty('--k', 1);
+        var avail = card.clientWidth - 28;
+        for (var i = 0; i < 3; i++) {
+            var k = parseFloat(eq.style.getPropertyValue('--k')) || 1, kids = eq.children, need = 8 * k * (kids.length - 1);
+            for (var j = 0; j < kids.length; j++) need += kids[j].offsetWidth;
+            if (need <= avail) break;
+            eq.style.setProperty('--k', Math.max(.45, k * avail / need * .98).toFixed(3));
+        }
+    }
+    window.addEventListener('resize', fitEq);
     board.addEventListener('click', function (e) {
         var s = e.target.closest('[data-slot]');
         if (s) clearSlot(+s.getAttribute('data-slot'));
