@@ -60,10 +60,19 @@
 
     <main class="ks-cmain">
         {{-- ზედა ზოლი (ყველა გვერდზე ერთნაირი, landing-ის მსგავსად მიმაგრებული): მხოლოდ ლოგო და გასვლა --}}
-        <header class="ks-ctop ks-ctop-bar">
+        <header class="ks-ctop ks-ctop-bar{{ request()->routeIs('dashboard') ? ' has-bell' : '' }}{{ View::hasSection('ksBackUrl') ? ' has-back' : '' }}">
+            {{-- გვერდს შეუძლია უკან დაბრუნების ღილაკი მოითხოვოს: @section('ksBackUrl') + @section('ksBackLabel') --}}
+            @hasSection('ksBackUrl')
+            <a href="@yield('ksBackUrl')" class="ks-cback-link"><i class="bi bi-arrow-left"></i> @yield('ksBackLabel', 'უკან')</a>
+            @endif
             <a href="{{ route('dashboard') }}" class="ks-cbrand">
                 <img src="{{ asset('img/logo.png') }}" alt="KidSmart" class="ks-logo">
             </a>
+            <div class="ks-ctop-acts">
+            {{-- შეტყობინებების ზარი — მხოლოდ მთავარ გვერდზე --}}
+            @if(request()->routeIs('dashboard'))
+            <button type="button" id="notifBtn" class="ks-clogout-top ks-cbell" aria-label="შეტყობინებები" title="შეტყობინებების ჩართვა/გამორთვა" onclick="window._notifToast=true;toggleNotifications()"><i id="notifIcon" class="bi bi-bell"></i></button>
+            @endif
             @if(session('ks_impersonator'))
             <form method="POST" action="{{ route('child.as-child.leave') }}" class="ks-ctop-r">
                 @csrf
@@ -76,7 +85,27 @@
                 <button type="submit" class="ks-clogout-top"><i class="bi bi-box-arrow-right"></i><span>გასვლა</span></button>
             </form>
             @endif
+            </div>
         </header>
+        <style>
+            .ks-ctop-acts { display: flex; align-items: center; gap: 8px; }
+            .ks-ctop-bar.has-back { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; }
+            .ks-ctop-bar.has-back .ks-cbrand { justify-self: center; }
+            .ks-ctop-bar.has-back .ks-ctop-acts { justify-self: end; }
+            .ks-cback-link { justify-self: start; height: 44px; padding: 0 16px; border-radius: 22px; border: 2px solid #ECE9E4; background: #fff; color: #2B2622; font-family: 'Noto Sans Georgian', system-ui, sans-serif; font-size: 14px; font-weight: 800; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; white-space: nowrap; }
+            .ks-cback-link:hover { border-color: #2B2622; color: #2B2622; }
+            @media (max-width: 420px) { .ks-cback-link { padding: 0 12px; } }
+            .ks-ctop-acts .ks-cbell { width: 44px; padding: 0 !important; justify-content: center; font-size: 18px !important; }
+            .ks-ctop-acts .ks-cbell.on, .ks-ctop-acts .ks-cbell.active { color: #1E8A4C !important; border-color: #BFE6CD !important; }
+            /* ზარი მთავარ გვერდზე დესკტოპზეც ჩანდეს — ზოლი იქ დამალულია, ამიტომ ზარი გვერდით მენიუს ქვემოთ არ გადაგვაქვს: ვაჩვენებთ ზოლს მხოლოდ ზარით */
+            @media (min-width: 901px) {
+                body.ks-child .ks-ctop.ks-ctop-bar.has-bell { display: flex; justify-content: flex-end; background: transparent; border: 0; backdrop-filter: none; -webkit-backdrop-filter: none; position: static; padding-bottom: 0; }
+                body.ks-child .ks-ctop-bar.has-bell .ks-cbrand, body.ks-child .ks-ctop-bar.has-bell form { display: none; }
+                /* დესკტოპზე ლოგო და გასვლა გვერდით მენიუშია — ზოლში მხოლოდ „უკან“ */
+                body.ks-child .ks-ctop.ks-ctop-bar.has-back { display: grid; }
+                body.ks-child .ks-ctop-bar.has-back .ks-cbrand, body.ks-child .ks-ctop-bar.has-back .ks-ctop-acts { visibility: hidden; }
+            }
+        </style>
 
         @yield('content')
     </main>

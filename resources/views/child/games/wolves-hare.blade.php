@@ -114,7 +114,6 @@ h1 { margin: 0; font-size: 20px; color: #1b5e20; flex: 1; text-align: left; }
 </style>
 
 <div class="wrap">
-    <a href="{{ route('games.index') }}" class="back-btn ks-game-back"><i class="bi bi-arrow-left"></i> თამაშები</a>
     <div class="game">
         <div class="header-row">
             <h1>🐰 ბაჭია და მგლები 🐺</h1>

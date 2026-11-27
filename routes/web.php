@@ -196,6 +196,10 @@ Route::middleware(['auth', 'role.permission'])->group(function () {
     Route::get('/games/signs',   [GameController::class, 'mathSigns'])->name('games.math-signs');
     Route::get('/games/chain',   [GameController::class, 'mathChain'])->name('games.math-chain');
     Route::post('/games/math/finish', [GameController::class, 'mathFinish'])->name('games.math.finish');
+    Route::get('/games/rain',         [GameController::class, 'mathRain'])->name('games.math-rain');
+    Route::post('/games/rain/finish', [GameController::class, 'mathRainFinish'])->name('games.math-rain.finish');
+    Route::get('/games/code-breaker',       [GameController::class, 'codeBreaker'])->name('games.code-breaker');
+    Route::post('/games/code-breaker/save', [GameController::class, 'codeBreakerSave'])->name('games.code-breaker.save');
 
     Route::get('/games/quoridor', [GameController::class, 'quoridor'])->name('games.quoridor');
     Route::post('/games/quoridor/state', [GameController::class, 'quoridorState'])->name('games.quoridor.state');
@@ -264,6 +268,11 @@ Route::middleware(['auth', 'admin', 'role.permission'])->group(function () {
     Route::post('/admin/users/{child}/reset-progress',  [UserController::class, 'resetChildProgress'])->name('admin.users.reset-progress');
     Route::post('/admin/users/{user}/relations',  [UserController::class, 'manageRelation'])->name('admin.users.relations');
     Route::delete('/admin/users/{user}',          [UserController::class, 'destroy'])->name('admin.users.destroy');
+    // სარეზერვო ასლები (მხოლოდ ადმინი)
+    Route::get('/admin/backups',                  [\App\Http\Controllers\Admin\BackupController::class, 'index'])->name('admin.backups.index');
+    Route::post('/admin/backups',                 [\App\Http\Controllers\Admin\BackupController::class, 'store'])->name('admin.backups.store');
+    Route::get('/admin/backups/{file}',           [\App\Http\Controllers\Admin\BackupController::class, 'download'])->name('admin.backups.download')->where('file', '[A-Za-z0-9_.-]+');
+    Route::delete('/admin/backups/{file}',        [\App\Http\Controllers\Admin\BackupController::class, 'destroy'])->name('admin.backups.destroy')->where('file', '[A-Za-z0-9_.-]+');
     Route::get('/admin/permissions',              [RolePermissionController::class, 'index'])->name('admin.permissions.index');
     Route::post('/admin/permissions',             [RolePermissionController::class, 'update'])->name('admin.permissions.update');
 

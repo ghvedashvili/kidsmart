@@ -20,7 +20,7 @@ use Carbon\Carbon;
 class AchievementService
 {
     /** Every game slug GameController currently exposes — see all_games_tried. */
-    private const GAME_SLUGS = ['rock_paper_scissors', 'wolves_and_hare', 'memory', 'quoridor', 'math_numbers', 'math_signs', 'math_chain'];
+    private const GAME_SLUGS = ['rock_paper_scissors', 'wolves_and_hare', 'memory', 'quoridor', 'math_numbers', 'math_signs', 'math_chain', 'math_rain', 'code_breaker'];
 
     /**
      * Builds everything the achievements "wall" needs — used by both the child's own

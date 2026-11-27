@@ -2,6 +2,8 @@
 @push('head')
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
 @endpush
+@section('ksBackUrl'){{ route('practice.topics') }}@endsection
+@section('ksBackLabel', 'ვარჯიში')
 @section('content')
 @include('partials.achievement-toast')
 <style>
@@ -11,8 +13,10 @@
     /* ── Header ── */
     .topbar { display:flex; align-items:center; justify-content:space-between; padding:0 16px; }
     .back { font-size:0.86rem; font-weight:800; color:#2B2622; text-decoration:none; padding:8px 14px; background:white; border-radius:14px; border:1px solid #ECE9E4; }
-    .title { margin: 0; font-size: 48px; line-height: .95; font-weight: 900; font-stretch: 66%; text-transform: uppercase; color: #2B2622; }
-    .topic-tag { font-weight:800; font-size:0.82rem; color:#8A3407; background:#FFE3CC; border-radius:99px; padding:5px 14px; margin:10px 16px 0; display:inline-block; }
+    .topbar { justify-content: center; }
+    .title { margin: 6px 0 0; font-size: 24px; line-height: 1.2; font-weight: 900; color: #2B2622; text-align: center; }
+    @media (max-width: 900px) { .title { font-size: 20px; } }
+    .topic-tag { font-weight:800; font-size:0.9rem; color:#8A3407; background:#FFE3CC; border-radius:99px; padding:6px 16px; margin:10px auto 0; display:table; }
     .topic-tag:empty { display: none; }
 
     /* ── Question card ── */
@@ -103,15 +107,16 @@
 </style>
 
 <div class="wrap">
-    <a href="{{ route('practice.topics') }}" class="back" style="display:inline-flex;align-items:center;gap:6px;margin:0 0 12px;"><i class="bi bi-arrow-left"></i> ვარჯიში</a>
+    {{-- უკან დაბრუნება ზედა ზოლშია (child-shell, ksBackUrl); სათაური „ვარჯიში“ აღარ ჩანს — მხოლოდ თემა --}}
+    @if($type !== 'auto')
     <div class="topbar">
         <h1 class="title">
             @if($type === 'pyramid') პირამიდა
-            @elseif($type === 'auto') ვარჯიში
-            @else 📘 {{ $topic->name }}
+            @else {{ $topic->name }}
             @endif
         </h1>
     </div>
+    @endif
 
     @if($type === 'auto')
     <div class="topic-tag" id="topicTag"></div>

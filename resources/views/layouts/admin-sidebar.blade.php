@@ -26,6 +26,7 @@
         'packages'  => 'M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8',
         'perms'     => 'M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4',
         'review'    => 'M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9',
+        'backup'    => 'M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6',
     ];
 
     // [ნებართვის გასაღები, სახელი, route, აქტიურობის pattern, აიკონი]
@@ -53,6 +54,9 @@
             ['admin.users', 'მომხმარებლები', 'admin.users.index', 'admin.users.*', 'users'],
             ['admin.packages', 'პაკეტები', 'admin.packages.index', 'admin.packages.*', 'packages'],
             ['admin.perms', 'წვდომა', 'admin.permissions.index', 'admin.permissions.*', 'perms'],
+        ],
+        'სისტემა' => [
+            ['__admin', 'სარეზერვო ასლები', 'admin.backups.index', 'admin.backups.*', 'backup'],
         ],
     ];
 @endphp

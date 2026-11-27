@@ -73,7 +73,8 @@
         <section class="ksg-menu" id="ksgMenu" aria-label="გიდის მენიუ" hidden>
             <b>რით დაგეხმარო?</b>
             @if($__gRole === 'parent')
-            <button type="button" data-g="tour"><i class="bi bi-play-circle"></i>ტური თავიდან</button>
+            <button type="button" data-g="restart"><i class="bi bi-arrow-counterclockwise"></i>გიდი თავიდან</button>
+            <button type="button" data-g="tour"><i class="bi bi-play-circle"></i>გვერდის ტური</button>
             <button type="button" data-g="add"><i class="bi bi-person-plus"></i>შვილის დამატება</button>
             @if($__gNewest)<button type="button" data-g="share"><i class="bi bi-link-45deg"></i>ბმულის გაზიარება</button>@endif
             @if($__gCfg['urls']['market'])<button type="button" data-g="market"><i class="bi bi-bag-plus"></i>ჯილდოს დამატება</button>@endif
@@ -134,7 +135,23 @@
     .ksg-link { display: flex; align-items: center; gap: 8px; background: #F7F6F3; border: 1.5px dashed #FFC49A; border-radius: 14px; padding: 10px 12px; }
     .ksg-link span { flex: 1; min-width: 0; font-size: 14px; font-weight: 700; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
     .ksg-link button { height: 36px; padding: 0 12px; border: 0; border-radius: 10px; background: var(--o); color: #fff; font-family: inherit; font-weight: 800; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .ksg-steps li > div { flex: 1; min-width: 0; text-align: left; font-weight: 500; font-size: 13px; color: #6B625A; line-height: 1.45; }
+    .ksg-steps li > div b { font-size: 14px; font-weight: 800; color: var(--ink); }
     .ksg-apps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .ksg-share { display: grid; grid-template-columns: 148px minmax(0, 1fr); gap: 12px; align-items: stretch; }
+    @media (max-width: 460px) { .ksg-share { grid-template-columns: 1fr; } }
+    .ksg-qr { background: #fff; border: 1.5px solid var(--line); border-radius: 16px; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+    .ksg-qr-box { width: 124px; height: 124px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #6B625A; text-align: center; }
+    .ksg-qr-box img, .ksg-qr-box canvas { width: 124px !important; height: 124px !important; }
+    .ksg-qr small { font-size: 11px; font-weight: 700; color: #6B625A; }
+    .ksg-cl { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+    .ksg-code { display: flex; align-items: center; gap: 8px; background: var(--t1); border-radius: 14px; padding: 8px 8px 8px 12px; }
+    .ksg-code div { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .ksg-code small { font-size: 11px; font-weight: 800; color: var(--o2); }
+    .ksg-code b { font-size: 24px; font-weight: 900; letter-spacing: .12em; color: var(--ink); line-height: 1.2; }
+    .ksg-code button { height: 36px; padding: 0 12px; border: 0; border-radius: 10px; background: #fff; color: var(--o2); font-family: inherit; font-weight: 800; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .ksg-native-btn { height: 50px; border: 2px solid var(--o); border-radius: 16px; background: #fff; color: var(--o2); font-family: inherit; font-weight: 900; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .ksg-native-btn:hover { background: var(--t1); }
     .ksg-apps a, .ksg-apps button { height: 64px; border: 1.5px solid var(--line); border-radius: 16px; background: #fff; font-family: inherit; font-weight: 800; font-size: 13px; color: var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; text-decoration: none; }
     .ksg-apps a:hover, .ksg-apps button:hover { border-color: #FFC49A; }
     .ksg-apps i { font-size: 20px; }
@@ -290,37 +307,57 @@
         if (!k || !k.link) { stepTour(); return; }
         if (G.page !== 'home') { go(G.urls.home, 'share'); return; }
         save({ step: 'share' });
-        var msg = k.name + ', შედი KidSmart-ში ამ ბმულით: ' + k.link;
+        var msg = k.name + ', შედი KidSmart-ში ამ ბმულით: ' + k.link + (k.code ? ' (ან კოდით: ' + k.code + ')' : '');
+        var canShare = !!navigator.share;
         sheet('<div class="ksg-sh-head"><span class="ksg-fox">' + FOX + '</span><div><small>ნაბიჯი 2 — ბმულის გაგზავნა</small><b id="ksgST">' + esc(k.name) + ' დაემატა! ახლა ბმული გაუგზავნე</b></div></div>'
-            + '<p>' + esc(k.name) + ' ამ ბმულით შევა თავის გვერდზე — პაროლი არ სჭირდება. გახსენი მის ტელეფონზე ან პლანშეტზე.' + (k.code ? ' ან შესვლისას ჩაწეროს კოდი: <b>' + esc(k.code) + '</b>' : '') + '</p>'
-            + '<div class="ksg-link"><span>' + esc(k.link) + '</span><button type="button" data-a="copy"><i class="bi bi-clipboard"></i> კოპირება</button></div>'
-            + '<div class="ksg-apps">'
-            + '<a href="https://wa.me/?text=' + encodeURIComponent(msg) + '" target="_blank" rel="noopener" data-a="sent"><i class="bi bi-whatsapp" style="color:#1E8A4C"></i>WhatsApp</a>'
-            + '<a href="viber://forward?text=' + encodeURIComponent(msg) + '" data-a="sent"><i class="bi bi-chat-dots" style="color:#5B4FD0"></i>Viber</a>'
-            + '<button type="button" data-a="qr"><i class="bi bi-qr-code"></i>QR კოდი</button></div>'
+            + '<p>' + esc(k.name) + ' ამ ბმულით შევა თავის გვერდზე — პაროლი არ სჭირდება. გახსენი მის ტელეფონზე ან პლანშეტზე, დაასკანერე QR, ან შესვლისას ჩაწეროს კოდი.</p>'
+            + '<div class="ksg-share">'
+            +   '<div class="ksg-qr"><div class="ksg-qr-box" id="ksgQr" role="img" aria-label="QR კოდი — ' + esc(k.name) + '-ის შესვლის ბმული">იტვირთება…</div><small>დაასკანერე კამერით</small></div>'
+            +   '<div class="ksg-cl">'
+            +     (k.code ? '<div class="ksg-code"><div><small>შესვლის კოდი</small><b>' + esc(k.code) + '</b></div><button type="button" data-a="copycode"><i class="bi bi-clipboard"></i> კოპირება</button></div>' : '')
+            +     '<div class="ksg-link"><span>' + esc(k.link) + '</span><button type="button" data-a="copy"><i class="bi bi-clipboard"></i> ბმული</button></div>'
+            +   '</div>'
+            + '</div>'
+            + (canShare ? '<button type="button" class="ksg-native-btn" data-a="native"><i class="bi bi-share"></i> გაზიარება</button>' : '')
             + '<div class="ksg-row"><button type="button" class="ksg-later" data-a="later">მერე გავუგზავნი</button><button type="button" class="ksg-main" data-a="done">გავუგზავნე <i class="bi bi-arrow-right"></i></button></div>', false,
             function () { if (G.state.step === 'share') save({ step: 'tour' }); });
+        drawQr($('ksgQr'), k.link);
         $('ksgSheet').onclick = function (e) {
             var a = e.target.closest('[data-a]'); if (!a) return;
             var act = a.dataset.a;
-            if (act === 'copy') {
-                var done = function () { a.innerHTML = '<i class="bi bi-check-lg"></i> დაკოპირდა'; };
-                if (navigator.clipboard) navigator.clipboard.writeText(k.link).then(done, done); else done();
+            if (act === 'copy' || act === 'copycode') {
+                var label = a.innerHTML;
+                var done = function () { a.innerHTML = '<i class="bi bi-check-lg"></i> დაკოპირდა'; setTimeout(function () { a.innerHTML = label; }, 1800); };
+                var txt = act === 'copy' ? k.link : k.code;
+                if (navigator.clipboard) navigator.clipboard.writeText(txt).then(done, done); else done();
                 save({ shared: true }); return;
             }
-            if (act === 'sent') { save({ shared: true }); return; }
-            if (act === 'qr') {
-                save({ shared: true }); sheetClose = null; closeSheet(); save({ step: 'tour' });
-                if (window.toggleShare && document.getElementById('shareModal' + k.id)) { toggleShare(k.id); if (window.ksShareTab) ksShareTab(k.id, 'qr'); }
+            if (act === 'native') {
+                navigator.share({ title: 'KidSmart — ' + k.name, text: msg, url: k.link }).then(function () { save({ shared: true }); }).catch(function () {});
                 return;
             }
+            if (act === 'sent') { save({ shared: true }); return; }
             if (act === 'done') save({ shared: true });
             sheetClose = null; closeSheet();
             stepTour();
         };
     }
 
+    // QR — იგივე ბიბლიოთეკა, რასაც დეშბორდის „გაზიარება“ იყენებს
+    function drawQr(box, text) {
+        if (!box) return;
+        var draw = function () { box.innerHTML = ''; new QRCode(box, { text: text, width: 248, height: 248, correctLevel: QRCode.CorrectLevel.M }); box.removeAttribute('title'); };
+        if (window.QRCode) return draw();
+        var sc = document.createElement('script');
+        sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+        sc.onload = draw;
+        sc.onerror = function () { box.textContent = 'QR ვერ ჩაიტვირთა — გამოიყენე ბმული ან კოდი'; };
+        document.head.appendChild(sc);
+    }
+
     function stepTour() {
+        // შვილი ჯერ არ ჰყავს — გვერდზე სანახავი არაფერია, ჯერ დამატება
+        if (!G.hasKids) { stepAdd(); return; }
         if (G.page !== 'home') { go(G.urls.home, 'tour'); return; }
         save({ step: 'tour' });
         var steps = [
@@ -334,7 +371,7 @@
             { key: 'today', title: 'დღეს', text: 'დღის ტესტი და ვარჯიში. თუ დაავიწყდა — „შეხსენება“ და შეტყობინება მიუვა.' },
             { key: 'add-child', title: 'კიდევ ერთი შვილი', text: 'აქედან დაამატებ სხვა შვილსაც — თითოეულს თავისი გვერდი ექნება.' },
         ];
-        if (G.urls.market) steps.push({ key: 'nav-market', title: 'ოჯახის მარკეტი', text: 'აქ ამატებ ჯილდოებს, რომლებსაც ' + KID + ' მონეტებით „იყიდის“ — ნაყინი, კინო, თამაშის დრო. შენ ადასტურებ.', primary: 'მარკეტში გადასვლა',
+        if (G.urls.market) steps.push({ key: 'nav-market', title: 'ოჯახის მარკეტი', text: KID + ' ტესტებით და ვარჯიშით აგროვებს მონეტებს. მარკეტში შენ ათავსებ ჯილდოებს — რასაც გინდა, რა ფასადაც გინდა — და ' + KID + ' მათ მონეტებით „იყიდის“.', primary: 'მარკეტში გადასვლა',
             action: function () { save({ step: 'market' }); go(G.urls.market, 'market'); } });
         run(steps, { lastLabel: 'დასრულება', onSkip: function () { save({ step: null, tour: 'done' }); }, onDone: finish });
     }
@@ -342,6 +379,25 @@
     function stepMarket() {
         if (G.page !== 'market') { if (G.urls.market) go(G.urls.market, 'market'); return; }
         save({ step: 'market' });
+        // ჯერ ახსნა: როგორ მუშაობს მარკეტი
+        sheet('<div class="ksg-hero">' + FOX.replace(/width="44" height="44"/, 'width="96" height="96"') + '</div>'
+            + '<h2 id="ksgST">ოჯახის მარკეტი — როგორ მუშაობს?</h2>'
+            + '<ol class="ksg-steps">'
+            + '<li><span>1</span><div><b>' + esc(KID) + ' აგროვებს მონეტებს</b><br>ყოველი ტესტით, ვარჯიშით და სწორი პასუხით.</div></li>'
+            + '<li><span>2</span><div><b>შენ ათავსებ ჯილდოებს</b><br>რასაც გინდა, რა ფასადაც გინდა — ნაყინი, კინო, ერთი საათი თამაში, სათამაშო…</div></li>'
+            + '<li><span>3</span><div><b>' + esc(KID) + ' „ყიდულობს“ მონეტებით</b><br>შენ დაადასტურებ და შეუსრულებ — ასე სწავლა სასიამოვნო მიზნად იქცევა.</div></li>'
+            + '</ol>'
+            + '<button type="button" class="ksg-main" data-a="go">გასაგებია, ვნახოთ</button>'
+            + '<button type="button" class="ksg-later" data-a="skip">გამოტოვება</button>', true,
+            function () { if (G.state.step === 'market') save({ step: null, tour: 'done' }); });
+        $('ksgSheet').onclick = function (e) {
+            var a = e.target.closest('[data-a]'); if (!a) return;
+            sheetClose = null; closeSheet();
+            if (a.dataset.a === 'skip') { save({ step: null, tour: 'done' }); return; }
+            marketTour();
+        };
+    }
+    function marketTour() {
         run([
             { key: 'market-requests', title: 'მოთხოვნები', text: 'როცა ' + KID + ' ჯილდოს „იყიდის“, აქ გამოჩნდება — შენ დაადასტურებ ან გააუქმებ. მონეტები მხოლოდ დადასტურებისას ჩამოეჭრება.' },
             { key: 'market-add', title: 'ჯილდოს დამატება', text: 'აქედან ამატებ ჯილდოებს. მოდი, ნაბიჯ-ნაბიჯ გაჩვენებ!', primary: 'მაჩვენე როგორ',
@@ -411,6 +467,13 @@
         ], { lastLabel: 'მზად ვარ!', onSkip: function () { save({ tour: 'done' }); }, onDone: finish });
     }
 
+    // გიდი სრულად თავიდან: მისალმება → შვილი → ბმული → ტური → მარკეტი
+    function restart() {
+        save({ step: null, tour: null, shared: null, welcome: null });
+        if (G.page !== 'home') { go(G.urls.home, 'welcome'); return; }
+        welcome();
+    }
+
     // ═══════════════════ FAB ═══════════════════
     var fab = $('ksgFab'), menu = $('ksgMenu');
     if (fab) fab.setAttribute('data-guide', '__fab');
@@ -422,7 +485,8 @@
             closeMenu();
             var g = b.dataset.g;
             if (G.role === 'child') { kidTour(); return; }
-            if (g === 'tour') stepTour();
+            if (g === 'restart') restart();
+            else if (g === 'tour') stepTour();
             else if (g === 'add') stepAdd();
             else if (g === 'share') stepShare();
             else if (g === 'market') rewardGuide();

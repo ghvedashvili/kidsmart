@@ -134,7 +134,6 @@ button.action-btn:hover { opacity: 0.9; }
 </style>
 
 <div class="wrap">
-    <a href="{{ route('games.index') }}" class="back-btn ks-game-back"><i class="bi bi-arrow-left"></i> თამაშები</a>
     <div class="header-row">
         <h1>🧱 ქუორიდორი 5×5</h1>
         <button id="info-btn" aria-label="წესები">ⓘ</button>
@@ -408,9 +407,9 @@ function render() {
 /* ================= EXACT CALCULATIONS FOR WALL POSITIONING ================= */
 
 function getIntersectionPosition(r, c) {
-    const boardRect = board.getBoundingClientRect();
+    // offsetWidth — გვერდის მასშტაბირებისას (ეკრანზე მორგება) getBoundingClientRect უკვე შემცირებულ ზომას აბრუნებს
     const gap = 10;
-    const cellWidth = (boardRect.width - 4 * gap) / 5;
+    const cellWidth = (board.offsetWidth - 4 * gap) / 5;
 
     const x = (c + 1) * cellWidth + c * gap + gap / 2;
     const y = (r + 1) * cellWidth + r * gap + gap / 2;

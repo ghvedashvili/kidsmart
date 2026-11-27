@@ -83,8 +83,10 @@
         && (request()->routeIs('admin.*') || request()->routeIs('test.preview'))
         && (auth()->user()->isAdmin() || \App\Models\RolePermission::hasAnyAdminPage(auth()->user()->role));
     // redesign-kidsmart: ბავშვის გვერდებს აქვს საერთო გარსი (მენიუ ტესტის წერისასაც ჩანს)
+    // თამაშის გვერდი: მენიუს გარეშე — მხოლოდ ზედა ზოლი („← თამაშები“) და თვითონ თამაში, სქროლის გარეშე
+    $__ksGame = auth()->check() && request()->routeIs('games.memory', 'games.rps', 'games.wolves-hare', 'games.quoridor', 'games.math-numbers', 'games.math-signs', 'games.math-chain', 'games.math-rain', 'games.code-breaker');
     $__ksChild = !$__ksAdmin && auth()->check() && auth()->user()->role === 'child'
-        && request()->routeIs('dashboard', 'test.show', 'practice.topics', 'practice.show', 'games.memory', 'games.rps', 'games.wolves-hare', 'games.quoridor', 'my.tests', 'my.test.show', 'achievements', 'games.index', 'market.child', 'olympiad.index', 'videos.library');
+        && request()->routeIs('dashboard', 'test.show', 'practice.topics', 'practice.show', 'my.tests', 'my.test.show', 'achievements', 'games.index', 'market.child', 'olympiad.index', 'videos.library');
     // ადმინიც მშობელია: ადმინის გვერდების გარეთ მშობლის გარსს ხედავს („ადმინ რეჟიმი“ ღილაკით გადადის)
     $__ksParent = !$__ksAdmin && auth()->check() && in_array(auth()->user()->role, ['parent', 'admin'])
         && request()->routeIs('dashboard', 'child.hub', 'child.stats', 'child.practice-stats', 'child.olympiad-stats', 'child.achievements', 'child.test.show', 'market.index');
@@ -95,7 +97,7 @@
     $__ksIosOffer = $__ksParent && request()->routeIs('dashboard')
         && \App\Models\Test::whereIn('child_id', auth()->user()->children()->pluck('users.id'))->whereNotNull('completed_at')->exists();
 @endphp
-<body class="@yield('bodyClass'){{ $__ksAdmin ? ' ks-admin' : '' }}{{ $__ksChild ? ' ks-child' : '' }}{{ $__ksParent || $__ksTeacher ? ' ks-parent' : '' }}{{ $__ksTeacher ? ' ks-teacher' : '' }}{{ !auth()->check() && request()->is('/') ? ' ks-landing' : '' }}{{ $__ksChild && request()->routeIs('games.memory', 'games.rps', 'games.wolves-hare', 'games.quoridor') ? ' ks-game' : '' }}">
+<body class="@yield('bodyClass'){{ $__ksAdmin ? ' ks-admin' : '' }}{{ $__ksChild ? ' ks-child' : '' }}{{ $__ksParent || $__ksTeacher ? ' ks-parent' : '' }}{{ $__ksTeacher ? ' ks-teacher' : '' }}{{ !auth()->check() && request()->is('/') ? ' ks-landing' : '' }}{{ request()->routeIs('games.memory', 'games.rps', 'games.wolves-hare', 'games.quoridor') ? ' ks-game' : '' }}{{ $__ksGame ? ' ks-gamefit' : '' }}">
 
 <div id="page-loader">
     <div class="ks-loader">
@@ -268,6 +270,56 @@
      inside it below the shared top-bar (z-index:500) no matter how high the
      modal's own z-index is set. --}}
 @stack('modals')
+
+@if($__ksGame)
+{{-- თამაში ეკრანზე ეტევა: გვერდი არ სქროლდება — თამაშის ბლოკი საჭიროებისამებრ პატარავდება --}}
+<style>
+    html:has(body.ks-gamefit), body.ks-gamefit { height: 100%; overflow: hidden !important; overscroll-behavior: none; }
+    body.ks-gamefit .wrap { min-height: 0 !important; }
+    /* თამაშის სათაური: პატარა და ჰორიზონტალურად ცენტრში */
+    body.ks-game .wrap h1 { font-size: 24px !important; line-height: 1.2 !important; text-align: center !important; flex: 1 1 100%; margin: 0 0 4px !important; }
+    @media (max-width: 900px) { body.ks-game .wrap h1 { font-size: 20px !important; } }
+    body.ks-game .subtitle { text-align: center !important; }
+    /* body.ks-game კლასს ეჯახება თამაშების სიის ბარათის სტილი (.ks-game — flex, ქვემოთ სწორება, padding, hover) */
+    body.ks-game { display: block !important; padding: 0 !important; min-height: 0 !important; border-radius: 0 !important; transform: none !important; gap: 0 !important; }
+    /* თამაშების გლობალური button/form სტილები ზედა ზოლს არ უნდა შეეხოს */
+    body.ks-gamefit .child-top-bar { flex-wrap: nowrap; }
+    body.ks-gamefit .child-top-bar form { display: block !important; width: auto !important; margin: 0 !important; }
+    body.ks-gamefit .child-top-bar button, body.ks-gamefit .child-top-bar button:hover { background: #fff !important; color: #2B2622 !important; border: 2px solid #ECE9E4 !important; border-radius: 22px !important; height: 44px; padding: 0 16px !important; font-family: 'Noto Sans Georgian', system-ui, sans-serif !important; font-size: 14px !important; font-weight: 800 !important; margin: 0 !important; }
+    @media (max-width: 900px) { body.ks-gamefit .child-top-bar .ks-clogout-top { width: 44px !important; padding: 0 !important; } }
+    body.ks-gamefit [data-gfit] { transform-origin: top center; will-change: transform; }
+</style>
+<script>
+(function () {
+    var el = null;
+    function fit() {
+        if (!el) return;
+        el.style.transform = '';
+        var top = el.getBoundingClientRect().top;
+        var avail = window.innerHeight - top - 6;
+        var h = el.offsetHeight, w = el.offsetWidth;
+        var s = Math.min(1, avail / h, (document.documentElement.clientWidth) / w);
+        if (s < 1) el.style.transform = 'scale(' + Math.max(.45, s) + ')';
+    }
+    function init() {
+        el = document.querySelector('.mp, .wrap');
+        if (!el) return;
+        el.setAttribute('data-gfit', '');
+        // fixed ფანჯრები transform-ის შიგნით გაფუჭდებოდა — გადავიტანოთ body-ში
+        el.querySelectorAll('*').forEach(function (n) {
+            if (getComputedStyle(n).position === 'fixed') document.body.appendChild(n);
+        });
+        window.scrollTo(0, 0);
+        fit();
+        if (window.ResizeObserver) new ResizeObserver(function () { requestAnimationFrame(fit); }).observe(el);
+        addEventListener('resize', fit);
+        addEventListener('orientationchange', function () { setTimeout(fit, 200); });
+        setTimeout(fit, 300); setTimeout(fit, 1000);
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+</script>
+@endif
 
 {{-- iPhone/iPad: მთავარ ეკრანზე დამატება + შეტყობინებების ჩართვა --}}
 @if(auth()->check() && ! $__ksAdmin)

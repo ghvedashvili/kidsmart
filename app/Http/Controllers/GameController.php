@@ -60,15 +60,54 @@ class GameController extends Controller
             'mode'  => 'chain',
             'desc'  => 'ნაბიჯ-ნაბიჯ მიიყვანე რიცხვი სამიზნემდე.',
         ],
+        // რიცხვების წვიმა: მაგალითები ცვივა — უპასუხე, სანამ მიწას დაეცემა (3 სიცოცხლე, კომბო ქულები)
+        'math_rain' => [
+            'name'  => 'რიცხვების წვიმა',
+            'icon'  => '🌧️',
+            'route' => 'games.math-rain',
+            'type'  => 'rain',
+            'desc'  => 'დაწერე პასუხი, სანამ მაგალითი მიწამდე ჩამოვა.',
+        ],
+        // კოდის გამტეხი: 22 სახლი × 10 კარი — წაიკითხე პირობები და გააღე საკეტი
+        'code_breaker' => [
+            'name'  => 'კოდის გამტეხი',
+            'icon'  => '🔐',
+            'route' => 'games.code-breaker',
+            'type'  => 'quest',
+            'desc'  => 'წაიკითხე პირობები, გამოიცანი კოდი და გააღე კარები.',
+        ],
     ];
+
+    /** კოდის გამტეხის ზომა — უნდა ემთხვეოდეს JS-ის CB.HOUSES / CB.DOORS-ს */
+    private const CB_HOUSES = 22;
+    private const CB_DOORS  = 10;
 
     /** ადმინმა თამაში გათიშა ან ამ კლასს არ უჩანს → თამაშების გვერდზე */
     private function hiddenRedirect(string $slug)
     {
         $child = auth()->user();
-        if (GameSetting::isVisible($slug, $child->childSetting?->grade_id)) return null;
-        return redirect()->route('games.index')->with('error', 'ეს თამაში ახლა მიუწვდომელია.');
+        if (! GameSetting::isVisible($slug, $child->childSetting?->grade_id)) {
+            return redirect()->route('games.index')->with('error', 'ეს თამაში ახლა მიუწვდომელია.');
+        }
+        // თამაშები იხსნება მხოლოდ დღის ტესტის დაწერის შემდეგ
+        if (! self::dailyTestDone($child)) {
+            return redirect()->route('games.index')->with('error', 'ჯერ დღის ტესტი დაწერე — მერე ითამაშებ!');
+        }
+        return null;
     }
+
+    /** დღეს დასრულებული ჩვეულებრივი (არა ოლიმპიადის) ტესტი */
+    public static function dailyTestDone($child): bool
+    {
+        return \App\Models\Test::where('child_id', $child->id)
+            ->whereNotNull('completed_at')
+            ->whereDate('completed_at', today())
+            ->where('is_olympiad', false)
+            ->exists();
+    }
+
+    /** კოდის გამტეხი: სახლის პირველად დასრულება (ბოსის კარი) — ამდენი მონეტა */
+    private const CB_HOUSE_COINS = 10;
 
     // ── Games hub ────────────────────────────────────────────────────────────
     public function index()
@@ -85,11 +124,14 @@ class GameController extends Controller
                 'slug'       => $slug,
                 'wins'       => $session->wins,
                 'losses'     => $session->losses,
-                'best_score' => $session->player_score,
+                // წვიმაში ქულა 255-ს აჭარბებს — რეკორდი state.best-შია
+                'best_score' => (int) (($session->state['best'] ?? 0) ?: $session->player_score),
+                'stars'      => (int) ($session->state['stars'] ?? 0),
+                'house'      => (int) ($session->state['house'] ?? 0),
             ]);
         });
 
-        return view('child.games.index', ['games' => $games]);
+        return view('child.games.index', ['games' => $games, 'locked' => ! self::dailyTestDone($child)]);
     }
 
     // ── Rock-Paper-Scissors ─────────────────────────────────────────────────
@@ -358,6 +400,113 @@ class GameController extends Controller
 
         return response()->json([
             'best_score'       => $session->player_score,
+            'is_best'          => $isBest,
+            'new_achievements' => $newAchievements,
+        ]);
+    }
+
+    // ── კოდის გამტეხი ───────────────────────────────────────────────────────
+    public function codeBreaker()
+    {
+        $child = auth()->user();
+        abort_if($child->role !== 'child', 403);
+        if ($r = $this->hiddenRedirect('code_breaker')) return $r;
+
+        $session = GameSession::forChild($child->id, 'code_breaker');
+        return view('child.games.code-breaker', [
+            'game'     => self::GAMES['code_breaker'],
+            'progress' => (object) (($session->state ?? [])['p'] ?? []),
+        ]);
+    }
+
+    /** კარი გაიღო: ვინახავთ ვარსკვლავებს (საუკეთესოს). კარი ღია უნდა იყოს — წინა კარი/სახლი დასრულებული. */
+    public function codeBreakerSave(Request $request): JsonResponse
+    {
+        $child = auth()->user();
+        abort_if($child->role !== 'child', 403);
+
+        $data = $request->validate([
+            'house' => 'required|integer|min:0|max:' . (self::CB_HOUSES - 1),
+            'door'  => 'required|integer|min:0|max:' . (self::CB_DOORS - 1),
+            'stars' => 'required|integer|min:1|max:3',
+        ]);
+        $h = (int) $data['house']; $d = (int) $data['door'];
+
+        $session = GameSession::forChild($child->id, 'code_breaker');
+        $state   = (array) ($session->state ?? []);
+        $p       = (array) ($state['p'] ?? []);
+        $done    = fn ($hh, $dd) => ($p["$hh-$dd"] ?? 0) > 0;
+        $open    = ($d === 0 ? ($h === 0 || $done($h - 1, self::CB_DOORS - 1)) : $done($h, $d - 1));
+        if (! $open) return response()->json(['error' => 'ეს კარი ჯერ დაკეტილია.'], 422);
+
+        $isNew = ! $done($h, $d);
+        // სახლი პირველად დასრულდა (ბოსის კარი) → მონეტები; განმეორებით გავლაზე აღარ ერიცხება
+        $coins = 0;
+        if ($isNew && $d === self::CB_DOORS - 1 && $child->childSetting) {
+            $coins = self::CB_HOUSE_COINS;
+            $child->childSetting->increment('coins', $coins);
+            $state['coins'] = (int) ($state['coins'] ?? 0) + $coins;
+        }
+        $p["$h-$d"] = max((int) ($p["$h-$d"] ?? 0), (int) $data['stars']);
+        $state['p']     = $p;
+        $state['stars'] = array_sum($p);
+        $state['house'] = max((int) ($state['house'] ?? 0), $d === self::CB_DOORS - 1 ? min(self::CB_HOUSES - 1, $h + 1) : $h);
+        $session->state = $state;
+        $session->player_score = min(255, count(array_filter($p)));
+        $session->save();
+
+        $newAchievements = $isNew ? (new \App\Services\AchievementService())->handleGameFinish($child, 'code_breaker') : [];
+
+        return response()->json([
+            'stars'            => $state['stars'],
+            'coins'            => $coins,
+            'new_achievements' => $newAchievements,
+        ]);
+    }
+
+    // ── რიცხვების წვიმა ─────────────────────────────────────────────────────
+    public function mathRain()
+    {
+        $child = auth()->user();
+        abort_if($child->role !== 'child', 403);
+        if ($r = $this->hiddenRedirect('math_rain')) return $r;
+
+        $session = GameSession::forChild($child->id, 'math_rain');
+        $grade   = (int) ($child->childSetting?->grade?->number ?? 2);
+
+        return view('child.games.math-rain', [
+            'game'  => self::GAMES['math_rain'],
+            'best'  => (int) (($session->state['best'] ?? 0) ?: $session->player_score),
+            'grade' => max(1, min(6, $grade)),
+        ]);
+    }
+
+    public function mathRainFinish(Request $request): JsonResponse
+    {
+        $child = auth()->user();
+        abort_if($child->role !== 'child', 403);
+
+        $data = $request->validate([
+            'score'  => 'required|integer|min:0|max:1000000',
+            'solved' => 'required|integer|min:0|max:10000',
+            'level'  => 'nullable|in:easy,medium,hard',
+        ]);
+
+        $session = GameSession::forChild($child->id, 'math_rain');
+        $state   = (array) ($session->state ?? []);
+        $best    = (int) ($state['best'] ?? 0);
+        $isBest  = $data['score'] > $best;
+        if ($isBest) $state['best'] = $data['score'];
+        $state['games']  = ($state['games'] ?? 0) + 1;
+        $state['solved'] = ($state['solved'] ?? 0) + $data['solved'];
+        $session->state = $state;
+        $session->player_score = min(255, max($session->player_score, $data['solved']));   // tinyint — ამოხსნილი მაგალითების რეკორდი
+        $session->save();
+
+        $newAchievements = (new \App\Services\AchievementService())->handleGameFinish($child, 'math_rain');
+
+        return response()->json([
+            'best_score'       => (int) ($state['best'] ?? 0),
             'is_best'          => $isBest,
             'new_achievements' => $newAchievements,
         ]);

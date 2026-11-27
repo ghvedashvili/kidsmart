@@ -15,7 +15,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        // მონაცემთა ბაზის სარეზერვო ასლი ყოველ ღამე (ინახება ბოლო 14) — საჭიროა `php artisan schedule:run` ყოველ წუთს
+        $schedule->command('ks:backup')->dailyAt('03:15')->withoutOverlapping();
     }
 
     /**

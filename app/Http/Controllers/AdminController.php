@@ -13,7 +13,9 @@ class AdminController extends Controller
         $isAdmin       = auth()->user()->isAdmin();
         $users         = $isAdmin ? User::orderBy('created_at', 'desc')->get() : collect();
         $subscriptions = $isAdmin ? PushSubscription::with('user')->get() : collect();
-        return view('admin.panel', compact('users', 'subscriptions', 'isAdmin'));
+        // „დაბრუნება“ — რამდენ დღეს ბრუნდება ბავშვი კვირაში (child_activity_days)
+        $retention     = $isAdmin ? app(\App\Services\RetentionService::class)->summary() : null;
+        return view('admin.panel', compact('users', 'subscriptions', 'isAdmin', 'retention'));
     }
 
     public function updateRole(Request $request, User $user)

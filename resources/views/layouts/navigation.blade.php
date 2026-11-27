@@ -153,55 +153,46 @@
     $__hideChildChrome = auth()->check() && (in_array(auth()->user()->role, ['child', 'parent']) || !empty($__ksParent) || !empty($__ksTeacher));
 @endphp
 @if($__hideChildChrome && empty($__ksChild) && empty($__ksParent) && empty($__ksTeacher))
+{{-- ბავშვის გვერდები გარსის გარეშე (თამაშები): იგივე ზედა ზოლი, რაც მთავარ გვერდზე — ფონი, ლოგო, გასვლა; ზარი მხოლოდ მთავარზეა --}}
 <style>
     .child-top-bar {
-        display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
-        padding: 10px 16px; background: transparent; box-shadow: none;
-        position: relative; z-index: 500;
+        display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px;
+        position: sticky; top: 0; z-index: 500;
+        padding: 10px 16px;
+        background: rgba(255,248,241,.94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        border-bottom: 1px solid #ECE9E4;
     }
     .child-top-left { justify-self: start; }
     .child-top-logo { justify-self: center; }
-    .child-top-bar.no-back { grid-template-columns: auto 1fr; }
-    .child-top-bar.no-back .child-top-logo { justify-self: start; }
     .child-top-bar img { height: 36px; width: auto; display: block; }
     .child-top-actions { justify-self: end; display: flex; gap: 8px; }
-    .child-back-btn {
-        display: flex; align-items: center; gap: 6px;
-        flex-shrink: 0;
-        background: rgba(255,255,255,0.65); border: 1.5px solid rgba(108,92,231,0.28);
-        backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-        border-radius: 99px;
-        padding: 8px 14px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.72rem;
-        color: #6c5ce7; cursor: pointer; transition: background 0.15s;
-    }
-    .child-back-btn:hover { background: rgba(255,255,255,0.85); }
-    .child-top-actions button {
-        display: flex; align-items: center; gap: 6px;
-        background: rgba(255,255,255,0.65); border: 1.5px solid rgba(108,92,231,0.28);
-        backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-        border-radius: 99px;
-        padding: 8px 14px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.72rem;
-        color: #6c5ce7; cursor: pointer; transition: background 0.15s;
-    }
-    .child-top-actions button:hover { background: rgba(255,255,255,0.85); }
-    .child-top-actions button.on { color: #16a34a; border-color: rgba(22,163,74,0.3); }
     .child-top-actions form { margin: 0; }
-    .child-top-actions .logout-btn { color: #e17055; border-color: rgba(225,112,85,0.3); }
+    .child-back-btn, .child-top-bar .ks-clogout-top {
+        height: 44px; padding: 0 16px; border-radius: 22px; border: 2px solid #ECE9E4; background: #fff; color: #2B2622;
+        font-family: 'Noto Sans Georgian', system-ui, sans-serif; font-size: 14px; font-weight: 800;
+        display: inline-flex; align-items: center; gap: 8px; cursor: pointer; text-decoration: none; white-space: nowrap;
+    }
+    .child-back-btn:hover, .child-top-bar .ks-clogout-top:hover { border-color: #2B2622; color: #2B2622; }
+    @media (max-width: 900px) {
+        .child-top-bar { padding: 10px 14px; }
+        .child-top-bar .ks-clogout-top span { display: none; }
+        .child-top-bar .ks-clogout-top { width: 44px; padding: 0; justify-content: center; }
+    }
+    @media (max-width: 420px) { .child-top-bar img { height: 30px; } .child-back-btn { padding: 0 12px; } }
 </style>
-<div class="child-top-bar{{ request()->routeIs('dashboard') ? ' no-back' : '' }}">
-    @unless(request()->routeIs('dashboard'))
+<div class="child-top-bar">
     <div class="child-top-left">
-        <button type="button" onclick="history.back()" class="child-back-btn" aria-label="უკან">← უკან</button>
+        @if(request()->routeIs('games.*') && ! request()->routeIs('games.index'))
+        <a href="{{ route('games.index') }}" class="child-back-btn"><i class="bi bi-arrow-left"></i> თამაშები</a>
+        @else
+        <button type="button" onclick="history.back()" class="child-back-btn" aria-label="უკან"><i class="bi bi-arrow-left"></i> უკან</button>
+        @endif
     </div>
-    @endunless
     <a href="{{ route('dashboard') }}" class="child-top-logo"><img src="/img/logo.png" alt="KidSmart"></a>
     <div class="child-top-actions">
-        <button type="button" id="notifBtn" onclick="window._notifToast=true;toggleNotifications()">
-            <i id="notifIcon" class="bi bi-bell"></i>
-        </button>
         <form method="POST" action="{{ route('logout') }}">
             @csrf
-            <button type="submit" class="logout-btn">↩</button>
+            <button type="submit" class="ks-clogout-top"><i class="bi bi-box-arrow-right"></i><span>გასვლა</span></button>
         </form>
     </div>
 </div>

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Schema;
 class GuideController extends Controller
 {
     private const RULES = [
-        'welcome'          => ['done', 'later'],
+        'welcome'          => ['done', 'later', null],   // null — „გიდი თავიდან“
         'step'             => ['add', 'share', 'tour', 'market', null],
         'tour'             => ['done', null],
         'shared'           => 'bool',

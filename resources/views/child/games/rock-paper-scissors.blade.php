@@ -285,7 +285,6 @@ button:hover { background-color: #15803d; }
 </style>
 
 <div class="wrap">
-    <a href="{{ route('games.index') }}" class="back-btn ks-game-back"><i class="bi bi-arrow-left"></i> თამაშები</a>
     <form onsubmit="return false;">
       <input type="radio" id="rock-rock" name="rock-paper-scissors">
       <input type="radio" id="rock-paper" name="rock-paper-scissors">

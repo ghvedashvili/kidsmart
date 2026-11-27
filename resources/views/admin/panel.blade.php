@@ -57,6 +57,80 @@ if ($isAdmin) {
     <div class="ks-kpi"><span class="ks-kpi-label">ფასიანი გამოწერა</span><span class="ks-kpi-value">{{ number_format($_kPaid, 0, '.', ' ') }}</span><span class="ks-kpi-note">{{ $_kExpiring }} იწურება 7 დღეში</span></div>
 </div>
 
+{{-- „დაბრუნება“ — რამდენ დღეს ბრუნდება ბავშვი კვირაში (child_activity_days) --}}
+@if($retention)
+@php
+    $_r = $retention;
+    $_dMax = max(1, max($_r['dist']));
+    $_wMax = max(1, max(array_column($_r['weeks'], 'kids')));
+@endphp
+<style>
+    .rt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+    .rt-stat { background: #F7F6F3; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 4px; }
+    .rt-stat b { font-size: 26px; font-weight: 900; color: #2B2622; line-height: 1.1; }
+    .rt-stat span { font-size: 13px; font-weight: 800; color: #4F473F; }
+    .rt-stat small { font-size: 12px; color: #6B625A; line-height: 1.4; }
+    .rt-stat.main { background: #FFF3EA; }
+    .rt-stat.main b { color: #C24A0A; }
+    .rt-charts { display: flex; flex-wrap: wrap; gap: 20px; }
+    .rt-chart { flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+    .rt-chart h3 { margin: 0; font-size: 14px; font-weight: 900; color: #2B2622; }
+    .rt-bars { display: flex; align-items: flex-end; gap: 8px; height: 140px; }
+    .rt-bar { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; min-width: 0; }
+    .rt-bar i { display: block; width: 100%; border-radius: 8px 8px 4px 4px; background: #E2590F; min-height: 3px; }
+    .rt-bar i.soft { background: #FFC49A; }
+    .rt-bar em { font-style: normal; font-size: 12px; font-weight: 800; color: #2B2622; }
+    .rt-bar span { font-size: 11px; color: #6B625A; white-space: nowrap; }
+</style>
+<section class="ks-card" style="display:flex;flex-direction:column;gap:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;">
+        <h2 class="ks-h2">დაბრუნება</h2>
+        <span style="font-size:13px;color:var(--ks-muted);">რამდენ დღეს ბრუნდება ბავშვი კვირაში · ბოლო 7 დღე</span>
+    </div>
+    <div class="rt-grid">
+        <div class="rt-stat main">
+            <span>საშუალოდ კვირაში</span>
+            <b>{{ $_r['avg_days'] }} დღე</b>
+            <small>აქტიური ბავშვი ამდენ დღეს შემოდის 7-დან</small>
+        </div>
+        <div class="rt-stat">
+            <span>აქტიური ბავშვი</span>
+            <b>{{ $_r['active7'] }}</b>
+            <small>დღეს {{ $_r['active_today'] }} · 30 დღეში {{ $_r['active30'] }} · სულ {{ $_r['children'] }}</small>
+        </div>
+        <div class="rt-stat">
+            <span>დაბრუნდა ამ კვირასაც</span>
+            <b>{{ $_r['wow']['pct'] !== null ? $_r['wow']['pct'] . '%' : '—' }}</b>
+            <small>წინა კვირის {{ $_r['wow']['prev'] }} აქტიურიდან {{ $_r['wow']['back'] }} ამ კვირასაც შემოვიდა</small>
+        </div>
+        <div class="rt-stat">
+            <span>ახლები — მეორე კვირაში</span>
+            <b>{{ $_r['new']['pct'] !== null ? $_r['new']['pct'] . '%' : '—' }}</b>
+            <small>8–35 დღის წინ დარეგისტრირებული {{ $_r['new']['total'] }}-დან {{ $_r['new']['back'] }} დაბრუნდა 7 დღის შემდეგ</small>
+        </div>
+    </div>
+    <div class="rt-charts">
+        <div class="rt-chart">
+            <h3>რამდენ დღეს შემოვიდნენ ბოლო 7 დღეში</h3>
+            <div class="rt-bars" role="img" aria-label="ბავშვების განაწილება აქტიური დღეების მიხედვით">
+                @foreach($_r['dist'] as $_d => $_n)
+                <div class="rt-bar"><em>{{ $_n }}</em><i class="{{ $_d < 3 ? 'soft' : '' }}" style="height: {{ round($_n / $_dMax * 100) }}%;"></i><span>{{ $_d }} დღე</span></div>
+                @endforeach
+            </div>
+        </div>
+        <div class="rt-chart">
+            <h3>აქტიური ბავშვები კვირების მიხედვით</h3>
+            <div class="rt-bars" role="img" aria-label="აქტიური ბავშვები ბოლო 8 კვირაში">
+                @foreach($_r['weeks'] as $_w)
+                <div class="rt-bar" title="საშუალოდ {{ $_w['avg'] }} დღე"><em>{{ $_w['kids'] }}</em><i style="height: {{ round($_w['kids'] / $_wMax * 100) }}%;"></i><span>{{ $_w['label'] }}</span></div>
+                @endforeach
+            </div>
+            <small style="font-size:12px;color:var(--ks-muted);">თითო სვეტი — 7 დღე, ქვემოთ კვირის ბოლო დღე. მიიტანე მაუსი: საშუალო დღეები.</small>
+        </div>
+    </div>
+</section>
+@endif
+
 <section style="display:flex;flex-wrap:wrap;gap:20px;">
     <div class="ks-card" style="flex:2 1 460px;min-width:0;display:flex;flex-direction:column;gap:14px;">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
