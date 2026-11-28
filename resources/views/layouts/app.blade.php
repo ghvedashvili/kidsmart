@@ -84,7 +84,7 @@
         && (auth()->user()->isAdmin() || \App\Models\RolePermission::hasAnyAdminPage(auth()->user()->role));
     // redesign-kidsmart: ბავშვის გვერდებს აქვს საერთო გარსი (მენიუ ტესტის წერისასაც ჩანს)
     // თამაშის გვერდი: მენიუს გარეშე — მხოლოდ ზედა ზოლი („← თამაშები“) და თვითონ თამაში, სქროლის გარეშე
-    $__ksGame = auth()->check() && request()->routeIs('games.memory', 'games.rps', 'games.wolves-hare', 'games.quoridor', 'games.math-numbers', 'games.math-signs', 'games.math-chain', 'games.math-rain', 'games.code-breaker');
+    $__ksGame = auth()->check() && request()->routeIs('games.memory', 'games.rps', 'games.wolves-hare', 'games.quoridor', 'games.math-numbers', 'games.math-signs', 'games.math-chain', 'games.math-rain', 'games.code-breaker', 'games.tic-tac-eat', 'games.math-move');
     $__ksChild = !$__ksAdmin && auth()->check() && auth()->user()->role === 'child'
         && request()->routeIs('dashboard', 'test.show', 'practice.topics', 'practice.show', 'my.tests', 'my.test.show', 'achievements', 'games.index', 'market.child', 'olympiad.index', 'videos.library');
     // ადმინიც მშობელია: ადმინის გვერდების გარეთ მშობლის გარსს ხედავს („ადმინ რეჟიმი“ ღილაკით გადადის)

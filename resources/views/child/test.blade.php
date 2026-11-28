@@ -119,6 +119,7 @@ body.ks-child .hdr { border: 1px solid #ECE9E4; border-radius: 20px; margin: 0 a
 
 /* დასრულების ღილაკი ეკრანის ქვედა კიდეზეა მიმაგრებული და სქროლვისას არ მოძრაობს
    (sticky — მთელი ფორმის ფარგლებში; მობილურზე ქვედა მენიუს ზემოთ დგას) */
+.q-card.q-miss { outline: 3px solid #E2590F; outline-offset: 3px; }
 .submit-wrap {
     position: sticky; bottom: 16px; z-index: 60;
     max-width: 720px; margin: 0 auto; padding: 0 16px 16px;
@@ -454,7 +455,51 @@ function onAnswer(i, qid, val) {
     }
 })();
 
-document.getElementById('testForm').addEventListener('submit', function() {
+// კითხვა პასუხგაცემულია? — ვამოწმებთ თვითონ ველებს, არა მთვლელს
+function ksCardDone(card) {
+    if (card.querySelector('input[type=radio]')) return !!card.querySelector('input[type=radio]:checked');
+    const ins = Array.from(card.querySelectorAll('input:not([type=hidden]):not([readonly]):not([disabled]), textarea, select'));
+    return ins.every(inp => String(inp.value).trim() !== '');
+}
+
+function ksMissNote(n) {
+    let t = document.getElementById('ksMissNote');
+    if (!t) {
+        t = document.createElement('div');
+        t.id = 'ksMissNote';
+        t.setAttribute('role', 'alert');
+        t.style.cssText = 'position:fixed;left:50%;top:16px;transform:translateX(-50%);z-index:9999;max-width:calc(100% - 32px);background:#2B2622;color:#fff;font-family:inherit;font-weight:800;font-size:15px;line-height:1.4;padding:12px 18px;border-radius:16px;box-shadow:0 10px 28px rgba(29,26,23,.28);text-align:center;';
+        document.body.appendChild(t);
+    }
+    t.textContent = 'ჯერ ყველა კითხვას უპასუხე — დარჩა ' + n + ' 🙂';
+    t.style.display = 'block';
+    clearTimeout(t._h);
+    t._h = setTimeout(() => { t.style.display = 'none'; }, 3500);
+}
+
+const ksForm = document.getElementById('testForm');
+
+// Enter (ტელეფონზე „Go“ / „შესრულება“) ფორმას აღარ აგზავნის — შემდეგ უჯრაზე გადადის
+ksForm.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
+    e.preventDefault();
+    const card = e.target.closest('.q-card') || ksForm;
+    const ins = Array.from(card.querySelectorAll('input:not([type=hidden]):not([type=radio]):not([readonly]):not([disabled])'));
+    const next = ins[ins.indexOf(e.target) + 1];
+    if (next) next.focus(); else e.target.blur();
+});
+
+// ტესტი არ დასრულდება, სანამ ყველა კითხვას არ აქვს პასუხი
+ksForm.addEventListener('submit', function (e) {
+    const miss = Array.from(document.querySelectorAll('.q-card')).filter(c => !ksCardDone(c));
+    if (miss.length) {
+        e.preventDefault();
+        ksMissNote(miss.length);
+        miss.forEach(c => c.classList.add('q-miss'));
+        miss[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => miss.forEach(c => c.classList.remove('q-miss')), 2500);
+        return;
+    }
     localStorage.removeItem(CACHE_KEY);
 });
 </script>

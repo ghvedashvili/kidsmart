@@ -133,7 +133,15 @@ h1 { margin: 0; font-family:'Fredoka One',cursive; font-size: 1.15rem; color: #1
 #bestScoreLine { color: #8A3407 !important; font-family: inherit !important; font-size: .85rem !important; }
 .foundTxt, .timeTxt { color: #1D1A17 !important; font-weight: 900 !important; }
 .timePlus { color: #1E8A4C !important; }
-#btnArea .btn { border-color: #ECE9E4 !important; box-shadow: none !important; }
+#btnArea .btn { border-color: #ECE9E4 !important; box-shadow: none !important; transition: background-color .15s, border-color .15s, box-shadow .15s; }
+/* მონსტრები ემოჯების ნაცვლად */
+#btnArea .btn img { width: 86%; height: 86%; object-fit: contain; pointer-events: none; user-select: none; -webkit-user-drag: none; }
+#btnArea .btn { max-width: 66px; }
+#hintBtn img { width: 34px; height: 34px; object-fit: contain; pointer-events: none; }
+#startScreen .mem-icon img { display: block; margin: 0 auto; }
+/* მონიშნული მონსტრი და ნაპოვნი წყვილი */
+#btnArea .btn.sel { border-color: #E2590F !important; background: #FFF3EA !important; box-shadow: 0 0 0 4px rgba(226, 89, 15, .22) !important; }
+#btnArea .btn.ok { border-color: #1E8A4C !important; background: #E9FBE9 !important; box-shadow: 0 0 0 4px rgba(30, 138, 76, .22) !important; }
 #leaderboardBtn { background: #F5B301 !important; }
 #hintBtn { background: #6D4FE0 !important; }
 .mem-modal-box { font-family: 'Noto Sans Georgian', system-ui, sans-serif !important; border-radius: 24px !important; }
@@ -153,9 +161,9 @@ h1 { margin: 0; font-family:'Fredoka One',cursive; font-size: 1.15rem; color: #1
     <div class="game-stage">
     <div id="container">
         <div id="startScreen">
-            <div class="mem-icon">🧠</div>
-            <h2>იპოვე ტყუპი სმაილები!</h2>
-            <p>16 სმაილს შორის მხოლოდ ორი ერთნაირია — იპოვე ისინი რაც შეიძლება მალე. სწორ პასუხზე +3 წამი ემატება დროს!</p>
+            <div class="mem-icon"><img src="{{ asset('images/monsters/m08.png') }}" alt="" width="84" height="84"></div>
+            <h2>იპოვე ტყუპი მონსტრები!</h2>
+            <p>16 მონსტრს შორის მხოლოდ ორი ერთნაირია — იპოვე ისინი რაც შეიძლება მალე. სწორ პასუხზე +3 წამი ემატება დროს!</p>
             <button id="startGame">▶ დაწყება</button>
             <button id="startLeaderboardBtn" type="button">🏆 ტაბლო</button>
             <div id="bestScoreLine" style="{{ $session->player_score > 0 ? '' : 'display:none;' }}">⭐ შენი რეკორდი: <span id="bestScoreVal">{{ $session->player_score }}</span> წყვილი</div>
@@ -197,6 +205,7 @@ h1 { margin: 0; font-family:'Fredoka One',cursive; font-size: 1.15rem; color: #1
 </div>
 
 <script>
+window.MON_BASE = @json(asset('images/monsters'));
 (function() {
 
 var btnArea = document.getElementById('btnArea'),
@@ -218,7 +227,7 @@ var btnArea = document.getElementById('btnArea'),
     hintAt,
     hintShown = false,
     matched = false,
-    art = ['😄','🤣','🙂','🙃','😉','😇','😍','🤥','😘','😚','😛','😜','😋','🤗','🤔','🤐','😶','🤑','😏','🙄','😳','😬','😴','🤕','🤠','🤧','😢','😵','😎','🤓','😡','🤢','😭','😫','😠'],
+    art = ['01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22'],
     found = 0,
     hintCount = 0,
     bestScore = {{ $session->player_score }};
@@ -240,12 +249,16 @@ startGameBtn.addEventListener('click', function() {
     hintCount = 0;
     if (timeInt !== undefined) { clearInterval(timeInt); timeInt = undefined; }
     new TimelineMax({onStart: populate})
-        .set('.foundTxt', {textContent: 'იპოვე ტყუპი სმაილები...', rotation: 0, scale: 1, y: 0})
+        .set('.foundTxt', {textContent: 'იპოვე ტყუპი მონსტრები...', rotation: 0, scale: 1, y: 0})
         .set([btnArea, '.timeTxt'], {autoAlpha: 1})
         .set('.btn', {border: '3px solid #bbf7d0'});
 });
 
+function monImg(n) { return '<img src="' + window.MON_BASE + '/m' + n + '.png" alt="" draggable="false">'; }
+// სურათები წინასწარ ჩავტვირთოთ, რომ რაუნდებს შორის არ ციმციმებდეს
+(function () { for (var i = 1; i <= 22; i++) { var im = new Image(); im.src = window.MON_BASE + '/m' + (i < 10 ? '0' : '') + i + '.png'; } })();
 function populate() {
+    document.querySelectorAll('#btnArea .btn').forEach(function (x) { x.classList.remove('sel', 'ok'); });
     lastBtn = undefined;
     matched = false;
     hintAt = Date.now() + 5000;
@@ -260,7 +273,7 @@ function populate() {
     var btns = [];
     for (var i = 0; i < 15; i++) makeNewNum();
     function makeNewNum() {
-        var n = art[Math.floor(rand(0, art.length - 1))], valExists = false;
+        var n = art[Math.floor(rand(0, art.length))], valExists = false;
         for (var i = 0; i < btns.length; i++) if (n == btns[i]) valExists = true;
         (valExists) ? makeNewNum() : btns.push(n);
     }
@@ -268,7 +281,7 @@ function populate() {
     hint = btns[14];
     btns.push(btns[14]);
     shuffleArray(btns);
-    for (var b = 1; b <= 16; b++) window['b' + b].textContent = btns[b - 1];
+    for (var b = 1; b <= 16; b++) { window['b' + b].dataset.m = btns[b - 1]; window['b' + b].innerHTML = monImg(btns[b - 1]); }
 }
 
 function btnClick(e) {
@@ -283,7 +296,9 @@ function btnClick(e) {
     TweenMax.to(b, 0.05, {scale: 0.95, yoyo: true, repeat: 1});
 
     if (lastBtn != undefined && lastBtn != b) {
-        if (b.textContent == lastBtn.textContent) {
+        if (b.dataset.m == lastBtn.dataset.m) {
+            b.classList.remove('sel'); lastBtn.classList.remove('sel');
+            b.classList.add('ok'); lastBtn.classList.add('ok');
             found++;
             matched = true;
             endAt += 3000;
@@ -298,9 +313,11 @@ function btnClick(e) {
             return;
         } else {
             TweenMax.to(lastBtn, 0.1, {border: '3px solid transparent'});
+            lastBtn.classList.remove('sel');
         }
     }
     TweenMax.to(b, 0.1, {border: '3px solid #006da6'});
+    b.classList.add('sel');
     lastBtn = e.currentTarget;
 }
 
@@ -391,7 +408,7 @@ function loadLeaderboard() {
 
 hintBtn.onclick = hintBtn.ontouchend = function(e) {
     if (e.type == 'touchend') hintBtn.onclick = undefined;
-    TweenMax.set(hintBtn, {textContent: hint, fontSize: 20});
+    hintBtn.innerHTML = monImg(hint);
     hintCount++;
 };
 

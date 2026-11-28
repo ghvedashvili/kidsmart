@@ -8,7 +8,7 @@
     $__rules = [
         'numbers' => ['ჩასვი რიცხვები ცარიელ უჯრებში ისე, რომ სამიზნე რიცხვი გამოვიდეს.', 'დააჭირე რიცხვს ქვემოთ — ის პირველ ცარიელ უჯრაში ჩაჯდება. შეცდომით ჩასმულს უჯრაზე დაჭერით ამოიღებ.'],
         'signs'   => ['რიცხვებს შორის დასვი ნიშნები ისე, რომ სამიზნე რიცხვი გამოვიდეს.', 'ნიშნები რამდენჯერაც გინდა, იმდენჯერ გამოიყენე. × და ÷ ჯერ სრულდება, მერე + და −.'],
-        'chain'   => ['დაიწყე რიცხვიდან და ბარათებით ნაბიჯ-ნაბიჯ მიიყვანე სამიზნემდე.', 'ყველა ბარათი საჭირო არ არის — ზოგი ზედმეტია! შეცდომისას „უკან“ დააჭირე.'],
+        'chain'   => ['ზემოდან ბურთი რიცხვით ჩავარდება და დანადგარებში გაივლის. ჩასვი ბარათები ისე, რომ ქვემოთ სწორი რიცხვი ჩამოვარდეს.', 'ბარათს დააჭირე ან გადაიტანე დანადგარზე. დანადგარზე დაჭერით ბარათს ამოიღებ. ყველა ბარათი საჭირო არ არის — ზოგი ზედმეტია!'],
     ][$game['mode']];
 @endphp
 <style>
@@ -55,6 +55,61 @@
     .mp-eq .mp-slot { flex: 0 0 auto; width: calc(60px * var(--k)); height: calc(60px * var(--k)); font-size: calc(26px * var(--k)); border-radius: calc(16px * var(--k)); border-width: 2px; }
     .mp-eq .mp-slot.op { width: calc(48px * var(--k)); height: calc(48px * var(--k)); font-size: calc(24px * var(--k)); border-radius: calc(14px * var(--k)); }
     .mp-eq .mp-eqsign, .mp-eq .mp-op { flex: 0 0 auto; font-size: calc(26px * var(--k)); min-width: 0; }
+    /* ── რიცხვების ქარხანა (ვერტიკალური) ── */
+    .mp-card.fxmode { padding: 12px 10px 14px; gap: 6px; }
+    .mp-card.fxmode > .mp-tlbl, .mp-card.fxmode > .mp-target { display: none; }
+    .fx { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 42px; padding-bottom: 2px; }
+    .fx-pipe { position: absolute; z-index: 0; left: 50%; width: 52px; margin-left: -26px; border-radius: 10px; background: linear-gradient(90deg, rgba(201,191,179,.55), rgba(255,255,255,.9) 35%, rgba(237,231,223,.9) 70%, rgba(201,191,179,.55)); border-left: 3px solid #C9BFB3; border-right: 3px solid #C9BFB3; }
+
+    .fx-cap { position: relative; z-index: 1; font-size: 12px; font-weight: 900; color: var(--mut); background: #fff; padding: 0 8px; border-radius: 99px; }
+    .fx-cap b { color: var(--ink); font-size: 15px; }
+    .fx-top { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .fx-drop { position: relative; z-index: 3; width: 100%; height: 54px; pointer-events: none; }
+    .fx-drop .fx-cap { position: absolute; right: calc(50% + 36px); top: 50%; transform: translateY(-50%); white-space: nowrap; font-size: 14px; color: #6D4FE0; }
+    .fx-hop { width: 120px; height: 58px; background: #6D4FE0; clip-path: polygon(0 0, 100% 0, 66% 100%, 34% 100%); }
+    .fx-m { position: relative; z-index: 2; width: 100%; max-width: 250px; height: 62px; border: 0; padding: 0; background: none; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; }
+    .fx-body { position: relative; width: 100%; height: 100%; border-radius: 16px; background: linear-gradient(#F7F3EE, #E9E2D9); border: 2.5px solid #C9BFB3; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 0 #B9AEA2; }
+    .fx-gear { position: absolute; top: 50%; width: 32px; height: 32px; margin-top: -16px; color: #9A8E82; }
+    .fx-gear.g1 { left: 12px; }
+    .fx-gear.g2 { right: 12px; width: 24px; height: 24px; margin-top: -12px; color: #B3A99F; }
+    .fx-m.on .fx-gear { animation: fxSpin .6s linear infinite; color: #E2590F; }
+    .fx-m.on .fx-gear.g2 { animation-direction: reverse; }
+    @keyframes fxSpin { to { transform: rotate(360deg); } }
+    .fx-m.on .fx-body { animation: fxHum .12s linear infinite; border-color: #E2590F; }
+    @keyframes fxHum { 50% { transform: translateX(-1.5px); } }
+    .fx-slot { width: 112px; height: 46px; border-radius: 12px; border: 2.5px dashed #CFC6BB; background: #FFFDFB; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 900; color: #CFC6BB; transition: background .15s, border-color .15s; }
+    .fx-m.full .fx-slot { border: 2.5px solid #E2590F; background: #E2590F; color: #fff; box-shadow: 0 3px 8px rgba(226,89,15,.3); }
+    .fx-m.next .fx-slot, .fx-m.hov .fx-slot { border-color: #E2590F; background: #FFF3EA; color: #E2590F; }
+    .fx-m.jam .fx-body { border-color: #C2372B; background: #FDECEA; animation: mpNope .35s; }
+    .fx-m.done .fx-body { border-color: #1E8A4C; }
+    .fx-lamp { position: absolute; top: 6px; right: 8px; width: 8px; height: 8px; border-radius: 50%; background: #D9D3CB; }
+    .fx-m.on .fx-lamp { background: #FFB020; box-shadow: 0 0 6px #FFB020; }
+    .fx-m.done .fx-lamp { background: #1E8A4C; }
+    .fx-m.jam .fx-lamp { background: #C2372B; }
+    .fx-puff { position: absolute; top: -10px; right: 30px; font-size: 18px; opacity: 0; pointer-events: none; }
+    .fx-m.jam .fx-puff { animation: fxPuff .9s ease-out; }
+    @keyframes fxPuff { 0% { opacity: 0; transform: translateY(6px) scale(.6); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-14px) scale(1.3); } }
+    .fx-out { position: relative; z-index: 2; display: flex; justify-content: center; width: 100%; }
+    .fx-out .fx-cap { position: absolute; right: calc(50% + 64px); top: 50%; transform: translateY(-50%); font-size: 13px; line-height: 1.25; text-align: right; color: var(--o2); background: none; }
+    .fx-box { min-width: 110px; height: 62px; padding: 0 14px; border-radius: 8px 8px 18px 18px; background: #FFF3EA; border: 3px solid #E2590F; border-top-style: dashed; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 900; font-size: 32px; color: #C24A0A; transition: background .2s, border-color .2s, color .2s; }
+    .fx-box .tg { font-size: 22px; }
+    .fx-box.ok { background: #E8F7EE; border-color: #1E8A4C; color: #1E8A4C; }
+    .fx-box.bad { background: #FDECEA; border-color: #C2372B; color: #C2372B; }
+    .fx-ball { position: absolute; z-index: 1; left: 0; top: 0; min-width: 42px; height: 42px; padding: 0 6px; margin: -21px 0 0 -21px; border-radius: 99px; background: #fff; border: 3.5px solid #6D4FE0; color: #2B2622; font-weight: 900; font-size: 19px; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 8px rgba(43,38,34,.2); transition: top .55s cubic-bezier(.55,0,1,.45), transform .25s, opacity .2s; pointer-events: none; }
+    .fx-ball.idle { z-index: 3; animation: fxBob 1.4s ease-in-out infinite; }
+    @keyframes fxBob { 50% { transform: translateY(-4px); } }
+    .fx-ball.in { transform: scale(.2); opacity: 0; }
+    .fx-ball.pop { animation: fxPop .3s; }
+    @keyframes fxPop { 0% { transform: scale(.4); } 70% { transform: scale(1.2); } 100% { transform: scale(1); } }
+    .fx-ball.bad { border-color: #C2372B; color: #C2372B; }
+    .fx-msg { font-size: 13px; font-weight: 800; color: var(--mut); min-height: 18px; text-align: center; }
+    .fx-msg.bad { color: var(--bad); }
+    .fx-ghost { position: fixed; z-index: 1300; pointer-events: none; transform: translate(-50%, -50%) scale(1.08); min-width: 62px; height: 56px; padding: 0 12px; border-radius: 18px; background: #E2590F; color: #fff; font: 900 22px 'Noto Sans Georgian', system-ui, sans-serif; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 22px rgba(43,38,34,.25); }
+    .mp-tool.go { background: #1E8A4C; color: #fff; font-size: 15px; padding: 10px 20px; }
+    .mp-tool.go:disabled { background: #fff; color: var(--mut); }
+    .fx.s4 { gap: 32px; }
+    .fx.s4 .fx-m { height: 54px; }
+    .fx.s4 .fx-slot { height: 40px; font-size: 21px; }
     .mp-chain { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
     .mp-cur { font-size: 40px; font-weight: 900; color: var(--o2); background: var(--t1); border-radius: 20px; padding: 6px 22px; min-width: 96px; text-align: center; }
     .mp-trail { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; font-size: 14px; font-weight: 800; color: var(--mut); min-height: 22px; }
@@ -66,7 +121,7 @@
     .mp-item:focus-visible, .mp-slot:focus-visible { outline: 3px solid #FFC49A; outline-offset: 2px; }
     .mp-item.used { visibility: hidden; }
     .mp-item.opc { background: var(--o); color: #fff; }
-    .mp-item.chainc { background: var(--o); color: #fff; font-size: 24px; }
+    .mp-item.chainc { background: var(--o); color: #fff; font-size: 24px; touch-action: none; }
     .mp-item.nope { animation: mpNope .35s; }
     @keyframes mpNope { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
     .mp-msg { font-size: 13px; font-weight: 800; color: var(--bad); min-height: 18px; text-align: center; }
@@ -359,47 +414,170 @@
         if (res === E.res) success(); else fail(function () { P.filled.forEach(function (f, i) { if (f) clearSlot(i); }); });
     }
 
-    // ── რიცხვების ჯაჭვი ──
+    // ── რიცხვების ქარხანა: ბარათები დანადგარებში → ჩართვა → რიცხვი გადის ლენტზე ──
+    var GEAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10.3 1h3.4l.5 2.6 1.9.8 2.2-1.5 2.4 2.4-1.5 2.2.8 1.9 2.6.5v3.4l-2.6.5-.8 1.9 1.5 2.2-2.4 2.4-2.2-1.5-1.9.8-.5 2.6h-3.4l-.5-2.6-1.9-.8-2.2 1.5-2.4-2.4 1.5-2.2-.8-1.9L1 13.7v-3.4l2.6-.5.8-1.9-1.5-2.2 2.4-2.4 2.2 1.5 1.9-.8zM12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>';
     function setupChain(L) {
-        var C = genChain(L);
-        P = { C: C, L: L, cur: C.start, hist: [] };
+        var C = genChain(L), slots = [];
+        for (var i = 0; i < C.steps; i++) slots.push(-1);
+        P = { C: C, L: L, slots: slots };
         $('mpTarget').textContent = C.target;
+        card.classList.add('fxmode');
+        var h = '<div class="fx' + (C.steps >= 4 ? ' s4' : '') + '" id="fx"><div class="fx-pipe" id="fxPipe"></div>'
+            + '<div class="fx-top"><div class="fx-drop" id="fxDrop"><span class="fx-cap">ჩავარდება</span></div><div class="fx-hop" id="fxHop"></div></div>';
+        for (var j = 0; j < C.steps; j++) {
+            h += '<button type="button" class="fx-m" data-m="' + j + '" aria-label="დანადგარი ' + (j + 1) + '">'
+                + '<span class="fx-body"><span class="fx-gear g1">' + GEAR + '</span><span class="fx-gear g2">' + GEAR + '</span><span class="fx-lamp"></span><span class="fx-puff">💨</span><span class="fx-slot"></span></span></button>';
+        }
+        h += '<div class="fx-out"><span class="fx-cap">უნდა<br>ჩამოვარდეს</span><div class="fx-box" id="fxBox"></div></div>'
+            + '<div class="fx-ball" id="fxBall"></div></div>'
+            + '<div class="fx-msg" id="mpMsg" aria-live="polite"></div>';
+        board.innerHTML = h; board.style.width = '100%';
         bank.innerHTML = C.cards.map(function (c, k) { return '<button type="button" class="mp-item chainc" data-c="' + k + '">' + label(c) + '</button>'; }).join('');
-        tools.innerHTML = '<button type="button" class="mp-tool" id="mpUndo"><i class="bi bi-arrow-counterclockwise"></i> უკან</button>';
-        $('mpUndo').onclick = undoChain;
+        tools.innerHTML = '<button type="button" class="mp-tool" id="fxClear"><i class="bi bi-arrow-counterclockwise"></i> გასუფთავება</button>'
+            + '<button type="button" class="mp-tool go" id="fxGo"><i class="bi bi-play-fill"></i> ჩართვა</button>';
+        $('fxClear').onclick = function () { if (busy) return; P.slots = P.slots.map(function () { return -1; }); drawChain(); };
+        $('fxGo').onclick = runFactory;
         drawChain();
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (!busy && $('fx')) ballHome(); });
+    }
+    window.addEventListener('resize', function () { if (MODE === 'chain' && P && !busy && $('fx')) ballHome(); });
+    // ბურთის და მილის ადგილი (fx-ის მიმართ)
+    function fxPos(el) {
+        // ეკრანზე მორგებისას გვერდი შეიძლება დაპატარავებული იყოს (transform: scale) — კოორდინატებს ვასწორებთ
+        var fx = $('fx'), base = fx.getBoundingClientRect(), r = el.getBoundingClientRect(), k = base.width / fx.offsetWidth || 1;
+        return { x: (r.left - base.left + r.width / 2) / k, y: (r.top - base.top + r.height / 2) / k, top: (r.top - base.top) / k, bottom: (r.bottom - base.top) / k };
+    }
+    function ballHome() {
+        var ball = $('fxBall'), hop = fxPos($('fxHop')), dp = fxPos($('fxDrop')), pipe = $('fxPipe'), box = fxPos($('fxBox'));
+        pipe.style.top = (hop.bottom - 6) + 'px'; pipe.style.height = Math.max(0, box.top - hop.bottom + 12) + 'px';
+        ball.style.transition = 'none';
+        ball.className = 'fx-ball idle'; ball.textContent = P.C.start;
+        ball.style.left = hop.x + 'px'; ball.style.top = dp.y + 'px';
+        void ball.offsetWidth; ball.style.transition = '';
     }
     function drawChain() {
-        var C = P.C;
-        board.innerHTML = '<div class="mp-chain"><span class="mp-cur" aria-label="ახლა">' + P.cur + '</span></div><div class="mp-msg" id="mpMsg" aria-live="polite"></div>';
-        bank.querySelectorAll('[data-c]').forEach(function (b) {
-            var k = +b.getAttribute('data-c');
-            b.classList.toggle('used', P.hist.some(function (h) { return h.k === k; }));
+        var first = P.slots.indexOf(-1);
+        board.querySelectorAll('[data-m]').forEach(function (m) {
+            var i = +m.getAttribute('data-m'), k = P.slots[i];
+            m.classList.toggle('full', k !== -1);
+            m.classList.toggle('next', i === first);
+            m.classList.remove('on', 'done', 'jam');
+            m.querySelector('.fx-slot').textContent = k === -1 ? '?' : label(P.C.cards[k]);
         });
-        $('mpUndo').disabled = !P.hist.length;
+        bank.querySelectorAll('[data-c]').forEach(function (b) {
+            b.classList.toggle('used', P.slots.indexOf(+b.getAttribute('data-c')) !== -1);
+        });
+        $('fxGo').disabled = first !== -1;
+        $('fxClear').disabled = P.slots.every(function (k) { return k === -1; });
+        var box = $('fxBox'); box.className = 'fx-box'; box.innerHTML = '<span class="tg">🎯</span>' + P.C.target;
+        ballHome();
+        var m = $('mpMsg'); m.className = 'fx-msg';
+        m.textContent = first === -1 ? 'ყველაფერი მზადაა — ჩართე ქარხანა!' : 'ჩასვი ბარათები დანადგარებში';
     }
-    function useCard(k) {
-        if (busy) return;
-        var y = applyCard(P.cur, P.C.cards[k], P.L);
-        if (y === null) {
-            // ეს ნაბიჯი ამ რიცხვზე არ გამოდის (უარყოფითი/წილადი) — სიცოცხლე არ იკარგება
-            var b = bank.querySelector('[data-c="' + k + '"]');
-            b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope');
-            var m = $('mpMsg'); if (m) m.textContent = P.C.cards[k].op === '/' ? P.cur + ' უნაშთოდ არ იყოფა ' + P.C.cards[k].v + '-ზე' : 'ასე უარყოფითი გამოვა';
-            return;
-        }
+    function placeCard(k, i) {
+        if (busy || P.slots.indexOf(k) !== -1) return;
+        if (i === undefined) i = P.slots.indexOf(-1);
+        if (i === -1) { var b = bank.querySelector('[data-c="' + k + '"]'); b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope'); return; }
         sfx.tap();
-        P.hist.push({ k: k, from: P.cur, to: y });
-        P.cur = y;
+        P.slots[i] = k;
         drawChain();
-        if (P.cur === P.C.target) setTimeout(success, 200);
-        else if (P.hist.length >= P.C.steps) setTimeout(function () { fail(function () { P.cur = P.C.start; P.hist = []; drawChain(); }); }, 250);
     }
-    function undoChain() {
-        if (busy || !P.hist.length) return;
-        var h = P.hist.pop();
-        P.cur = h.from;
+    function useCard(k) { placeCard(k); }
+    function takeBack(i) {
+        if (busy || P.slots[i] === -1) return;
+        tone(400, .06);
+        P.slots[i] = -1;
         drawChain();
+    }
+
+    // გადატანა თითით / მაუსით
+    var drag = null, noClick = false;
+    bank.addEventListener('pointerdown', function (e) {
+        var b = e.target.closest('[data-c]');
+        if (!b || busy || MODE !== 'chain' || b.classList.contains('used')) return;
+        drag = { k: +b.getAttribute('data-c'), x: e.clientX, y: e.clientY, g: null, hov: null };
+    });
+    function machineAt(x, y) { var el = document.elementFromPoint(x, y); return el && el.closest ? el.closest('[data-m]') : null; }
+    window.addEventListener('pointermove', function (e) {
+        if (!drag) return;
+        if (!drag.g) {
+            if (Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) < 8) return;
+            drag.g = document.createElement('div');
+            drag.g.className = 'fx-ghost';
+            drag.g.textContent = label(P.C.cards[drag.k]);
+            document.body.appendChild(drag.g);
+        }
+        e.preventDefault();
+        drag.g.style.left = e.clientX + 'px'; drag.g.style.top = e.clientY + 'px';
+        var m = machineAt(e.clientX, e.clientY);
+        if (drag.hov && drag.hov !== m) drag.hov.classList.remove('hov');
+        if (m) m.classList.add('hov');
+        drag.hov = m;
+    }, { passive: false });
+    function endDrag(e) {
+        if (!drag) return;
+        var d = drag; drag = null;
+        if (!d.g) return;
+        d.g.remove();
+        if (d.hov) d.hov.classList.remove('hov');
+        noClick = true; setTimeout(function () { noClick = false; }, 50);
+        var m = e && e.type === 'pointerup' ? machineAt(e.clientX, e.clientY) : null;
+        if (m) placeCard(d.k, +m.getAttribute('data-m'));
+    }
+    window.addEventListener('pointerup', endDrag);
+    window.addEventListener('pointercancel', endDrag);
+    bank.addEventListener('click', function (e) { if (noClick) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
+
+    // ქარხნის ანიმაცია
+    function runFactory() {
+        if (busy || P.slots.indexOf(-1) !== -1) return;
+        busy = true;
+        $('fxGo').disabled = true; $('fxClear').disabled = true;
+        var fx = $('fx'), ball = $('fxBall'), box = $('fxBox'), msg = $('mpMsg'), ms = fx.querySelectorAll('[data-m]');
+        var x = P.C.start, trail = [x], t = 0, jam = false;
+        var at = function (d, fn) { t += d; setTimeout(function () { if (!jam) fn(); }, t); };
+        var drop = function (y) { ball.style.top = y + 'px'; };
+        fx.classList.add('run');
+        msg.className = 'fx-msg'; msg.textContent = 'ქარხანა მუშაობს…';
+        ball.classList.remove('idle');
+        ball.style.left = fxPos($('fxHop')).x + 'px';
+        tone(330, .1);
+        // ბურთი ჩანს მხოლოდ მილში: დანადგარში შესვლისას მის უკან იმალება, ქვემოდან ახალი რიცხვით გამოდის
+        var place = function (y) { ball.style.transition = 'none'; ball.style.top = y + 'px'; void ball.offsetWidth; ball.style.transition = ''; };
+        P.slots.forEach(function (k, i) {
+            var m = ms[i], c = P.C.cards[k], mp = fxPos(m);
+            at(i ? 60 : 80, function () { drop(mp.top + 24); });
+            at(560, function () { m.classList.add('on'); tone(220, .25, 'sawtooth'); });
+            at(750, function () {
+                var y = applyCard(x, c, P.L);
+                m.classList.remove('on');
+                if (y === null) {
+                    jam = true;
+                    m.classList.add('jam'); sfx.bad();
+                    msg.className = 'fx-msg bad';
+                    msg.textContent = c.op === '/' ? x + ' უნაშთოდ არ იყოფა ' + c.v + '-ზე — დანადგარი გაიჭედა!' : x + ' ' + label(c) + ' უარყოფითი გამოდის — დანადგარი გაიჭედა!';
+                    setTimeout(function () { fx.classList.remove('run'); busy = false; drawChain(); var mm = $('mpMsg'); mm.className = 'fx-msg bad'; mm.textContent = 'გადაალაგე ბარათები და სცადე თავიდან'; }, 1800);
+                    return;
+                }
+                x = y; trail.push(y);
+                m.classList.add('done');
+                ball.textContent = y;
+                place(mp.bottom - 24);
+                tone(720, .07);
+            });
+        });
+        var bp = fxPos(box);
+        at(60, function () { drop(bp.top + 26); });
+        at(580, function () {
+            fx.classList.remove('run');
+            var ok = x === P.C.target;
+            box.innerHTML = ok ? x + ' ✓' : x + ' ✗';
+            box.classList.add(ok ? 'ok' : 'bad');
+            msg.className = 'fx-msg' + (ok ? '' : ' bad');
+            msg.textContent = trail.join(' → ') + (ok ? '' : '  (საჭიროა ' + P.C.target + ')');
+            if (ok) { busy = false; setTimeout(success, 400); }
+            else setTimeout(function () { busy = false; fail(function () { drawChain(); var mm = $('mpMsg'); mm.className = 'fx-msg bad'; mm.textContent = 'გამოვიდა ' + x + ', საჭიროა ' + P.C.target + ' — გადაალაგე ბარათები'; }); }, 1000);
+        });
     }
 
     // ── შედეგი ──
@@ -469,7 +647,9 @@
     window.addEventListener('resize', fitEq);
     board.addEventListener('click', function (e) {
         var s = e.target.closest('[data-slot]');
-        if (s) clearSlot(+s.getAttribute('data-slot'));
+        if (s) { clearSlot(+s.getAttribute('data-slot')); return; }
+        var m = e.target.closest('[data-m]');
+        if (m && MODE === 'chain') takeBack(+m.getAttribute('data-m'));
     });
     $('mpStart').addEventListener('click', start);
     $('mpStart').focus();

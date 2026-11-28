@@ -196,10 +196,16 @@ Route::middleware(['auth', 'role.permission'])->group(function () {
     Route::get('/games/signs',   [GameController::class, 'mathSigns'])->name('games.math-signs');
     Route::get('/games/chain',   [GameController::class, 'mathChain'])->name('games.math-chain');
     Route::post('/games/math/finish', [GameController::class, 'mathFinish'])->name('games.math.finish');
+    Route::get('/games/move',         [GameController::class, 'mathMove'])->name('games.math-move');
+    Route::post('/games/move/finish', [GameController::class, 'mathMoveFinish'])->name('games.math-move.finish');
     Route::get('/games/rain',         [GameController::class, 'mathRain'])->name('games.math-rain');
     Route::post('/games/rain/finish', [GameController::class, 'mathRainFinish'])->name('games.math-rain.finish');
     Route::get('/games/code-breaker',       [GameController::class, 'codeBreaker'])->name('games.code-breaker');
     Route::post('/games/code-breaker/save', [GameController::class, 'codeBreakerSave'])->name('games.code-breaker.save');
+    Route::post('/games/code-breaker/hint', [GameController::class, 'codeBreakerHint'])->name('games.code-breaker.hint');
+
+    Route::get('/games/tic-tac-eat',         [GameController::class, 'ticTacEat'])->name('games.tic-tac-eat');
+    Route::post('/games/tic-tac-eat/finish', [GameController::class, 'ticTacEatFinish'])->name('games.tic-tac-eat.finish');
 
     Route::get('/games/quoridor', [GameController::class, 'quoridor'])->name('games.quoridor');
     Route::post('/games/quoridor/state', [GameController::class, 'quoridorState'])->name('games.quoridor.state');

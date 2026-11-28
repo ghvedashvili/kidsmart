@@ -54,11 +54,19 @@ class GameController extends Controller
         ],
         'math_chain' => [
             'name'  => 'რიცხვების ქარხანა',
-            'icon'  => '🔗',
+            'icon'  => '🏭',
             'route' => 'games.math-chain',
             'type'  => 'puzzle',
             'mode'  => 'chain',
             'desc'  => 'მოცემული რიცხვი მოქმედებებით გადააკეთე სამიზნე რიცხვამდე',
+        ],
+        // ციფრის გადატანა: ერთი ციფრი გადაიტანე, რომ ტოლობა სწორი გახდეს (შეუზღუდავი, თანდათან რთულდება)
+        'math_move' => [
+            'name'  => 'ციფრის გადატანა',
+            'icon'  => '↔️',
+            'route' => 'games.math-move',
+            'type'  => 'puzzle',
+            'desc'  => 'გადაიტანე ერთი ციფრი, რომ ტოლობა სწორი გახდეს.',
         ],
         // რიცხვების წვიმა: მაგალითები ცვივა — უპასუხე, სანამ მიწას დაეცემა (3 სიცოცხლე, კომბო ქულები)
         'math_rain' => [
@@ -67,6 +75,14 @@ class GameController extends Controller
             'route' => 'games.math-rain',
             'type'  => 'rain',
             'desc'  => 'დაწერე პასუხი, სანამ მაგალითი მიწამდე ჩამოვა.',
+        ],
+        // ცხოველების X-O (Tic-Tac-Eat): 🐰 კურდღლები 🦊 მელიების წინააღმდეგ — დიდი ფიგურა პატარაზე ჯდება
+        'tic_tac_eat' => [
+            'name'  => 'ცხოველების X-O',
+            'icon'  => '🦊',
+            'route' => 'games.tic-tac-eat',
+            'type'  => 'versus',
+            'desc'  => 'X-O: კურდღლები მელიების წინააღმდეგ',
         ],
         // კოდის გამტეხი: 22 სახლი × 10 კარი — წაიკითხე პირობები და გააღე საკეტი
         'code_breaker' => [
@@ -80,7 +96,30 @@ class GameController extends Controller
 
     /** კოდის გამტეხის ზომა — უნდა ემთხვეოდეს JS-ის CB.HOUSES / CB.DOORS-ს */
     private const CB_HOUSES = 22;
-    private const CB_DOORS  = 10;
+    private const CB_DOORS  = 10;   // ძველი ვერსია: ყველა სახლში 10 კარი (ბოსი = 9)
+
+    /** კარების რაოდენობა სახლში: 1–6 → 6, 7–14 → 8, 15–22 → 10 (ბოლო კარი ყოველთვის ბოსია) */
+    public static function cbDoors(int $h): int
+    {
+        return $h < 6 ? 6 : ($h < 14 ? 8 : 10);
+    }
+
+    /** ძველი პროგრესი (10 კარი ყველგან) → ახალი: ჩვეულებრივი კარები რჩება, ბოსი (9) ახალ ბოლო კარზე გადადის */
+    private static function cbMigrate(array $state): array
+    {
+        if (($state['v'] ?? 1) >= 2) return $state;
+        $old = (array) ($state['p'] ?? []);
+        $new = [];
+        for ($h = 0; $h < self::CB_HOUSES; $h++) {
+            $nd = self::cbDoors($h);
+            for ($d = 0; $d < $nd - 1; $d++) if (! empty($old["$h-$d"])) $new["$h-$d"] = (int) $old["$h-$d"];
+            if (! empty($old["$h-9"])) $new["$h-" . ($nd - 1)] = (int) $old["$h-9"];
+        }
+        $state['p'] = $new;
+        $state['stars'] = array_sum($new);
+        $state['v'] = 2;
+        return $state;
+    }
 
     /** ადმინმა თამაში გათიშა ან ამ კლასს არ უჩანს → თამაშების გვერდზე */
     private function hiddenRedirect(string $slug)
@@ -420,14 +459,23 @@ class GameController extends Controller
         if ($r = $this->hiddenRedirect('code_breaker')) return $r;
 
         $session = GameSession::forChild($child->id, 'code_breaker');
+        $state   = (array) ($session->state ?? []);
+        if (($state['v'] ?? 1) < 2) {
+            $state = self::cbMigrate($state);
+            $session->state = $state;
+            $session->player_score = min(255, count(array_filter($state['p'])));
+            $session->save();
+        }
         return view('child.games.code-breaker', [
             'game'     => self::GAMES['code_breaker'],
-            'progress' => (object) (($session->state ?? [])['p'] ?? []),
+            'progress' => (object) ($state['p'] ?? []),
+            'hints'    => (object) ($state['hint'] ?? []),
         ]);
     }
 
     /** კარი გაიღო: ვინახავთ ვარსკვლავებს (საუკეთესოს). კარი ღია უნდა იყოს — წინა კარი/სახლი დასრულებული. */
-    public function codeBreakerSave(Request $request): JsonResponse
+    /** მინიშნება: ერთ კარზე ერთხელ — ინახება, რომ გასვლა/შემოსვლით ახალი არ მიიღოს */
+    public function codeBreakerHint(Request $request): JsonResponse
     {
         $child = auth()->user();
         abort_if($child->role !== 'child', 403);
@@ -435,29 +483,60 @@ class GameController extends Controller
         $data = $request->validate([
             'house' => 'required|integer|min:0|max:' . (self::CB_HOUSES - 1),
             'door'  => 'required|integer|min:0|max:' . (self::CB_DOORS - 1),
+            'pos'   => 'required|integer|min:0|max:3',
+            'digit' => 'required|integer|min:0|max:9',
+            'say'   => 'required|integer|min:0|max:20',
+        ]);
+        $h = (int) $data['house']; $d = (int) $data['door'];
+        if ($d > self::cbDoors($h) - 1) return response()->json(['error' => 'ასეთი კარი ამ სახლში არ არის.'], 422);
+
+        $session = GameSession::forChild($child->id, 'code_breaker');
+        $state   = self::cbMigrate((array) ($session->state ?? []));
+        $hints   = (array) ($state['hint'] ?? []);
+        if (! isset($hints["$h-$d"])) {   // უკვე აღებულს არ ვცვლით
+            $hints["$h-$d"] = [(int) $data['pos'], (int) $data['digit'], (int) $data['say']];
+            $state['hint'] = $hints;
+            $session->state = $state;
+            $session->save();
+        }
+        return response()->json(['hint' => $hints["$h-$d"]]);
+    }
+
+    public function codeBreakerSave(Request $request): JsonResponse
+    {
+        $child = auth()->user();
+        abort_if($child->role !== 'child', 403);
+
+        $data = $request->validate([
+            'house' => 'required|integer|min:0|max:' . (self::CB_HOUSES - 1),
+            'door'  => 'required|integer|min:0|max:' . (self::CB_DOORS - 1),   // ზუსტი ზღვარი ქვემოთ, სახლის მიხედვით
             'stars' => 'required|integer|min:1|max:3',
         ]);
         $h = (int) $data['house']; $d = (int) $data['door'];
+        $nd = self::cbDoors($h); $boss = $nd - 1;
+        if ($d > $boss) return response()->json(['error' => 'ასეთი კარი ამ სახლში არ არის.'], 422);
 
         $session = GameSession::forChild($child->id, 'code_breaker');
-        $state   = (array) ($session->state ?? []);
+        $state   = self::cbMigrate((array) ($session->state ?? []));
         $p       = (array) ($state['p'] ?? []);
         $done    = fn ($hh, $dd) => ($p["$hh-$dd"] ?? 0) > 0;
-        $open    = ($d === 0 ? ($h === 0 || $done($h - 1, self::CB_DOORS - 1)) : $done($h, $d - 1));
+        $open    = ($d === 0 ? ($h === 0 || $done($h - 1, self::cbDoors($h - 1) - 1)) : $done($h, $d - 1));
         if (! $open) return response()->json(['error' => 'ეს კარი ჯერ დაკეტილია.'], 422);
 
         $isNew = ! $done($h, $d);
         // სახლი პირველად დასრულდა (ბოსის კარი) → მონეტები; განმეორებით გავლაზე აღარ ერიცხება
         $coins = 0;
-        if ($isNew && $d === self::CB_DOORS - 1 && $child->childSetting) {
+        if ($isNew && $d === $boss && $child->childSetting) {
             $coins = self::CB_HOUSE_COINS;
             $child->childSetting->increment('coins', $coins);
             $state['coins'] = (int) ($state['coins'] ?? 0) + $coins;
         }
         $p["$h-$d"] = max((int) ($p["$h-$d"] ?? 0), (int) $data['stars']);
         $state['p']     = $p;
+        // კარი გაიღო → ამ კარის მინიშნება აღარ გვჭირდება (თავიდან თამაშისას ახლიდან იქნება)
+        if (isset($state['hint']["$h-$d"])) unset($state['hint']["$h-$d"]);
         $state['stars'] = array_sum($p);
-        $state['house'] = max((int) ($state['house'] ?? 0), $d === self::CB_DOORS - 1 ? min(self::CB_HOUSES - 1, $h + 1) : $h);
+        $state['house'] = max((int) ($state['house'] ?? 0), $d === $boss ? min(self::CB_HOUSES - 1, $h + 1) : $h);
         $session->state = $state;
         $session->player_score = min(255, count(array_filter($p)));
         $session->save();
@@ -472,6 +551,44 @@ class GameController extends Controller
     }
 
     // ── რიცხვების წვიმა ─────────────────────────────────────────────────────
+    public function mathMove()
+    {
+        $child = auth()->user();
+        abort_if($child->role !== 'child', 403);
+        if ($r = $this->hiddenRedirect('math_move')) return $r;
+
+        $session = GameSession::forChild($child->id, 'math_move');
+        return view('child.games.math-move', [
+            'game'  => self::GAMES['math_move'],
+            'best'  => (int) ($session->state['best'] ?? 0),     // სულ ამოხსნილი (მინიშნების გარეშე)
+            'level' => (int) ($session->state['level'] ?? 0),    // რამდენი ამოცანა გაიარა — სირთულე აქედან გრძელდება
+        ]);
+    }
+
+    public function mathMoveFinish(Request $request): JsonResponse
+    {
+        $child = auth()->user();
+        abort_if($child->role !== 'child', 403);
+
+        // ყოველი ამოხსნილი ამოცანის შემდეგ: solved = 1 (მინიშნებით — 0), level = გავლილი ამოცანების რაოდენობა
+        $data = $request->validate([
+            'solved' => 'required|integer|min:0|max:1',
+            'level'  => 'required|integer|min:1|max:100000',
+        ]);
+
+        $session = GameSession::forChild($child->id, 'math_move');
+        $state   = (array) ($session->state ?? []);
+        $state['best']  = (int) ($state['best'] ?? 0) + (int) $data['solved'];
+        $state['level'] = max((int) ($state['level'] ?? 0), min((int) $data['level'], (int) ($state['level'] ?? 0) + 1));
+        $session->state = $state;
+        $session->player_score = min(255, $state['best']);
+        $session->save();
+
+        $newAchievements = (new \App\Services\AchievementService())->handleGameFinish($child, 'math_move');
+
+        return response()->json(['best' => $state['best'], 'new_achievements' => $newAchievements]);
+    }
+
     public function mathRain()
     {
         $child = auth()->user();
@@ -520,6 +637,51 @@ class GameController extends Controller
     }
 
     // ── ქუორიდორი 5×5 (Quoridor) ────────────────────────────────────────────
+    public function ticTacEat()
+    {
+        $child = auth()->user();
+        abort_if($child->role !== 'child', 403);
+        if ($r = $this->hiddenRedirect('tic_tac_eat')) return $r;
+
+        return view('child.games.tic-tac-eat', [
+            'game'    => self::GAMES['tic_tac_eat'],
+            'session' => GameSession::forChild($child->id, 'tic_tac_eat'),
+        ]);
+    }
+
+    public function ticTacEatFinish(Request $request): JsonResponse
+    {
+        $child = auth()->user();
+        abort_if($child->role !== 'child', 403);
+
+        $data = $request->validate(['result' => 'required|in:win,lose,draw']);
+
+        $session = GameSession::forChild($child->id, 'tic_tac_eat');
+        $global  = GameGlobalStat::forGame('tic_tac_eat');
+        if ($data['result'] === 'win') {
+            $session->wins++;
+            $session->current_streak++;
+            $global->increment('total_wins');
+        } elseif ($data['result'] === 'lose') {
+            $session->losses++;
+            $session->current_streak = 0;
+            $global->increment('total_losses');
+        } else {
+            $state = (array) ($session->state ?? []);
+            $state['draws'] = (int) ($state['draws'] ?? 0) + 1;
+            $session->state = $state;
+        }
+        $session->save();
+
+        $newAchievements = $data['result'] === 'draw' ? [] : (new \App\Services\AchievementService())->handleGameFinish($child, 'tic_tac_eat');
+
+        return response()->json([
+            'wins'             => $session->wins,
+            'losses'           => $session->losses,
+            'new_achievements' => $newAchievements,
+        ]);
+    }
+
     public function quoridor()
     {
         $child = auth()->user();
